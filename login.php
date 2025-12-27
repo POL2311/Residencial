@@ -31,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_role'] = $user['tipo_usuario_nombre']; // super_admin, guardia, etc.
 
-            // Redirección por rol (usando los nombres de tipos_usuario)
             switch ($user['tipo_usuario_nombre']) {
                 case 'super_admin':
                     header('Location: superadmin/dashboard_super_admin.php');
@@ -47,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
                 case 'residente':
                 default:
-                    header('Location: residente/dashboard_resident.php');
+                    header('Location: residente/php/dashboard.php');
                     break;
             }
             exit;
