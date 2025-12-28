@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: admin_residencial/dashboard_admin_residencial.php');
                     break;
                 case 'guardia':
-                    header('Location: guardia/dashboard_guard.php');
+                    header('Location: guardia/php/dashboard.php');
                     break;
                 case 'residente':
                 default:

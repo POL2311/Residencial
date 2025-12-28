@@ -164,7 +164,6 @@
     }
   }
 
-  // ✅ API GLOBAL como residente (para que tus vistas puedan usarlo)
   window.GuardiaDashboard = {
     BASE,
     API,
@@ -196,10 +195,8 @@
       loadView(v);
     });
 
-    // reglamento (puedes apuntar a uno real)
     els.btnReg?.addEventListener('click', () => {
-      // si tienes un reglamento guardia, cámbialo aquí:
-      // loadView('reglamento');
+
       openModal('Reglamento', `<div class="text-sm">Aquí conectas tu reglamento.</div>`);
     });
 

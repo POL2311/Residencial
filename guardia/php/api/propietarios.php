@@ -57,7 +57,6 @@ if ($method === 'POST' && $action === 'create') {
   try {
     $pdo->beginTransaction();
 
-    // 5 = residente
     $stmt = $pdo->prepare("
       INSERT INTO users (tipo_usuario_id, name, email, telefono, password_hash, is_active, created_at)
       VALUES (5, :name, :email, :tel, :ph, 1, NOW())
