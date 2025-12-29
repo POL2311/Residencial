@@ -8,10 +8,23 @@
 
         <!-- Izquierda: nombre + contexto -->
         <div class="min-w-0">
-          <div id="guardName" class="text-xl font-semibold leading-tight truncate">—</div>
-          <div id="guardContext" class="text-sm opacity-95 truncate">—</div>
-          <div id="guardHint" class="mt-1 text-xs opacity-90 hidden"></div>
+        <div id="guardName" class="text-xl font-semibold leading-tight truncate">—</div>
+
+        <div class="flex items-center gap-2 text-sm opacity-95 truncate">
+          <span id="guardContext">—</span>
+
+          <!-- Botón EDITAR PERFIL -->
+          <button
+            type="button"
+            data-view="perfil"
+            class="underline underline-offset-2 text-xs hover:opacity-100 opacity-90">
+            Editar
+          </button>
         </div>
+
+        <div id="guardHint" class="mt-1 text-xs opacity-90 hidden"></div>
+      </div>
+
 
         <!-- Centro: accesos rápidos tipo iconos (opcional) -->
         <div class="text-center mt-1 hidden sm:block">
@@ -54,6 +67,7 @@
       </div>
     </div>
   </header>
+  
 
   <!-- BODY -->
   <main id="dashboardBody" class="flex-1 overflow-y-auto bg-[#F2F3F5]">

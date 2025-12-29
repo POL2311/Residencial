@@ -90,7 +90,6 @@
     // load view script
     loadViewScript(view);
 
-    // init hook (cuando el script expone init)
     setTimeout(() => {
       if (window.GuardiaViews && typeof window.GuardiaViews[view] === 'function') {
         window.GuardiaViews[view]({
@@ -109,6 +108,7 @@
   function loadViewScript(view) {
     const scriptsMap = {
       home: null,
+      perfil: BASE + 'js/perfil.js',
       accesos: BASE + 'js/accesos.js',
       autos: BASE + 'js/autos.js',
       incidencias: BASE + 'js/incidencias.js',
@@ -148,6 +148,7 @@
 
       els.name.textContent = data.user?.name || 'Guardia';
       els.ctx.textContent  = data.header_line || data.direccion || '—';
+      
 
       if (els.hint) {
         if (data.residencial_direccion) {
@@ -195,10 +196,45 @@
       loadView(v);
     });
 
-    els.btnReg?.addEventListener('click', () => {
+    els.btnReg?.addEventListener('click', async () => {
+    openModal('Reglamento', `<div class="text-sm text-slate-500">Cargando reglamento…</div>`);
 
-      openModal('Reglamento', `<div class="text-sm">Aquí conectas tu reglamento.</div>`);
+    try {
+        const json = await fetchJSON(`${API}reglamento.php`);
+        const r = json.data;
+
+        if (!r) {
+        els.modalBody.innerHTML = `
+            <div class="text-sm text-slate-600">
+            No hay reglamento público registrado para este residencial.
+            </div>`;
+        return;
+        }
+
+        els.modalBody.innerHTML = `
+        <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+            <div class="text-lg font-semibold text-slate-800">
+            ${escapeHtml(r.titulo)}
+            </div>
+
+            <div class="text-xs text-slate-500">
+            Versión ${escapeHtml(r.version_label || '—')} ·
+            Actualizado ${escapeHtml(r.updated_at || '')}
+            </div>
+
+            <div class="prose prose-sm max-w-none text-slate-700 whitespace-pre-line">
+            ${escapeHtml(r.contenido)}
+            </div>
+        </div>
+        `;
+    } catch (e) {
+        els.modalBody.innerHTML = `
+        <div class="text-sm text-rose-600">
+            No se pudo cargar el reglamento.
+        </div>`;
+    }
     });
+
 
     // modal close
     els.modalClose?.addEventListener('click', closeModal);
