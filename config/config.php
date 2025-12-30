@@ -1,9 +1,9 @@
 <?php
 
 $DB_HOST = 'localhost';
-$DB_NAME = 'caroli93_residencial_app'; 
-$DB_USER = 'caroli93_root';     
-$DB_PASS = 'residencial_app123456';       
+$DB_NAME = 'residencial_app'; 
+$DB_USER = 'root';     
+$DB_PASS = '';       
 
 try {
     $pdo = new PDO(
