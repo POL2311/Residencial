@@ -11,14 +11,13 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 
 require_login();
-require_role(['residente']);
+require_role(['residente','admin_residencial']);
 
 $user = current_user();
 $uid  = (int)($user['id'] ?? 0);
 
 function json_out(bool $ok, array $extra = []): void {
   echo json_encode(array_merge(['ok' => $ok], $extra), JSON_UNESCAPED_UNICODE);
-  exit;
 }
 
 function clean_str(?string $v): string {

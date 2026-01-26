@@ -1,0 +1,118 @@
+<div id="incidenciasView" class="space-y-4">
+  <div id="incidenciasAlert" class="hidden rounded-lg px-4 py-3 text-sm"></div>
+
+  <div class="flex justify-between items-center">
+    <div>
+      <label class="text-sm mr-2">Mostrar:</label>
+      <select id="filterEstado" class="text-sm border border-slate-300 rounded-md px-2 py-1">
+        <option value="todas">Todas</option>
+        <option value="abierta">Abiertas</option>
+        <option value="en_proceso">En proceso</option>
+        <option value="cerrada">Cerradas</option>
+      </select>
+    </div>
+    <button id="btnAddIncidencia" class="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-blue-700">+ Nueva incidencia</button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="text-xs uppercase text-slate-500 bg-slate-100">
+        <tr>
+          <th class="px-3 py-2">Título</th>
+          <th class="px-3 py-2">Tipo</th>
+          <th class="px-3 py-2">Unidad</th>
+          <th class="px-3 py-2">Residente</th>
+          <th class="px-3 py-2">Guardia</th>
+          <th class="px-3 py-2">Prioridad</th>
+          <th class="px-3 py-2">Estado</th>
+          <th class="px-3 py-2">Fecha</th>
+          <th class="px-3 py-2 text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="incidenciasTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Modal Nueva Incidencia -->
+  <div id="incidenciaModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+      <div class="flex justify-between items-center border-b px-4 py-2">
+        <h2 class="text-lg font-semibold">Reportar incidencia</h2>
+        <button id="btnCloseIncidenciaModal" class="text-xl font-semibold">&times;</button>
+      </div>
+      <form id="incidenciaForm" class="px-4 py-3 space-y-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Unidad</label>
+          <select name="unidad_id" class="w-full border border-slate-300 rounded-md px-2 py-1"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Tipo</label>
+          <select name="tipo" class="w-full border border-slate-300 rounded-md px-2 py-1">
+            <option value="seguridad">Seguridad</option>
+            <option value="servicio">Servicio</option>
+            <option value="vecino">Vecino</option>
+            <option value="infraestructura">Infraestructura</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Título</label>
+          <input type="text" name="titulo" class="w-full border border-slate-300 rounded-md px-3 py-1" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Descripción</label>
+          <textarea name="descripcion" rows="4" class="w-full border border-slate-300 rounded-md px-3 py-1" required></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Prioridad</label>
+          <select name="prioridad" class="w-full border border-slate-300 rounded-md px-2 py-1">
+            <option value="baja">Baja</option>
+            <option value="media" selected>Media</option>
+            <option value="alta">Alta</option>
+          </select>
+        </div>
+        <div class="text-right pt-2">
+          <button type="submit" class="bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-green-700">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Editar Incidencia -->
+  <div id="incidenciaEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+      <div class="flex justify-between items-center border-b px-4 py-2">
+        <h2 class="text-lg font-semibold">Actualizar incidencia</h2>
+        <button id="btnCloseEditIncModal" class="text-xl font-semibold">&times;</button>
+      </div>
+      <form id="incidenciaEditForm" class="px-4 py-3 space-y-3">
+        <input type="hidden" name="id" />
+        <div>
+          <label class="block text-sm font-medium mb-1">Asignar guardia</label>
+          <select name="guardia_id" class="w-full border border-slate-300 rounded-md px-2 py-1">
+            <option value="">-- Sin asignar --</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Estado</label>
+          <select name="estado" class="w-full border border-slate-300 rounded-md px-2 py-1">
+            <option value="abierta">Abierta</option>
+            <option value="en_proceso">En proceso</option>
+            <option value="cerrada">Cerrada</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Prioridad</label>
+          <select name="prioridad" class="w-full border border-slate-300 rounded-md px-2 py-1">
+            <option value="baja">Baja</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+          </select>
+        </div>
+        <div class="text-right pt-2">
+          <button type="submit" class="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-blue-700">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
