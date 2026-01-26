@@ -23,7 +23,6 @@ function current_user() {
 }
 
 /**
- * $roles = ['super_admin', 'admin_residencial', ...]
  */
 function require_role(array $roles): void {
     if (!is_logged_in()) {
