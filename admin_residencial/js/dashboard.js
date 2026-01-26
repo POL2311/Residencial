@@ -44,7 +44,7 @@
       reglamento: BASE + 'js/reglamento.js',
       pagos_residentes: BASE + 'js/pagos_residentes.js',
 
-      // si luego los creas:
+      // Módulos ya disponibles:
       unidades: BASE + 'js/unidades.js',
       residentes: BASE + 'js/residentes.js',
       incidencias: BASE + 'js/incidencias.js',
