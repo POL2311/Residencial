@@ -42,7 +42,6 @@
       guardias: BASE + 'js/guardias.js',
       comunicados: BASE + 'js/comunicados.js',
       reglamento: BASE + 'js/reglamento.js',
-      pagos_residentes: BASE + 'js/pagos_residentes.js',
 
       // si luego los creas:
       unidades: BASE + 'js/unidades.js',

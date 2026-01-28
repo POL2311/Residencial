@@ -40,14 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: admin_supervisor/dashboard_admin_supervisor.php');
                     break;
                 case 'admin_residencial':
-                    header('Location: admin_residencial/dashboard_admin_residencial.php');
+                    header('Location: admin_residencial/php/dashboard.php');
                     break;
                 case 'guardia':
                     header('Location: guardia/dashboard_guard.php');
                     break;
                 case 'residente':
                 default:
-                    header('Location: residente/dashboard_resident.php');
+                    header('Location: residente/php/dashboard.php');
                     break;
             }
             exit;

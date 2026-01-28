@@ -1,38 +1,54 @@
-console.log('[UNIDADES] JS CARGADO');
+// admin_residencial/js/unidades.js
+// ESPEJO ESTRUCTURAL DE residentes.js, PERO PARA UNIDADES
 
-document.addEventListener('DOMContentLoaded', () => {
+console.log('[UNIDADES] JS ACTIVO');
 
-  const API_URL = '/admin_residencial/php/api/unidades.php'; // 👈 RUTA CORRECTA
+(function () {
 
+  /* =========================
+     ELEMENTOS
+  ========================= */
   const els = {
+    view: document.getElementById('unidadesView'),
     list: document.getElementById('unidadesList'),
     empty: document.getElementById('unidadesEmpty'),
     alert: document.getElementById('unidadesAlert'),
     btnAdd: document.getElementById('btnAddUnidad'),
+    search: document.getElementById('unidadSearch'),
 
     modal: document.getElementById('modal'),
     modalTitle: document.getElementById('modalTitle'),
     modalForm: document.getElementById('modalForm'),
     btnCloseModal: document.getElementById('btnCloseModal'),
     btnCancelModal: document.getElementById('btnCancelModal'),
+
+    detailModal: document.getElementById('detailModal'),
+    detailContent: document.getElementById('detailModalContent'),
   };
 
-  if (!els.list || !els.modalForm) {
-    console.error('[UNIDADES] Elementos base no encontrados');
-    return;
-  }
+  if (!els.view) return;
 
+  /* =========================
+     ESTADO
+  ========================= */
   const state = {
     unidades: [],
+    filteredUnidades: [],
     page: 1,
     editingId: null,
+    selected: null
   };
 
   const PER_PAGE = 5;
 
-  /* =====================
+  /* =========================
      HELPERS
-  ===================== */
+  ========================= */
+  function paginate(arr, page, perPage) {
+    const start = (page - 1) * perPage;
+    return arr.slice(start, start + perPage);
+  }
+
   function showAlert(msg, type = 'info') {
     els.alert.className =
       'rounded-2xl px-4 py-3 text-sm ' +
@@ -47,87 +63,98 @@ document.addEventListener('DOMContentLoaded', () => {
     els.alert.classList.add('hidden');
   }
 
-  function paginate(arr, page, perPage) {
-    const start = (page - 1) * perPage;
-    return arr.slice(start, start + perPage);
-  }
-
   async function fetchJSON(url, options = {}) {
     const res = await fetch(url, {
       credentials: 'same-origin',
       ...options
     });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'Error');
-    return json;
+
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      if (!json.ok) throw new Error(json.error || 'Error');
+      return json;
+    } catch {
+      throw new Error(text);
+    }
   }
 
-  /* =====================
+  /* =========================
      LOAD
-  ===================== */
-  async function load() {
+  ========================= */
+  async function loadUnidades() {
     hideAlert();
     els.list.innerHTML = '';
 
     try {
-      const json = await fetchJSON(API_URL);
+      const json = await fetchJSON(
+        '/residencial/admin_residencial/php/api/unidades.php'
+      );
+
       state.unidades = json.unidades || [];
+      state.filteredUnidades = [...state.unidades];
       state.page = 1;
+
       render();
-    } catch (err) {
-      showAlert(err.message, 'error');
+    } catch (e) {
+      showAlert(e.message, 'error');
     }
   }
 
-  /* =====================
+  /* =========================
      RENDER
-  ===================== */
+  ========================= */
   function render() {
     els.list.innerHTML = '';
 
-    if (!state.unidades.length) {
+    if (!state.filteredUnidades.length) {
       els.empty.classList.remove('hidden');
       return;
     }
     els.empty.classList.add('hidden');
 
-    // Headers
-    const header = document.createElement('div');
-    header.className = 'grid grid-cols-6 gap-4 px-4 py-2 text-xs font-semibold text-slate-500';
-    header.innerHTML = `
-      <div>Clave</div>
-      <div>Tipo</div>
-      <div>Ubicación</div>
-      <div>Titular</div>
-      <div>Estado</div>
-      <div class="text-right">Acciones</div>
-    `;
-    els.list.appendChild(header);
-
-    const visibles = paginate(state.unidades, state.page, PER_PAGE);
+    const visibles = paginate(
+      state.filteredUnidades,
+      state.page,
+      PER_PAGE
+    );
 
     visibles.forEach(u => {
       const card = document.createElement('div');
       card.className =
-        'grid grid-cols-6 gap-4 items-center bg-white border border-slate-200 rounded-2xl px-4 py-3';
+        'rounded-2xl border bg-white p-4 flex justify-between items-center';
 
       card.innerHTML = `
-        <div class="font-semibold">${u.clave}</div>
-        <div class="capitalize">${u.tipo}</div>
-        <div>${u.torre || '—'}</div>
-        <div>${u.titular || '—'}</div>
-        <div>
-          <span class="px-3 py-1 text-xs rounded-full ${
-            u.activo == 1
-              ? 'bg-emerald-100 text-emerald-700'
-              : 'bg-rose-100 text-rose-700'
-          }">
-            ${u.activo == 1 ? 'Activa' : 'Inactiva'}
-          </span>
-        </div>
-        <div class="flex justify-end gap-2">
-          <button data-edit="${u.id}" class="text-xs px-3 py-1 rounded-full border">Editar</button>
-          <button data-del="${u.id}" class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white">Eliminar</button>
+        <div class="grid grid-cols-4 gap-4 w-full items-center">
+
+          <div>
+            <div class="font-semibold text-slate-800">${u.clave}</div>
+            <div class="text-xs text-slate-500 capitalize">${u.tipo}</div>
+          </div>
+
+          <div class="text-sm text-slate-700">
+            ${u.torre || '—'}
+          </div>
+
+          <div class="text-sm text-slate-600 text-center">
+            ${u.titular || 'Sin titular'}
+          </div>
+
+          <div class="flex justify-end gap-2">
+            <button data-more="${u.id}"
+              class="text-xs px-3 py-1 rounded-full bg-slate-100">
+              Ver más
+            </button>
+            <button data-edit="${u.id}"
+              class="text-xs px-3 py-1 rounded-full border">
+              Editar
+            </button>
+            <button data-del="${u.id}"
+              class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white">
+              Eliminar
+            </button>
+          </div>
+
         </div>
       `;
 
@@ -138,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderPagination() {
-    const pages = Math.ceil(state.unidades.length / PER_PAGE);
+    const total = state.filteredUnidades.length;
+    const pages = Math.ceil(total / PER_PAGE);
     if (pages <= 1) return;
 
     const nav = document.createElement('div');
@@ -146,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nav.innerHTML = Array.from({ length: pages }, (_, i) => `
       <button data-page="${i + 1}"
-        class="px-3 py-1 rounded border ${state.page === i + 1 ? 'bg-slate-800 text-white' : ''}">
+        class="px-3 py-1 rounded border ${state.page === i + 1 ? 'bg-slate-900 text-white' : ''}">
         ${i + 1}
       </button>
     `).join('');
@@ -161,24 +189,44 @@ document.addEventListener('DOMContentLoaded', () => {
     els.list.appendChild(nav);
   }
 
-  /* =====================
-     MODAL
-  ===================== */
-  function openModal(edit = null) {
+  /* =========================
+     FILTRO
+  ========================= */
+  function filterUnidades(query) {
+    query = query.toLowerCase().trim();
+
+    if (!query) {
+      state.filteredUnidades = [...state.unidades];
+    } else {
+      state.filteredUnidades = state.unidades.filter(u =>
+        (u.clave || '').toLowerCase().includes(query) ||
+        (u.torre || '').toLowerCase().includes(query) ||
+        (u.tipo || '').toLowerCase().includes(query) ||
+        (u.titular || '').toLowerCase().includes(query)
+      );
+    }
+
+    state.page = 1;
+    render();
+  }
+
+  /* =========================
+     MODAL CRUD
+  ========================= */
+  function openModal(unidad = null) {
     els.modal.classList.remove('hidden');
     els.modalForm.reset();
 
-    if (edit) {
-      state.editingId = edit.id;
+    if (unidad) {
+      state.editingId = unidad.id;
       els.modalTitle.textContent = 'Editar unidad';
-      els.modalForm.id.value = edit.id;
-      els.modalForm.clave.value = edit.clave;
-      els.modalForm.torre.value = edit.torre || '';
-      els.modalForm.tipo.value = edit.tipo;
+      els.modalForm.id.value = unidad.id;
+      els.modalForm.clave.value = unidad.clave;
+      els.modalForm.torre.value = unidad.torre || '';
+      els.modalForm.tipo.value = unidad.tipo;
     } else {
       state.editingId = null;
       els.modalTitle.textContent = 'Agregar unidad';
-      els.modalForm.id.value = '';
     }
   }
 
@@ -188,33 +236,69 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function deleteUnidad(id) {
-    if (!confirm('¿Eliminar unidad?')) return;
+    const fd = new FormData();
+    fd.append('action', 'delete');
+    fd.append('id', id);
 
     try {
-      const fd = new FormData();
-      fd.append('action', 'delete');
-      fd.append('id', id);
-
-      await fetchJSON(API_URL, { method: 'POST', body: fd });
-      load();
-    } catch (err) {
-      showAlert(err.message, 'error');
+      await fetchJSON(
+        '/residencial/admin_residencial/php/api/unidades.php',
+        { method: 'POST', body: fd }
+      );
+      loadUnidades();
+    } catch (e) {
+      showAlert(e.message, 'error');
     }
   }
 
-  /* =====================
-     EVENTS
-  ===================== */
+  /* =========================
+     VER MÁS
+  ========================= */
+  function openDetail(unidad) {
+    els.detailContent.innerHTML = `
+      <div class="bg-white rounded-2xl p-6 space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-semibold">Detalle de unidad</h2>
+          <button id="closeDetail"
+            class="h-9 w-9 rounded-full border hover:bg-slate-100">✕</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div><strong>Clave:</strong> ${unidad.clave}</div>
+          <div><strong>Tipo:</strong> ${unidad.tipo}</div>
+          <div><strong>Torre:</strong> ${unidad.torre || '—'}</div>
+          <div><strong>Titular:</strong> ${unidad.titular || 'Sin titular'}</div>
+        </div>
+      </div>
+    `;
+
+    els.detailModal.classList.remove('hidden');
+
+    document.getElementById('closeDetail').onclick = () =>
+      els.detailModal.classList.add('hidden');
+  }
+
+  /* =========================
+     EVENTOS
+  ========================= */
   els.list.addEventListener('click', e => {
     const edit = e.target.closest('[data-edit]');
     const del  = e.target.closest('[data-del]');
+    const more = e.target.closest('[data-more]');
 
     if (edit) {
       const u = state.unidades.find(x => x.id == edit.dataset.edit);
       if (u) openModal(u);
     }
 
-    if (del) deleteUnidad(del.dataset.del);
+    if (more) {
+      const u = state.unidades.find(x => x.id == more.dataset.more);
+      if (u) openDetail(u);
+    }
+
+    if (del && confirm('¿Eliminar unidad?')) {
+      deleteUnidad(del.dataset.del);
+    }
   });
 
   els.btnAdd?.addEventListener('click', () => openModal());
@@ -224,19 +308,32 @@ document.addEventListener('DOMContentLoaded', () => {
   els.modalForm.addEventListener('submit', async e => {
     e.preventDefault();
 
-    try {
-      const fd = new FormData(els.modalForm);
-      fd.set('action', state.editingId ? 'update' : 'create');
-      if (state.editingId) fd.set('id', state.editingId);
+    const fd = new FormData(els.modalForm);
+    fd.set('action', state.editingId ? 'update' : 'create');
+    if (state.editingId) fd.set('id', state.editingId);
 
-      await fetchJSON(API_URL, { method: 'POST', body: fd });
+    try {
+      await fetchJSON(
+        '/residencial/admin_residencial/php/api/unidades.php',
+        { method: 'POST', body: fd }
+      );
       closeModal();
-      load();
-    } catch (err) {
-      showAlert(err.message, 'error');
+      loadUnidades();
+    } catch (e) {
+      showAlert(e.message, 'error');
     }
   });
 
-  els.btnAdd.classList.remove('hidden');
-  load();
-});
+  els.search?.addEventListener('input', e =>
+    filterUnidades(e.target.value)
+  );
+
+  /* =========================
+     INIT
+  ========================= */
+  (function init() {
+    els.btnAdd?.classList.remove('hidden');
+    loadUnidades();
+  })();
+
+})();
