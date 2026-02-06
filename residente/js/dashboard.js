@@ -123,7 +123,39 @@
         }
     }
 
+    function renderCars(autos) {
+        if (!els.cars) return;
 
+        if (!autos || autos.length === 0) {
+            els.cars.innerHTML = `<span class="text-xs opacity-90">—</span>`;
+            return;
+        }
+
+        els.cars.innerHTML = '';
+        autos.slice(0, 6).forEach((a, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+
+            const colorClass =
+                (idx % 3 === 1) ? 'text-red-400'
+                    : (idx % 3 === 2) ? 'text-yellow-300'
+                        : 'text-white';
+
+            btn.className = `h-8 w-8 flex items-center justify-center ${colorClass} opacity-95 hover:opacity-100`;
+            btn.title = a.placas || 'Auto';
+
+            btn.innerHTML = `
+        <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none">
+          <path d="M7 16l-1 3m11-3l1 3M5 16h14l-1.5-6.5A2 2 0 0 0 15.55 8H8.45a2 2 0 0 0-1.95 1.5L5 16Z"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7.5 16.5h.01M16.5 16.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        </svg>
+      `;
+
+            btn.addEventListener('click', () => openCarModal(a));
+            els.cars.appendChild(btn);
+        });
+    }
 
     function openCarModal(auto) {
         els.modal = els.modal || document.getElementById('carModal');
