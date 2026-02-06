@@ -63,6 +63,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         json_out(false, ['error' => 'Error al obtener incidencias.']);
     }
 }
+if (isset($_POST['action']) && $_POST['action'] === 'delete') {
+    $incidentId = (int)($_POST['id'] ?? 0);
+    if ($incidentId <= 0) json_out(false, ['error' => 'ID inválido.']);
+
+    try {
+        $stmt = $pdo->prepare("DELETE FROM incidencias WHERE id = ? AND residencial_id = ?");
+        $stmt->execute([$incidentId, $residencialId]);
+        json_out(true, ['message' => 'Incidencia eliminada.']);
+    } catch (PDOException $e) {
+        json_out(false, ['error' => 'Error al eliminar incidencia.']);
+    }
+}
+
 
 // POST: crear nueva incidencia o actualizar una existente
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -125,10 +125,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $stmtChk->execute([$residencialId, $clave]);
       if ($stmtChk->fetchColumn()) json_out(false, ['error' => 'Ya existe una unidad con esa clave.']);
 
-      $stmt = $pdo->prepare("
-        INSERT INTO unidades (residencial_id, tipo, clave, activo, created_at)
-        VALUES (:rid, :tipo, :clave, 1, NOW())
-      ");
+$stmt = $pdo->prepare("
+  INSERT INTO unidades (
+    residencial_id,
+    tipo,
+    clave,
+    torre,
+    activo,
+    created_at
+  )
+  VALUES (
+    :rid,
+    :tipo,
+    :clave,
+    :torre,
+    1,
+    NOW()
+  )
+");
+
       $stmt->execute([
         'rid'  => $residencialId,
         'tipo' => $tipo,

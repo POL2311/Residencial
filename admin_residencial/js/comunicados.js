@@ -7,130 +7,129 @@
     const i = p.indexOf('/admin_residencial/');
     return i === -1 ? '/admin_residencial/' : p.slice(0, i) + '/admin_residencial/';
   }
-  const API = basePath() + 'php/api/';
 
-  const alertBox = document.getElementById('comunicadosAlert');
-  const listContainer = document.getElementById('comunicadosList');
-  const btnAdd = document.getElementById('btnAddComunicado');
-  const modal = document.getElementById('comunicadoModal');
-  const form = document.getElementById('comunicadoForm');
-  const btnClose = document.getElementById('btnCloseComModal');
+  const API = basePath() + 'php/api/comunicados.php';
 
-  let comunicadosData = [];
+  const els = {
+    alert: document.getElementById('comunicadosAlert'),
+    list: document.getElementById('comunicadosList'),
+    btnAdd: document.getElementById('btnAddComunicado'),
+    modal: document.getElementById('comunicadoModal'),
+    form: document.getElementById('comunicadoForm'),
+    btnClose: document.getElementById('btnCloseComModal'),
+  };
 
-  function showAlert(msg, isError = false) {
-    if (!alertBox) return;
-    alertBox.textContent = msg;
-    alertBox.classList.remove('hidden');
-    alertBox.classList.toggle('bg-red-100', isError);
-    alertBox.classList.toggle('text-red-800', isError);
-    alertBox.classList.toggle('bg-green-100', !isError);
-    alertBox.classList.toggle('text-green-800', !isError);
-    setTimeout(() => alertBox.classList.add('hidden'), 5000);
+  let data = [];
+
+  function showAlert(msg, error = false) {
+    els.alert.textContent = msg;
+    els.alert.className =
+      'rounded-xl px-4 py-3 text-sm ' +
+      (error ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700');
+    els.alert.classList.remove('hidden');
+    setTimeout(() => els.alert.classList.add('hidden'), 4000);
   }
 
-  btnAdd.addEventListener('click', () => {
-    form.reset();
-    form.id.value = '';
-    modal.classList.remove('hidden');
-  });
+  function badge(p) {
+    if (p === 'alta') return 'bg-rose-100 text-rose-700';
+    if (p === 'media') return 'bg-amber-100 text-amber-700';
+    return 'bg-slate-100 text-slate-700';
+  }
 
-  btnClose.addEventListener('click', () => {
-    modal.classList.add('hidden');
-  });
+  function render() {
+    els.list.innerHTML = '';
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    try {
-      const res = await fetch(API + 'comunicados.php', { method: 'POST', body: formData, credentials: 'same-origin' });
-      const json = await res.json();
-      if (json.ok) {
-        showAlert(json.message || 'Comunicado guardado.');
-        modal.classList.add('hidden');
-        await loadComunicados();
-      } else {
-        showAlert(json.error || 'Error al guardar comunicado.', true);
-      }
-    } catch (err) {
-      showAlert('Error de red al guardar comunicado.', true);
-    }
-  });
+    data.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'rounded-2xl border bg-white p-4';
 
-  listContainer.addEventListener('click', async (e) => {
-    const target = e.target;
-    if (target.matches('.btn-archivar')) {
-      const id = target.getAttribute('data-id');
-      if (!confirm('¿Archivar este comunicado?')) return;
-      try {
-        const formData = new FormData();
-        formData.append('action', 'archive');
-        formData.append('id', id);
-        const res = await fetch(API + 'comunicados.php', { method: 'POST', body: formData, credentials: 'same-origin' });
-        const json = await res.json();
-        if (json.ok) {
-          showAlert(json.message || 'Comunicado archivado.');
-          await loadComunicados();
-        } else {
-          showAlert(json.error || 'Error al archivar comunicado.', true);
-        }
-      } catch (err) {
-        showAlert('Error de red al archivar comunicado.', true);
-      }
-    }
-    if (target.matches('.btn-editar')) {
-      const id = target.getAttribute('data-id');
-      const com = comunicadosData.find(c => c.id == id);
-      if (!com) return;
-      form.reset();
-      form.id.value = com.id;
-      form.titulo.value = com.titulo;
-      form.mensaje.value = com.mensaje;
-      form.tipo.value = com.tipo;
-      form.prioridad.value = com.prioridad;
-      form.fecha_publicacion.value = com.fecha_publicacion;
-      form.fecha_expiracion.value = com.fecha_expiracion || '';
-      form.estado.value = com.estado;
-      modal.classList.remove('hidden');
-    }
-  });
+      card.innerHTML = `
+        <div class="flex justify-between gap-4">
+          <div class="flex-1">
+            <h3 class="font-semibold text-lg">${c.titulo}</h3>
 
-  function renderComunicados() {
-    listContainer.innerHTML = '';
-    comunicadosData.forEach(c => {
-      const item = document.createElement('div');
-      item.className = 'rounded-2xl bg-white shadow px-4 py-3';
-      item.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            <h3 class="text-base font-semibold">${c.titulo}</h3>
-            <div class="text-xs text-slate-500">Categoría: ${c.tipo}, Prioridad: ${c.prioridad}, Estado: ${c.estado}, Publicado: ${c.fecha_publicacion}</div>
+            <div class="text-xs text-slate-500 mt-1">
+              ${c.tipo} · ${c.fecha_publicacion}
+            </div>
+
+            <p class="text-sm mt-2 line-clamp-3">${c.mensaje}</p>
+
+            <span class="inline-block mt-2 px-3 py-1 text-xs rounded-full ${badge(c.prioridad)}">
+              ${c.prioridad}
+            </span>
           </div>
-          <div class="space-x-2">
-            <button class="btn-editar text-sm text-blue-600 hover:underline" data-id="${c.id}">Editar</button>
-            <button class="btn-archivar text-sm text-red-600 hover:underline" data-id="${c.id}">Archivar</button>
+
+          <div class="flex flex-col gap-2 items-end">
+            <button data-edit="${c.id}"
+              class="text-sm px-3 py-1 border rounded-lg hover:bg-slate-50">
+              Editar
+            </button>
+            <button data-archive="${c.id}"
+              class="text-sm px-3 py-1 bg-rose-500 text-white rounded-lg hover:bg-rose-600">
+              Archivar
+            </button>
           </div>
         </div>
-        <p class="mt-2 text-sm whitespace-pre-line">${c.mensaje}</p>
       `;
-      listContainer.appendChild(item);
+
+      els.list.appendChild(card);
     });
   }
 
-  async function loadComunicados() {
-    try {
-      const res = await fetch(API + 'comunicados.php', { credentials: 'same-origin' });
-      const json = await res.json();
-      if (json.ok) {
-        comunicadosData = json.comunicados || [];
-        renderComunicados();
-      } else {
-        showAlert(json.error || 'Error al cargar comunicados.', true);
-      }
-    } catch (err) {
-      showAlert('Error de red al cargar comunicados.', true);
+  async function load() {
+    const r = await fetch(API, { credentials: 'same-origin' });
+    const j = await r.json();
+    if (j.ok) {
+      data = j.comunicados || [];
+      render();
     }
   }
 
-  loadComunicados();
+  els.btnAdd.onclick = () => {
+    els.form.reset();
+    els.form.id.value = '';
+    els.modal.classList.remove('hidden');
+  };
+
+  els.btnClose.onclick = () => els.modal.classList.add('hidden');
+
+  els.list.onclick = async e => {
+    const edit = e.target.closest('[data-edit]');
+    const arch = e.target.closest('[data-archive]');
+
+    if (edit) {
+      const c = data.find(x => x.id == edit.dataset.edit);
+      if (!c) return;
+      Object.keys(c).forEach(k => {
+        if (els.form[k]) els.form[k].value = c[k] ?? '';
+      });
+      els.modal.classList.remove('hidden');
+    }
+
+    if (arch) {
+      if (!confirm('¿Archivar comunicado?')) return;
+      const fd = new FormData();
+      fd.append('action', 'archive');
+      fd.append('id', arch.dataset.archive);
+      await fetch(API, { method: 'POST', body: fd });
+      showAlert('Comunicado archivado');
+      load();
+    }
+  };
+
+  els.form.onsubmit = async e => {
+    e.preventDefault();
+    const fd = new FormData(els.form);
+    const r = await fetch(API, { method: 'POST', body: fd });
+    const j = await r.json();
+    if (j.ok) {
+      showAlert(j.message || 'Guardado');
+      els.modal.classList.add('hidden');
+      load();
+    } else {
+      showAlert(j.error, true);
+    }
+  };
+
+  load();
 })();
