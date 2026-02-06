@@ -4,7 +4,6 @@
 console.log('[INCIDENCIAS] JS ACTIVO');
 
 (function () {
-
   const view = document.getElementById('incidenciasView');
   if (!view) return;
 
@@ -79,7 +78,7 @@ console.log('[INCIDENCIAS] JS ACTIVO');
       if (!json.ok) throw new Error(json.error || 'Error');
       return json;
     } catch {
-      throw new Error(text);
+      throw new Error(text); // te muestra HTML 404/login si algo falla
     }
   }
 
@@ -123,6 +122,78 @@ console.log('[INCIDENCIAS] JS ACTIVO');
       state.guardias = g.guardias || [];
 
       render();
+    } catch (e) {
+      showAlert(e.message, 'error');
+    }
+  }
+
+  // =========================
+  // MODALES
+  // =========================
+  function openAddModal() {
+    if (!els.modalAdd || !els.formAdd) return;
+
+    els.formAdd.reset();
+
+    const selU = els.formAdd.querySelector('[name="unidad_id"]');
+    if (selU) {
+      selU.innerHTML = '';
+      state.unidades.forEach(u => {
+        selU.innerHTML += `<option value="${u.id}">${u.clave}</option>`;
+      });
+    }
+
+    els.modalAdd.classList.remove('hidden');
+  }
+
+  function closeAddModal() {
+    els.modalAdd?.classList.add('hidden');
+  }
+
+  function openEditModal(inc) {
+    if (!els.modalEdit || !els.formEdit) {
+      console.error('[INCIDENCIAS] Falta modalEdit o formEdit en HTML');
+      return;
+    }
+
+    els.formEdit.reset();
+
+    const idInput = els.formEdit.querySelector('[name="id"]');
+    if (idInput) idInput.value = inc.id;
+
+    const selG = els.formEdit.querySelector('[name="guardia_id"]');
+    if (selG) {
+      selG.innerHTML = `<option value="">-- Sin asignar --</option>`;
+      state.guardias.forEach(g => {
+        selG.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+      });
+      selG.value = inc.guardia_id || '';
+    }
+
+    const selEstado = els.formEdit.querySelector('[name="estado"]');
+    if (selEstado) selEstado.value = inc.estado || 'abierta';
+
+    const selPri = els.formEdit.querySelector('[name="prioridad"]');
+    if (selPri) selPri.value = inc.prioridad || 'media';
+
+    els.modalEdit.classList.remove('hidden');
+  }
+
+  function closeEditModal() {
+    els.modalEdit?.classList.add('hidden');
+  }
+
+  async function deleteIncidencia(id) {
+    if (!confirm('¿Eliminar esta incidencia?')) return;
+
+    const fd = new FormData();
+    fd.append('action', 'delete');
+    fd.append('id', id);
+
+    try {
+      await fetchJSON(API_INCIDENCIAS, { method: 'POST', body: fd });
+      showAlert('Incidencia eliminada.');
+      await loadAll();
     } catch (e) {
       showAlert(e.message, 'error');
     }
@@ -192,44 +263,44 @@ console.log('[INCIDENCIAS] JS ACTIVO');
         <div class="space-y-3 md:hidden">
           <div>
             <div class="text-xs text-slate-500">Título</div>
-            <div class="font-semibold">${i.titulo}</div>
-            <div class="text-xs text-slate-400">${i.tipo}</div>
+            <div class="font-semibold">${i.titulo || '—'}</div>
+            <div class="text-xs text-slate-400 capitalize">${i.tipo || '—'}</div>
           </div>
 
-          <div><span class="text-xs text-slate-500">Unidad</span><div>${i.unidad_clave}</div></div>
-          <div><span class="text-xs text-slate-500">Residente</span><div>${i.residente_nombre}</div></div>
+          <div><span class="text-xs text-slate-500">Unidad</span><div>${i.unidad_clave || '—'}</div></div>
+          <div><span class="text-xs text-slate-500">Residente</span><div>${i.residente_nombre || '—'}</div></div>
           <div><span class="text-xs text-slate-500">Guardia</span><div>${i.guardia_nombre || '—'}</div></div>
 
           <div class="flex gap-2">
-            <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${i.prioridad}</span>
-            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)}">${i.estado}</span>
+            <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${i.prioridad}</span>
+            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)} capitalize">${i.estado}</span>
           </div>
 
           <div class="text-[11px] text-slate-400">${fmtDate(i.created_at)}</div>
 
           <div class="flex gap-2 pt-2">
-            <button data-edit="${i.id}" class="flex-1 rounded-xl border px-3 py-2">Editar</button>
-            <button data-del="${i.id}" class="flex-1 rounded-xl bg-rose-500 text-white px-3 py-2">Eliminar</button>
+            <button data-edit="${i.id}" class="flex-1 rounded-xl border px-3 py-2 text-sm">Editar</button>
+            <button data-del="${i.id}" class="flex-1 rounded-xl bg-rose-500 text-white px-3 py-2 text-sm">Eliminar</button>
           </div>
         </div>
 
         <!-- DESKTOP -->
         <div class="hidden md:grid grid-cols-9 gap-4 items-center">
           <div class="col-span-2">
-            <div class="font-semibold">${i.titulo}</div>
-            <div class="text-xs text-slate-500">${i.tipo}</div>
+            <div class="font-semibold text-slate-800">${i.titulo || '—'}</div>
+            <div class="text-xs text-slate-500 capitalize">${i.tipo || '—'}</div>
           </div>
-          <div>${i.unidad_clave}</div>
-          <div class="col-span-2">${i.residente_nombre}</div>
+          <div>${i.unidad_clave || '—'}</div>
+          <div class="col-span-2">${i.residente_nombre || '—'}</div>
           <div>${i.guardia_nombre || '—'}</div>
-          <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${i.prioridad}</span></div>
+          <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${i.prioridad}</span></div>
           <div>
-            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)}">${i.estado}</span>
+            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)} capitalize">${i.estado}</span>
             <div class="text-[11px] text-slate-400">${fmtDate(i.created_at)}</div>
           </div>
           <div class="flex justify-end gap-2">
-            <button data-edit="${i.id}" class="text-xs px-3 py-1 rounded-full border">Editar</button>
-            <button data-del="${i.id}" class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white">Eliminar</button>
+            <button data-edit="${i.id}" class="text-xs px-3 py-1 rounded-full border hover:bg-slate-50">Editar</button>
+            <button data-del="${i.id}" class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white hover:bg-rose-600">Eliminar</button>
           </div>
         </div>
       `;
@@ -237,19 +308,33 @@ console.log('[INCIDENCIAS] JS ACTIVO');
       els.list.appendChild(card);
     });
 
-    // ===== PAGINACIÓN
+    // ===== PAGINACIÓN (con flechas como residentes)
     if (totalPages > 1) {
       const nav = document.createElement('div');
       nav.className = 'flex justify-end gap-2 mt-4';
 
-      nav.innerHTML = Array.from({ length: totalPages }).map((_, i) => `
-        <button data-page="${i + 1}"
-          class="px-3 py-1 rounded text-sm ${
-            state.page === i + 1 ? 'bg-slate-800 text-white' : 'border'
-          }">
-          ${i + 1}
+      nav.innerHTML = `
+        <button ${state.page === 1 ? 'disabled' : ''}
+          class="px-3 py-1 rounded border text-sm disabled:opacity-40"
+          data-page="${state.page - 1}">
+          ◀
         </button>
-      `).join('');
+
+        ${Array.from({ length: totalPages }).map((_, i) => `
+          <button data-page="${i + 1}"
+            class="px-3 py-1 rounded text-sm ${
+              state.page === i + 1 ? 'bg-slate-800 text-white' : 'border'
+            }">
+            ${i + 1}
+          </button>
+        `).join('')}
+
+        <button ${state.page === totalPages ? 'disabled' : ''}
+          class="px-3 py-1 rounded border text-sm disabled:opacity-40"
+          data-page="${state.page + 1}">
+          ▶
+        </button>
+      `;
 
       els.list.appendChild(nav);
     }
@@ -265,10 +350,18 @@ console.log('[INCIDENCIAS] JS ACTIVO');
   });
 
   els.search?.addEventListener('input', e => {
-    state.search = e.target.value.toLowerCase().trim();
+    state.search = (e.target.value || '').toLowerCase().trim();
     state.page = 1;
     render();
   });
+
+  els.btnAdd?.addEventListener('click', openAddModal);
+
+  els.btnCloseAdd?.addEventListener('click', closeAddModal);
+  els.btnCancelAdd?.addEventListener('click', closeAddModal);
+
+  els.btnCloseEdit?.addEventListener('click', closeEditModal);
+  els.btnCancelEdit?.addEventListener('click', closeEditModal);
 
   els.list.addEventListener('click', e => {
     const pageBtn = e.target.closest('[data-page]');
@@ -278,19 +371,54 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     if (pageBtn) {
       state.page = Number(pageBtn.dataset.page);
       render();
+      return;
     }
 
     if (edit) {
-      const inc = state.incidencias.find(x => x.id == edit.dataset.edit);
+      const inc = state.incidencias.find(x => String(x.id) === String(edit.dataset.edit));
       if (inc) openEditModal(inc);
+      return;
     }
 
-    if (del) deleteIncidencia(del.dataset.del);
+    if (del) {
+      deleteIncidencia(del.dataset.del);
+    }
+  });
+
+  // Submit ADD
+  els.formAdd?.addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+      await fetchJSON(API_INCIDENCIAS, {
+        method: 'POST',
+        body: new FormData(els.formAdd),
+      });
+      closeAddModal();
+      showAlert('Incidencia registrada.');
+      await loadAll();
+    } catch (e2) {
+      showAlert(e2.message, 'error');
+    }
+  });
+
+  // Submit EDIT
+  els.formEdit?.addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+      await fetchJSON(API_INCIDENCIAS, {
+        method: 'POST',
+        body: new FormData(els.formEdit),
+      });
+      closeEditModal();
+      showAlert('Incidencia actualizada.');
+      await loadAll();
+    } catch (e2) {
+      showAlert(e2.message, 'error');
+    }
   });
 
   // =========================
   // INIT
   // =========================
   loadAll();
-
 })();
