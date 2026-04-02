@@ -7,7 +7,7 @@ console.log('[INCIDENCIAS] JS ACTIVO');
   const view = document.getElementById('incidenciasView');
   if (!view) return;
 
-  const API_BASE = '/residencial/admin_residencial/php/api/';
+  const API_BASE = '/admin_residencial/php/api/';
   const API_INCIDENCIAS = API_BASE + 'incidencias.php';
   const API_UNIDADES   = API_BASE + 'unidades.php';
   const API_GUARDIAS   = API_BASE + 'guardias.php';
