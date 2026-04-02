@@ -255,7 +255,7 @@ console.log('[RESIDENTES] JS ACTIVO');
     els.list.innerHTML = '';
     try {
       const json = await fetchJSON(
-        '/residencial/admin_residencial/php/api/residentes.php?action=list'
+        '/admin_residencial/php/api/residentes.php?action=list'
       );
     state.residentes = json.residentes || [];
     state.filteredResidentes = [...state.residentes];
@@ -485,7 +485,7 @@ card.innerHTML = `
       const fd = new FormData(e.target);
       try {
         await fetchJSON(
-          '/residencial/admin_residencial/php/api/pagos_residentes.php',
+          '/admin_residencial/php/api/pagos_residentes.php',
           { method: 'POST', body: fd }
         );
         modal.remove();
@@ -584,7 +584,7 @@ function openAddAutoModal(residente) {
 
     try {
       await fetchJSON(
-        '/residencial/admin_residencial/php/api/autos_admin.php',
+        '/admin_residencial/php/api/autos_admin.php',
         { method: 'POST', body: fd }
       );
 
@@ -636,7 +636,7 @@ els.list.addEventListener('change', async (e) => {
 
   try {
     await fetchJSON(
-      '/residencial/admin_residencial/php/api/residentes.php',
+      '/admin_residencial/php/api/residentes.php',
       { method: 'POST', body: fd }
     );
 
@@ -657,7 +657,7 @@ els.list.addEventListener('change', async (e) => {
       state.autosPage = 1;
       // 1. Residente
       const detailResp = await fetchJSON(
-        `/residencial/admin_residencial/php/api/residentes.php?action=get&id=${residUnidId}`
+        `/admin_residencial/php/api/residentes.php?action=get&id=${residUnidId}`
       );
       const r = detailResp.residente;
       state.selected = r;
@@ -669,7 +669,7 @@ els.list.addEventListener('change', async (e) => {
 
       // 3. Pagos
       const pagosResp = await fetchJSON(
-        `/residencial/admin_residencial/php/api/pagos_residentes.php?action=list&user_id=${userId}`
+        `/admin_residencial/php/api/pagos_residentes.php?action=list&user_id=${userId}`
       );
       state.pagos = pagosResp.data ? pagosResp.data.pagos : [];
 
@@ -680,7 +680,7 @@ els.list.addEventListener('change', async (e) => {
 
       // 4. Autos
       const autosResp = await fetchJSON(
-        `/residencial/admin_residencial/php/api/autos_admin.php?action=list_by_resident&user_id=${userId}`
+        `/admin_residencial/php/api/autos_admin.php?action=list_by_resident&user_id=${userId}`
       );
       state.autos = autosResp.data ? autosResp.data.autos : [];
 
@@ -796,7 +796,7 @@ els.list.addEventListener('change', async (e) => {
     if (state.editingId) fd.append('id', state.editingId);
     try {
       await fetchJSON(
-        '/residencial/admin_residencial/php/api/residentes.php',
+        '/admin_residencial/php/api/residentes.php',
         { method: 'POST', body: fd }
       );
       closeModal();
@@ -813,7 +813,7 @@ els.list.addEventListener('change', async (e) => {
     fd.append('id', id);
     try {
       await fetchJSON(
-        '/residencial/admin_residencial/php/api/residentes.php',
+        '/admin_residencial/php/api/residentes.php',
         { method: 'POST', body: fd }
       );
       loadData();
