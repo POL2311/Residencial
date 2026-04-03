@@ -1,0 +1,9 @@
+Array
+(
+    [monto] => 12
+    [fecha] => 2026-04-02
+    [metodo] => efectivo
+    [concepto] => 
+    [user_id] => 4
+    [action] => create
+)

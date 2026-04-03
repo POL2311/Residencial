@@ -1,0 +1,50 @@
+[02-Apr-2026 13:13:58 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 13:15:43 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 13:39:06 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 13:49:00 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 13:49:07 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 13:52:37 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 13:57:07 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 13:57:24 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 14:07:04 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
+[02-Apr-2026 14:12:36 America/Mexico_City] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.guardia_en_servicio' in 'field list' in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php:46
+Stack trace:
+#0 /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php(46): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home3/miinvit3/toro-max.com/admin_residencial/php/api/guardias.php on line 46
