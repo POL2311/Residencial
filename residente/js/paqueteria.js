@@ -1,7 +1,4 @@
 (function () {
-    if (window.__paqueteria_init_v1) return;
-    window.__paqueteria_init_v1 = true;
-
     function baseResidentPath() {
         const p = window.location.pathname;
         const idx = p.indexOf('/residente/');
