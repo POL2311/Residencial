@@ -29,6 +29,7 @@
     function loadViewScript(view) {
         const scriptsMap = {
             perfil: BASE + 'js/perfil.js',
+            paqueteria: BASE + 'js/paqueteria.js',
             // luego: reglamento, comunicados, etc.
         };
 
@@ -194,7 +195,7 @@
             .replaceAll("'", '&#039;');
     }
 
-    // ✅ EXPONER API GLOBAL PARA OTRAS VISTAS (perfil.js)
+    // ✅ EXPONER API GLOBAL PARA OTRAS VISTAS (perfil.js / paqueteria.js)
     window.ResidenteDashboard = {
         loadContext,
         renderCars,
