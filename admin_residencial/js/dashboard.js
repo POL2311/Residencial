@@ -43,7 +43,7 @@
       comunicados: BASE + 'js/comunicados.js',
       reglamento: BASE + 'js/reglamento.js',
 
-      // si luego los creas:
+      // Módulos ya disponibles:
       unidades: BASE + 'js/unidades.js',
       residentes: BASE + 'js/residentes.js',
       incidencias: BASE + 'js/incidencias.js',
