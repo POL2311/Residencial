@@ -1,20 +1,12 @@
-// admin_residencial/js/incidencias.js
-// ESPEJO ESTRUCTURAL DE residentes.js / unidades.js (cards + modales)
-
-console.log('[INCIDENCIAS] JS ACTIVO');
-
 (function () {
   const view = document.getElementById('incidenciasView');
   if (!view) return;
 
-  const API_BASE = '/admin_residencial/php/api/';
+  const API_BASE = '/Residencial/admin_residencial/php/api/';
   const API_INCIDENCIAS = API_BASE + 'incidencias.php';
-  const API_UNIDADES   = API_BASE + 'unidades.php';
-  const API_GUARDIAS   = API_BASE + 'guardias.php';
+  const API_UNIDADES = API_BASE + 'unidades.php';
+  const API_GUARDIAS = API_BASE + 'guardias.php';
 
-  // =========================
-  // ELEMENTOS
-  // =========================
   const els = {
     alert: document.getElementById('incidenciasAlert'),
     list: document.getElementById('incidenciasList'),
@@ -32,16 +24,13 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     btnCloseEdit: document.getElementById('btnCloseEditIncModal'),
     btnCancelAdd: document.getElementById('btnCancelIncidenciaAdd'),
     btnCancelEdit: document.getElementById('btnCancelIncidenciaEdit'),
+
+    addError: document.getElementById('incidenciaAddError'),
+    editError: document.getElementById('incidenciaEditError'),
   };
 
-  if (!els.list) {
-    console.error('[INCIDENCIAS] Falta #incidenciasList en el HTML');
-    return;
-  }
+  if (!els.list) return;
 
-  // =========================
-  // ESTADO
-  // =========================
   const state = {
     incidencias: [],
     unidades: [],
@@ -52,9 +41,15 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     perPage: 3,
   };
 
-  // =========================
-  // HELPERS
-  // =========================
+  function escapeHtml(value = '') {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function showAlert(msg, type = 'info') {
     if (!els.alert) return;
     els.alert.className =
@@ -64,57 +59,206 @@ console.log('[INCIDENCIAS] JS ACTIVO');
         : 'bg-sky-100 text-sky-700');
     els.alert.textContent = msg;
     els.alert.classList.remove('hidden');
+
+    setTimeout(() => {
+      els.alert.classList.add('hidden');
+    }, 3500);
   }
 
   function hideAlert() {
     els.alert?.classList.add('hidden');
   }
 
+  function showFormError(el, msg) {
+    if (!el) {
+      showAlert(msg, 'error');
+      return;
+    }
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function clearFormError(el) {
+    if (!el) return;
+    el.textContent = '';
+    el.classList.add('hidden');
+  }
+
   async function fetchJSON(url, options = {}) {
     const res = await fetch(url, { credentials: 'same-origin', ...options });
     const text = await res.text();
+
+    let json;
     try {
-      const json = JSON.parse(text);
-      if (!json.ok) throw new Error(json.error || 'Error');
-      return json;
+      json = JSON.parse(text);
     } catch {
-      throw new Error(text); // te muestra HTML 404/login si algo falla
+      throw new Error(text || 'Respuesta inválida del servidor');
     }
+
+    if (!json.ok) throw new Error(json.error || 'Error');
+    return json;
   }
 
-  const badgeEstado = e =>
+  const api = {
+    incidencias: {
+      list: () => fetchJSON(API_INCIDENCIAS),
+      save: (fd) =>
+        fetchJSON(API_INCIDENCIAS, {
+          method: 'POST',
+          body: fd,
+        }),
+      remove: (id) => {
+        const fd = new FormData();
+        fd.append('action', 'delete');
+        fd.append('id', id);
+        return fetchJSON(API_INCIDENCIAS, {
+          method: 'POST',
+          body: fd,
+        });
+      },
+    },
+    unidades: {
+      list: () => fetchJSON(API_UNIDADES),
+    },
+    guardias: {
+      list: () => fetchJSON(API_GUARDIAS),
+    },
+  };
+
+  const badgeEstado = (e) =>
     e === 'cerrada'
       ? 'bg-emerald-100 text-emerald-700'
       : e === 'en_proceso'
       ? 'bg-amber-100 text-amber-700'
       : 'bg-rose-100 text-rose-700';
 
-  const badgePrioridad = p =>
+  const badgePrioridad = (p) =>
     p === 'alta'
       ? 'bg-rose-100 text-rose-700'
       : p === 'media'
       ? 'bg-amber-100 text-amber-700'
       : 'bg-slate-100 text-slate-700';
 
-  const fmtDate = s => {
+  function fmtDate(s) {
     if (!s) return '—';
     const d = new Date(s);
     return Number.isNaN(d.getTime()) ? s : d.toLocaleString();
-  };
+  }
 
-  const paginate = (arr, page, per) =>
-    arr.slice((page - 1) * per, page * per);
+  function paginate(arr, page, per) {
+    return arr.slice((page - 1) * per, page * per);
+  }
 
-  // =========================
-  // LOAD
-  // =========================
+  function ensureUiHelpers() {
+    if (document.getElementById('incidenciasUiLayer')) return;
+
+    const layer = document.createElement('div');
+    layer.id = 'incidenciasUiLayer';
+    layer.innerHTML = `
+      <div id="friendlyConfirmIncidencia"
+           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+        <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-start gap-4">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
+                !
+              </div>
+              <div class="flex-1">
+                <h3 id="friendlyConfirmIncidenciaTitle" class="text-xl font-semibold text-slate-900">
+                  Confirmar acción
+                </h3>
+                <p id="friendlyConfirmIncidenciaMessage" class="mt-2 text-sm leading-6 text-slate-600">
+                  ¿Deseas continuar?
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+              <button id="friendlyConfirmIncidenciaCancel"
+                      type="button"
+                      class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+                Cancelar
+              </button>
+              <button id="friendlyConfirmIncidenciaAccept"
+                      type="button"
+                      class="rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(layer);
+  }
+
+  function showConfirmIncidencia({
+    title = 'Confirmar acción',
+    message = '¿Deseas continuar?',
+    acceptText = 'Aceptar',
+    cancelText = 'Cancelar',
+  } = {}) {
+    ensureUiHelpers();
+
+    return new Promise((resolve) => {
+      const modal = document.getElementById('friendlyConfirmIncidencia');
+      const titleEl = document.getElementById('friendlyConfirmIncidenciaTitle');
+      const messageEl = document.getElementById('friendlyConfirmIncidenciaMessage');
+      const acceptBtn = document.getElementById('friendlyConfirmIncidenciaAccept');
+      const cancelBtn = document.getElementById('friendlyConfirmIncidenciaCancel');
+
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      acceptBtn.textContent = acceptText;
+      cancelBtn.textContent = cancelText;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        acceptBtn.onclick = null;
+        cancelBtn.onclick = null;
+        modal.onclick = null;
+        document.removeEventListener('keydown', onKeydown);
+      };
+
+      const onKeydown = (e) => {
+        if (e.key === 'Escape') {
+          cleanup();
+          resolve(false);
+        }
+      };
+
+      acceptBtn.onclick = () => {
+        cleanup();
+        resolve(true);
+      };
+
+      cancelBtn.onclick = () => {
+        cleanup();
+        resolve(false);
+      };
+
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          cleanup();
+          resolve(false);
+        }
+      };
+
+      document.addEventListener('keydown', onKeydown);
+    });
+  }
+
   async function loadAll() {
     hideAlert();
     try {
       const [i, u, g] = await Promise.all([
-        fetchJSON(API_INCIDENCIAS),
-        fetchJSON(API_UNIDADES),
-        fetchJSON(API_GUARDIAS),
+        api.incidencias.list(),
+        api.unidades.list(),
+        api.guardias.list(),
       ]);
 
       state.incidencias = i.incidencias || [];
@@ -127,19 +271,17 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     }
   }
 
-  // =========================
-  // MODALES
-  // =========================
   function openAddModal() {
     if (!els.modalAdd || !els.formAdd) return;
 
+    clearFormError(els.addError);
     els.formAdd.reset();
 
     const selU = els.formAdd.querySelector('[name="unidad_id"]');
     if (selU) {
       selU.innerHTML = '';
-      state.unidades.forEach(u => {
-        selU.innerHTML += `<option value="${u.id}">${u.clave}</option>`;
+      state.unidades.forEach((u) => {
+        selU.innerHTML += `<option value="${u.id}">${escapeHtml(u.clave)}</option>`;
       });
     }
 
@@ -148,14 +290,13 @@ console.log('[INCIDENCIAS] JS ACTIVO');
 
   function closeAddModal() {
     els.modalAdd?.classList.add('hidden');
+    clearFormError(els.addError);
   }
 
   function openEditModal(inc) {
-    if (!els.modalEdit || !els.formEdit) {
-      console.error('[INCIDENCIAS] Falta modalEdit o formEdit en HTML');
-      return;
-    }
+    if (!els.modalEdit || !els.formEdit) return;
 
+    clearFormError(els.editError);
     els.formEdit.reset();
 
     const idInput = els.formEdit.querySelector('[name="id"]');
@@ -164,8 +305,8 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     const selG = els.formEdit.querySelector('[name="guardia_id"]');
     if (selG) {
       selG.innerHTML = `<option value="">-- Sin asignar --</option>`;
-      state.guardias.forEach(g => {
-        selG.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+      state.guardias.forEach((g) => {
+        selG.innerHTML += `<option value="${g.id}">${escapeHtml(g.name)}</option>`;
       });
       selG.value = inc.guardia_id || '';
     }
@@ -181,32 +322,67 @@ console.log('[INCIDENCIAS] JS ACTIVO');
 
   function closeEditModal() {
     els.modalEdit?.classList.add('hidden');
+    clearFormError(els.editError);
   }
 
   async function deleteIncidencia(id) {
-    if (!confirm('¿Eliminar esta incidencia?')) return;
+    const ok = await showConfirmIncidencia({
+      title: 'Eliminar incidencia',
+      message: 'Esta acción eliminará la incidencia de forma permanente. ¿Deseas continuar?',
+      acceptText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+    });
 
-    const fd = new FormData();
-    fd.append('action', 'delete');
-    fd.append('id', id);
+    if (!ok) return;
 
     try {
-      await fetchJSON(API_INCIDENCIAS, { method: 'POST', body: fd });
-      showAlert('Incidencia eliminada.');
+      const resp = await api.incidencias.remove(id);
+      showAlert(resp.message || 'Incidencia eliminada.');
       await loadAll();
     } catch (e) {
       showAlert(e.message, 'error');
     }
   }
 
-  // =========================
-  // RENDER
-  // =========================
+  function validateAddForm(fd) {
+    const unidadId = Number(fd.get('unidad_id') || 0);
+    const tipo = String(fd.get('tipo') || '').trim();
+    const titulo = String(fd.get('titulo') || '').trim();
+    const descripcion = String(fd.get('descripcion') || '').trim();
+    const prioridad = String(fd.get('prioridad') || '').trim();
+
+    if (unidadId <= 0) throw new Error('Debes seleccionar una unidad.');
+    if (!['seguridad', 'servicio', 'vecino', 'infraestructura', 'otro'].includes(tipo)) {
+      throw new Error('Tipo inválido.');
+    }
+    if (titulo.length < 3) throw new Error('El título debe tener al menos 3 caracteres.');
+    if (titulo.length > 120) throw new Error('El título no puede exceder 120 caracteres.');
+    if (descripcion.length < 5) throw new Error('La descripción debe tener al menos 5 caracteres.');
+    if (descripcion.length > 1000) throw new Error('La descripción no puede exceder 1000 caracteres.');
+    if (!['baja', 'media', 'alta'].includes(prioridad)) throw new Error('Prioridad inválida.');
+  }
+
+  function validateEditForm(fd) {
+    const estado = String(fd.get('estado') || '').trim();
+    const prioridad = String(fd.get('prioridad') || '').trim();
+
+    if (!['abierta', 'en_proceso', 'cerrada'].includes(estado)) {
+      throw new Error('Estado inválido.');
+    }
+    if (!['baja', 'media', 'alta'].includes(prioridad)) {
+      throw new Error('Prioridad inválida.');
+    }
+
+    const guardiaId = String(fd.get('guardia_id') || '').trim();
+    if (guardiaId !== '' && Number(guardiaId) <= 0) {
+      throw new Error('Guardia inválido.');
+    }
+  }
+
   function render() {
     els.list.innerHTML = '';
 
-    // ===== FILTRO (ESTADO + SEARCH)
-    const filtradas = state.incidencias.filter(i => {
+    const filtradas = state.incidencias.filter((i) => {
       const byEstado =
         state.filter === 'todas' ? true : i.estado === state.filter;
 
@@ -225,7 +401,6 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     const totalPages = Math.max(1, Math.ceil(filtradas.length / state.perPage));
     if (state.page > totalPages) state.page = 1;
 
-    // ===== HEADER DESKTOP
     if (filtradas.length) {
       const header = document.createElement('div');
       header.className =
@@ -253,30 +428,28 @@ console.log('[INCIDENCIAS] JS ACTIVO');
       return;
     }
 
-    // ===== CARDS
-    visibles.forEach(i => {
+    visibles.forEach((i) => {
       const card = document.createElement('div');
       card.className = 'rounded-2xl border bg-white px-4 py-4';
 
       card.innerHTML = `
-        <!-- MOBILE -->
         <div class="space-y-3 md:hidden">
           <div>
             <div class="text-xs text-slate-500">Título</div>
-            <div class="font-semibold">${i.titulo || '—'}</div>
-            <div class="text-xs text-slate-400 capitalize">${i.tipo || '—'}</div>
+            <div class="font-semibold">${escapeHtml(i.titulo || '—')}</div>
+            <div class="text-xs text-slate-400 capitalize">${escapeHtml(i.tipo || '—')}</div>
           </div>
 
-          <div><span class="text-xs text-slate-500">Unidad</span><div>${i.unidad_clave || '—'}</div></div>
-          <div><span class="text-xs text-slate-500">Residente</span><div>${i.residente_nombre || '—'}</div></div>
-          <div><span class="text-xs text-slate-500">Guardia</span><div>${i.guardia_nombre || '—'}</div></div>
+          <div><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || '—')}</div></div>
+          <div><span class="text-xs text-slate-500">Residente</span><div>${escapeHtml(i.residente_nombre || '—')}</div></div>
+          <div><span class="text-xs text-slate-500">Guardia</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
 
           <div class="flex gap-2">
-            <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${i.prioridad}</span>
-            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)} capitalize">${i.estado}</span>
+            <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${escapeHtml(i.prioridad || '')}</span>
+            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)} capitalize">${escapeHtml(i.estado || '')}</span>
           </div>
 
-          <div class="text-[11px] text-slate-400">${fmtDate(i.created_at)}</div>
+          <div class="text-[11px] text-slate-400">${escapeHtml(fmtDate(i.created_at))}</div>
 
           <div class="flex gap-2 pt-2">
             <button data-edit="${i.id}" class="flex-1 rounded-xl border px-3 py-2 text-sm">Editar</button>
@@ -284,19 +457,18 @@ console.log('[INCIDENCIAS] JS ACTIVO');
           </div>
         </div>
 
-        <!-- DESKTOP -->
         <div class="hidden md:grid grid-cols-9 gap-4 items-center">
           <div class="col-span-2">
-            <div class="font-semibold text-slate-800">${i.titulo || '—'}</div>
-            <div class="text-xs text-slate-500 capitalize">${i.tipo || '—'}</div>
+            <div class="font-semibold text-slate-800">${escapeHtml(i.titulo || '—')}</div>
+            <div class="text-xs text-slate-500 capitalize">${escapeHtml(i.tipo || '—')}</div>
           </div>
-          <div>${i.unidad_clave || '—'}</div>
-          <div class="col-span-2">${i.residente_nombre || '—'}</div>
-          <div>${i.guardia_nombre || '—'}</div>
-          <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${i.prioridad}</span></div>
+          <div>${escapeHtml(i.unidad_clave || '—')}</div>
+          <div class="col-span-2">${escapeHtml(i.residente_nombre || '—')}</div>
+          <div>${escapeHtml(i.guardia_nombre || '—')}</div>
+          <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${escapeHtml(i.prioridad || '')}</span></div>
           <div>
-            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)} capitalize">${i.estado}</span>
-            <div class="text-[11px] text-slate-400">${fmtDate(i.created_at)}</div>
+            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)} capitalize">${escapeHtml(i.estado || '')}</span>
+            <div class="text-[11px] text-slate-400">${escapeHtml(fmtDate(i.created_at))}</div>
           </div>
           <div class="flex justify-end gap-2">
             <button data-edit="${i.id}" class="text-xs px-3 py-1 rounded-full border hover:bg-slate-50">Editar</button>
@@ -308,7 +480,6 @@ console.log('[INCIDENCIAS] JS ACTIVO');
       els.list.appendChild(card);
     });
 
-    // ===== PAGINACIÓN (con flechas como residentes)
     if (totalPages > 1) {
       const nav = document.createElement('div');
       nav.className = 'flex justify-end gap-2 mt-4';
@@ -340,16 +511,13 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     }
   }
 
-  // =========================
-  // EVENTOS
-  // =========================
-  els.filterEstado?.addEventListener('change', e => {
+  els.filterEstado?.addEventListener('change', (e) => {
     state.filter = e.target.value;
     state.page = 1;
     render();
   });
 
-  els.search?.addEventListener('input', e => {
+  els.search?.addEventListener('input', (e) => {
     state.search = (e.target.value || '').toLowerCase().trim();
     state.page = 1;
     render();
@@ -359,11 +527,18 @@ console.log('[INCIDENCIAS] JS ACTIVO');
 
   els.btnCloseAdd?.addEventListener('click', closeAddModal);
   els.btnCancelAdd?.addEventListener('click', closeAddModal);
-
   els.btnCloseEdit?.addEventListener('click', closeEditModal);
   els.btnCancelEdit?.addEventListener('click', closeEditModal);
 
-  els.list.addEventListener('click', e => {
+  els.modalAdd?.addEventListener('click', (e) => {
+    if (e.target === els.modalAdd) closeAddModal();
+  });
+
+  els.modalEdit?.addEventListener('click', (e) => {
+    if (e.target === els.modalEdit) closeEditModal();
+  });
+
+  els.list.addEventListener('click', (e) => {
     const pageBtn = e.target.closest('[data-page]');
     const edit = e.target.closest('[data-edit]');
     const del = e.target.closest('[data-del]');
@@ -375,7 +550,7 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     }
 
     if (edit) {
-      const inc = state.incidencias.find(x => String(x.id) === String(edit.dataset.edit));
+      const inc = state.incidencias.find((x) => String(x.id) === String(edit.dataset.edit));
       if (inc) openEditModal(inc);
       return;
     }
@@ -385,40 +560,40 @@ console.log('[INCIDENCIAS] JS ACTIVO');
     }
   });
 
-  // Submit ADD
-  els.formAdd?.addEventListener('submit', async e => {
+  els.formAdd?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    clearFormError(els.addError);
+
     try {
-      await fetchJSON(API_INCIDENCIAS, {
-        method: 'POST',
-        body: new FormData(els.formAdd),
-      });
+      const fd = new FormData(els.formAdd);
+      validateAddForm(fd);
+
+      const resp = await api.incidencias.save(fd);
       closeAddModal();
-      showAlert('Incidencia registrada.');
+      showAlert(resp.message || 'Incidencia registrada.');
       await loadAll();
     } catch (e2) {
-      showAlert(e2.message, 'error');
+      showFormError(els.addError, e2.message || 'Error al registrar incidencia.');
     }
   });
 
-  // Submit EDIT
-  els.formEdit?.addEventListener('submit', async e => {
+  els.formEdit?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    clearFormError(els.editError);
+
     try {
-      await fetchJSON(API_INCIDENCIAS, {
-        method: 'POST',
-        body: new FormData(els.formEdit),
-      });
+      const fd = new FormData(els.formEdit);
+      validateEditForm(fd);
+
+      const resp = await api.incidencias.save(fd);
       closeEditModal();
-      showAlert('Incidencia actualizada.');
+      showAlert(resp.message || 'Incidencia actualizada.');
       await loadAll();
     } catch (e2) {
-      showAlert(e2.message, 'error');
+      showFormError(els.editError, e2.message || 'Error al actualizar incidencia.');
     }
   });
 
-  // =========================
-  // INIT
-  // =========================
+  ensureUiHelpers();
   loadAll();
 })();

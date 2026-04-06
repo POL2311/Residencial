@@ -3,28 +3,104 @@
   <div id="comunicadosAlert"
        class="hidden rounded-xl px-4 py-3 text-sm"></div>
 
-  <div class="flex justify-end">
+  <!-- HEADER -->
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Comunicados</h1>
+      <p class="text-sm text-slate-500">
+        Administra avisos, borradores y publicaciones activas del residencial.
+      </p>
+    </div>
+
     <button id="btnAddComunicado"
       class="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700">
       + Nuevo comunicado
     </button>
   </div>
 
+  <!-- RESUMEN -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div class="rounded-2xl border bg-white p-4 shadow-sm">
+      <div class="text-sm text-slate-500">Total visibles</div>
+      <div id="comCountTotal" class="text-2xl font-bold text-slate-900">0</div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4 shadow-sm">
+      <div class="text-sm text-slate-500">Publicados</div>
+      <div id="comCountPublicados" class="text-2xl font-bold text-emerald-700">0</div>
+    </div>
+
+    <div class="rounded-2xl border bg-white p-4 shadow-sm">
+      <div class="text-sm text-slate-500">Borradores</div>
+      <div id="comCountBorradores" class="text-2xl font-bold text-amber-700">0</div>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="rounded-2xl border bg-white p-4 shadow-sm">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Buscar</label>
+        <input
+          id="comunicadoSearch"
+          type="text"
+          placeholder="Título, mensaje, tipo..."
+          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Estado</label>
+        <select id="comunicadoFilterEstado" class="w-full rounded-xl border px-3 py-3 text-sm">
+          <option value="todos">Todos</option>
+          <option value="publicado">Publicados</option>
+          <option value="borrador">Borradores</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Prioridad</label>
+        <select id="comunicadoFilterPrioridad" class="w-full rounded-xl border px-3 py-3 text-sm">
+          <option value="todas">Todas</option>
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+      </div>
+
+      <div class="flex items-end">
+        <button id="btnResetComunicadosFilters"
+          type="button"
+          class="w-full rounded-xl border px-4 py-3 text-sm hover:bg-slate-50">
+          Limpiar filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- LISTA -->
   <div id="comunicadosList" class="space-y-3"></div>
 
+  <!-- PAGINACIÓN -->
+  <div id="comunicadosPagination" class="flex justify-end gap-2"></div>
+
   <!-- MODAL -->
   <div id="comunicadoModal"
-       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+       class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
 
-      <div class="flex justify-between items-center border-b px-4 py-3">
-        <h2 class="text-lg font-semibold">Comunicado</h2>
+      <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
+        <h2 id="comunicadoModalTitle" class="text-lg font-semibold">Comunicado</h2>
         <button id="btnCloseComModal"
-                class="text-xl font-semibold">&times;</button>
+                class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">
+          ✕
+        </button>
       </div>
 
       <form id="comunicadoForm" class="px-4 py-4 space-y-3">
+        <div id="comunicadoFormError"
+             class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
+
         <input type="hidden" name="id" />
 
         <div>
@@ -35,7 +111,7 @@
 
         <div>
           <label class="block text-sm font-medium mb-1">Mensaje</label>
-          <textarea name="mensaje" rows="4" required
+          <textarea name="mensaje" rows="5" required
             class="w-full border rounded-lg px-3 py-2"></textarea>
         </div>
 
@@ -66,7 +142,11 @@
           <option value="borrador">Borrador</option>
         </select>
 
-        <div class="text-right pt-2">
+        <div class="text-right pt-2 flex justify-end gap-2">
+          <button type="button" id="btnCancelComModal"
+            class="text-sm px-4 py-2 rounded-lg border hover:bg-slate-50">
+            Cancelar
+          </button>
           <button
             class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
             Guardar

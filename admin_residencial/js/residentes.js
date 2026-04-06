@@ -1,10 +1,6 @@
 // admin_residencial/js/residentes.js
-// Script actualizado para que el modal de detalles cargue autos y pagos del residente seleccionado
-
-console.log('[RESIDENTES] JS ACTIVO');
 
 (function () {
-
   // =========================
   // ELEMENTOS
   // =========================
@@ -21,9 +17,10 @@ console.log('[RESIDENTES] JS ACTIVO');
     btnCloseModal: document.getElementById('btnCloseModal'),
     btnCancelModal: document.getElementById('btnCancelModal'),
 
-    // Elementos del modal de detalle
     detailModal: document.getElementById('detailModal'),
     detailModalContent: document.getElementById('detailModalContent'),
+
+    residentSearch: document.getElementById('residentSearch'),
   };
 
   if (!els.view) return;
@@ -33,6 +30,7 @@ console.log('[RESIDENTES] JS ACTIVO');
   // =========================
   const state = {
     residentes: [],
+    filteredResidentes: [],
     unidades: [],
     editingId: null,
     selected: null,
@@ -41,15 +39,255 @@ console.log('[RESIDENTES] JS ACTIVO');
     autos: [],
     pagosPage: 1,
     autosPage: 1,
-    currentUserId: null,
     residentesPage: 1,
-     filteredResidentes: []
+    currentUserId: null,
   };
 
+  // =========================
+  // CONSTANTES
+  // =========================
   const PAGOS_PER_PAGE = 3;
   const AUTOS_PER_PAGE = 4;
   const RESIDENTES_PER_PAGE = 5;
+  const API_BASE = '/Residencial/admin_residencial/php/api';
 
+  const MESSAGES = {
+    residenteCreado: 'Residente agregado correctamente.',
+    residenteActualizado: 'Residente actualizado correctamente.',
+    residenteEliminado: 'Residente eliminado correctamente.',
+    residenteSuspendido: 'Residente suspendido correctamente.',
+    residenteReactivado: 'Residente reactivado correctamente.',
+    autoCreado: 'Auto registrado correctamente.',
+    pagoCreado: 'Pago registrado correctamente.',
+  };
+
+  const ALLOWED_PAYMENT_METHODS = ['efectivo', 'transferencia', 'tarjeta'];
+
+  // =========================
+  // HELPERS UI
+  // =========================
+  function showAlert(msg, type = 'info') {
+    els.alert.className =
+      'rounded-2xl px-4 py-3 text-sm ' +
+      (type === 'error'
+        ? 'bg-rose-100 text-rose-700'
+        : 'bg-sky-100 text-sky-700');
+
+    els.alert.textContent = msg;
+    els.alert.classList.remove('hidden');
+  }
+
+  function hideAlert() {
+    els.alert.classList.add('hidden');
+  }
+
+  function ensureUiHelpers() {
+    if (document.getElementById('residentesUiLayer')) return;
+
+    const layer = document.createElement('div');
+    layer.id = 'residentesUiLayer';
+    layer.innerHTML = `
+      <div id="friendlyConfirm"
+           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+        <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-start gap-4">
+              <div id="friendlyConfirmIcon"
+                   class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
+                !
+              </div>
+              <div class="flex-1">
+                <h3 id="friendlyConfirmTitle" class="text-xl font-semibold text-slate-900">
+                  Confirmar acción
+                </h3>
+                <p id="friendlyConfirmMessage" class="mt-2 text-sm leading-6 text-slate-600">
+                  ¿Deseas continuar?
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+              <button id="friendlyConfirmCancel"
+                      type="button"
+                      class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+                Cancelar
+              </button>
+              <button id="friendlyConfirmAccept"
+                      type="button"
+                      class="rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="friendlyToastWrap"
+           class="fixed top-4 right-4 z-[10010] flex w-full max-w-sm flex-col gap-3 pointer-events-none">
+      </div>
+    `;
+    document.body.appendChild(layer);
+  }
+
+  function showToast(message, type = 'success') {
+    ensureUiHelpers();
+
+    const wrap = document.getElementById('friendlyToastWrap');
+    const toast = document.createElement('div');
+
+    const styles = {
+      success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+      error: 'border-rose-200 bg-rose-50 text-rose-800',
+      info: 'border-sky-200 bg-sky-50 text-sky-800',
+    };
+
+    toast.className =
+      `pointer-events-auto rounded-2xl border px-4 py-3 shadow-lg ${styles[type] || styles.info}`;
+
+    toast.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <p class="text-sm font-medium">${escapeHtml(message)}</p>
+        <button type="button"
+                class="text-lg leading-none opacity-60 hover:opacity-100">
+          &times;
+        </button>
+      </div>
+    `;
+
+    const closeBtn = toast.querySelector('button');
+    closeBtn?.addEventListener('click', () => toast.remove());
+
+    wrap.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3200);
+  }
+
+  function showConfirm({
+    title = 'Confirmar acción',
+    message = '¿Deseas continuar?',
+    acceptText = 'Aceptar',
+    cancelText = 'Cancelar',
+    tone = 'danger',
+  } = {}) {
+    ensureUiHelpers();
+
+    return new Promise((resolve) => {
+      const modal = document.getElementById('friendlyConfirm');
+      const titleEl = document.getElementById('friendlyConfirmTitle');
+      const messageEl = document.getElementById('friendlyConfirmMessage');
+      const acceptBtn = document.getElementById('friendlyConfirmAccept');
+      const cancelBtn = document.getElementById('friendlyConfirmCancel');
+      const iconEl = document.getElementById('friendlyConfirmIcon');
+
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      acceptBtn.textContent = acceptText;
+      cancelBtn.textContent = cancelText;
+
+      if (tone === 'danger') {
+        iconEl.className =
+          'flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold';
+        acceptBtn.className =
+          'rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700';
+        iconEl.textContent = '!';
+      } else {
+        iconEl.className =
+          'flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xl font-bold';
+        acceptBtn.className =
+          'rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700';
+        iconEl.textContent = '✓';
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        acceptBtn.onclick = null;
+        cancelBtn.onclick = null;
+        modal.onclick = null;
+        document.removeEventListener('keydown', onKeydown);
+      };
+
+      const onKeydown = (e) => {
+        if (e.key === 'Escape') {
+          cleanup();
+          resolve(false);
+        }
+      };
+
+      acceptBtn.onclick = () => {
+        cleanup();
+        resolve(true);
+      };
+
+      cancelBtn.onclick = () => {
+        cleanup();
+        resolve(false);
+      };
+
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          cleanup();
+          resolve(false);
+        }
+      };
+
+      document.addEventListener('keydown', onKeydown);
+    });
+  }
+
+  function bindModalClose(modal, selectors = []) {
+    selectors.forEach((selector) => {
+      const el = modal.querySelector(selector);
+      if (el) el.onclick = () => modal.remove();
+    });
+  }
+
+  // =========================
+  // HELPERS DE SEGURIDAD / SANITIZADO
+  // =========================
+  function escapeHtml(value = '') {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function normalizePhoneDigits(value = '') {
+    return String(value).replace(/\D+/g, '');
+  }
+
+  function getWhatsAppUrl(phone = '') {
+    const digits = normalizePhoneDigits(phone);
+    if (digits.length < 10) return '';
+    return `https://wa.me/52${digits}`;
+  }
+
+  function getTelUrl(phone = '') {
+    const digits = normalizePhoneDigits(phone);
+    if (digits.length < 7) return '';
+    return `tel:${digits}`;
+  }
+
+  function normalizePlacas(value = '') {
+    return String(value).trim().toUpperCase().replace(/\s+/g, '');
+  }
+
+  function isValidDateYMD(value = '') {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return false;
+    const date = new Date(`${value}T00:00:00`);
+    return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  }
+
+  // =========================
+  // HELPERS DE FORMATO
+  // =========================
   function paginate(array, page = 1, perPage = 3) {
     const start = (page - 1) * perPage;
     return array.slice(start, start + perPage);
@@ -63,10 +301,11 @@ console.log('[RESIDENTES] JS ACTIVO');
     html += `
       <button ${page === 1 ? 'disabled' : ''}
         data-page="${page - 1}"
-        class="px-3 py-1 rounded border ${page === 1 ? 'opacity-50' : ''}">
+        class="px-3 py-1 rounded border ${page === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
         ◀
       </button>
     `;
+
     for (let i = 1; i <= pages; i++) {
       html += `
         <button data-page="${i}"
@@ -75,317 +314,374 @@ console.log('[RESIDENTES] JS ACTIVO');
         </button>
       `;
     }
+
     html += `
       <button ${page === pages ? 'disabled' : ''}
         data-page="${page + 1}"
-        class="px-3 py-1 rounded border ${page === pages ? 'opacity-50' : ''}">
+        class="px-3 py-1 rounded border ${page === pages ? 'opacity-50 cursor-not-allowed' : ''}">
         ▶
       </button>
     </div>`;
+
     return html;
   }
 
+  function getPagoFecha(p) {
+    return p.fecha_pago || p.fecha || p.payment_date || p.date || p.created_at || '';
+  }
+
+  function formatFecha(fecha) {
+    if (!fecha) return '—';
+
+    const clean = String(fecha).trim().slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(clean)) return escapeHtml(fecha);
+
+    const [y, m, d] = clean.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function formatMoney(value) {
+    const num = Number(value || 0);
+    return num.toLocaleString('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2,
+    });
+  }
+
+  // =========================
+  // API
+  // =========================
+  async function fetchJSON(url, options = {}) {
+    const res = await fetch(url, {
+      credentials: 'same-origin',
+      ...options,
+    });
+
+    const text = await res.text();
+    let json;
+
+    try {
+      json = JSON.parse(text);
+    } catch (_) {
+      throw new Error(`Respuesta inválida del servidor (${res.status})`);
+    }
+
+    if (!res.ok || !json.ok) {
+      throw new Error(json.error || json.message || `Error HTTP ${res.status}`);
+    }
+
+    return json;
+  }
+
+  const api = {
+    residentes: {
+      list: () =>
+        fetchJSON(`${API_BASE}/residentes.php?action=list`),
+
+      get: (residUnidId) =>
+        fetchJSON(`${API_BASE}/residentes.php?action=get&id=${encodeURIComponent(residUnidId)}`),
+
+      save: (formData) =>
+        fetchJSON(`${API_BASE}/residentes.php`, {
+          method: 'POST',
+          body: formData,
+        }),
+
+      remove: (id) => {
+        const fd = new FormData();
+        fd.append('action', 'delete');
+        fd.append('id', id);
+
+        return fetchJSON(`${API_BASE}/residentes.php`, {
+          method: 'POST',
+          body: fd,
+        });
+      },
+
+      toggleActive: (id, active) => {
+        const fd = new FormData();
+        fd.append('action', 'toggle_active');
+        fd.append('id', id);
+        fd.append('active', active ? '1' : '0');
+
+        return fetchJSON(`${API_BASE}/residentes.php`, {
+          method: 'POST',
+          body: fd,
+        });
+      },
+    },
+
+    pagos: {
+      list: (userId) =>
+        fetchJSON(`${API_BASE}/pagos_residentes.php?action=list&user_id=${encodeURIComponent(userId)}`),
+
+      create: (formData) =>
+        fetchJSON(`${API_BASE}/pagos_residentes.php`, {
+          method: 'POST',
+          body: formData,
+        }),
+    },
+
+    autos: {
+      listByResident: (userId) =>
+        fetchJSON(`${API_BASE}/autos_admin.php?action=list_by_resident&user_id=${encodeURIComponent(userId)}`),
+
+      create: (formData) =>
+        fetchJSON(`${API_BASE}/autos_admin.php`, {
+          method: 'POST',
+          body: formData,
+        }),
+    },
+  };
+
+  // =========================
+  // RENDER
+  // =========================
   function renderPagos() {
     const visibles = paginate(state.pagos, state.pagosPage, PAGOS_PER_PAGE);
+
     if (!visibles.length) {
       return `<p class="text-xs text-slate-500">Sin pagos registrados.</p>`;
     }
+
     return `
-      <div data-type="pagos">
-        <table class="min-w-full text-xs border rounded-xl overflow-hidden">
-          <thead class="bg-slate-100">
-            <tr>
-              <th class="px-3 py-2">Fecha</th>
-              <th class="px-3 py-2">Monto</th>
-              <th class="px-3 py-2">Método</th>
-              <th class="px-3 py-2">Concepto</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${visibles.map(p => `
-              <tr class="border-t">
-                <td class="px-3 py-2">${p.fecha_pago || '—'}</td>
-                <td class="px-3 py-2">$${Number(p.monto).toFixed(2)}</td>
-                <td class="px-3 py-2">${p.metodo}</td>
-                <td class="px-3 py-2">${p.concepto || ''}</td>
+      <div data-type="pagos" class="space-y-3">
+        <div class="overflow-hidden rounded-2xl border border-slate-200">
+          <table class="min-w-full table-fixed text-sm">
+            <thead class="bg-slate-100 text-slate-700">
+              <tr>
+                <th class="w-[22%] px-4 py-3 text-left font-semibold">Fecha</th>
+                <th class="w-[20%] px-4 py-3 text-right font-semibold">Monto</th>
+                <th class="w-[20%] px-4 py-3 text-left font-semibold">Método</th>
+                <th class="w-[38%] px-4 py-3 text-left font-semibold">Concepto</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        ${renderPagination(
-          state.pagos.length,
-          state.pagosPage,
-          PAGOS_PER_PAGE,
-          'pagos'
-        )}
+            </thead>
+            <tbody class="divide-y divide-slate-200 bg-white">
+              ${visibles.map((p) => {
+                const fecha = formatFecha(getPagoFecha(p));
+                const monto = formatMoney(p.monto);
+                const metodo = escapeHtml(p.metodo || p.method || p.medio || '—');
+                const concepto = escapeHtml(
+                  p.concepto || p.concept || p.descripcion || p.description || p.nota || '—'
+                );
+
+                return `
+                  <tr class="align-middle">
+                    <td class="px-4 py-3 text-slate-700 whitespace-nowrap">${fecha}</td>
+                    <td class="px-4 py-3 text-right font-semibold text-slate-900 whitespace-nowrap">${monto}</td>
+                    <td class="px-4 py-3 text-slate-700 capitalize">${metodo}</td>
+                    <td class="px-4 py-3 text-slate-700 break-words">${concepto}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        ${renderPagination(state.pagos.length, state.pagosPage, PAGOS_PER_PAGE, 'pagos')}
       </div>
     `;
   }
 
   function renderAutos() {
     const visibles = paginate(state.autos, state.autosPage, AUTOS_PER_PAGE);
+
     if (!visibles.length) {
       return `<p class="text-xs text-slate-500">Sin autos asignados.</p>`;
     }
+
     return `
       <div data-type="autos">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          ${visibles.map(a => `
+          ${visibles.map((a) => `
             <div class="rounded-2xl border p-4 shadow-sm">
-              <div class="font-semibold">${a.placas}</div>
+              <div class="font-semibold">${escapeHtml(a.placas || '—')}</div>
               <div class="text-xs text-slate-500">
-                ${a.modelo || '—'} • ${a.color || '—'}
+                ${escapeHtml(a.modelo || '—')} • ${escapeHtml(a.color || '—')}
               </div>
             </div>
           `).join('')}
         </div>
-        ${renderPagination(
-          state.autos.length,
-          state.autosPage,
-          AUTOS_PER_PAGE,
-          'autos'
-        )}
+
+        ${renderPagination(state.autos.length, state.autosPage, AUTOS_PER_PAGE, 'autos')}
       </div>
     `;
   }
 
   function renderDetailModal(r, totalPagado) {
     return `
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
-      <div class="flex justify-between items-center px-6 py-4 border-b bg-slate-50">
-        <div>
-          <h2 class="text-lg font-semibold text-slate-800">Detalle del residente</h2>
-          <p class="text-xs text-slate-500">Información general y actividad</p>
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
+        <div class="flex justify-between items-center px-6 py-4 border-b bg-slate-50">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-800">Detalle del residente</h2>
+            <p class="text-xs text-slate-500">Información general y actividad</p>
+          </div>
+          <button id="btnCloseDetail"
+            class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">
+            ✕
+          </button>
         </div>
-        <button id="btnCloseDetail"
-          class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">
-          ✕
-        </button>
+
+        <div class="p-6 space-y-6">
+          <section class="rounded-2xl border bg-white p-5">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">👤 Información del residente</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-xs text-slate-500">Nombre</p>
+                <p class="font-medium text-slate-800">${escapeHtml(r.nombre || '—')}</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Unidad</p>
+                <p class="font-medium text-slate-800">${escapeHtml(r.unidad_clave || '—')}</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Email</p>
+                <p class="font-medium text-slate-800">${escapeHtml(r.email || '—')}</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Teléfono</p>
+                <p class="font-medium text-slate-800">${escapeHtml(r.telefono || '—')}</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="rounded-2xl border bg-white p-5 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-slate-700">💳 Pagos</h3>
+              <button id="btnAddPago"
+                class="px-4 py-2 rounded-xl text-xs bg-blue-500 text-white hover:bg-blue-600">
+                + Agregar pago
+              </button>
+            </div>
+
+            <div class="text-sm">
+              <strong>Total pagado:</strong> ${formatMoney(totalPagado)}
+            </div>
+
+            ${renderPagos()}
+          </section>
+
+          <section class="rounded-2xl border bg-white p-5 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-slate-700">🚗 Autos</h3>
+              <button id="btnAddAuto"
+                class="px-4 py-2 rounded-xl text-xs bg-slate-800 text-white hover:bg-slate-900">
+                + Agregar auto
+              </button>
+            </div>
+
+            ${renderAutos()}
+          </section>
+        </div>
       </div>
-      <div class="p-6 space-y-6">
-        <section class="rounded-2xl border bg-white p-5">
-          <h3 class="text-sm font-semibold text-slate-700 mb-4">
-            👤 Información del residente
-          </h3>
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p class="text-xs text-slate-500">Nombre</p>
-              <p class="font-medium text-slate-800">${r.nombre}</p>
-            </div>
-            <div>
-              <p class="text-xs text-slate-500">Unidad</p>
-              <p class="font-medium text-slate-800">${r.unidad_clave || '—'}</p>
-            </div>
-            <div>
-              <p class="text-xs text-slate-500">Email</p>
-              <p class="font-medium text-slate-800">${r.email || '—'}</p>
-            </div>
-            <div>
-              <p class="text-xs text-slate-500">Teléfono</p>
-              <p class="font-medium text-slate-800">${r.telefono || '—'}</p>
-            </div>
-          </div>
-        </section>
-        <section class="rounded-2xl border bg-white p-5 space-y-4">
-          <div class="flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-slate-700">💳 Pagos</h3>
-            <button id="btnAddPago"
-              class="px-4 py-2 rounded-xl text-xs bg-blue-500 text-white hover:bg-blue-600">
-              + Agregar pago
-            </button>
-          </div>
-          <div class="text-sm">
-            <strong>Total pagado:</strong>
-            $${Number(totalPagado).toFixed(2)}
-          </div>
-          ${renderPagos()}
-        </section>
-        <section class="rounded-2xl border bg-white p-5 space-y-4">
-          <div class="flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-slate-700">🚗 Autos</h3>
-            <button id="btnAddAuto"
-              class="px-4 py-2 rounded-xl text-xs bg-slate-800 text-white hover:bg-slate-900">
-              + Agregar auto
-            </button>
-          </div>
-          ${renderAutos()}
-        </section>
-      </div>
-    </div>
     `;
   }
 
-  // =========================
-  // HELPERS
-  // =========================
-  function showAlert(msg, type = 'info') {
-    els.alert.className =
-      'rounded-2xl px-4 py-3 text-sm ' +
-      (type === 'error'
-        ? 'bg-rose-100 text-rose-700'
-        : 'bg-sky-100 text-sky-700');
-    els.alert.textContent = msg;
-    els.alert.classList.remove('hidden');
+  function renderResidenteCard(r) {
+    const phoneDigits = normalizePhoneDigits(r.telefono || '');
+    const telUrl = getTelUrl(phoneDigits);
+    const waUrl = getWhatsAppUrl(phoneDigits);
+
+    return `
+      <div class="w-full grid grid-cols-4 gap-4 items-center">
+        <div>
+          <div class="font-semibold text-slate-800">${escapeHtml(r.nombre || '—')}</div>
+          <div class="text-xs text-slate-500">Unidad: ${escapeHtml(r.unidad_clave || '—')}</div>
+          <div class="text-xs text-slate-600">${escapeHtml(r.telefono || 'Sin teléfono')}</div>
+        </div>
+
+        <div class="text-sm text-slate-700">
+          ${escapeHtml(r.unidad_detalle || '—')}
+        </div>
+
+        <div class="flex justify-center">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox"
+              class="sr-only peer"
+              data-toggle="${escapeHtml(r.resid_unid_id)}"
+              ${r.activo_servicio == 1 ? 'checked' : ''}>
+            <div class="
+              w-11 h-6 bg-slate-300 rounded-full peer
+              peer-checked:bg-emerald-500
+              after:content-['']
+              after:absolute after:top-[2px] after:left-[2px]
+              after:bg-white after:rounded-full after:h-5 after:w-5
+              after:transition-all
+              peer-checked:after:translate-x-full
+            "></div>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-2 flex-wrap">
+          ${telUrl ? `
+            <a href="${telUrl}" class="text-xs px-3 py-1 rounded-full border">
+              Llamar
+            </a>
+          ` : ''}
+
+          ${waUrl ? `
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer"
+              class="text-xs px-3 py-1 rounded-full bg-green-500 text-white">
+              WhatsApp
+            </a>
+          ` : ''}
+
+          <button data-more="${escapeHtml(r.resid_unid_id)}"
+            class="text-xs px-3 py-1 rounded-full bg-slate-100">
+            Ver más
+          </button>
+
+          <button data-edit="${escapeHtml(r.resid_unid_id)}"
+            class="text-xs px-3 py-1 rounded-full border">
+            Editar
+          </button>
+
+          <button data-del="${escapeHtml(r.resid_unid_id)}"
+            class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    `;
   }
 
-  function hideAlert() {
-    els.alert.classList.add('hidden');
-  }
-
-  async function fetchJSON(url, options = {}) {
-    const res = await fetch(url, {
-      credentials: 'same-origin',
-      ...options
-    });
-    const text = await res.text();
-    try {
-      const json = JSON.parse(text);
-      if (!json.ok) throw new Error(json.error || 'Error');
-      return json;
-    } catch (err) {
-      throw new Error(text);
-    }
-  }
-
-  // =========================
-  // LOAD
-  // =========================
-  async function loadData() {
-    hideAlert();
+  function renderResidentes() {
     els.list.innerHTML = '';
-    try {
-      const json = await fetchJSON(
-        '/admin_residencial/php/api/residentes.php?action=list'
-      );
-    state.residentes = json.residentes || [];
-    state.filteredResidentes = [...state.residentes];
-    state.unidades = json.unidades || [];
-    state.residentesPage = 1;
-    renderResidentes();
-    els.list.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    } catch (e) {
-      showAlert(e.message, 'error');
+    if (!state.filteredResidentes.length) {
+      els.empty.classList.remove('hidden');
+      return;
     }
-  }
 
-  // =========================
-  // RENDER (lista)
-  // =========================
-function renderResidentes() {
-  els.list.innerHTML = '';
+    els.empty.classList.add('hidden');
 
-  if (!state.filteredResidentes.length) {
-    els.empty.classList.remove('hidden');
-    return;
-  }
-
-  els.empty.classList.add('hidden');
-
-  const visibles = paginate(
-    state.filteredResidentes,
-    state.residentesPage,
-    RESIDENTES_PER_PAGE
-  );
-
-  visibles.forEach(r => {
-    const wa = r.telefono
-      ? `https://wa.me/52${r.telefono.replace(/\D/g, '')}`
-      : '#';
-
-    const card = document.createElement('div');
-    card.className =
-      'rounded-2xl border bg-white p-4 flex justify-between items-center';
-
-card.innerHTML = `
-  <div class="w-full grid grid-cols-4 gap-4 items-center">
-
-    <!-- Col 1: Residente -->
-    <div>
-      <div class="font-semibold text-slate-800">${r.nombre}</div>
-      <div class="text-xs text-slate-500">Unidad: ${r.unidad_clave || '—'}</div>
-      <div class="text-xs text-slate-600">${r.telefono || 'Sin teléfono'}</div>
-    </div>
-
-    <!-- Col 2: Calle / Casa -->
-    <div class="text-sm text-slate-700">
-      ${r.unidad_detalle || '—'}
-    </div>
-
-    <!-- Col 3: Estado servicio -->
-    <div class="flex justify-center">
-      <label class="relative inline-flex items-center cursor-pointer">
-       <input type="checkbox"
-        class="sr-only peer"
-        data-toggle="${r.resid_unid_id}"
-        ${r.activo_servicio == 1 ? 'checked' : ''}>
-        <div class="
-          w-11 h-6 bg-slate-300 rounded-full peer
-          peer-checked:bg-emerald-500
-          after:content-['']
-          after:absolute after:top-[2px] after:left-[2px]
-          after:bg-white after:rounded-full after:h-5 after:w-5
-          after:transition-all
-          peer-checked:after:translate-x-full
-        "></div>
-      </label>
-    </div>
-
-    <!-- Col 4: Más acciones -->
-    <div class="flex justify-end gap-2 flex-wrap">
-
-      ${r.telefono ? `
-        <a href="tel:${r.telefono}"
-          class="text-xs px-3 py-1 rounded-full border">
-          Llamar
-        </a>
-
-        <a href="https://wa.me/52${r.telefono.replace(/\D/g,'')}"
-          target="_blank"
-          class="text-xs px-3 py-1 rounded-full bg-green-500 text-white">
-          WhatsApp
-        </a>
-      ` : ''}
-
-      <button data-more="${r.resid_unid_id}"
-        class="text-xs px-3 py-1 rounded-full bg-slate-100">
-        Ver más
-      </button>
-
-      <button data-edit="${r.resid_unid_id}"
-        class="text-xs px-3 py-1 rounded-full border">
-        Editar
-      </button>
-
-      <button data-del="${r.resid_unid_id}"
-        class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white">
-        Eliminar
-      </button>
-    </div>
-
-  </div>
-`;
-
-
-
-    els.list.appendChild(card);
-  });
-
-  // 👇 paginación
-  els.list.insertAdjacentHTML(
-    'beforeend',
-    renderPagination(
-      state.filteredResidentes.length,
+    const visibles = paginate(
+      state.filteredResidentes,
       state.residentesPage,
-      RESIDENTES_PER_PAGE,
-      'residentes'
-    )
-  );
-}
+      RESIDENTES_PER_PAGE
+    );
 
+    visibles.forEach((r) => {
+      const card = document.createElement('div');
+      card.className = 'rounded-2xl border bg-white p-4 flex justify-between items-center';
+      card.innerHTML = renderResidenteCard(r);
+      els.list.appendChild(card);
+    });
+
+    els.list.insertAdjacentHTML(
+      'beforeend',
+      renderPagination(
+        state.filteredResidentes.length,
+        state.residentesPage,
+        RESIDENTES_PER_PAGE,
+        'residentes'
+      )
+    );
+  }
 
   // =========================
-  // MODAL CRUD
+  // MODALES
   // =========================
   function openModal(mode, r = null) {
     els.modal.classList.remove('hidden');
@@ -393,22 +689,37 @@ card.innerHTML = `
 
     const sel = els.modalForm.unidad_id;
     sel.innerHTML = `<option value="">—</option>`;
-    state.unidades.forEach(u => {
-      sel.innerHTML += `<option value="${u.id}">${u.clave}</option>`;
+    state.unidades.forEach((u) => {
+      sel.innerHTML += `<option value="${escapeHtml(u.id)}">${escapeHtml(u.clave)}</option>`;
     });
+
+    const passwordHelp = els.modalForm
+      .querySelector('[name="password"]')
+      ?.parentElement?.querySelector('p');
 
     if (mode === 'edit' && r) {
       els.modalTitle.textContent = 'Editar residente';
       state.editingId = r.resid_unid_id;
-      els.modalForm.nombre.value = r.nombre;
+      els.modalForm.nombre.value = r.nombre || '';
       els.modalForm.telefono.value = r.telefono || '';
       els.modalForm.email.value = r.email || '';
+      if (els.modalForm.password) els.modalForm.password.value = '';
+      if (els.modalForm.password_confirm) els.modalForm.password_confirm.value = '';
+
+      if (passwordHelp) {
+        passwordHelp.textContent = 'Déjalo vacío si no deseas cambiar la contraseña.';
+      }
+
       setTimeout(() => {
         sel.value = String(r.unidad_id);
       }, 0);
     } else {
       els.modalTitle.textContent = 'Agregar residente';
       state.editingId = null;
+
+      if (passwordHelp) {
+        passwordHelp.textContent = 'Si lo dejas vacío, se generará una contraseña temporal.';
+      }
     }
   }
 
@@ -419,18 +730,20 @@ card.innerHTML = `
 
   function openAddPagoModal(residente) {
     const modal = document.createElement('div');
-    modal.className =
-      'fixed inset-0 bg-black/40 flex items-center justify-center z-50';
+    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-50';
+
     modal.innerHTML = `
       <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">
         <button id="closeAddPago"
           class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100">
           ✕
         </button>
+
         <h2 class="text-lg font-semibold">Agregar pago</h2>
         <p class="text-sm text-slate-500 mb-6">
-          ${residente.nombre} · Unidad ${residente.unidad_clave}
+          ${escapeHtml(residente.nombre || '—')} · Unidad ${escapeHtml(residente.unidad_clave || '—')}
         </p>
+
         <form id="addPagoForm" class="space-y-5">
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -445,11 +758,11 @@ card.innerHTML = `
                 class="w-full mt-1 rounded-xl border px-4 py-2">
             </div>
           </div>
+
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="text-xs text-slate-500">Método</label>
-              <select name="metodo"
-                class="w-full mt-1 rounded-xl border px-4 py-2">
+              <select name="metodo" class="w-full mt-1 rounded-xl border px-4 py-2">
                 <option value="efectivo">Efectivo</option>
                 <option value="transferencia">Transferencia</option>
                 <option value="tarjeta">Tarjeta</option>
@@ -459,234 +772,243 @@ card.innerHTML = `
               <label class="text-xs text-slate-500">Concepto</label>
               <input name="concepto"
                 class="w-full mt-1 rounded-xl border px-4 py-2"
-                placeholder="Ej. Mantenimiento enero">
+                placeholder="Ej. Mantenimiento enero"
+                maxlength="120">
             </div>
           </div>
-          <input type="hidden" name="user_id" value="${residente.user_id}">
+
+          <input type="hidden" name="user_id" value="${escapeHtml(residente.user_id)}">
           <input type="hidden" name="action" value="create">
+
           <div class="flex justify-end gap-3 pt-6">
             <button type="button" id="cancelAddPago"
               class="px-5 py-2 rounded-xl border hover:bg-slate-100">
               Cancelar
             </button>
-            <button
-              class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+            <button class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
               Registrar pago
             </button>
           </div>
         </form>
       </div>
     `;
+
     document.body.appendChild(modal);
-    modal.querySelector('#closeAddPago').onclick =
-      modal.querySelector('#cancelAddPago').onclick = () => modal.remove();
-    modal.querySelector('#addPagoForm').onsubmit = async e => {
+    bindModalClose(modal, ['#closeAddPago', '#cancelAddPago']);
+
+    modal.querySelector('#addPagoForm').onsubmit = async (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
+
+      const monto = Number(fd.get('monto') || 0);
+      const fecha = String(fd.get('fecha') || '').trim();
+      const metodo = String(fd.get('metodo') || '').trim().toLowerCase();
+      const concepto = String(fd.get('concepto') || '').trim();
+
+      if (!(monto > 0)) {
+        showToast('El monto debe ser mayor a 0.', 'error');
+        return;
+      }
+
+      if (!isValidDateYMD(fecha)) {
+        showToast('La fecha del pago no es válida.', 'error');
+        return;
+      }
+
+      if (metodo && !ALLOWED_PAYMENT_METHODS.includes(metodo)) {
+        showToast('El método de pago no es válido.', 'error');
+        return;
+      }
+
+      if (concepto.length > 120) {
+        showToast('El concepto no puede exceder 120 caracteres.', 'error');
+        return;
+      }
+
       try {
-        await fetchJSON(
-          '/admin_residencial/php/api/pagos_residentes.php',
-          { method: 'POST', body: fd }
-        );
+        const resp = await api.pagos.create(fd);
+
         modal.remove();
-        // vuelve a cargar datos y re-renderiza paginaciones
-        state.pagosPage = 1;
-        await openDetail(state.selected.resid_unid_id);
+        await refreshCurrentDetail({ resetPagos: true });
+        showToast(resp.message || MESSAGES.pagoCreado, 'success');
       } catch (err) {
-        alert(err.message);
+        showToast(err.message || 'No se pudo registrar el pago.', 'error');
       }
     };
   }
 
-function openAddAutoModal(residente) {
-  const modal = document.createElement('div');
-  modal.className =
-    'fixed inset-0 bg-black/40 flex items-center justify-center z-50';
+  function openAddAutoModal(residente) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-50';
 
-  modal.innerHTML = `
-    <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">
+    modal.innerHTML = `
+      <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">
+        <button id="closeAddAuto"
+          class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100 flex items-center justify-center">
+          ✕
+        </button>
 
-      <!-- Cerrar -->
-      <button id="closeAddAuto"
-        class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100 flex items-center justify-center">
-        ✕
-      </button>
+        <h2 class="text-lg font-semibold text-slate-800">Agregar auto</h2>
+        <p class="text-sm text-slate-500 mb-6">
+          ${escapeHtml(residente.nombre || '—')} · Unidad ${escapeHtml(residente.unidad_clave || '—')}
+        </p>
 
-      <!-- Header -->
-      <h2 class="text-lg font-semibold text-slate-800">Agregar auto</h2>
-      <p class="text-sm text-slate-500 mb-6">
-        ${residente.nombre} · Unidad ${residente.unidad_clave}
-      </p>
+        <form id="addAutoForm" class="space-y-5">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs text-slate-500">Placas *</label>
+              <input name="placas" required
+                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                placeholder="Ej. ABC-123"
+                maxlength="15">
+            </div>
 
-      <!-- Form -->
-      <form id="addAutoForm" class="space-y-5">
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="text-xs text-slate-500">Placas *</label>
-            <input name="placas" required
-              class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej. ABC-123">
+            <div>
+              <label class="text-xs text-slate-500">Modelo</label>
+              <input name="modelo"
+                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                placeholder="Ej. Versa 2020"
+                maxlength="80">
+            </div>
           </div>
 
-          <div>
-            <label class="text-xs text-slate-500">Modelo</label>
-            <input name="modelo"
-              class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej. Versa 2020">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs text-slate-500">Color</label>
+              <input name="color"
+                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                placeholder="Ej. Blanco"
+                maxlength="40">
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-500">Casa asignada</label>
+              <input disabled
+                class="w-full mt-1 rounded-xl border bg-slate-100 px-4 py-2"
+                value="${escapeHtml(residente.unidad_clave || '—')}">
+            </div>
           </div>
-        </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="text-xs text-slate-500">Color</label>
-            <input name="color"
-              class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej. Blanco">
+          <input type="hidden" name="user_id" value="${escapeHtml(residente.user_id)}">
+          <input type="hidden" name="unidad_id" value="${escapeHtml(residente.unidad_id)}">
+          <input type="hidden" name="action" value="create">
+
+          <div class="flex justify-end gap-3 pt-6">
+            <button type="button" id="cancelAddAuto"
+              class="px-5 py-2 rounded-xl border hover:bg-slate-100">
+              Cancelar
+            </button>
+            <button class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+              Crear auto
+            </button>
           </div>
+        </form>
+      </div>
+    `;
 
-          <div>
-            <label class="text-xs text-slate-500">Casa asignada</label>
-            <input disabled
-              class="w-full mt-1 rounded-xl border bg-slate-100 px-4 py-2"
-              value="${residente.unidad_clave}">
-          </div>
-        </div>
+    document.body.appendChild(modal);
+    bindModalClose(modal, ['#closeAddAuto', '#cancelAddAuto']);
 
-        <!-- Hidden -->
-        <input type="hidden" name="user_id" value="${residente.user_id}">
-        <input type="hidden" name="unidad_id" value="${residente.unidad_id}">
-        <input type="hidden" name="action" value="create">
+    modal.querySelector('#addAutoForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
 
-        <!-- Footer -->
-        <div class="flex justify-end gap-3 pt-6">
-          <button type="button" id="cancelAddAuto"
-            class="px-5 py-2 rounded-xl border hover:bg-slate-100">
-            Cancelar
-          </button>
-          <button
-            class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
-            Crear auto
-          </button>
-        </div>
-      </form>
-    </div>
-  `;
+      const placas = normalizePlacas(fd.get('placas') || '');
+      const modelo = String(fd.get('modelo') || '').trim();
+      const color = String(fd.get('color') || '').trim();
 
-  document.body.appendChild(modal);
+      fd.set('placas', placas);
 
-  modal.querySelector('#closeAddAuto').onclick =
-    modal.querySelector('#cancelAddAuto').onclick = () => modal.remove();
+      if (placas.length < 5 || placas.length > 15) {
+        showToast('Las placas deben tener entre 5 y 15 caracteres.', 'error');
+        return;
+      }
 
-  modal.querySelector('#addAutoForm').onsubmit = async e => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
+      if (modelo.length > 80) {
+        showToast('El modelo no puede exceder 80 caracteres.', 'error');
+        return;
+      }
+
+      if (color.length > 40) {
+        showToast('El color no puede exceder 40 caracteres.', 'error');
+        return;
+      }
+
+      try {
+        const resp = await api.autos.create(fd);
+
+        modal.remove();
+        await refreshCurrentDetail({ resetAutos: true });
+        showToast(resp.message || MESSAGES.autoCreado, 'success');
+      } catch (err) {
+        showToast(err.message || 'No se pudo registrar el auto.', 'error');
+      }
+    };
+  }
+
+  // =========================
+  // FLOWS
+  // =========================
+  async function loadData() {
+    hideAlert();
+    els.list.innerHTML = '';
 
     try {
-      await fetchJSON(
-        '/admin_residencial/php/api/autos_admin.php',
-        { method: 'POST', body: fd }
-      );
+      const json = await api.residentes.list();
 
-      modal.remove();
-      state.autosPage = 1;
-      await openDetail(state.selected.resid_unid_id);
-    } catch (err) {
-      alert(err.message);
+      state.residentes = Array.isArray(json.residentes) ? json.residentes : [];
+      state.filteredResidentes = [...state.residentes];
+      state.unidades = Array.isArray(json.unidades) ? json.unidades : [];
+      state.residentesPage = 1;
+
+      renderResidentes();
+      els.list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+      showAlert(e.message, 'error');
     }
-  };
-}
+  }
 
   function filterResidentes(query) {
-  query = query.toLowerCase().trim();
+    query = String(query || '').toLowerCase().trim();
 
-  if (!query) {
-    state.filteredResidentes = [...state.residentes];
-  } else {
-    state.filteredResidentes = state.residentes.filter(r =>
-      (r.nombre || '').toLowerCase().includes(query) ||
-      (r.unidad_clave || '').toLowerCase().includes(query) ||
-      (r.telefono || '').includes(query)
-    );
+    if (!query) {
+      state.filteredResidentes = [...state.residentes];
+    } else {
+      state.filteredResidentes = state.residentes.filter((r) =>
+        String(r.nombre || '').toLowerCase().includes(query) ||
+        String(r.unidad_clave || '').toLowerCase().includes(query) ||
+        String(r.telefono || '').includes(query)
+      );
+    }
+
+    state.residentesPage = 1;
+    renderResidentes();
   }
-
-  state.residentesPage = 1;
-  renderResidentes();
-}
-
-
-  // =========================
-  // DETALLE / “Ver más”
-  // =========================
-  // =========================
-// TOGGLE ESTADO SERVICIO
-// =========================
-els.list.addEventListener('change', async (e) => {
-  const input = e.target;
-
-  if (!input.matches('input[type="checkbox"][data-toggle]')) return;
-
-  const residUnidId = input.dataset.toggle;
-  const newStatus = input.checked ? 1 : 0;
-
-  const fd = new FormData();
-  fd.append('action', 'toggle_active');
-  fd.append('id', residUnidId);
-  fd.append('active', newStatus);
-
-  try {
-    await fetchJSON(
-      '/admin_residencial/php/api/residentes.php',
-      { method: 'POST', body: fd }
-    );
-
-    // sincroniza estado local
-    const r = state.residentes.find(x => x.resid_unid_id == residUnidId);
-    if (r) r.activo_servicio = newStatus;
-
-  } catch (err) {
-    // rollback visual
-    input.checked = !newStatus;
-    alert(err.message);
-  }
-});
 
   async function openDetail(residUnidId) {
     try {
       state.pagosPage = 1;
       state.autosPage = 1;
-      // 1. Residente
-      const detailResp = await fetchJSON(
-        `/admin_residencial/php/api/residentes.php?action=get&id=${residUnidId}`
-      );
+
+      const detailResp = await api.residentes.get(residUnidId);
       const r = detailResp.residente;
       state.selected = r;
 
-      // 2. user_id
-      const resident = state.residentes.find(x => x.resid_unid_id == residUnidId);
+      const resident = state.residentes.find((x) => x.resid_unid_id == residUnidId);
       const userId = resident ? resident.user_id : r.user_id;
       state.currentUserId = userId;
 
-      // 3. Pagos
-      const pagosResp = await fetchJSON(
-        `/admin_residencial/php/api/pagos_residentes.php?action=list&user_id=${userId}`
-      );
-      state.pagos = pagosResp.data ? pagosResp.data.pagos : [];
+      const [pagosResp, autosResp] = await Promise.all([
+        api.pagos.list(userId),
+        api.autos.listByResident(userId),
+      ]);
 
-      const totalPagado = state.pagos.reduce(
-        (sum, p) => sum + (p.monto || 0),
-        0
-      );
+      state.pagos = Array.isArray(pagosResp.data?.pagos) ? pagosResp.data.pagos : [];
+      state.autos = Array.isArray(autosResp.data?.autos) ? autosResp.data.autos : [];
 
-      // 4. Autos
-      const autosResp = await fetchJSON(
-        `/admin_residencial/php/api/autos_admin.php?action=list_by_resident&user_id=${userId}`
-      );
-      state.autos = autosResp.data ? autosResp.data.autos : [];
+      const totalPagado = state.pagos.reduce((sum, p) => sum + (Number(p.monto) || 0), 0);
 
-      // 5. Render
-      els.detailModalContent.innerHTML =
-        renderDetailModal(r, totalPagado);
+      els.detailModalContent.innerHTML = renderDetailModal(r, totalPagado);
       els.detailModal.classList.remove('hidden');
 
       attachDetailEventListeners();
@@ -695,139 +1017,228 @@ els.list.addEventListener('change', async (e) => {
     }
   }
 
-  // Vuelve a enlazar los manejadores después de re-render
+  async function refreshCurrentDetail({ resetPagos = false, resetAutos = false } = {}) {
+    if (!state.selected?.resid_unid_id) return;
+
+    if (resetPagos) state.pagosPage = 1;
+    if (resetAutos) state.autosPage = 1;
+
+    await openDetail(state.selected.resid_unid_id);
+  }
+
   function attachDetailEventListeners() {
-    // botón cerrar
     document.getElementById('btnCloseDetail')?.addEventListener('click', () => {
       els.detailModal.classList.add('hidden');
     });
-    // botón agregar pago
+
     document.getElementById('btnAddPago')?.addEventListener('click', () => {
       openAddPagoModal({
         user_id: state.currentUserId,
         nombre: state.selected.nombre,
-        unidad_clave: state.selected.unidad_clave
+        unidad_clave: state.selected.unidad_clave,
       });
     });
-    // botón agregar auto
+
     document.getElementById('btnAddAuto')?.addEventListener('click', () => {
       openAddAutoModal({
         user_id: state.currentUserId,
         nombre: state.selected.nombre,
         unidad_id: state.selected.unidad_id,
-        unidad_clave: state.selected.unidad_clave
+        unidad_clave: state.selected.unidad_clave,
       });
     });
-
-
-
-
-
   }
 
-  // Paginación: al hacer clic, actualiza la página y vuelve a enlazar
-  els.detailModalContent.addEventListener('click', e => {
-    const btn = e.target.closest('[data-page]');
-    if (!btn) return;
-    const page = Number(btn.dataset.page);
-    const wrapper = btn.closest('[data-type]');
-    if (!wrapper) return;
-    if (wrapper.dataset.type === 'pagos') {
-      state.pagosPage = page;
-    }
-    if (wrapper.dataset.type === 'autos') {
-      state.autosPage = page;
-    }
-        if (wrapper.dataset.type === 'residentes') {
-    state.residentesPage = page;
-    renderResidentes();
-    }
+  async function confirmDeleteResidente(id) {
+    const confirmed = await showConfirm({
+      title: 'Eliminar residente',
+      message: 'Esta acción eliminará la relación del residente con la unidad. ¿Deseas continuar?',
+      acceptText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      tone: 'danger',
+    });
 
-    els.detailModalContent.innerHTML =
-      renderDetailModal(
-        state.selected,
-        state.pagos.reduce((s, p) => s + (p.monto || 0), 0)
-      );
-    // volver a enlazar
-    attachDetailEventListeners();
-  });
+    if (!confirmed) return;
+
+    await deleteResidente(id);
+  }
+
+  async function deleteResidente(id) {
+    try {
+      const resp = await api.residentes.remove(id);
+      await loadData();
+      showToast(resp.message || MESSAGES.residenteEliminado, 'success');
+    } catch (e) {
+      showToast(e.message || 'No se pudo eliminar el residente.', 'error');
+    }
+  }
 
   // =========================
   // EVENTOS
   // =========================
-  els.list.addEventListener('click', e => {
-  const btn = e.target.closest('[data-page]');
-  if (!btn) return;
+  els.list.addEventListener('change', async (e) => {
+    const input = e.target;
+    if (!input.matches('input[type="checkbox"][data-toggle]')) return;
 
-  const wrapper = btn.closest('[data-type]');
-  if (!wrapper || wrapper.dataset.type !== 'residentes') return;
+    const residUnidId = input.dataset.toggle;
+    const newStatus = input.checked ? 1 : 0;
 
-  const page = Number(btn.dataset.page);
-  state.residentesPage = page;
-  renderResidentes();
-});
-  document.getElementById('residentSearch')?.addEventListener('input', e => {
-  filterResidentes(e.target.value);
-});
+    try {
+      await api.residentes.toggleActive(residUnidId, newStatus);
+
+      const r = state.residentes.find((x) => x.resid_unid_id == residUnidId);
+      if (r) r.activo_servicio = newStatus;
+
+      showToast(
+        newStatus ? MESSAGES.residenteReactivado : MESSAGES.residenteSuspendido,
+        'success'
+      );
+    } catch (err) {
+      input.checked = !newStatus;
+      showToast(err.message || 'No se pudo actualizar el estado del residente.', 'error');
+    }
+  });
+
+  els.detailModalContent.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-page]');
+    if (!btn) return;
+
+    const page = Number(btn.dataset.page);
+    const wrapper = btn.closest('[data-type]');
+    if (!wrapper) return;
+
+    if (wrapper.dataset.type === 'pagos') {
+      state.pagosPage = page;
+    }
+
+    if (wrapper.dataset.type === 'autos') {
+      state.autosPage = page;
+    }
+
+    els.detailModalContent.innerHTML = renderDetailModal(
+      state.selected,
+      state.pagos.reduce((s, p) => s + (Number(p.monto) || 0), 0)
+    );
+
+    attachDetailEventListeners();
+  });
+
+  els.list.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-page]');
+    if (!btn) return;
+
+    const wrapper = btn.closest('[data-type]');
+    if (!wrapper || wrapper.dataset.type !== 'residentes') return;
+
+    const page = Number(btn.dataset.page);
+    state.residentesPage = page;
+    renderResidentes();
+  });
+
+  els.list.addEventListener('click', (e) => {
+    const edit = e.target.closest('[data-edit]');
+    const del = e.target.closest('[data-del]');
+    const more = e.target.closest('[data-more]');
+
+    if (edit) {
+      const r = state.residentes.find((x) => x.resid_unid_id == edit.dataset.edit);
+      if (r) openModal('edit', r);
+    }
+
+    if (more) {
+      openDetail(more.dataset.more);
+    }
+
+    if (del) {
+      confirmDeleteResidente(del.dataset.del);
+    }
+  });
+
+  els.residentSearch?.addEventListener('input', (e) => {
+    filterResidentes(e.target.value);
+  });
+
   els.btnAdd?.addEventListener('click', () => openModal('create'));
   els.btnCloseModal?.addEventListener('click', closeModal);
   els.btnCancelModal?.addEventListener('click', closeModal);
 
-  els.list.addEventListener('click', e => {
-    const edit = e.target.closest('[data-edit]');
-    const del = e.target.closest('[data-del]');
-    const more = e.target.closest('[data-more]');
-    if (edit) {
-      const r = state.residentes.find(x => x.resid_unid_id == edit.dataset.edit);
-      if (r) openModal('edit', r);
-    }
-    if (more) {
-      openDetail(more.dataset.more);
-    }
-    if (del && confirm('¿Eliminar residente?')) {
-      deleteResidente(del.dataset.del);
-    }
-  });
-
-  els.modalForm.addEventListener('submit', async e => {
+  els.modalForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    const isEditing = !!state.editingId;
+
     const fd = new FormData(els.modalForm);
-    fd.append('action', state.editingId ? 'update' : 'create');
-    if (state.editingId) fd.append('id', state.editingId);
+    fd.append('action', isEditing ? 'update' : 'create');
+    if (isEditing) fd.append('id', state.editingId);
+
+    const nombre = String(fd.get('nombre') || '').trim();
+    const telefono = normalizePhoneDigits(fd.get('telefono') || '');
+    const email = String(fd.get('email') || '').trim();
+    const unidadId = String(fd.get('unidad_id') || '').trim();
+    const password = String(fd.get('password') || '').trim();
+    const passwordConfirm = String(fd.get('password_confirm') || '').trim();
+
+    fd.set('telefono', telefono);
+
+    if (nombre.length < 3 || nombre.length > 120) {
+      showToast('El nombre debe tener entre 3 y 120 caracteres.', 'error');
+      return;
+    }
+
+    if (telefono && (telefono.length < 10 || telefono.length > 15)) {
+      showToast('El teléfono debe tener entre 10 y 15 dígitos.', 'error');
+      return;
+    }
+
+    if (!email) {
+      showToast('El correo es obligatorio.', 'error');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showToast('El correo no es válido.', 'error');
+      return;
+    }
+
+    if (!unidadId) {
+      showToast('Debes seleccionar una unidad.', 'error');
+      return;
+    }
+
+    if (password || passwordConfirm) {
+      if (password.length < 8) {
+        showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
+        return;
+      }
+
+      if (password !== passwordConfirm) {
+        showToast('Las contraseñas no coinciden.', 'error');
+        return;
+      }
+    }
+
     try {
-      await fetchJSON(
-        '/admin_residencial/php/api/residentes.php',
-        { method: 'POST', body: fd }
-      );
+      const resp = await api.residentes.save(fd);
+
       closeModal();
-      loadData();
+      await loadData();
+
+      showToast(
+        resp.message || (isEditing ? MESSAGES.residenteActualizado : MESSAGES.residenteCreado),
+        'success'
+      );
     } catch (e) {
-      showAlert(e.message, 'error');
+      showToast(e.message || 'No se pudo guardar el residente.', 'error');
     }
   });
-  
-
-  async function deleteResidente(id) {
-    const fd = new FormData();
-    fd.append('action', 'delete');
-    fd.append('id', id);
-    try {
-      await fetchJSON(
-        '/admin_residencial/php/api/residentes.php',
-        { method: 'POST', body: fd }
-      );
-      loadData();
-    } catch (e) {
-      showAlert(e.message, 'error');
-    }
-  }
 
   // =========================
   // INIT
   // =========================
   (function init() {
+    ensureUiHelpers();
     els.btnAdd?.classList.remove('hidden');
     loadData();
   })();
-
 })();
