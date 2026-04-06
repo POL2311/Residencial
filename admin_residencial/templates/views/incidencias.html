@@ -1,44 +1,49 @@
 <div id="incidenciasView" class="space-y-4">
   <div id="incidenciasAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
 
+  <div class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+    <div class="flex items-center gap-3">
+      <label class="text-sm">Mostrar:</label>
+      <select id="filterEstado" class="rounded-xl border px-3 py-2 text-sm">
+        <option value="todas">Todas</option>
+        <option value="abierta">Abiertas</option>
+        <option value="en_proceso">En proceso</option>
+        <option value="cerrada">Cerradas</option>
+      </select>
+    </div>
 
-
-  <!-- Header tipo tabla (como tu screenshot) -->
-  
-<div class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-  <div class="flex items-center gap-3">
-    <label class="text-sm">Mostrar:</label>
-    <select id="filterEstado" class="rounded-xl border px-3 py-2 text-sm">
-      <option value="todas">Todas</option>
-      <option value="abierta">Abiertas</option>
-      <option value="en_proceso">En proceso</option>
-      <option value="cerrada">Cerradas</option>
-    </select>
+    <div class="flex gap-2 w-full md:w-auto">
+      <input
+        id="searchIncidencias"
+        type="text"
+        placeholder="Buscar por título, unidad o residente..."
+        class="w-full md:w-[340px] rounded-xl border px-4 py-2 text-sm"
+      />
+      <button id="btnAddIncidencia"
+        class="bg-[#2E5D73] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-95 whitespace-nowrap">
+        + Reportar
+      </button>
+    </div>
   </div>
 
-  <input
-    id="searchIncidencias"
-    type="text"
-    placeholder="Buscar por título, unidad o residente..."
-    class="w-full md:max-w-md rounded-xl border px-4 py-2 text-sm"
-  />
-</div>
-
-  <!-- LISTA EN CARDS -->
   <div id="incidenciasList" class="space-y-3"></div>
 
-  <!-- Modal Nueva Incidencia -->
+  <!-- Modal Nueva -->
   <div id="incidenciaModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
       <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
         <h2 class="text-base font-semibold">Reportar incidencia</h2>
         <button id="btnCloseIncidenciaModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">✕</button>
       </div>
+
       <form id="incidenciaForm" class="px-4 py-4 space-y-3">
+        <div id="incidenciaAddError" class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
+
         <div>
           <label class="block text-xs text-slate-600 mb-1">Unidad</label>
           <select name="unidad_id" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></select>
         </div>
+
         <div>
           <label class="block text-xs text-slate-600 mb-1">Tipo</label>
           <select name="tipo" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
@@ -49,14 +54,17 @@
             <option value="otro">Otro</option>
           </select>
         </div>
+
         <div>
           <label class="block text-xs text-slate-600 mb-1">Título</label>
           <input type="text" name="titulo" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" required />
         </div>
+
         <div>
           <label class="block text-xs text-slate-600 mb-1">Descripción</label>
           <textarea name="descripcion" rows="4" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" required></textarea>
         </div>
+
         <div>
           <label class="block text-xs text-slate-600 mb-1">Prioridad</label>
           <select name="prioridad" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
@@ -80,21 +88,26 @@
     </div>
   </div>
 
-  <!-- Modal Editar Incidencia -->
+  <!-- Modal Editar -->
   <div id="incidenciaEditModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
       <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
         <h2 class="text-base font-semibold">Actualizar incidencia</h2>
         <button id="btnCloseEditIncModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">✕</button>
       </div>
+
       <form id="incidenciaEditForm" class="px-4 py-4 space-y-3">
+        <div id="incidenciaEditError" class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
+
         <input type="hidden" name="id" />
+
         <div>
           <label class="block text-xs text-slate-600 mb-1">Asignar guardia</label>
           <select name="guardia_id" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
             <option value="">-- Sin asignar --</option>
           </select>
         </div>
+
         <div>
           <label class="block text-xs text-slate-600 mb-1">Estado</label>
           <select name="estado" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
@@ -103,6 +116,7 @@
             <option value="cerrada">Cerrada</option>
           </select>
         </div>
+
         <div>
           <label class="block text-xs text-slate-600 mb-1">Prioridad</label>
           <select name="prioridad" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
@@ -126,3 +140,5 @@
     </div>
   </div>
 </div>
+
+<script src="/admin_residencial/js/incidencias.js"></script>

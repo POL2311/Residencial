@@ -1,0 +1,112 @@
+<div id="reglamentoView" class="space-y-4">
+  <div id="reglamentoAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <div class="flex flex-col lg:flex-row gap-6">
+    <!-- FORM -->
+    <div class="w-full lg:w-1/2">
+      <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b bg-slate-50 flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-800">Editar reglamento</h2>
+            <p class="text-sm text-slate-500">Modifica el documento oficial del residencial.</p>
+          </div>
+
+          <button
+            id="btnTogglePreview"
+            type="button"
+            class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-100">
+            Ocultar vista previa
+          </button>
+        </div>
+
+        <form id="reglamentoForm" class="p-5 space-y-4">
+          <div id="reglamentoFormError"
+               class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Título</label>
+            <input
+              id="reglamentoTitulo"
+              name="titulo"
+              type="text"
+              class="w-full rounded-xl border px-4 py-3 text-sm"
+              placeholder="Ej. Reglamento General del Residencial"
+              required />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Versión</label>
+            <input
+              id="reglamentoVersion"
+              name="version_label"
+              type="text"
+              class="w-full rounded-xl border px-4 py-3 text-sm"
+              placeholder="Ej. v1.0 / Abril 2026" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Contenido</label>
+            <textarea
+              id="reglamentoContenido"
+              name="contenido"
+              rows="18"
+              class="w-full rounded-xl border px-4 py-3 text-sm"
+              placeholder="Escribe aquí el reglamento..."
+              required></textarea>
+            <p class="mt-1 text-xs text-slate-500">
+              Puedes escribir en párrafos y saltos de línea. La vista previa se actualiza en tiempo real.
+            </p>
+          </div>
+
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              class="bg-[#2E5D73] text-white text-sm font-semibold px-5 py-3 rounded-xl hover:opacity-95">
+              Guardar reglamento
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div id="reglamentoPreviewWrap" class="w-full lg:w-1/2">
+      <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b bg-slate-50">
+          <h2 class="text-lg font-semibold text-slate-800">Vista previa</h2>
+          <p class="text-sm text-slate-500">Así se verá el reglamento actual del residencial.</p>
+        </div>
+
+        <div class="p-6">
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-6">
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h3 id="reglamentoPreviewTitle" class="text-2xl font-bold text-slate-900">
+                  Sin título
+                </h3>
+                <p id="reglamentoPreviewVersion" class="text-sm text-slate-500 mt-1">
+                  Versión: Sin versión
+                </p>
+              </div>
+
+              <div class="shrink-0">
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-[#2E5D73]/10 text-[#2E5D73] text-xs font-semibold">
+                  Reglamento
+                </span>
+              </div>
+            </div>
+
+            <div class="h-px bg-slate-200 mb-5"></div>
+
+            <div id="reglamentoPreviewContent"
+                 class="prose prose-sm max-w-none text-slate-700 leading-7 whitespace-normal">
+              Aún no hay contenido del reglamento.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/admin_residencial/js/reglamento.js"></script>

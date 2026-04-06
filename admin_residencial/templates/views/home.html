@@ -1,40 +1,84 @@
-<div class="space-y-4">
+<div id="residentHomeView" class="space-y-6">
 
-  <!-- Comunicados -->
-  <div class="flex items-end justify-between">
-    <h2 class="text-3xl font-semibold text-slate-700">Comunicados</h2>
-    <button class="text-xl text-slate-500">Ver todos</button>
-  </div>
+  <div id="homeAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
 
-  <div class="rounded-2xl bg-white shadow overflow-hidden">
-    <div class="h-48 bg-slate-200"></div>
-    <div class="py-2 flex items-center justify-center gap-2">
-      <span class="h-2 w-2 rounded-full bg-slate-700"></span>
-      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-    </div>
-  </div>
-
-  <!-- Contrata -->
-  <div class="flex items-end justify-between mt-4">
-    <h2 class="text-3xl font-semibold text-slate-700">Contrata:</h2>
-    <button class="text-xl text-slate-500">Ver todos</button>
-  </div>
-
-  <div class="relative">
-    <div class="flex gap-3 overflow-x-auto pb-2">
-      <div class="min-w-[260px] h-28 rounded-2xl bg-white shadow overflow-hidden">
-        <div class="h-full bg-slate-200"></div>
+  <!-- WELCOME -->
+  <div class="rounded-3xl bg-[#2E5D73] text-white p-6 shadow-lg">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold">Bienvenido a tu residencial</h1>
+        <p class="text-white/80 mt-1 text-sm">
+          Consulta anuncios, servicios y accesos rápidos del condominio.
+        </p>
       </div>
-      <div class="min-w-[260px] h-28 rounded-2xl bg-white shadow overflow-hidden">
-        <div class="h-full bg-slate-200"></div>
-      </div>
-      <div class="min-w-[260px] h-28 rounded-2xl bg-white shadow overflow-hidden">
-        <div class="h-full bg-slate-200"></div>
+
+      <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm">
+        <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+        Sistema activo
       </div>
     </div>
   </div>
+
+  <!-- COMUNICADOS -->
+  <section class="space-y-3">
+    <div class="flex items-end justify-between">
+      <div>
+        <h2 class="text-3xl font-semibold text-slate-700">Comunicados</h2>
+        <p class="text-sm text-slate-500">Anuncios y avisos destacados del residencial.</p>
+      </div>
+      <button id="btnVerTodosComunicados" class="text-base text-slate-500 hover:text-slate-700">
+        Ver todos
+      </button>
+    </div>
+
+    <div class="rounded-3xl bg-white shadow overflow-hidden border border-slate-200">
+      <div class="relative">
+        <div id="homeComunicadosSlider" class="overflow-hidden">
+          <div id="homeComunicadosTrack" class="flex transition-transform duration-500 ease-in-out"></div>
+        </div>
+
+        <button id="homeComPrev"
+          class="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center">
+          ◀
+        </button>
+
+        <button id="homeComNext"
+          class="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center">
+          ▶
+        </button>
+      </div>
+
+      <div id="homeComDots" class="py-4 flex items-center justify-center gap-2"></div>
+    </div>
+  </section>
+
+  <!-- CONTRATA -->
+  <section class="space-y-3">
+    <div class="flex items-end justify-between">
+      <div>
+        <h2 class="text-3xl font-semibold text-slate-700">Contrata</h2>
+        <p class="text-sm text-slate-500">Servicios y anuncios recomendados dentro del residencial.</p>
+      </div>
+      <button id="btnVerTodosServicios" class="text-base text-slate-500 hover:text-slate-700">
+        Ver todos
+      </button>
+    </div>
+
+    <div class="relative">
+      <button id="homeSrvPrev"
+        class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 h-10 w-10 rounded-full bg-white shadow items-center justify-center border">
+        ◀
+      </button>
+
+      <div id="homeServiciosScroller" class="flex gap-4 overflow-x-auto pb-2 scroll-smooth"></div>
+
+      <button id="homeSrvNext"
+        class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 h-10 w-10 rounded-full bg-white shadow items-center justify-center border">
+        ▶
+      </button>
+    </div>
+  </section>
 
 </div>
+
+<script src="/admin_residencial/js/home.js"></script>

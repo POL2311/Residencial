@@ -88,7 +88,7 @@ console.log('[UNIDADES] JS ACTIVO');
 
     try {
       const json = await fetchJSON(
-        '/admin_residencial/php/api/unidades.php'
+        '/Residencial/admin_residencial/php/api/unidades.php'
       );
 
       state.unidades = json.unidades || [];
@@ -242,7 +242,7 @@ console.log('[UNIDADES] JS ACTIVO');
 
     try {
       await fetchJSON(
-        '/admin_residencial/php/api/unidades.php',
+        '/Residencial/admin_residencial/php/api/unidades.php',
         { method: 'POST', body: fd }
       );
       loadUnidades();
