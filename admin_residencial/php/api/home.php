@@ -65,7 +65,37 @@ try {
         ORDER BY orden ASC, id DESC
     ");
     $stmtServicios->execute(['rid' => $residencialId]);
-    $servicios = $stmtServicios->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    $serviciosResidenciales = $stmtServicios->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    $serviciosGlobales = [];
+    if (tableExists($pdo, 'home_servicios_globales')) {
+        $stmtGlobales = $pdo->query("
+            SELECT
+                id,
+                nombre,
+                descripcion,
+                imagen_url,
+                telefono,
+                whatsapp,
+                link_url,
+                categoria,
+                orden
+            FROM home_servicios_globales
+            WHERE activo = 1
+            ORDER BY orden ASC, id DESC
+        ");
+        $serviciosGlobales = $stmtGlobales->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    $servicios = [];
+    foreach ($serviciosGlobales as $item) {
+        $item['origen'] = 'global';
+        $servicios[] = $item;
+    }
+    foreach ($serviciosResidenciales as $item) {
+        $item['origen'] = 'residencial';
+        $servicios[] = $item;
+    }
 
     json_out(true, [
         'banners' => $banners,

@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             switch ($user['tipo_usuario_nombre']) {
                 case 'super_admin':
-                    header('Location: superadmin/dashboard_super_admin.php');
+                    header('Location: superadmin/php/dashboard.php');
                     break;
                 case 'admin_supervisor':
                     header('Location: admin_supervisor/dashboard_admin_supervisor.php');

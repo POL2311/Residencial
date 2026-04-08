@@ -1,10 +1,14 @@
 <?php
 
 $DB_HOST = 'localhost';
-$DB_NAME = 'miinvit3_residencial_app'; 
-$DB_USER = 'miinvit3_adminmafious';     
-$DB_PASS = 'Madafaka985*mg';       
+$DB_NAME = 'residencial_app2'; 
+$DB_USER = 'root';     
+$DB_PASS = '';       
 
+#$DB_HOST = 'localhost';
+#$DB_NAME = 'miinvit3_residencial_app'; 
+#$DB_USER = 'miinvit3_adminmafious';     
+#$DB_PASS = 'Madafaka985*mg';       
 try {
     $pdo = new PDO(
         "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4",

@@ -260,6 +260,35 @@ INSERT INTO `home_servicios_residenciales` (`id`, `residencial_id`, `nombre`, `d
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `home_servicios_globales`
+--
+
+CREATE TABLE `home_servicios_globales` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `descripcion` varchar(255) DEFAULT NULL,
+  `imagen_url` varchar(500) DEFAULT NULL,
+  `telefono` varchar(30) DEFAULT NULL,
+  `whatsapp` varchar(30) DEFAULT NULL,
+  `link_url` varchar(500) DEFAULT NULL,
+  `categoria` varchar(80) NOT NULL DEFAULT 'servicio',
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `orden` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `home_servicios_globales`
+--
+
+INSERT INTO `home_servicios_globales` (`id`, `nombre`, `descripcion`, `imagen_url`, `telefono`, `whatsapp`, `link_url`, `categoria`, `activo`, `orden`, `created_at`, `updated_at`) VALUES
+(1, 'Internet empresarial', 'Soluciones de conectividad y soporte para administración residencial.', 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop', '5558881122', '5558881122', 'https://example.com/internet', 'aliado', 1, 1, '2026-04-08 09:00:00', '2026-04-08 09:00:00'),
+(2, 'Mantenimiento integral', 'Servicios de mantenimiento preventivo y correctivo para áreas comunes.', 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200&auto=format&fit=crop', '5557773344', '5557773344', 'https://example.com/mantenimiento', 'promocion', 1, 2, '2026-04-08 09:00:00', '2026-04-08 09:00:00');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `incidencias`
 --
 
@@ -695,6 +724,14 @@ ALTER TABLE `home_servicios_residenciales`
   ADD KEY `idx_home_servicios_orden` (`orden`);
 
 --
+-- Indices de la tabla `home_servicios_globales`
+--
+ALTER TABLE `home_servicios_globales`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_home_servicios_globales_activo` (`activo`),
+  ADD KEY `idx_home_servicios_globales_orden` (`orden`);
+
+--
 -- Indices de la tabla `incidencias`
 --
 ALTER TABLE `incidencias`
@@ -851,6 +888,12 @@ ALTER TABLE `home_banners_residenciales`
 --
 ALTER TABLE `home_servicios_residenciales`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `home_servicios_globales`
+--
+ALTER TABLE `home_servicios_globales`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `incidencias`

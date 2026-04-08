@@ -1,0 +1,115 @@
+<div class="min-h-screen flex flex-col">
+  <header class="shrink-0 bg-[#2E5D73] text-white">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <div id="superadminName" class="text-xl font-semibold leading-tight truncate">—</div>
+          <div id="superadminContext" class="text-sm opacity-95 truncate">—</div>
+          <div id="superadminMeta" class="mt-1 text-xs opacity-85">Cargando contexto…</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
+          <div class="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
+            <div class="text-[11px] uppercase tracking-wide text-white/70">Residenciales</div>
+            <div id="superadminStatResidenciales" class="mt-1 text-xl font-semibold">0</div>
+          </div>
+          <div class="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
+            <div class="text-[11px] uppercase tracking-wide text-white/70">Usuarios</div>
+            <div id="superadminStatUsuarios" class="mt-1 text-xl font-semibold">0</div>
+          </div>
+          <div class="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur col-span-2 sm:col-span-1">
+            <div class="text-[11px] uppercase tracking-wide text-white/70">Activos</div>
+            <div id="superadminStatActivos" class="mt-1 text-xl font-semibold">0</div>
+          </div>
+        </div>
+
+        <div class="text-center shrink-0">
+          <div class="h-16 w-16 rounded-full bg-[#E9E3D9] flex items-center justify-center overflow-hidden">
+            <img
+              id="systemLogoImg"
+              src="../../assets/img/logo_asher.png"
+              alt="Logo del sistema"
+              class="h-full w-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <a href="/logout.php" class="mt-2 inline-block text-sm opacity-95 hover:opacity-100">
+            cerrar sesión
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="dashboardBody" class="flex-1 overflow-y-auto bg-[#F2F3F5]">
+    <div class="max-w-6xl mx-auto px-4 py-4"></div>
+  </main>
+
+  <footer class="shrink-0 bg-[#F2F3F5]">
+    <div class="max-w-6xl mx-auto px-4 pb-5">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-3">
+        <button class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md active:scale-[0.99] transition"
+                data-view="home" type="button">
+          <div class="h-[105px] flex flex-col items-center justify-center gap-1.5">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <div class="text-base font-light">Home</div>
+          </div>
+        </button>
+
+        <button class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md active:scale-[0.99] transition"
+                data-view="residenciales" type="button">
+          <div class="h-[105px] flex flex-col items-center justify-center gap-1.5">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M4 20V7a1 1 0 0 1 1-1h6v14H5a1 1 0 0 1-1-1ZM13 20V4a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v16h-7Z" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <div class="text-base font-light">Residenciales</div>
+          </div>
+        </button>
+
+        <button class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md active:scale-[0.99] transition"
+                data-view="usuarios" type="button">
+          <div class="h-[105px] flex flex-col items-center justify-center gap-1.5">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M7 14a4 4 0 1 1 8 0" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M3 21a6 6 0 0 1 18 0" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <div class="text-base font-light">Usuarios</div>
+          </div>
+        </button>
+
+        <button class="dashBtn rounded-2xl bg-[#EF5A5A] text-white shadow-md active:scale-[0.99] transition"
+                data-view="seguridad" type="button">
+          <div class="h-[105px] flex flex-col items-center justify-center gap-1.5">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <div class="text-base font-light">Seguridad</div>
+          </div>
+        </button>
+
+        <button class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md active:scale-[0.99] transition"
+                data-view="reportes" type="button">
+          <div class="h-[105px] flex flex-col items-center justify-center gap-1.5">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M5 19V9m7 10V5m7 14v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <div class="text-base font-light">Reportes</div>
+          </div>
+        </button>
+
+        <button class="dashBtn rounded-2xl bg-[#6B6B6B] text-white shadow-md active:scale-[0.99] transition"
+                data-view="configuracion" type="button">
+          <div class="h-[105px] flex flex-col items-center justify-center gap-1.5">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M12 8.5A3.5 3.5 0 1 1 8.5 12 3.5 3.5 0 0 1 12 8.5Z" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M19 12a7 7 0 0 0-.08-1l2.08-1.62-2-3.46L16.5 7a7 7 0 0 0-1.73-1L14.5 3h-5L9.23 6A7 7 0 0 0 7.5 7L5 5.92l-2 3.46L5.08 11A7 7 0 0 0 5 12c0 .34.03.67.08 1L3 14.62l2 3.46L7.5 17a7 7 0 0 0 1.73 1l.27 3h5l.27-3A7 7 0 0 0 16.5 17l2.5 1.08 2-3.46L18.92 13c.05-.33.08-.66.08-1Z" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+            <div class="text-base font-light">Configuración</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </footer>
+</div>

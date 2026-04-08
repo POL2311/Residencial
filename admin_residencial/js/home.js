@@ -185,7 +185,23 @@
       card.innerHTML = `
         <div class="h-40" style="${bgImage}"></div>
         <div class="p-4">
-          <h3 class="font-semibold text-slate-800">${escapeHtml(s.nombre || '')}</h3>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="flex flex-wrap gap-2">
+                ${s.origen === 'global' ? `
+                  <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-700">
+                    Recomendado
+                  </span>
+                ` : ''}
+                ${s.categoria ? `
+                  <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                    ${escapeHtml(s.categoria)}
+                  </span>
+                ` : ''}
+              </div>
+              <h3 class="mt-2 font-semibold text-slate-800">${escapeHtml(s.nombre || '')}</h3>
+            </div>
+          </div>
           <p class="text-sm text-slate-500 mt-1">${escapeHtml(s.descripcion || '')}</p>
 
           <div class="flex flex-wrap gap-2 mt-4">
