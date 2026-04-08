@@ -18,6 +18,23 @@ function out(bool $ok, array $extra = []) {
   exit;
 }
 
+function fetch_user(PDO $pdo, int $uid): array {
+  $stmt = $pdo->prepare("
+    SELECT id, name, email, telefono
+    FROM users
+    WHERE id = ?
+    LIMIT 1
+  ");
+  $stmt->execute([$uid]);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if (!$row) {
+    out(false, ['error' => 'Usuario no encontrado']);
+  }
+
+  return $row;
+}
+
 function verify_password(PDO $pdo, int $uid, string $plain): bool {
   $stmt = $pdo->prepare("SELECT password_hash FROM users WHERE id=? LIMIT 1");
   $stmt->execute([$uid]);
@@ -32,12 +49,14 @@ $action = $_POST['action'] ?? 'get';
    GET PERFIL
 ======================= */
 if ($action === 'get') {
+  $dbUser = fetch_user($pdo, $uid);
+
   out(true, [
     'data' => [
       'user' => [
-        'name'     => $user['name'] ?? '',
-        'email'    => $user['email'] ?? '',
-        'telefono' => $user['telefono'] ?? '',
+        'name'     => $dbUser['name'] ?? '',
+        'email'    => $dbUser['email'] ?? '',
+        'telefono' => $dbUser['telefono'] ?? '',
       ],
       // esto viene del contexto, no editable
       'direccion' => $user['direccion'] ?? '—'
@@ -53,7 +72,7 @@ if ($action === 'update_name') {
   if ($name === '') out(false, ['error'=>'Nombre requerido']);
 
   $pdo->prepare("UPDATE users SET name=? WHERE id=?")->execute([$name, $uid]);
-  $_SESSION['user']['name'] = $name;
+  $_SESSION['user_name'] = $name;
 
   out(true, ['message'=>'Nombre actualizado']);
 }
@@ -73,7 +92,6 @@ if ($action === 'update_phone') {
   }
 
   $pdo->prepare("UPDATE users SET telefono=? WHERE id=?")->execute([$telefono, $uid]);
-  $_SESSION['user']['telefono'] = $telefono;
 
   out(true, ['message'=>'Teléfono actualizado']);
 }
@@ -95,7 +113,6 @@ if ($action === 'update_email') {
   }
 
   $pdo->prepare("UPDATE users SET email=? WHERE id=?")->execute([$email, $uid]);
-  $_SESSION['user']['email'] = $email;
 
   out(true, ['message'=>'Correo actualizado']);
 }

@@ -4,10 +4,7 @@
         addr: document.getElementById('residentAddress'),
         btnEdit: document.getElementById('btnEditAddress'),
         cars: document.getElementById('carsContainer'),
-
-        btnReg: document.getElementById('btnReglamento'),
         body: document.getElementById('dashboardBody'),
-
         modal: document.getElementById('carModal'),
         modalBody: document.getElementById('carModalBody'),
         modalClose: document.getElementById('btnCloseCarModal'),
@@ -23,14 +20,23 @@
     const BASE = baseResidentPath();
     const API = BASE + 'php/api/';
     const VIEWS = BASE + 'templates/views/';
+    const inlineViews = new Set(['home', 'visitas', 'incidencias', 'paqueteria', 'autos', 'pagos', 'comunicados', 'reglamento', 'perfil']);
 
     let currentViewScript = null;
+    let currentViewName = null;
 
     function loadViewScript(view) {
+        return new Promise((resolve) => {
         const scriptsMap = {
+            home: BASE + 'js/home.js',
+            visitas: BASE + 'js/visitas.js',
+            incidencias: BASE + 'js/incidencias.js',
             perfil: BASE + 'js/perfil.js',
             paqueteria: BASE + 'js/paqueteria.js',
-            // luego: reglamento, comunicados, etc.
+            autos: BASE + 'js/autos.js',
+            pagos: BASE + 'js/pagos.js',
+            comunicados: BASE + 'js/comunicados.js',
+            reglamento: BASE + 'js/reglamento.js',
         };
 
         if (currentViewScript) {
@@ -38,17 +44,28 @@
             currentViewScript = null;
         }
 
-        if (!scriptsMap[view]) return;
+        if (!scriptsMap[view]) {
+            resolve();
+            return;
+        }
 
         const s = document.createElement('script');
-        s.src = scriptsMap[view];
-        s.defer = true;
+        s.src = `${scriptsMap[view]}?v=${Date.now()}`;
         s.dataset.viewScript = view;
+        s.onload = () => resolve();
+        s.onerror = () => resolve();
         document.body.appendChild(s);
         currentViewScript = s;
+        });
     }
 
     async function loadView(view) {
+        if (!inlineViews.has(view)) {
+            view = 'home';
+        }
+
+        currentViewName = view;
+
         const url = `${VIEWS}${view}.html`;
         const wrap = els.body?.querySelector('.max-w-6xl') || els.body;
         if (!wrap) return;
@@ -72,13 +89,14 @@
             btn.classList.toggle('ring-black/20', isActive);
         });
 
-        loadViewScript(view);
+        await loadViewScript(view);
         window.location.hash = view;
     }
 
     function initialView() {
         const h = (window.location.hash || '').replace('#', '').trim();
-        return h || 'home';
+        if (!h) return 'home';
+        return inlineViews.has(h) ? h : 'home';
     }
 
     async function loadContext() {
@@ -103,6 +121,12 @@
             const ctx = data.ctx || {};
 
             els.name.textContent = data.user?.name || 'Residente';
+
+            if (data.setup_incomplete) {
+                els.addr.textContent = data.setup_message || 'Configuración pendiente';
+                renderCars([]);
+                return;
+            }
 
             if (data.direccion && String(data.direccion).trim() !== '') {
                 els.addr.textContent = data.direccion;
@@ -202,6 +226,8 @@
         openCarModal,
         closeCarModal,
         loadView,
+        navigate: loadView,
+        getCurrentView: () => currentViewName,
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -209,7 +235,6 @@
             btn.addEventListener('click', () => loadView(btn.dataset.view));
         });
 
-        els.btnReg?.addEventListener('click', () => loadView('reglamento'));
         els.btnEdit?.addEventListener('click', () => loadView('perfil'));
 
         els.modalClose?.addEventListener('click', closeCarModal);
@@ -219,5 +244,12 @@
 
         loadContext();
         loadView(initialView());
+    });
+
+    window.addEventListener('hashchange', () => {
+        const next = (window.location.hash || '').replace('#', '').trim();
+        if (next && next !== currentViewName && inlineViews.has(next)) {
+            loadView(next);
+        }
     });
 })();

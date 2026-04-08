@@ -11,17 +11,26 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 
 require_login();
-require_role(['guardia','super_admin']);
+require_role(['guardia', 'super_admin']);
 
 $user = current_user();
 $uid = (int)($user['id'] ?? 0);
 
-function json_out(bool $ok, array $extra = []): void {
+function json_out(bool $ok, array $extra = [], int $status = 200): void {
+  http_response_code($status);
   echo json_encode(array_merge(['ok' => $ok], $extra), JSON_UNESCAPED_UNICODE);
   exit;
 }
 
-function rid(PDO $pdo, int $uid): int {
+function clean_string($value, int $max = 255): string {
+  $value = trim((string)($value ?? ''));
+  if (mb_strlen($value) > $max) {
+    $value = mb_substr($value, 0, $max);
+  }
+  return $value;
+}
+
+function residencial_id_for_guard(PDO $pdo, int $uid): int {
   $stmt = $pdo->prepare("
     SELECT r.id
     FROM usuarios_residenciales ur
@@ -34,71 +43,203 @@ function rid(PDO $pdo, int $uid): int {
   return (int)($stmt->fetchColumn() ?: 0);
 }
 
+function validate_unit(PDO $pdo, int $unidadId, int $residencialId): ?array {
+  $stmt = $pdo->prepare("
+    SELECT id, clave
+    FROM unidades
+    WHERE id = :id
+      AND residencial_id = :rid
+      AND activo = 1
+    LIMIT 1
+  ");
+  $stmt->execute([
+    'id' => $unidadId,
+    'rid' => $residencialId,
+  ]);
+
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  return $row ?: null;
+}
+
+function residente_for_unit(PDO $pdo, int $unidadId, int $residencialId): ?array {
+  $stmt = $pdo->prepare("
+    SELECT
+      ru.user_id AS id,
+      us.name
+    FROM residentes_unidades ru
+    JOIN unidades u ON u.id = ru.unidad_id
+    JOIN users us ON us.id = ru.user_id
+    WHERE ru.unidad_id = :unidad_id
+      AND ru.activo = 1
+      AND u.residencial_id = :rid
+    ORDER BY ru.es_titular DESC, us.name ASC
+    LIMIT 1
+  ");
+  $stmt->execute([
+    'unidad_id' => $unidadId,
+    'rid' => $residencialId,
+  ]);
+
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  return $row ?: null;
+}
+
+function list_items(PDO $pdo, int $residencialId): array {
+  $stmt = $pdo->prepare("
+    SELECT
+      p.*,
+      u.clave AS unidad_clave,
+      rg.name AS residente_nombre,
+      gg.name AS guardia_nombre
+    FROM paqueteria p
+    JOIN unidades u
+      ON u.id = p.unidad_id
+     AND u.residencial_id = p.residencial_id
+    LEFT JOIN users rg
+      ON rg.id = p.residente_id
+    LEFT JOIN users gg
+      ON gg.id = p.guardia_id
+    WHERE p.residencial_id = :rid
+    ORDER BY p.created_at DESC, p.id DESC
+    LIMIT 300
+  ");
+  $stmt->execute(['rid' => $residencialId]);
+  return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+}
+
+$residencialId = residencial_id_for_guard($pdo, $uid);
+if ($residencialId <= 0) {
+  json_out(false, ['error' => 'Guardia no asociado a residencial.'], 403);
+}
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$action = $_GET['action'] ?? $_POST['action'] ?? 'list';
+
 try {
-  $residencial_id = rid($pdo, $uid);
-  if ($residencial_id <= 0) json_out(false, ['error' => 'Guardia no asociado a residencial.']);
-
-  // GET unidades
-  if ($_SERVER['REQUEST_METHOD'] === 'GET' && (($_GET['action'] ?? '') === 'unidades')) {
-    $stmt = $pdo->prepare("SELECT id, clave FROM unidades WHERE residencial_id = :rid ORDER BY clave ASC");
-    $stmt->execute(['rid' => $residencial_id]);
-    $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    json_out(true, ['data' => ['items' => $items]]);
-  }
-
-  // GET list
-  if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+  if ($method === 'GET' && $action === 'unidades') {
     $stmt = $pdo->prepare("
-      SELECT p.*, u.clave AS unidad_clave
-      FROM paqueteria p
-      JOIN unidades u ON u.id = p.unidad_id
-      WHERE p.residencial_id = :rid
-      ORDER BY p.created_at DESC
-      LIMIT 100
+      SELECT
+        u.id,
+        u.clave,
+        owner.name AS residente_nombre
+      FROM unidades u
+      LEFT JOIN residentes_unidades ru
+        ON ru.unidad_id = u.id
+       AND ru.activo = 1
+       AND ru.es_titular = 1
+      LEFT JOIN users owner
+        ON owner.id = ru.user_id
+      WHERE u.residencial_id = :rid
+        AND u.activo = 1
+      ORDER BY u.clave ASC
     ");
-    $stmt->execute(['rid' => $residencial_id]);
-    $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    json_out(true, ['data' => ['items' => $items]]);
+    $stmt->execute(['rid' => $residencialId]);
+    json_out(true, ['data' => ['items' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []]]);
   }
 
-  // POST create
-  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = (string)($_POST['action'] ?? '');
-    if ($action !== 'create') json_out(false, ['error' => 'Acción inválida.']);
+  if ($method === 'GET' && $action === 'list') {
+    json_out(true, ['data' => ['items' => list_items($pdo, $residencialId)]]);
+  }
 
-    $unidad_id = (int)($_POST['unidad_id'] ?? 0);
-    $empresa = trim((string)($_POST['empresa'] ?? ''));
-    $descripcion = trim((string)($_POST['descripcion'] ?? ''));
-    $codigo_rastreo = trim((string)($_POST['codigo_rastreo'] ?? ''));
-    $notas = trim((string)($_POST['notas'] ?? ''));
+  if ($method === 'POST' && $action === 'create') {
+    $unidadId = (int)($_POST['unidad_id'] ?? 0);
+    $empresa = clean_string($_POST['empresa'] ?? '', 100);
+    $descripcion = clean_string($_POST['descripcion'] ?? '', 255);
+    $codigoRastreo = clean_string($_POST['codigo_rastreo'] ?? '', 100);
+    $notas = clean_string($_POST['notas'] ?? '', 1000);
 
-    if ($unidad_id <= 0) json_out(false, ['error' => 'Debes seleccionar una unidad.']);
-    if ($descripcion === '') json_out(false, ['error' => 'La descripción del paquete es obligatoria.']);
+    if ($unidadId <= 0) {
+      json_out(false, ['error' => 'Debes seleccionar una unidad.'], 422);
+    }
+
+    if ($descripcion === '') {
+      json_out(false, ['error' => 'La descripción del paquete es obligatoria.'], 422);
+    }
+
+    $unidad = validate_unit($pdo, $unidadId, $residencialId);
+    if (!$unidad) {
+      json_out(false, ['error' => 'La unidad no pertenece a este residencial.'], 422);
+    }
+
+    $residente = residente_for_unit($pdo, $unidadId, $residencialId);
 
     $stmt = $pdo->prepare("
       INSERT INTO paqueteria (
-        residencial_id, unidad_id, residente_id, guardia_id,
-        empresa, descripcion, codigo_rastreo, estado, notas
+        residencial_id,
+        unidad_id,
+        residente_id,
+        guardia_id,
+        empresa,
+        descripcion,
+        codigo_rastreo,
+        estado,
+        notas
       ) VALUES (
-        :rid, :unidad_id, NULL, :guardia_id,
-        :empresa, :descripcion, :codigo_rastreo, 'registrado', :notas
+        :rid,
+        :unidad_id,
+        :residente_id,
+        :guardia_id,
+        :empresa,
+        :descripcion,
+        :codigo_rastreo,
+        'registrado',
+        :notas
       )
     ");
     $stmt->execute([
-      'rid' => $residencial_id,
-      'unidad_id' => $unidad_id,
+      'rid' => $residencialId,
+      'unidad_id' => $unidadId,
+      'residente_id' => $residente ? (int)$residente['id'] : null,
       'guardia_id' => $uid,
       'empresa' => $empresa !== '' ? $empresa : null,
       'descripcion' => $descripcion,
-      'codigo_rastreo' => $codigo_rastreo !== '' ? $codigo_rastreo : null,
+      'codigo_rastreo' => $codigoRastreo !== '' ? $codigoRastreo : null,
       'notas' => $notas !== '' ? $notas : null,
     ]);
 
-    json_out(true, ['data' => ['created' => true]]);
+    json_out(true, [
+      'message' => 'Paquete registrado correctamente.',
+      'data' => ['items' => list_items($pdo, $residencialId)],
+    ]);
   }
 
-  json_out(false, ['error' => 'Método no soportado.']);
+  if ($method === 'POST' && $action === 'update_status') {
+    $id = (int)($_POST['id'] ?? 0);
+    $estado = clean_string($_POST['estado'] ?? '', 20);
+    $allowedEstados = ['registrado', 'entregado', 'devuelto'];
 
+    if ($id <= 0) {
+      json_out(false, ['error' => 'Paquete inválido.'], 422);
+    }
+
+    if (!in_array($estado, $allowedEstados, true)) {
+      json_out(false, ['error' => 'Estado inválido.'], 422);
+    }
+
+    $stmt = $pdo->prepare("
+      UPDATE paqueteria
+      SET estado = :estado, updated_at = NOW()
+      WHERE id = :id
+        AND residencial_id = :rid
+      LIMIT 1
+    ");
+    $stmt->execute([
+      'estado' => $estado,
+      'id' => $id,
+      'rid' => $residencialId,
+    ]);
+
+    if ($stmt->rowCount() <= 0) {
+      json_out(false, ['error' => 'No se pudo actualizar el paquete.'], 404);
+    }
+
+    json_out(true, [
+      'message' => 'Estado actualizado correctamente.',
+      'data' => ['items' => list_items($pdo, $residencialId)],
+    ]);
+  }
+
+  json_out(false, ['error' => 'Acción no soportada.'], 400);
 } catch (Throwable $e) {
-  json_out(false, ['error' => 'Error: ' . $e->getMessage()]);
+  json_out(false, ['error' => 'Error: ' . $e->getMessage()], 500);
 }

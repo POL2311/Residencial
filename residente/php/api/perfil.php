@@ -53,6 +53,13 @@ function tableExists(PDO $pdo, string $table): bool {
 function refresh_session_user(array $newUser): void {
   if (session_status() !== PHP_SESSION_ACTIVE) @session_start();
 
+  if (array_key_exists('name', $newUser)) {
+    $_SESSION['user_name'] = (string)$newUser['name'];
+  }
+  if (array_key_exists('id', $newUser)) {
+    $_SESSION['user_id'] = (int)$newUser['id'];
+  }
+
   if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
     foreach (['name','email','telefono'] as $k) {
       if (array_key_exists($k, $newUser)) $_SESSION['user'][$k] = $newUser[$k];
@@ -251,7 +258,7 @@ if ($action === 'update_name') {
     $stmt = $pdo->prepare("UPDATE users SET name = :n WHERE id = :id");
     $stmt->execute(['n' => $name, 'id' => $uid]);
 
-    refresh_session_user(['name' => $name]);
+    refresh_session_user(['id' => $uid, 'name' => $name]);
     json_out(true, ['message' => 'Nombre actualizado.']);
   } catch (Throwable $e) {
     json_out(false, ['error' => 'Error: ' . $e->getMessage()]);

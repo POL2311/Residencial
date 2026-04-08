@@ -1,40 +1,85 @@
-<div class="space-y-4">
+<div id="guardiaHomeView" class="space-y-6">
 
-  <!-- Comunicados -->
-  <div class="flex items-end justify-between">
-    <h2 class="text-3xl font-semibold text-slate-700">Comunicados</h2>
-    <button class="text-xl text-slate-500">Ver todos</button>
-  </div>
-
-  <div class="rounded-2xl bg-white shadow overflow-hidden">
-    <div class="h-48 bg-slate-200"></div>
-    <div class="py-2 flex items-center justify-center gap-2">
-      <span class="h-2 w-2 rounded-full bg-slate-700"></span>
-      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-      <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-    </div>
-  </div>
-
-  <!-- Contrata -->
-  <div class="flex items-end justify-between mt-4">
-    <h2 class="text-3xl font-semibold text-slate-700">Contrata:</h2>
-    <button class="text-xl text-slate-500">Ver todos</button>
-  </div>
-
-  <div class="relative">
-    <div class="flex gap-3 overflow-x-auto pb-2">
-      <div class="min-w-[260px] h-28 rounded-2xl bg-white shadow overflow-hidden">
-        <div class="h-full bg-slate-200"></div>
+  <div class="rounded-3xl bg-white border border-slate-200 shadow-sm p-5">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800">Centro operativo</h1>
+        <p class="text-sm text-slate-500">
+          Resumen del turno, actividad reciente y accesos rápidos.
+        </p>
       </div>
-      <div class="min-w-[260px] h-28 rounded-2xl bg-white shadow overflow-hidden">
-        <div class="h-full bg-slate-200"></div>
-      </div>
-      <div class="min-w-[260px] h-28 rounded-2xl bg-white shadow overflow-hidden">
-        <div class="h-full bg-slate-200"></div>
+
+      <div id="homeTurnoInfo"
+           class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">
+        Turno actual: —
       </div>
     </div>
   </div>
+
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Accesos hoy</div>
+      <div id="statAccesosHoy" class="mt-2 text-3xl font-bold text-slate-900">0</div>
+    </div>
+
+    <div class="rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Incidencias abiertas</div>
+      <div id="statIncidenciasAbiertas" class="mt-2 text-3xl font-bold text-rose-600">0</div>
+    </div>
+
+    <div class="rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Paquetes pendientes</div>
+      <div id="statPaquetesPendientes" class="mt-2 text-3xl font-bold text-amber-600">0</div>
+    </div>
+
+    <div class="rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Autos registrados hoy</div>
+      <div id="statAutosHoy" class="mt-2 text-3xl font-bold text-sky-600">0</div>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-2 rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-800">Actividad reciente</h2>
+          <p class="text-sm text-slate-500">Movimientos operativos del turno.</p>
+        </div>
+      </div>
+
+      <div id="homeRecentActivity" class="space-y-3">
+        <div class="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">
+          No hay actividad reciente para mostrar.
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
+      <h2 class="text-lg font-semibold text-slate-800">Acciones rápidas</h2>
+      <p class="text-sm text-slate-500 mb-4">Accede rápido a lo más usado.</p>
+
+      <div class="space-y-3">
+        <button data-home-action="accesos"
+          class="w-full rounded-2xl bg-[#4E7287] text-white px-4 py-4 text-left hover:opacity-95">
+          Registrar acceso
+        </button>
+
+        <button data-home-action="incidencias"
+          class="w-full rounded-2xl bg-[#EF5A5A] text-white px-4 py-4 text-left hover:opacity-95">
+          Nueva incidencia
+        </button>
+
+        <button data-home-action="paqueteria"
+          class="w-full rounded-2xl bg-[#4E7287] text-white px-4 py-4 text-left hover:opacity-95">
+          Registrar paquete
+        </button>
+
+        <button data-home-action="autos"
+          class="w-full rounded-2xl bg-[#4E7287] text-white px-4 py-4 text-left hover:opacity-95">
+          Buscar auto
+        </button>
+      </div>
+    </div>
+  </section>
 
 </div>

@@ -21,9 +21,6 @@ try {
   $session = current_user();
   $uid = (int)($session['id'] ?? 0);
 
-  /* ===============================
-     1) Usuario (guardia)
-     =============================== */
   $stmtU = $pdo->prepare("
     SELECT id, name, email
     FROM users
@@ -37,9 +34,6 @@ try {
     out(false, ['error'=>'Usuario no encontrado'], 404);
   }
 
-  /* ===============================
-     2) Residencial asignado
-     =============================== */
   $stmtR = $pdo->prepare("
     SELECT
       r.id,
@@ -59,8 +53,10 @@ try {
 
   $header_line = null;
   $direccion = null;
+  $residencialId = null;
 
   if ($res) {
+    $residencialId = (int)$res['id'];
     $header_line = 'Residencial: ' . $res['nombre'];
 
     $direccion = implode(', ', array_filter([
@@ -71,14 +67,27 @@ try {
     ]));
   }
 
-  /* ===============================
-     RESPONSE
-     =============================== */
+  // turno actual demo
+  $turnoActual = 'Turno activo';
+  $guardiaEnServicio = true;
+
+  // métricas demo
+  $stats = [
+    'accesos_hoy' => 0,
+    'incidencias_abiertas' => 0,
+    'paquetes_pendientes' => 0,
+    'autos_registrados_hoy' => 0,
+  ];
+
   out(true, [
     'data' => [
       'user' => $user,
+      'residencial_id' => $residencialId,
       'header_line' => $header_line,
       'direccion' => $direccion,
+      'turno_actual' => $turnoActual,
+      'guardia_en_servicio' => $guardiaEnServicio,
+      'stats' => $stats,
     ]
   ]);
 

@@ -1,7 +1,4 @@
 (function () {
-    if (window.__perfil_init_v2) return;
-    window.__perfil_init_v2 = true;
-
     function baseResidentPath() {
         const p = window.location.pathname;
         const idx = p.indexOf('/residente/');
@@ -15,6 +12,8 @@
 
     const root = $('perfilView');
     if (!root) return;
+    if (root.dataset.bound === '1') return;
+    root.dataset.bound = '1';
 
     const els = {
         alert: $('perfilAlert'),

@@ -1,0 +1,28 @@
+<div id="residentPagosView" class="space-y-4">
+  <div id="pagosAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <div class="flex flex-col gap-2">
+    <h2 class="text-3xl font-semibold text-slate-700">Pagos</h2>
+    <p class="text-sm text-slate-500">Revisa tus movimientos y el historial de pagos registrados.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Pagos registrados</div>
+      <div id="pagosCount" class="mt-2 text-3xl font-bold text-slate-900">0</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Monto acumulado</div>
+      <div id="pagosTotal" class="mt-2 text-3xl font-bold text-emerald-600">$0.00</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Ultimo pago</div>
+      <div id="pagosUltimo" class="mt-2 text-sm font-semibold text-slate-800">—</div>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="text-sm font-semibold text-slate-700">Historial</div>
+    <div id="residentPagosList" class="mt-4 space-y-3"></div>
+  </div>
+</div>

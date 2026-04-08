@@ -51,6 +51,7 @@ function listItems(PDO $pdo, int $rid, array $filters = []): array {
 
   $placas = clean((string)($filters['placas'] ?? ''));
   $modelo = clean((string)($filters['modelo'] ?? ''));
+  $color  = clean((string)($filters['color'] ?? ''));
 
   if ($placas !== '') {
     $np = norm_placas($placas);
@@ -60,6 +61,10 @@ function listItems(PDO $pdo, int $rid, array $filters = []): array {
   if ($modelo !== '') {
     $where[] = "a.modelo LIKE :modelo";
     $p['modelo'] = '%' . $modelo . '%';
+  }
+  if ($color !== '') {
+    $where[] = "a.color LIKE :color";
+    $p['color'] = '%' . $color . '%';
   }
 
   $sql = "
@@ -91,6 +96,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && $action === 'list') {
     $items = listItems($pdo, $residencial_id, [
       'placas' => $_GET['placas'] ?? '',
       'modelo' => $_GET['modelo'] ?? '',
+      'color'  => $_GET['color'] ?? '',
     ]);
     json_out(true, ['data' => ['items' => $items]]);
   } catch (Throwable $e) {
@@ -100,8 +106,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && $action === 'list') {
 
 /**
  * CREATE (POST)
- * Campos esperados:
- * placas (req), modelo, color, notas, unidad_id, propietario_user_id
  */
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'create') {
   $placas = norm_placas((string)($_POST['placas'] ?? ''));
@@ -115,7 +119,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'create') {
   if ($placas === '') json_out(false, ['error' => 'Las placas son obligatorias.'], 422);
 
   try {
-    // Evitar duplicado activo en el mismo residencial (comparación normalizada)
     $chk = $pdo->prepare("
       SELECT 1
       FROM autos
@@ -127,7 +130,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'create') {
     $chk->execute(['rid' => $residencial_id, 'p' => $placas]);
     if ($chk->fetchColumn()) json_out(false, ['error' => 'Estas placas ya están registradas en este residencial.'], 409);
 
-    // Si viene unidad_id, validarla contra unidades del mismo residencial
     if ($unidad_id !== null) {
       $vu = $pdo->prepare("SELECT 1 FROM unidades WHERE id=:id AND residencial_id=:rid AND activo=1 LIMIT 1");
       $vu->execute(['id' => $unidad_id, 'rid' => $residencial_id]);
@@ -157,7 +159,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'create') {
 
 /**
  * UPDATE (POST)
- * auto_id (req) + mismos campos
  */
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'update') {
   $auto_id = (int)($_POST['auto_id'] ?? 0);
@@ -174,13 +175,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'update') {
   if ($placas === '') json_out(false, ['error' => 'Las placas son obligatorias.'], 422);
 
   try {
-    // Pertenece al residencial
     $st = $pdo->prepare("SELECT * FROM autos WHERE id=:id AND residencial_id=:rid LIMIT 1");
     $st->execute(['id' => $auto_id, 'rid' => $residencial_id]);
     $row = $st->fetch(PDO::FETCH_ASSOC);
     if (!$row) json_out(false, ['error' => 'Auto no encontrado.'], 404);
 
-    // Duplicado si cambió placas
     $currentP = norm_placas((string)($row['placas'] ?? ''));
     if ($placas !== $currentP) {
       $chk = $pdo->prepare("
@@ -196,7 +195,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'update') {
       if ($chk->fetchColumn()) json_out(false, ['error' => 'Estas placas ya están registradas en este residencial.'], 409);
     }
 
-    // Validar unidad si viene
     if (array_key_exists('unidad_id', $_POST) && $unidad_id !== null) {
       $vu = $pdo->prepare("SELECT 1 FROM unidades WHERE id=:id AND residencial_id=:rid AND activo=1 LIMIT 1");
       $vu->execute(['id' => $unidad_id, 'rid' => $residencial_id]);
@@ -239,8 +237,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'update') {
 }
 
 /**
- * DELETE (SOFT) (POST)
- * auto_id (req)
+ * DELETE (SOFT)
  */
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $action === 'delete') {
   $auto_id = (int)($_POST['auto_id'] ?? 0);

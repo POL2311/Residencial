@@ -9,6 +9,7 @@ header('Expires: 0');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/residencial_helpers.php';
 
 require_login();
 require_role(['residente']);
@@ -47,34 +48,40 @@ try {
   }
 
   // 2) Contexto: residencial + unidad (+ campos de dirección general)
-  $stmtRU = $pdo->prepare("
-    SELECT
-      r.id     AS residencial_id,
-      r.nombre AS residencial_nombre,
-      r.calle  AS res_calle,
-      r.numero_exterior AS res_numero_exterior,
-      r.numero_interior AS res_numero_interior,
-      r.colonia AS res_colonia,
-      r.ciudad  AS res_ciudad,
-      r.estado  AS res_estado,
-      r.codigo_postal AS res_codigo_postal,
+  $ctxStatus = resolve_resident_context($pdo, $uid, true);
+  $ctx = null;
+  $setupIncomplete = !$ctxStatus['ok'];
 
-      u.id     AS unidad_id,
-      u.clave  AS unidad_clave,
-      u.torre  AS unidad_torre,
-      u.nivel  AS unidad_nivel,
-      u.numero_interior AS unidad_numero_interior
+  if (!$setupIncomplete) {
+    $stmtRU = $pdo->prepare("
+      SELECT
+        r.id     AS residencial_id,
+        r.nombre AS residencial_nombre,
+        r.calle  AS res_calle,
+        r.numero_exterior AS res_numero_exterior,
+        r.numero_interior AS res_numero_interior,
+        r.colonia AS res_colonia,
+        r.ciudad  AS res_ciudad,
+        r.estado  AS res_estado,
+        r.codigo_postal AS res_codigo_postal,
 
-    FROM usuarios_residenciales ur
-    JOIN residenciales r        ON r.id = ur.residencial_id
-    JOIN residentes_unidades ru ON ru.user_id = ur.user_id
-    JOIN unidades u             ON u.id = ru.unidad_id
-    WHERE ur.user_id = :user_id
-    ORDER BY ur.es_principal DESC, ur.created_at ASC
-    LIMIT 1
-  ");
-  $stmtRU->execute(['user_id' => $uid]);
-  $ctx = $stmtRU->fetch(PDO::FETCH_ASSOC) ?: null;
+        u.id     AS unidad_id,
+        u.clave  AS unidad_clave,
+        u.torre  AS unidad_torre,
+        u.nivel  AS unidad_nivel,
+        u.numero_interior AS unidad_numero_interior
+
+      FROM usuarios_residenciales ur
+      JOIN residenciales r        ON r.id = ur.residencial_id
+      JOIN residentes_unidades ru ON ru.user_id = ur.user_id AND ru.activo = 1
+      JOIN unidades u             ON u.id = ru.unidad_id
+      WHERE ur.user_id = :user_id
+      ORDER BY ur.es_principal DESC, ur.created_at ASC
+      LIMIT 1
+    ");
+    $stmtRU->execute(['user_id' => $uid]);
+    $ctx = $stmtRU->fetch(PDO::FETCH_ASSOC) ?: null;
+  }
 
   // 3) Header line (lo “correcto” para tu app)
   $header_line = null;
@@ -146,8 +153,10 @@ try {
       // extras por si luego los quieres mostrar en perfil u otro módulo
       'residencial_direccion' => $residencial_direccion,
       'unidad_detalle' => $unidad_detalle,
-
-      'autos' => $autos
+      'autos' => $autos,
+      'setup_incomplete' => $setupIncomplete,
+      'setup_message' => $setupIncomplete ? (string)($ctxStatus['error'] ?? 'Falta configurar el contexto del residente.') : null,
+      'setup_missing' => $setupIncomplete ? ($ctxStatus['missing'] ?? []) : []
     ]
   ]);
 

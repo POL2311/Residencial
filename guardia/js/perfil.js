@@ -1,270 +1,274 @@
 (function () {
-  if (window.__guardia_perfil_init_v1) return;
-  window.__guardia_perfil_init_v1 = true;
+  window.GuardiaViews = window.GuardiaViews || {};
 
-  /* ===============================
-     Paths & helpers
-  =============================== */
-  function baseGuardiaPath() {
-    const p = window.location.pathname;
-    const idx = p.indexOf('/guardia/');
-    return idx === -1 ? '/guardia/' : p.slice(0, idx) + '/guardia/';
-  }
+  window.GuardiaViews.perfil = function ({ API, fetchJSON, openModal, closeModal }) {
+    const root = document.getElementById('perfilView');
+    if (!root) return;
 
-  const BASE = baseGuardiaPath();
-  const API  = BASE + 'php/api/';
+    const els = {
+      alert: document.getElementById('perfilAlert'),
+      vName: document.getElementById('v_name'),
+      vEmail: document.getElementById('v_email'),
+      vTelefono: document.getElementById('v_telefono'),
+      accordionButtons: root.querySelectorAll('[data-acc-btn]'),
+      actionButtons: root.querySelectorAll('[data-open]'),
+    };
 
-  const root = document.getElementById('perfilView');
-  if (!root) return;
+    const state = {
+      destroyed: false,
+      perfil: null,
+    };
 
-  const $ = (id) => document.getElementById(id);
+    function isAlive() {
+      return !state.destroyed;
+    }
 
-  const els = {
-    alert: $('perfilAlert'),
+    function showAlert(type, message) {
+      if (!els.alert || !isAlive()) return;
 
-    v_name: $('v_name'),
-    v_direccion: $('v_direccion'),
-    v_telefono: $('v_telefono'),
-    v_email: $('v_email'),
+      els.alert.classList.remove('hidden');
+      els.alert.textContent = message;
+      els.alert.className =
+        'rounded-2xl px-4 py-3 text-sm ' +
+        (type === 'ok'
+          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+          : 'bg-rose-50 text-rose-800 border border-rose-200');
+    }
 
-    modal: $('gModal'),
-    modalTitle: $('gModalTitle'),
-    modalBody: $('gModalBody'),
-    modalClose: $('gModalClose'),
-  };
+    function hideAlert() {
+      if (!els.alert || !isAlive()) return;
+      els.alert.classList.add('hidden');
+      els.alert.textContent = '';
+    }
 
-  let state = {
-    perfil: null,
-  };
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
 
-  function escapeHtml(s) {
-    return String(s ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
-  }
+    async function apiPost(action, data = {}) {
+      const fd = new FormData();
+      fd.set('action', action);
 
-  /* ===============================
-     Alerts
-  =============================== */
-  function showAlert(type, msg) {
-    if (!els.alert) return;
-    els.alert.classList.remove('hidden');
-    els.alert.textContent = msg;
-    els.alert.className =
-      'rounded-2xl px-4 py-3 text-sm ' +
-      (type === 'ok'
-        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-        : 'bg-rose-50 text-rose-800 border border-rose-200');
-  }
+      Object.entries(data).forEach(([key, value]) => {
+        fd.set(key, String(value ?? ''));
+      });
 
-  function hideAlert() {
-    if (!els.alert) return;
-    els.alert.classList.add('hidden');
-  }
+      return fetchJSON(`${API}perfil.php`, {
+        method: 'POST',
+        body: fd,
+      });
+    }
 
-  /* ===============================
-     Modal helpers
-  =============================== */
-  function openModal(title, bodyHtml) {
-    els.modalTitle.textContent = title;
-    els.modalBody.innerHTML = bodyHtml;
-    els.modal.classList.remove('hidden');
-  }
+    function setExpanded(keyToOpen) {
+      if (!isAlive()) return;
 
-  function closeModal() {
-    els.modal.classList.add('hidden');
-    els.modalBody.innerHTML = '';
-  }
+      els.accordionButtons.forEach((btn) => {
+        const key = btn.getAttribute('data-acc-btn');
+        const body = root.querySelector(`[data-acc-body="${key}"]`);
+        const open = key === keyToOpen;
 
-  els.modalClose?.addEventListener('click', closeModal);
-  els.modal?.addEventListener('click', (e) => {
-    if (e.target === els.modal) closeModal();
-  });
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        body?.classList.toggle('hidden', !open);
+      });
+    }
 
-  /* ===============================
-     Accordion logic (FIXED)
-  =============================== */
-  function setAccExpanded(keyToOpen) {
-    document.querySelectorAll('[data-acc-btn]').forEach(btn => {
-      const key = btn.getAttribute('data-acc-btn');
-      const body = document.querySelector(`[data-acc-body="${key}"]`);
-      const open = key === keyToOpen;
+    function renderPerfil() {
+      if (!isAlive()) return;
 
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (body) body.classList.toggle('hidden', !open);
-    });
-  }
+      const user = state.perfil?.user || {};
+      if (els.vName) els.vName.textContent = user.name || '—';
+      if (els.vEmail) els.vEmail.textContent = user.email || '—';
+      if (els.vTelefono) els.vTelefono.textContent = user.telefono || '—';
+    }
 
-  setAccExpanded(null);
+    async function loadPerfil() {
+      const json = await apiPost('get');
+      if (!isAlive()) return;
 
-  document.querySelectorAll('[data-acc-btn]').forEach(btn => {
-    btn.addEventListener('click', () => {
+      state.perfil = json.data || {};
+      renderPerfil();
+    }
+
+    function attachModalSave(handler) {
+      const saveBtn = document.getElementById('m_save');
+      saveBtn?.addEventListener('click', handler, { once: true });
+    }
+
+    function openNameModal() {
+      openModal('Actualizar nombre', `
+        <div class="space-y-3">
+          <input id="m_name"
+            value="${escapeHtml(state.perfil?.user?.name || '')}"
+            class="w-full rounded-xl border px-3 py-2 text-sm">
+          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
+            Guardar
+          </button>
+          <div id="m_error" class="text-sm text-rose-600"></div>
+        </div>
+      `);
+
+      attachModalSave(async () => {
+        try {
+          const name = document.getElementById('m_name')?.value?.trim() || '';
+          await apiPost('update_name', { name });
+          closeModal();
+          await loadPerfil();
+          window.GuardiaDashboard?.loadContext?.();
+          showAlert('ok', 'Nombre actualizado.');
+        } catch (e) {
+          const errorEl = document.getElementById('m_error');
+          if (errorEl) errorEl.textContent = e.message || 'No se pudo actualizar el nombre.';
+        }
+      });
+    }
+
+    function openEmailModal() {
+      openModal('Actualizar correo', `
+        <div class="space-y-3">
+          <input id="m_email"
+            type="email"
+            value="${escapeHtml(state.perfil?.user?.email || '')}"
+            class="w-full rounded-xl border px-3 py-2 text-sm">
+          <input id="m_pwd"
+            type="password"
+            placeholder="Contraseña actual"
+            class="w-full rounded-xl border px-3 py-2 text-sm">
+          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
+            Guardar
+          </button>
+          <div id="m_error" class="text-sm text-rose-600"></div>
+        </div>
+      `);
+
+      attachModalSave(async () => {
+        try {
+          const email = document.getElementById('m_email')?.value?.trim() || '';
+          const currentPassword = document.getElementById('m_pwd')?.value || '';
+          await apiPost('update_email', {
+            email,
+            current_password: currentPassword,
+          });
+          closeModal();
+          await loadPerfil();
+          window.GuardiaDashboard?.loadContext?.();
+          showAlert('ok', 'Correo actualizado.');
+        } catch (e) {
+          const errorEl = document.getElementById('m_error');
+          if (errorEl) errorEl.textContent = e.message || 'No se pudo actualizar el correo.';
+        }
+      });
+    }
+
+    function openPhoneModal() {
+      openModal('Actualizar teléfono', `
+        <div class="space-y-3">
+          <input id="m_phone"
+            value="${escapeHtml(state.perfil?.user?.telefono || '')}"
+            class="w-full rounded-xl border px-3 py-2 text-sm"
+            placeholder="Teléfono">
+          <input id="m_pwd"
+            type="password"
+            placeholder="Contraseña actual"
+            class="w-full rounded-xl border px-3 py-2 text-sm">
+          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
+            Guardar
+          </button>
+          <div id="m_error" class="text-sm text-rose-600"></div>
+        </div>
+      `);
+
+      attachModalSave(async () => {
+        try {
+          const telefono = document.getElementById('m_phone')?.value?.trim() || '';
+          const currentPassword = document.getElementById('m_pwd')?.value || '';
+          await apiPost('update_phone', {
+            telefono,
+            current_password: currentPassword,
+          });
+          closeModal();
+          await loadPerfil();
+          window.GuardiaDashboard?.loadContext?.();
+          showAlert('ok', 'Teléfono actualizado.');
+        } catch (e) {
+          const errorEl = document.getElementById('m_error');
+          if (errorEl) errorEl.textContent = e.message || 'No se pudo actualizar el teléfono.';
+        }
+      });
+    }
+
+    function openPasswordModal() {
+      openModal('Cambiar contraseña', `
+        <div class="space-y-3">
+          <input id="m_cur" type="password" placeholder="Contraseña actual" class="w-full rounded-xl border px-3 py-2 text-sm">
+          <input id="m_new" type="password" placeholder="Nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-sm">
+          <input id="m_new2" type="password" placeholder="Confirmar nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-sm">
+          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
+            Guardar
+          </button>
+          <div id="m_error" class="text-sm text-rose-600"></div>
+        </div>
+      `);
+
+      attachModalSave(async () => {
+        try {
+          await apiPost('change_password', {
+            current_password: document.getElementById('m_cur')?.value || '',
+            new_password: document.getElementById('m_new')?.value || '',
+            new_password_confirm: document.getElementById('m_new2')?.value || '',
+          });
+          closeModal();
+          showAlert('ok', 'Contraseña actualizada.');
+        } catch (e) {
+          const errorEl = document.getElementById('m_error');
+          if (errorEl) errorEl.textContent = e.message || 'No se pudo actualizar la contraseña.';
+        }
+      });
+    }
+
+    function onAccordionClick(ev) {
+      const btn = ev.currentTarget;
       const key = btn.getAttribute('data-acc-btn');
       const expanded = btn.getAttribute('aria-expanded') === 'true';
-      setAccExpanded(expanded ? null : key);
-    });
-  });
-
-  /* ===============================
-     API
-  =============================== */
-  async function apiPost(action, data = {}) {
-    const fd = new FormData();
-    fd.append('action', action);
-    Object.keys(data).forEach(k => fd.append(k, data[k]));
-
-    const res = await fetch(`${API}perfil.php`, {
-      method: 'POST',
-      body: fd,
-      credentials: 'same-origin',
-      headers: { 'Accept': 'application/json' }
-    });
-
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'Error');
-    return json;
-  }
-
-  /* ===============================
-     Load perfil
-  =============================== */
-  async function loadPerfil() {
-    const json = await apiPost('get');
-    state.perfil = json.data || {};
-
-    if (els.v_name) {
-      els.v_name.textContent = state.perfil.user?.name || '—';
+      setExpanded(expanded ? null : key);
     }
-    if (els.v_email) {
-      els.v_email.textContent = state.perfil.user?.email || '—';
-    }
-    if (els.v_telefono) {
-      els.v_telefono.textContent = state.perfil.user?.telefono || '—';
-    }
-    if (els.v_direccion) {
-      els.v_direccion.textContent = state.perfil.direccion || '—';
-    }
-  }
 
-  /* ===============================
-     Clicks → open modals
-  =============================== */
-  root.querySelectorAll('[data-open]').forEach(btn => {
-    btn.addEventListener('click', async () => {
+    function onActionClick(ev) {
       hideAlert();
-      const act = btn.getAttribute('data-open');
+      const action = ev.currentTarget.getAttribute('data-open');
 
-      try {
-        if (act === 'update_name') {
-          openModal('Actualizar nombre', `
-            <div class="space-y-3">
-              <input id="m_name"
-                value="${escapeHtml(state.perfil?.user?.name || '')}"
-                class="w-full rounded-xl border px-3 py-2 text-sm">
-              <button id="m_save"
-                class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
-                Guardar
-              </button>
-            </div>
-          `);
-
-          document.getElementById('m_save').onclick = async () => {
-            const name = document.getElementById('m_name').value.trim();
-            await apiPost('update_name', { name });
-            closeModal();
-            await loadPerfil();
-            window.GuardiaDashboard?.loadContext();
-            showAlert('ok', 'Nombre actualizado');
-          };
-        }
-
-        if (act === 'update_email') {
-          openModal('Actualizar correo', `
-            <div class="space-y-3">
-              <input id="m_email"
-                type="email"
-                value="${escapeHtml(state.perfil?.user?.email || '')}"
-                class="w-full rounded-xl border px-3 py-2 text-sm">
-              <input id="m_pwd"
-                type="password"
-                placeholder="Contraseña actual"
-                class="w-full rounded-xl border px-3 py-2 text-sm">
-              <button id="m_save"
-                class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
-                Guardar
-              </button>
-              <div id="m_error" class="text-sm text-rose-600"></div>
-            </div>
-          `);
-
-          document.getElementById('m_save').onclick = async () => {
-            try {
-              await apiPost('update_email', {
-                email: document.getElementById('m_email').value.trim(),
-                current_password: document.getElementById('m_pwd').value
-              });
-              closeModal();
-              await loadPerfil();
-              window.GuardiaDashboard?.loadContext();
-              showAlert('ok', 'Correo actualizado');
-            } catch (e) {
-              document.getElementById('m_error').textContent = e.message;
-            }
-          };
-        }
-
-        if (act === 'change_password') {
-          openModal('Cambiar contraseña', `
-            <div class="space-y-3">
-              <input id="m_cur" type="password"
-                placeholder="Contraseña actual"
-                class="w-full rounded-xl border px-3 py-2 text-sm">
-              <input id="m_new" type="password"
-                placeholder="Nueva contraseña"
-                class="w-full rounded-xl border px-3 py-2 text-sm">
-              <input id="m_new2" type="password"
-                placeholder="Confirmar nueva contraseña"
-                class="w-full rounded-xl border px-3 py-2 text-sm">
-              <button id="m_save"
-                class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
-                Guardar
-              </button>
-              <div id="m_error" class="text-sm text-rose-600"></div>
-            </div>
-          `);
-
-          document.getElementById('m_save').onclick = async () => {
-            try {
-              await apiPost('change_password', {
-                current_password: document.getElementById('m_cur').value,
-                new_password: document.getElementById('m_new').value,
-                new_password_confirm: document.getElementById('m_new2').value,
-              });
-              closeModal();
-              showAlert('ok', 'Contraseña actualizada');
-            } catch (e) {
-              document.getElementById('m_error').textContent = e.message;
-            }
-          };
-        }
-
-      } catch (e) {
-        showAlert('error', e.message);
-      }
-    });
-  });
-
-  /* ===============================
-     Init
-  =============================== */
-  (async function init() {
-    try {
-      await loadPerfil();
-    } catch (e) {
-      showAlert('error', 'No se pudo cargar el perfil');
+      if (action === 'update_name') return openNameModal();
+      if (action === 'update_email') return openEmailModal();
+      if (action === 'update_phone') return openPhoneModal();
+      if (action === 'change_password') return openPasswordModal();
     }
-  })();
+
+    function bindEvents() {
+      els.accordionButtons.forEach((btn) => btn.addEventListener('click', onAccordionClick));
+      els.actionButtons.forEach((btn) => btn.addEventListener('click', onActionClick));
+    }
+
+    function unbindEvents() {
+      els.accordionButtons.forEach((btn) => btn.removeEventListener('click', onAccordionClick));
+      els.actionButtons.forEach((btn) => btn.removeEventListener('click', onActionClick));
+    }
+
+    setExpanded(null);
+    bindEvents();
+
+    loadPerfil().catch(() => {
+      if (isAlive()) showAlert('error', 'No se pudo cargar el perfil.');
+    });
+
+    return {
+      unmount() {
+        state.destroyed = true;
+        unbindEvents();
+      }
+    };
+  };
 })();

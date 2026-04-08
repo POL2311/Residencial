@@ -1,9 +1,10 @@
-// guardia/js/dashboard.js
 (function () {
   const els = {
     name: document.getElementById('guardName'),
     ctx: document.getElementById('guardContext'),
     hint: document.getElementById('guardHint'),
+    turnoBadge: document.getElementById('guardTurnoBadge'),
+    statusBadge: document.getElementById('guardStatusBadge'),
     btnReg: document.getElementById('btnReglamento'),
     body: document.getElementById('dashboardBody'),
 
@@ -23,8 +24,23 @@
   const BASE = basePath();
   const API = BASE + 'php/api/';
   const VIEWS = BASE + 'templates/views/';
+  const SCRIPTS = {
+    home: BASE + 'js/home.js',
+    perfil: BASE + 'js/perfil.js',
+    accesos: BASE + 'js/accesos.js',
+    autos: BASE + 'js/autos.js',
+    incidencias: BASE + 'js/incidencias.js',
+    paqueteria: BASE + 'js/paqueteria.js',
+  };
 
-  let currentViewScript = null;
+  const state = {
+    currentView: null,
+    currentViewScript: null,
+    currentViewController: null,
+    context: null,
+    navToken: 0,
+    isNavigating: false,
+  };
 
   function escapeHtml(s) {
     return String(s ?? '')
@@ -37,11 +53,12 @@
 
   async function fetchJSON(url, opts = {}) {
     const r = await fetch(url, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
       credentials: 'same-origin',
       cache: 'no-store',
-      ...opts
+      ...opts,
     });
+
     const json = await r.json().catch(() => ({}));
     if (!r.ok || json.ok === false) {
       throw new Error(json.error || 'Error API');
@@ -61,192 +78,352 @@
     els.modal.classList.add('hidden');
   }
 
-  async function loadView(view) {
-    const wrap = els.body?.querySelector('.max-w-6xl') || els.body;
+  function getWrap() {
+    return els.body?.querySelector('.max-w-6xl') || els.body;
+  }
+
+  function renderViewLoading(view) {
+    const wrap = getWrap();
     if (!wrap) return;
 
-    // active style
-    document.querySelectorAll('.dashBtn').forEach(btn => {
+    wrap.innerHTML = `
+      <div class="rounded-2xl bg-white p-4 shadow border border-slate-200">
+        <div class="text-sm font-semibold text-slate-700">Cargando sección…</div>
+        <div class="text-xs text-slate-500 mt-1">${escapeHtml(view)}</div>
+      </div>
+    `;
+  }
+
+  function renderViewError(view, message) {
+    const wrap = getWrap();
+    if (!wrap) return;
+
+    wrap.innerHTML = `
+      <div class="rounded-2xl bg-white p-4 shadow border border-rose-200">
+        <div class="text-sm font-semibold text-rose-600">No se pudo cargar la sección</div>
+        <div class="text-xs text-slate-600 mt-1">Plantilla/Vista: ${escapeHtml(view)}</div>
+        <div class="text-xs text-slate-500 mt-2">${escapeHtml(message || 'Error desconocido')}</div>
+      </div>
+    `;
+  }
+
+  function setActiveButtons(view) {
+    document.querySelectorAll('.dashBtn').forEach((btn) => {
       const isActive = btn.dataset.view === view;
       btn.classList.toggle('ring-2', isActive);
       btn.classList.toggle('ring-white/50', isActive);
+      btn.classList.toggle('scale-[0.99]', isActive);
     });
-
-    // load html
-    try {
-      const res = await fetch(`${VIEWS}${view}.html`, { cache: 'no-store' });
-      if (!res.ok) throw new Error('No se pudo cargar plantilla');
-      wrap.innerHTML = await res.text();
-    } catch (e) {
-      wrap.innerHTML = `
-        <div class="rounded-2xl bg-white p-4 shadow">
-          <div class="text-sm font-semibold text-rose-600">No se pudo cargar la sección</div>
-          <div class="text-xs text-slate-600">Plantilla: ${escapeHtml(view)}.html</div>
-        </div>
-      `;
-      return;
-    }
-
-    // load view script
-    loadViewScript(view);
-
-    setTimeout(() => {
-      if (window.GuardiaViews && typeof window.GuardiaViews[view] === 'function') {
-        window.GuardiaViews[view]({
-          BASE,
-          API,
-          openModal,
-          closeModal,
-          escapeHtml,
-          fetchJSON,
-          loadContext,
-        });
-      }
-    }, 0);
   }
 
-  function loadViewScript(view) {
-    const scriptsMap = {
-      home: null,
-      perfil: BASE + 'js/perfil.js',
-      accesos: BASE + 'js/accesos.js',
-      autos: BASE + 'js/autos.js',
-      incidencias: BASE + 'js/incidencias.js',
-      paqueteria: BASE + 'js/paqueteria.js',
-    };
+  async function loadTemplate(view, token) {
+    const wrap = getWrap();
+    if (!wrap) return false;
 
-    if (currentViewScript) {
-      currentViewScript.remove();
-      currentViewScript = null;
+    try {
+      const res = await fetch(`${VIEWS}${view}.html`, { cache: 'no-store' });
+      if (token !== state.navToken) return false;
+      if (!res.ok) throw new Error('No se pudo cargar plantilla');
+
+      const html = await res.text();
+      if (token !== state.navToken) return false;
+
+      wrap.innerHTML = html;
+      return true;
+    } catch (e) {
+      if (token === state.navToken) {
+        renderViewError(view, e.message || 'No se pudo cargar plantilla');
+      }
+      return false;
+    }
+  }
+
+  function unloadCurrentView() {
+    try {
+      if (
+        state.currentViewController &&
+        typeof state.currentViewController.unmount === 'function'
+      ) {
+        state.currentViewController.unmount();
+      }
+    } catch (e) {
+      console.warn('unmount fallo', e);
     }
 
-    if (!scriptsMap[view]) return;
+    state.currentViewController = null;
 
-    const s = document.createElement('script');
-    s.src = scriptsMap[view] + '?v=' + Date.now();
-    s.defer = true;
-    s.dataset.viewScript = view;
-    document.body.appendChild(s);
-    currentViewScript = s;
+    if (state.currentViewScript) {
+      state.currentViewScript.remove();
+      state.currentViewScript = null;
+    }
+  }
+
+  function clearViewRegistration(view) {
+    if (window.GuardiaViews && Object.prototype.hasOwnProperty.call(window.GuardiaViews, view)) {
+      try {
+        delete window.GuardiaViews[view];
+      } catch (_) {
+        window.GuardiaViews[view] = undefined;
+      }
+    }
+  }
+
+  function loadViewScript(view, token) {
+    return new Promise((resolve) => {
+      const src = SCRIPTS[view];
+      if (!src) {
+        resolve(true);
+        return;
+      }
+
+      clearViewRegistration(view);
+
+      const s = document.createElement('script');
+      s.src = `${src}?v=${Date.now()}`;
+      s.defer = true;
+      s.dataset.viewScript = view;
+
+      s.onload = () => {
+        if (token !== state.navToken) {
+          resolve(false);
+          return;
+        }
+        resolve(true);
+      };
+
+      s.onerror = () => {
+        if (token !== state.navToken) {
+          resolve(false);
+          return;
+        }
+        resolve(false);
+      };
+
+      document.body.appendChild(s);
+      state.currentViewScript = s;
+    });
+  }
+
+  async function mountView(view, token) {
+    if (token !== state.navToken) return false;
+
+    if (!window.GuardiaViews || typeof window.GuardiaViews[view] !== 'function') {
+      renderViewError(view, 'El script de la vista no se registró correctamente.');
+      return false;
+    }
+
+    try {
+      const controller = window.GuardiaViews[view]({
+        BASE,
+        API,
+        openModal,
+        closeModal,
+        escapeHtml,
+        fetchJSON,
+        loadContext,
+        getContext: () => state.context,
+        navigate: navigateTo,
+      });
+
+      if (token !== state.navToken) return false;
+
+      state.currentViewController = controller || null;
+      return true;
+    } catch (e) {
+      if (token === state.navToken) {
+        renderViewError(view, e.message || 'La vista falló al inicializar.');
+      }
+      return false;
+    }
   }
 
   function initialView() {
     const h = (window.location.hash || '').replace('#', '').trim();
-    if (h) return h;
-    return 'home';
+    return h || 'home';
+  }
+
+  async function navigateTo(view, opts = {}) {
+    const { force = false } = opts;
+    if (!view) view = 'home';
+
+    // Si ya estás en la misma vista pero quieres recargarla, se permite con force
+    if (!force && state.currentView === view && state.isNavigating === false) {
+      return;
+    }
+
+    const token = ++state.navToken;
+    state.isNavigating = true;
+    state.currentView = view;
+
+    setActiveButtons(view);
+    unloadCurrentView();
+    renderViewLoading(view);
+
+    const templateOk = await loadTemplate(view, token);
+    if (!templateOk || token !== state.navToken) {
+      state.isNavigating = false;
+      return;
+    }
+
+    const scriptOk = await loadViewScript(view, token);
+    if (!scriptOk || token !== state.navToken) {
+      renderViewError(view, 'No se pudo cargar el script de la vista.');
+      state.isNavigating = false;
+      return;
+    }
+
+    await mountView(view, token);
+
+    if (token === state.navToken) {
+      state.isNavigating = false;
+    }
+  }
+
+  function updateHeaderContext(data) {
+    const nameEl = els.name || document.getElementById('guardName');
+    const ctxEl = els.ctx || document.getElementById('guardContext');
+    const hintEl = els.hint || document.getElementById('guardHint');
+    const turnoEl = els.turnoBadge || document.getElementById('guardTurnoBadge');
+    const statusEl = els.statusBadge || document.getElementById('guardStatusBadge');
+
+    if (nameEl) nameEl.textContent = data.user?.name || 'Guardia';
+    if (ctxEl) ctxEl.textContent = data.header_line || data.direccion || '—';
+
+    if (hintEl) {
+      if (data.direccion) {
+        hintEl.textContent = data.direccion;
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+    }
+
+    if (turnoEl) {
+      const turnoTxt = data.turno_actual || 'Sin turno';
+      turnoEl.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-400"></span> Turno: ${escapeHtml(turnoTxt)}`;
+    }
+
+    if (statusEl) {
+      const estado = data.guardia_en_servicio ? 'En servicio' : 'Fuera de turno';
+      statusEl.textContent = `Estado: ${estado}`;
+    }
   }
 
   async function loadContext() {
-    els.name = els.name || document.getElementById('guardName');
-    els.ctx  = els.ctx  || document.getElementById('guardContext');
-
-    if (!els.name || !els.ctx) return;
-
     try {
       const json = await fetchJSON(`${API}contexto.php`);
-      const data = json.data || {};
+      state.context = json.data || {};
+      updateHeaderContext(state.context);
+      return state.context;
+    } catch (e) {
+      console.warn('loadContext fallo:', e);
+      state.context = null;
 
-      els.name.textContent = data.user?.name || 'Guardia';
-      els.ctx.textContent  = data.header_line || data.direccion || '—';
-      
+      if (els.name) els.name.textContent = 'Guardia';
+      if (els.ctx) els.ctx.textContent = '—';
 
-      if (els.hint) {
-        if (data.residencial_direccion) {
-          els.hint.textContent = data.residencial_direccion;
-          els.hint.classList.remove('hidden');
-        } else {
-          els.hint.classList.add('hidden');
+      return null;
+    }
+  }
+
+  async function openReglamento() {
+    openModal('Reglamento', `<div class="text-sm text-slate-500">Cargando reglamento…</div>`);
+
+    try {
+      const json = await fetchJSON(`${API}reglamento.php`);
+      const r = json.data || json.reglamento || null;
+
+      if (!r) {
+        if (els.modalBody) {
+          els.modalBody.innerHTML = `
+            <div class="text-sm text-slate-600">
+              No hay reglamento público registrado para este residencial.
+            </div>
+          `;
         }
+        return;
+      }
+
+      if (els.modalBody) {
+        els.modalBody.innerHTML = `
+          <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+            <div class="text-lg font-semibold text-slate-800">
+              ${escapeHtml(r.titulo)}
+            </div>
+
+            <div class="text-xs text-slate-500">
+              Versión ${escapeHtml(r.version_label || '—')}
+            </div>
+
+            <div class="prose prose-sm max-w-none text-slate-700 whitespace-pre-line">
+              ${escapeHtml(r.contenido)}
+            </div>
+          </div>
+        `;
       }
     } catch (e) {
-      console.warn('loadContext() fallo:', e);
-      els.name.textContent = 'Guardia';
-      els.ctx.textContent = '—';
+      if (els.modalBody) {
+        els.modalBody.innerHTML = `
+          <div class="text-sm text-rose-600">
+            No se pudo cargar el reglamento.
+          </div>
+        `;
+      }
     }
+  }
+
+  function bindStaticEvents() {
+    document.querySelectorAll('.dashBtn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const v = btn.dataset.view || 'home';
+        if (window.location.hash.replace('#', '') !== v) {
+          window.location.hash = v;
+        } else {
+          navigateTo(v, { force: true });
+        }
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-view]');
+      if (!t) return;
+      const v = t.getAttribute('data-view');
+      if (!v) return;
+
+      if (window.location.hash.replace('#', '') !== v) {
+        window.location.hash = v;
+      } else {
+        navigateTo(v, { force: true });
+      }
+    });
+
+    els.btnReg?.addEventListener('click', openReglamento);
+
+    els.modalClose?.addEventListener('click', closeModal);
+    els.modal?.addEventListener('click', (ev) => {
+      if (ev.target === els.modal) closeModal();
+    });
+
+    window.addEventListener('hashchange', () => {
+      navigateTo(initialView(), { force: true });
+    });
   }
 
   window.GuardiaDashboard = {
     BASE,
     API,
     loadContext,
-    loadView,
+    navigateTo,
     fetchJSON,
     openModal,
     closeModal,
     escapeHtml,
+    getContext: () => state.context,
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // botones footer
-    document.querySelectorAll('.dashBtn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const v = btn.dataset.view || 'home';
-        window.location.hash = v;
-        loadView(v);
-      });
-    });
-
-    // iconos header (data-view)
-    document.addEventListener('click', (e) => {
-      const t = e.target.closest('[data-view]');
-      if (!t) return;
-      const v = t.getAttribute('data-view');
-      if (!v) return;
-      window.location.hash = v;
-      loadView(v);
-    });
-
-    els.btnReg?.addEventListener('click', async () => {
-    openModal('Reglamento', `<div class="text-sm text-slate-500">Cargando reglamento…</div>`);
-
-    try {
-        const json = await fetchJSON(`${API}reglamento.php`);
-        const r = json.data;
-
-        if (!r) {
-        els.modalBody.innerHTML = `
-            <div class="text-sm text-slate-600">
-            No hay reglamento público registrado para este residencial.
-            </div>`;
-        return;
-        }
-
-        els.modalBody.innerHTML = `
-        <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-            <div class="text-lg font-semibold text-slate-800">
-            ${escapeHtml(r.titulo)}
-            </div>
-
-            <div class="text-xs text-slate-500">
-            Versión ${escapeHtml(r.version_label || '—')} ·
-            Actualizado ${escapeHtml(r.updated_at || '')}
-            </div>
-
-            <div class="prose prose-sm max-w-none text-slate-700 whitespace-pre-line">
-            ${escapeHtml(r.contenido)}
-            </div>
-        </div>
-        `;
-    } catch (e) {
-        els.modalBody.innerHTML = `
-        <div class="text-sm text-rose-600">
-            No se pudo cargar el reglamento.
-        </div>`;
-    }
-    });
-
-
-    // modal close
-    els.modalClose?.addEventListener('click', closeModal);
-    els.modal?.addEventListener('click', (ev) => {
-      if (ev.target === els.modal) closeModal();
-    });
-
-    // hash routing
-    window.addEventListener('hashchange', () => loadView(initialView()));
-
-    // boot
-    loadContext();
-    loadView(initialView());
+  document.addEventListener('DOMContentLoaded', async () => {
+    bindStaticEvents();
+    await loadContext();
+    await navigateTo(initialView(), { force: true });
   });
 })();
