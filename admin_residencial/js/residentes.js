@@ -243,7 +243,10 @@
   function bindModalClose(modal, selectors = []) {
     selectors.forEach((selector) => {
       const el = modal.querySelector(selector);
-      if (el) el.onclick = () => modal.remove();
+      if (el) el.onclick = () => {
+        modal.remove();
+        document.body.style.overflow = '';
+      };
     });
   }
 
@@ -584,33 +587,67 @@
     const waUrl = getWhatsAppUrl(phoneDigits);
 
     return `
-      <div class="w-full grid grid-cols-4 gap-4 items-center">
-        <div>
-          <div class="font-semibold text-slate-800">${escapeHtml(r.nombre || '—')}</div>
-          <div class="text-xs text-slate-500">Unidad: ${escapeHtml(r.unidad_clave || '—')}</div>
-          <div class="text-xs text-slate-600">${escapeHtml(r.telefono || 'Sin teléfono')}</div>
+      <div class="space-y-4">
+        <div class="md:hidden">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="font-semibold text-slate-800">${escapeHtml(r.nombre || '—')}</div>
+              <div class="text-xs text-slate-500">Unidad: ${escapeHtml(r.unidad_clave || '—')}</div>
+              <div class="text-xs text-slate-600">${escapeHtml(r.telefono || 'Sin teléfono')}</div>
+            </div>
+            <div class="flex justify-center">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox"
+                  class="sr-only peer"
+                  data-toggle="${escapeHtml(r.resid_unid_id)}"
+                  ${r.activo_servicio == 1 ? 'checked' : ''}>
+                <div class="
+                  w-11 h-6 bg-slate-300 rounded-full peer
+                  peer-checked:bg-emerald-500
+                  after:content-['']
+                  after:absolute after:top-[2px] after:left-[2px]
+                  after:bg-white after:rounded-full after:h-5 after:w-5
+                  after:transition-all
+                  peer-checked:after:translate-x-full
+                "></div>
+              </label>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-slate-700">
+            ${escapeHtml(r.unidad_detalle || '—')}
+          </div>
         </div>
 
-        <div class="text-sm text-slate-700">
-          ${escapeHtml(r.unidad_detalle || '—')}
-        </div>
+        <div class="hidden md:grid md:grid-cols-4 md:gap-4 md:items-center">
+          <div>
+            <div class="font-semibold text-slate-800">${escapeHtml(r.nombre || '—')}</div>
+            <div class="text-xs text-slate-500">Unidad: ${escapeHtml(r.unidad_clave || '—')}</div>
+            <div class="text-xs text-slate-600">${escapeHtml(r.telefono || 'Sin teléfono')}</div>
+          </div>
 
-        <div class="flex justify-center">
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox"
-              class="sr-only peer"
-              data-toggle="${escapeHtml(r.resid_unid_id)}"
-              ${r.activo_servicio == 1 ? 'checked' : ''}>
-            <div class="
-              w-11 h-6 bg-slate-300 rounded-full peer
-              peer-checked:bg-emerald-500
-              after:content-['']
-              after:absolute after:top-[2px] after:left-[2px]
-              after:bg-white after:rounded-full after:h-5 after:w-5
-              after:transition-all
-              peer-checked:after:translate-x-full
-            "></div>
-          </label>
+          <div class="text-sm text-slate-700">
+            ${escapeHtml(r.unidad_detalle || '—')}
+          </div>
+
+          <div class="flex justify-center">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox"
+                class="sr-only peer"
+                data-toggle="${escapeHtml(r.resid_unid_id)}"
+                ${r.activo_servicio == 1 ? 'checked' : ''}>
+              <div class="
+                w-11 h-6 bg-slate-300 rounded-full peer
+                peer-checked:bg-emerald-500
+                after:content-['']
+                after:absolute after:top-[2px] after:left-[2px]
+                after:bg-white after:rounded-full after:h-5 after:w-5
+                after:transition-all
+                peer-checked:after:translate-x-full
+              "></div>
+            </label>
+          </div>
+
+          <div></div>
         </div>
 
         <div class="flex justify-end gap-2 flex-wrap">
@@ -664,7 +701,7 @@
 
     visibles.forEach((r) => {
       const card = document.createElement('div');
-      card.className = 'rounded-2xl border bg-white p-4 flex justify-between items-center';
+      card.className = 'rounded-2xl border bg-white p-4 shadow-sm';
       card.innerHTML = renderResidenteCard(r);
       els.list.appendChild(card);
     });
@@ -684,6 +721,7 @@
   // MODALES
   // =========================
   function openModal(mode, r = null) {
+    document.body.style.overflow = 'hidden';
     els.modal.classList.remove('hidden');
     els.modalForm.reset();
 
@@ -725,6 +763,7 @@
 
   function closeModal() {
     els.modal.classList.add('hidden');
+    document.body.style.overflow = '';
     state.editingId = null;
   }
 

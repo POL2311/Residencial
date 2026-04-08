@@ -1,7 +1,7 @@
 <div id="incidenciasView" class="space-y-4">
   <div id="incidenciasAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
 
-  <div class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
     <div class="flex items-center gap-3">
       <label class="text-sm">Mostrar:</label>
       <select id="filterEstado" class="rounded-xl border px-3 py-2 text-sm">
@@ -29,14 +29,15 @@
   <div id="incidenciasList" class="space-y-3"></div>
 
   <!-- Modal Nueva -->
-  <div id="incidenciaModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+  <div id="incidenciaModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-end md:items-center justify-center z-50 hidden p-0 md:p-4">
+    <div class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden bg-white rounded-t-2xl md:rounded-2xl shadow-2xl">
       <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
         <h2 class="text-base font-semibold">Reportar incidencia</h2>
         <button id="btnCloseIncidenciaModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">✕</button>
       </div>
 
-      <form id="incidenciaForm" class="px-4 py-4 space-y-3">
+      <form id="incidenciaForm" class="flex min-h-0 flex-1 flex-col">
+        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         <div id="incidenciaAddError" class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
         <div>
@@ -74,7 +75,8 @@
           </select>
         </div>
 
-        <div class="pt-2 flex justify-end gap-2">
+        </div>
+        <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" id="btnCancelIncidenciaAdd"
             class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-50">
             Cancelar
@@ -89,14 +91,15 @@
   </div>
 
   <!-- Modal Editar -->
-  <div id="incidenciaEditModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+  <div id="incidenciaEditModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-end md:items-center justify-center z-50 hidden p-0 md:p-4">
+    <div class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden bg-white rounded-t-2xl md:rounded-2xl shadow-2xl">
       <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
         <h2 class="text-base font-semibold">Actualizar incidencia</h2>
         <button id="btnCloseEditIncModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">✕</button>
       </div>
 
-      <form id="incidenciaEditForm" class="px-4 py-4 space-y-3">
+      <form id="incidenciaEditForm" class="flex min-h-0 flex-1 flex-col">
+        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         <div id="incidenciaEditError" class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
         <input type="hidden" name="id" />
@@ -126,7 +129,8 @@
           </select>
         </div>
 
-        <div class="pt-2 flex justify-end gap-2">
+        </div>
+        <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" id="btnCancelIncidenciaEdit"
             class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-50">
             Cancelar

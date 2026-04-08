@@ -184,6 +184,8 @@
     }
 
     els.modal?.classList.remove('hidden');
+    els.modal?.classList.add('flex');
+    document.body.style.overflow = 'hidden';
   }
 
   function openEditModal(guardia) {
@@ -209,13 +211,17 @@
     }
 
     els.modal?.classList.remove('hidden');
+    els.modal?.classList.add('flex');
+    document.body.style.overflow = 'hidden';
   }
 
   function closeModal() {
     els.modal?.classList.add('hidden');
+    els.modal?.classList.remove('flex');
     clearModalError();
     state.editingId = null;
     els.form?.reset();
+    document.body.style.overflow = '';
 
     const { password, passwordConfirm } = getFormFields();
     if (password) {
@@ -258,43 +264,79 @@
 
       const row = document.createElement('div');
       row.className =
-        'grid grid-cols-12 gap-3 items-center bg-white border border-slate-200 rounded-2xl px-4 py-4';
+        'bg-white border border-slate-200 rounded-2xl px-4 py-4 shadow-sm';
 
       row.innerHTML = `
-        <div class="col-span-4 min-w-0">
-          <div class="font-semibold text-slate-900 truncate">${escapeHtml(g.name || '—')}</div>
-          <div class="text-xs text-slate-500 truncate">${escapeHtml(g.email || '')}</div>
-        </div>
+        <div class="space-y-4">
+          <div class="md:hidden">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="font-semibold text-slate-900 truncate">${escapeHtml(g.name || '—')}</div>
+                <div class="text-xs text-slate-500 truncate">${escapeHtml(g.email || '')}</div>
+              </div>
+              <div>${badgeCuenta(Number(g.is_active) === 1)}</div>
+            </div>
+            <div class="mt-3 space-y-3">
+              <div>
+                ${
+                  telDigits
+                    ? `
+                      <div class="flex flex-wrap gap-2">
+                        <a href="tel:${escapeHtml(telDigits)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full border text-[11px] hover:bg-slate-50">
+                          📞 Llamar
+                        </a>
+                        <a href="https://wa.me/${escapeHtml(telWa)}" target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] hover:bg-emerald-200">
+                          💬 WhatsApp
+                        </a>
+                      </div>
+                      <div class="text-[11px] text-slate-500 mt-1">${escapeHtml(g.telefono || '')}</div>
+                    `
+                    : `<span class="text-[11px] text-slate-400">Sin teléfono</span>`
+                }
+              </div>
+              <div>${toggleHTML({ id: g.id, enServicio })}${turnoHTML(g)}</div>
+            </div>
+          </div>
 
-        <div class="col-span-3">
-          ${
-            telDigits
-              ? `
-                <div class="flex flex-wrap gap-2">
-                  <a href="tel:${escapeHtml(telDigits)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full border text-[11px] hover:bg-slate-50">
-                    📞 Llamar
-                  </a>
-                  <a href="https://wa.me/${escapeHtml(telWa)}" target="_blank" rel="noopener noreferrer"
-                     class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] hover:bg-emerald-200">
-                    💬 WhatsApp
-                  </a>
-                </div>
-                <div class="text-[11px] text-slate-500 mt-1">${escapeHtml(g.telefono || '')}</div>
-              `
-              : `<span class="text-[11px] text-slate-400">Sin teléfono</span>`
-          }
-        </div>
+          <div class="hidden md:grid md:grid-cols-12 md:gap-3 md:items-center">
+            <div class="col-span-4 min-w-0">
+              <div class="font-semibold text-slate-900 truncate">${escapeHtml(g.name || '—')}</div>
+              <div class="text-xs text-slate-500 truncate">${escapeHtml(g.email || '')}</div>
+            </div>
 
-        <div class="col-span-2">
-          ${toggleHTML({ id: g.id, enServicio })}
-          ${turnoHTML(g)}
-        </div>
+            <div class="col-span-3">
+              ${
+                telDigits
+                  ? `
+                    <div class="flex flex-wrap gap-2">
+                      <a href="tel:${escapeHtml(telDigits)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full border text-[11px] hover:bg-slate-50">
+                        📞 Llamar
+                      </a>
+                      <a href="https://wa.me/${escapeHtml(telWa)}" target="_blank" rel="noopener noreferrer"
+                         class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] hover:bg-emerald-200">
+                        💬 WhatsApp
+                      </a>
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-1">${escapeHtml(g.telefono || '')}</div>
+                  `
+                  : `<span class="text-[11px] text-slate-400">Sin teléfono</span>`
+              }
+            </div>
 
-        <div class="col-span-2">
-          ${badgeCuenta(Number(g.is_active) === 1)}
-        </div>
+            <div class="col-span-2">
+              ${toggleHTML({ id: g.id, enServicio })}
+              ${turnoHTML(g)}
+            </div>
 
-        <div class="col-span-1 flex justify-end gap-2 flex-wrap">
+            <div class="col-span-2">
+              ${badgeCuenta(Number(g.is_active) === 1)}
+            </div>
+
+            <div class="col-span-1"></div>
+          </div>
+
+          <div class="flex justify-end gap-2 flex-wrap">
           <button
             type="button"
             class="js-turno inline-flex items-center justify-center px-3 py-2 rounded-xl bg-sky-100 text-sky-700 text-[11px] hover:bg-sky-200"
@@ -321,6 +363,7 @@
           >
             🗑️
           </button>
+        </div>
         </div>
       `;
 

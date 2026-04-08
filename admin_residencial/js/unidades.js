@@ -122,25 +122,41 @@ console.log('[UNIDADES] JS ACTIVO');
     visibles.forEach(u => {
       const card = document.createElement('div');
       card.className =
-        'rounded-2xl border bg-white p-4 flex justify-between items-center';
+        'rounded-2xl border bg-white p-4 shadow-sm';
 
       card.innerHTML = `
-        <div class="grid grid-cols-4 gap-4 w-full items-center">
-
-          <div>
-            <div class="font-semibold text-slate-800">${u.clave}</div>
-            <div class="text-xs text-slate-500 capitalize">${u.tipo}</div>
+        <div class="space-y-4">
+          <div class="md:hidden">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="font-semibold text-slate-800">${u.clave}</div>
+                <div class="text-xs text-slate-500 capitalize">${u.tipo}</div>
+              </div>
+              <div class="text-right text-xs text-slate-400">${u.torre || 'Sin torre'}</div>
+            </div>
+            <dl class="mt-4 grid grid-cols-1 gap-3 text-sm">
+              <div>
+                <dt class="text-xs uppercase tracking-wide text-slate-400">Titular</dt>
+                <dd class="mt-1 text-slate-700">${u.titular || 'Sin titular'}</dd>
+              </div>
+            </dl>
           </div>
 
-          <div class="text-sm text-slate-700">
-            ${u.torre || '—'}
+          <div class="hidden md:grid md:grid-cols-4 md:gap-4 md:items-center">
+            <div>
+              <div class="font-semibold text-slate-800">${u.clave}</div>
+              <div class="text-xs text-slate-500 capitalize">${u.tipo}</div>
+            </div>
+            <div class="text-sm text-slate-700">
+              ${u.torre || '—'}
+            </div>
+            <div class="text-sm text-slate-600 text-center">
+              ${u.titular || 'Sin titular'}
+            </div>
+            <div></div>
           </div>
 
-          <div class="text-sm text-slate-600 text-center">
-            ${u.titular || 'Sin titular'}
-          </div>
-
-          <div class="flex justify-end gap-2">
+          <div class="flex flex-wrap justify-end gap-2">
             <button data-more="${u.id}"
               class="text-xs px-3 py-1 rounded-full bg-slate-100">
               Ver más
@@ -154,7 +170,6 @@ console.log('[UNIDADES] JS ACTIVO');
               Eliminar
             </button>
           </div>
-
         </div>
       `;
 
@@ -214,6 +229,7 @@ console.log('[UNIDADES] JS ACTIVO');
      MODAL CRUD
   ========================= */
   function openModal(unidad = null) {
+    document.body.style.overflow = 'hidden';
     els.modal.classList.remove('hidden');
     els.modalForm.reset();
 
@@ -232,6 +248,7 @@ console.log('[UNIDADES] JS ACTIVO');
 
   function closeModal() {
     els.modal.classList.add('hidden');
+    document.body.style.overflow = '';
     state.editingId = null;
   }
 
@@ -256,14 +273,14 @@ console.log('[UNIDADES] JS ACTIVO');
   ========================= */
   function openDetail(unidad) {
     els.detailContent.innerHTML = `
-      <div class="bg-white rounded-2xl p-6 space-y-4">
-        <div class="flex justify-between items-center">
+      <div class="bg-white rounded-2xl p-4 sm:p-6 space-y-4">
+        <div class="flex justify-between items-center gap-3">
           <h2 class="text-lg font-semibold">Detalle de unidad</h2>
           <button id="closeDetail"
             class="h-9 w-9 rounded-full border hover:bg-slate-100">✕</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><strong>Clave:</strong> ${unidad.clave}</div>
           <div><strong>Tipo:</strong> ${unidad.tipo}</div>
           <div><strong>Torre:</strong> ${unidad.torre || '—'}</div>
@@ -273,9 +290,10 @@ console.log('[UNIDADES] JS ACTIVO');
     `;
 
     els.detailModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 
     document.getElementById('closeDetail').onclick = () =>
-      els.detailModal.classList.add('hidden');
+      (els.detailModal.classList.add('hidden'), document.body.style.overflow = '');
   }
 
   /* =========================
