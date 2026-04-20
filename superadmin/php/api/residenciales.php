@@ -201,5 +201,5 @@ try {
 
     sa_json_out(false, ['error' => 'Acción no soportada.'], 400);
 } catch (Throwable $e) {
-    sa_json_out(false, ['error' => 'Error: ' . $e->getMessage()], 500);
+    app_json_exception($e, 'No pudimos procesar la información de residenciales.');
 }

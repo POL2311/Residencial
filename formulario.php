@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/config/app_security.php';
+
 // Conexión a la base de datos
 $host = 'localhost';
 $user = 'root';
@@ -7,12 +9,14 @@ $dbname = 'asher_db';
 $conn = new mysqli($host, $user, $pass, $dbname);
 
 if ($conn->connect_error) {
-  die("Conexión fallida: " . $conn->connect_error);
+  app_abort(500, 'No pudimos cargar el formulario', 'La conexión con el servicio de reclutamiento no está disponible en este momento.');
 }
 
 $mensajeExito = false;
+$errorFormulario = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  app_require_write_guard();
   $nombre = $_POST['nombre'] ?? '';
   $direccion = $_POST['direccion'] ?? '';
   $telefono_principal = $_POST['telefono_principal'] ?? '';
@@ -22,10 +26,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($nombre && $direccion && $telefono_principal && $consume_sustancias) {
     $stmt = $conn->prepare("INSERT INTO aspirantes (nombre, direccion, telefono_principal, telefono_secundario, correo, consume_sustancias) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssss", $nombre, $direccion, $telefono_principal, $telefono_secundario, $correo, $consume_sustancias);
-    $stmt->execute();
-    $stmt->close();
-    $mensajeExito = true;
+    if ($stmt) {
+      $stmt->bind_param("ssssss", $nombre, $direccion, $telefono_principal, $telefono_secundario, $correo, $consume_sustancias);
+      if ($stmt->execute()) {
+        $mensajeExito = true;
+      } else {
+        $errorFormulario = 'No pudimos registrar tu solicitud. Inténtalo nuevamente.';
+      }
+      $stmt->close();
+    } else {
+      $errorFormulario = 'No pudimos preparar tu solicitud en este momento.';
+    }
+  } else {
+    $errorFormulario = 'Completa todos los campos obligatorios para continuar.';
   }
 }
 ?>
@@ -69,6 +82,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </p>
 
     <form method="POST" class="space-y-4" id="registroForm">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+      <?php if ($errorFormulario): ?>
+        <div class="rounded-lg border border-red-300 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          <?= htmlspecialchars($errorFormulario, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+      <?php endif; ?>
       <div>
         <label class="block font-medium mb-1">Nombre completo *</label>
         <input type="text" name="nombre" required class="w-full border border-[#d4af37] bg-white bg-opacity-10 text-white placeholder-white px-4 py-2 rounded-lg focus:outline-none">

@@ -8,6 +8,10 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_login();
 require_role(['guardia','super_admin']);
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+  app_require_write_guard();
+}
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -287,5 +291,5 @@ try {
 
 } catch (Throwable $e) {
   if ($pdo->inTransaction()) $pdo->rollBack();
-  out(false, ['error' => 'Error: ' . $e->getMessage()], 500);
+  app_json_exception($e, 'No pudimos procesar el control de accesos.');
 }

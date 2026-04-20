@@ -13,6 +13,10 @@ require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_login();
 require_role(['admin_residencial']);
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    app_require_write_guard();
+}
+
 $sessionUser = current_user();
 $adminId = (int)($sessionUser['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
@@ -530,5 +534,5 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    json_out(false, ['error' => 'Error: ' . $e->getMessage()]);
+    app_json_exception($e, 'No pudimos procesar la información de residentes.');
 }

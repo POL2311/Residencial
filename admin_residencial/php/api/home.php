@@ -102,5 +102,5 @@ try {
         'servicios' => $servicios,
     ]);
 } catch (Throwable $e) {
-    json_out(false, ['error' => 'Error interno: ' . $e->getMessage()]);
+    app_json_exception($e, 'No pudimos cargar el inicio del residencial.');
 }

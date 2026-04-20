@@ -33,5 +33,5 @@ try {
         ],
     ]);
 } catch (Throwable $e) {
-    sa_json_out(false, ['error' => 'Error: ' . $e->getMessage()], 500);
+    app_json_exception($e, 'No pudimos cargar el contexto del panel.');
 }

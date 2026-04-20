@@ -92,5 +92,5 @@ try {
   ]);
 
 } catch (Throwable $e) {
-  out(false, ['error'=>'Error: '.$e->getMessage()], 500);
+  app_json_exception($e, 'No pudimos cargar el contexto del guardia.');
 }

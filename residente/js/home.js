@@ -20,10 +20,6 @@
         alert: $('homeAlert'),
         unitLabel: $('homeUnitLabel'),
         residentQuickName: $('residentQuickName'),
-        statAutos: $('homeStatAutos'),
-        statPendientes: $('homeStatPendientes'),
-        statEntregados: $('homeStatEntregados'),
-        statContactos: $('homeStatContactos'),
         announcementTrack: $('homeAnnouncementsTrack'),
         announcementDots: $('homeAnnouncementDots'),
         announcementPrev: $('homeAnnPrev'),
@@ -31,8 +27,10 @@
         services: $('homeServices'),
         servicesPrev: $('homeSrvPrev'),
         servicesNext: $('homeSrvNext'),
-        packages: $('homeRecentPackages'),
-        tips: $('homeTips'),
+        tipsModal: $('residentTipsModal'),
+        tipsModalBody: $('residentTipsModalBody'),
+        btnCloseTipsModal: $('btnCloseResidentTipsModal'),
+        btnDismissTipsModal: $('btnDismissResidentTipsModal'),
         actions: root.querySelectorAll('[data-home-nav]'),
     };
 
@@ -41,6 +39,7 @@
         services: [],
         currentAnnouncement: 0,
         autoAnnouncement: null,
+        tips: [],
     };
 
     function escapeHtml(s) {
@@ -69,14 +68,9 @@
         if (els.residentQuickName && !els.residentQuickName.textContent.trim()) {
             els.residentQuickName.textContent = 'Residente';
         }
-        if (els.statAutos) els.statAutos.textContent = '0';
-        if (els.statPendientes) els.statPendientes.textContent = '0';
-        if (els.statEntregados) els.statEntregados.textContent = '0';
-        if (els.statContactos) els.statContactos.textContent = '0';
 
         renderAnnouncements([]);
         renderServices([]);
-        renderRecentPackages([]);
         renderTips([
             {
                 title: 'Vincula tu unidad',
@@ -264,41 +258,51 @@
         `).join('');
     }
 
-    function renderRecentPackages(items) {
-        if (!els.packages) return;
-        if (!items?.length) {
-            els.packages.innerHTML = `
-                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-                  Todavía no hay movimientos de paquetería para tu unidad.
-                </div>
-            `;
-            return;
-        }
-
-        els.packages.innerHTML = items.map((item) => `
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div class="flex items-center justify-between gap-3">
-                <div class="min-w-0">
-                  <div class="text-sm font-semibold text-slate-800 truncate">${escapeHtml(item.empresa || 'Paquete')}</div>
-                  <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.created_at || '')}</div>
-                </div>
-                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estado)}">
-                  ${escapeHtml(statusLabel(item.estado))}
-                </span>
-              </div>
-              <p class="mt-3 text-sm text-slate-600">${escapeHtml(item.descripcion || 'Sin descripción')}</p>
-            </div>
-        `).join('');
-    }
-
     function renderTips(items) {
-        if (!els.tips) return;
-        els.tips.innerHTML = (items || []).map((item) => `
-            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+        state.tips = items || [];
+        if (!els.tipsModalBody) return;
+        els.tipsModalBody.innerHTML = state.tips.map((item) => `
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.title || '')}</div>
               <p class="mt-2 text-sm text-slate-600">${escapeHtml(item.text || '')}</p>
             </div>
         `).join('');
+    }
+
+    function todayKey() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function tipsDismissKey() {
+        return `residentTipsDismissed:${todayKey()}`;
+    }
+
+    function closeTipsModal() {
+        if (!els.tipsModal) return;
+        els.tipsModal.classList.add('hidden');
+        document.body.style.overflow = '';
+        try {
+            window.localStorage.setItem(tipsDismissKey(), '1');
+        } catch (_) {
+            // ignore storage issues and keep UX flowing
+        }
+    }
+
+    function maybeOpenTipsModal() {
+        if (!els.tipsModal || !state.tips.length) return;
+        let dismissed = false;
+        try {
+            dismissed = window.localStorage.getItem(tipsDismissKey()) === '1';
+        } catch (_) {
+            dismissed = false;
+        }
+        if (dismissed) return;
+        els.tipsModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
     function bindActions() {
@@ -328,6 +332,12 @@
         els.servicesNext?.addEventListener('click', () => {
             els.services?.scrollBy({ left: 320, behavior: 'smooth' });
         });
+
+        els.btnCloseTipsModal?.addEventListener('click', closeTipsModal);
+        els.btnDismissTipsModal?.addEventListener('click', closeTipsModal);
+        els.tipsModal?.addEventListener('click', (event) => {
+            if (event.target === els.tipsModal) closeTipsModal();
+        });
     }
 
     async function loadHome() {
@@ -341,7 +351,6 @@
         const ctxData = ctxJson.data || {};
         const user = ctxData.user || {};
         const ctx = home.ctx || ctxData.ctx || {};
-        const stats = home.stats || {};
 
         if (home.setup_incomplete || ctxData.setup_incomplete) {
             if (els.residentQuickName) {
@@ -361,15 +370,10 @@
             els.residentQuickName.textContent = user.name || 'Residente';
         }
 
-        if (els.statAutos) els.statAutos.textContent = stats.autos ?? 0;
-        if (els.statPendientes) els.statPendientes.textContent = stats.paquetes_pendientes ?? 0;
-        if (els.statEntregados) els.statEntregados.textContent = stats.paquetes_entregados ?? 0;
-        if (els.statContactos) els.statContactos.textContent = stats.contactos_emergencia ?? 0;
-
         renderAnnouncements(home.announcements || []);
         renderServices(home.services || []);
-        renderRecentPackages(home.recent_packages || []);
         renderTips(home.tips || []);
+        maybeOpenTipsModal();
     }
 
     bindActions();

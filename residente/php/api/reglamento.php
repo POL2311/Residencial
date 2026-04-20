@@ -47,5 +47,5 @@ try {
 
   json_out(true, ['data' => ['ctx' => $ctx, 'item' => $item]]);
 } catch (Throwable $e) {
-  json_out(false, ['error' => 'Error: ' . $e->getMessage()], 500);
+  app_json_exception($e, 'No pudimos cargar el reglamento.');
 }

@@ -24,9 +24,15 @@
         form: document.getElementById('residentVisitasForm'),
         btnClose: document.getElementById('btnCloseResidentVisitasModal'),
         btnCancel: document.getElementById('btnCancelResidentVisitasModal'),
+        codeModal: document.getElementById('residentVisitasCodeModal'),
+        codeValue: document.getElementById('residentVisitasCodeValue'),
+        btnCloseCode: document.getElementById('btnCloseResidentVisitasCodeModal'),
+        btnDismissCode: document.getElementById('btnDismissResidentVisitasCodeModal'),
+        btnCopyCode: document.getElementById('btnCopyResidentVisitasCode'),
     };
 
     let items = [];
+    let currentCode = '';
 
     function escapeHtml(s) {
         return String(s ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
@@ -73,6 +79,27 @@
     function closeModal() {
         els.modal.classList.add('hidden');
         els.form.reset();
+        document.body.style.overflow = '';
+    }
+
+    function openFormModal() {
+        els.modalTitle.textContent = 'Nueva visita';
+        els.modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCodeModal() {
+        if (!els.codeModal) return;
+        els.codeModal.classList.add('hidden');
+        currentCode = '';
+        document.body.style.overflow = '';
+    }
+
+    function openCodeModal(code) {
+        currentCode = String(code || '').trim();
+        if (els.codeValue) els.codeValue.textContent = currentCode || '----';
+        els.codeModal?.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
     function renderStats() {
@@ -107,8 +134,7 @@
         `).join('') : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Aun no has registrado visitas.</div>`;
 
         els.list.querySelectorAll('[data-code]').forEach((btn) => btn.addEventListener('click', async () => {
-            await navigator.clipboard?.writeText(btn.dataset.code || '');
-            showAlert('ok', `Codigo copiado: ${btn.dataset.code || ''}`);
+            openCodeModal(btn.dataset.code || '');
         }));
         els.list.querySelectorAll('[data-cancel]').forEach((btn) => btn.addEventListener('click', async () => {
             try {
@@ -127,13 +153,21 @@
         render();
     }
 
-    els.btnNew?.addEventListener('click', () => {
-        els.modalTitle.textContent = 'Nueva visita';
-        els.modal.classList.remove('hidden');
-    });
+    els.btnNew?.addEventListener('click', openFormModal);
     els.btnClose?.addEventListener('click', closeModal);
     els.btnCancel?.addEventListener('click', closeModal);
     els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
+    els.btnCloseCode?.addEventListener('click', closeCodeModal);
+    els.btnDismissCode?.addEventListener('click', closeCodeModal);
+    els.codeModal?.addEventListener('click', (e) => { if (e.target === els.codeModal) closeCodeModal(); });
+    els.btnCopyCode?.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard?.writeText(currentCode || '');
+            showAlert('ok', `Código copiado: ${currentCode || ''}`);
+        } catch (_) {
+            showAlert('error', 'No se pudo copiar el código automáticamente.');
+        }
+    });
     els.form?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(els.form);

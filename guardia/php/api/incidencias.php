@@ -13,6 +13,10 @@ require_once __DIR__ . '/../../../config/config.php';
 require_login();
 require_role(['guardia','super_admin']);
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+  app_require_write_guard();
+}
+
 $user = current_user();
 $uid = (int)($user['id'] ?? 0);
 
@@ -354,5 +358,5 @@ try {
   json_out(false, ['error' => 'Método no soportado.'], 405);
 
 } catch (Throwable $e) {
-  json_out(false, ['error' => 'Error: ' . $e->getMessage()], 500);
+  app_json_exception($e, 'No pudimos procesar las incidencias.');
 }

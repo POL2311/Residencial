@@ -14,6 +14,10 @@ require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_login();
 require_role(['admin_residencial']);
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    app_require_write_guard();
+}
+
 $user = current_user();
 $adminId = (int)($user['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
@@ -136,5 +140,5 @@ try {
 
     json_out(false, ['error' => 'Método no soportado.']);
 } catch (Throwable $e) {
-    json_out(false, ['error' => 'Error interno: ' . $e->getMessage()]);
+    app_json_exception($e, 'No pudimos guardar el reglamento.');
 }

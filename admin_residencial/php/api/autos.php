@@ -18,6 +18,10 @@ require_once __DIR__ . '/../../../config/config.php';
 require_login();
 require_role(['residente', 'admin_residencial']);
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    app_require_write_guard();
+}
+
 $user    = current_user();
 $uid     = (int)($user['id'] ?? 0);
 $isAdmin = ($user['role'] ?? ($user['tipo_usuario_nombre'] ?? '')) === 'admin_residencial';

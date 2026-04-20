@@ -12,6 +12,10 @@ require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_login();
 require_role(['admin_residencial']);
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+  app_require_write_guard();
+}
+
 $adminId = (int)(current_user()['id'] ?? 0);
 
 /* =========================

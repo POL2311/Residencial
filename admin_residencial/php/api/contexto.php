@@ -152,5 +152,5 @@ try {
   ]);
 
 } catch (Throwable $e) {
-  json_out(false, ['error' => 'Error: ' . $e->getMessage()]);
+  app_json_exception($e, 'No pudimos cargar el contexto del residencial.');
 }

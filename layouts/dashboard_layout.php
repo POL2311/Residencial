@@ -294,7 +294,7 @@ $user = current_user();
                 <span class="hidden sm:inline text-[11px] text-slate-300/80">
                     Sesión iniciada como <span class="font-semibold"><?= htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8') ?></span>
                 </span>
-                <a href="/logout.php"
+                <a href="<?= htmlspecialchars(app_logout_url(), ENT_QUOTES, 'UTF-8') ?>"
                    class="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-medium bg-white/10 border border-white/20 hover:bg-white/20 transition">
                     Cerrar sesión
                 </a>

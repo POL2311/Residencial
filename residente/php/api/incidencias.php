@@ -14,6 +14,10 @@ require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_login();
 require_role(['residente']);
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+  app_require_write_guard();
+}
+
 $uid = (int)(current_user()['id'] ?? 0);
 $action = $_POST['action'] ?? $_GET['action'] ?? 'list';
 
@@ -104,5 +108,5 @@ try {
 
   json_out(false, ['error' => 'Accion no soportada.'], 400);
 } catch (Throwable $e) {
-  json_out(false, ['error' => 'Error: ' . $e->getMessage()], 500);
+  app_json_exception($e, 'No pudimos procesar las incidencias.');
 }

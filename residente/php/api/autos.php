@@ -13,6 +13,10 @@ require_once __DIR__ . '/../../../config/config.php';
 require_login();
 require_role(['residente']);
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+  app_require_write_guard();
+}
+
 $user = current_user();
 $uid  = (int)($user['id'] ?? 0);
 
