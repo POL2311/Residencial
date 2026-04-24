@@ -122,6 +122,49 @@
     </div>
   </div>
 
+  <!-- RESIDENTE DIRECTO -->
+  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <div class="text-sm font-semibold text-slate-700">Acceso directo de residentes</div>
+        <div class="text-xs text-slate-500 mt-1">
+          Busca al residente y valida si está en lista blanca o negra para permitir su acceso directo.
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 flex flex-col lg:flex-row gap-2">
+      <input id="residentDirectSearch"
+        class="flex-1 rounded-xl border px-3 py-2 text-sm"
+        placeholder="Buscar por nombre, unidad, teléfono o email" />
+
+      <button id="btnBuscarResidenteDirecto"
+        class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm hover:opacity-95">
+        Buscar residente
+      </button>
+    </div>
+
+    <div id="residentDirectAlert"
+      class="hidden mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+    </div>
+
+    <div id="residentDirectResults" class="mt-4 space-y-3 text-sm text-slate-600">
+      Busca un residente para validar su acceso directo.
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <button id="btnConfirmarEntradaResidente"
+              class="rounded-xl bg-emerald-600 text-white px-4 py-2 text-sm shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-700">
+        Registrar entrada residente
+      </button>
+
+      <button id="btnConfirmarSalidaResidente"
+              class="rounded-xl bg-[#2E5D73] text-white px-4 py-2 text-sm shadow disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-95">
+        Registrar salida residente
+      </button>
+    </div>
+  </div>
+
   <!-- HISTORIAL -->
   <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
     <div class="flex items-center justify-between gap-3">

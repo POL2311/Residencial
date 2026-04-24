@@ -408,6 +408,11 @@
       return Array.isArray(json.data?.items) ? json.data.items : [];
     }
 
+    async function getResidentes(unidadId) {
+      const json = await fetchJSON(`${API}paqueteria.php?action=residentes&unidad_id=${encodeURIComponent(unidadId)}`);
+      return Array.isArray(json.data?.items) ? json.data.items : [];
+    }
+
     function openNewModal() {
       openModal('Nuevo paquete', `
         <form id="frmNewPkg" class="space-y-3">
@@ -415,6 +420,13 @@
             <label class="text-xs text-slate-500">Unidad *</label>
             <select id="pkgUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
               <option value="">Cargando unidades…</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-500">Residente destinatario *</label>
+            <select id="pkgResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" disabled>
+              <option value="">Selecciona primero una unidad</option>
             </select>
           </div>
 
@@ -450,6 +462,7 @@
       const $ = (id) => document.getElementById(id);
       const err = $('pkgErr');
       const unidadSel = $('pkgUnidad');
+      const residenteSel = $('pkgResidente');
       const saveBtn = $('pkgSave');
 
       function setErr(message = '') {
@@ -491,17 +504,55 @@
           }
         });
 
+      unidadSel?.addEventListener('change', async () => {
+        setErr('');
+        const unidadId = unidadSel.value || '';
+
+        if (!residenteSel) return;
+
+        if (!unidadId) {
+          residenteSel.innerHTML = `<option value="">Selecciona primero una unidad</option>`;
+          residenteSel.disabled = true;
+          return;
+        }
+
+        residenteSel.disabled = true;
+        residenteSel.innerHTML = `<option value="">Cargando residentes…</option>`;
+
+        try {
+          const residentes = await getResidentes(unidadId);
+          residenteSel.innerHTML =
+            `<option value="">Selecciona residente</option>` +
+            residentes.map((item) => `
+              <option value="${escapeHtml(String(item.id))}">
+                ${safeText(item.name)}${item.es_titular == 1 ? ' (titular)' : ''}${item.email ? ' · ' + safeText(item.email, '') : ''}
+              </option>
+            `).join('');
+          residenteSel.disabled = false;
+        } catch (e) {
+          residenteSel.innerHTML = `<option value="">Sin residentes disponibles</option>`;
+          residenteSel.disabled = true;
+          setErr(e.message || 'No se pudieron cargar los residentes.');
+        }
+      });
+
       $('frmNewPkg')?.addEventListener('submit', async (ev) => {
         ev.preventDefault();
         setErr('');
         setSaving(true);
 
         const unidadId = unidadSel?.value || '';
+        const residenteId = residenteSel?.value || '';
         const descripcion = $('pkgDesc')?.value?.trim() || '';
 
         if (!unidadId) {
           setSaving(false);
           return setErr('Selecciona una unidad.');
+        }
+
+        if (!residenteId) {
+          setSaving(false);
+          return setErr('Selecciona al residente destinatario.');
         }
 
         if (!descripcion) {
@@ -513,6 +564,7 @@
           const fd = new FormData();
           fd.set('action', 'create');
           fd.set('unidad_id', unidadId);
+          fd.set('residente_id', residenteId);
           fd.set('empresa', $('pkgEmpresa')?.value?.trim() || '');
           fd.set('descripcion', descripcion);
           fd.set('codigo_rastreo', $('pkgTrack')?.value?.trim() || '');

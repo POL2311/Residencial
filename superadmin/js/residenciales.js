@@ -129,7 +129,7 @@
         els.tableWrap.innerHTML = `
             <div class="space-y-3 md:hidden">
               ${visible.map((item) => `
-                <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                       <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
@@ -157,31 +157,33 @@
               `).join('')}
             </div>
             <div class="hidden md:block">
-              <table class="min-w-full text-sm">
-                <thead class="text-left text-xs uppercase tracking-wide text-slate-400">
-                  <tr>
-                    <th class="px-3 py-2">Residencial</th>
-                    <th class="px-3 py-2">Ubicación</th>
-                    <th class="px-3 py-2">Plan</th>
-                    <th class="px-3 py-2">Estatus</th>
-                    <th class="px-3 py-2">Creado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${visible.map((item) => `
-                    <tr class="border-t border-slate-100">
-                      <td class="px-3 py-3">
-                        <div class="font-medium text-slate-800">${escapeHtml(item.nombre)}</div>
-                        <div class="text-xs text-slate-500">Código: ${escapeHtml(item.codigo || '—')}</div>
-                      </td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml((item.ciudad || '') + ((item.estado ? ', ' + item.estado : '')))}<div class="text-xs text-slate-400">${escapeHtml(item.pais || '')}</div></td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml(item.nombre_plan || 'Sin plan')}<div class="text-xs text-slate-400">${escapeHtml(item.codigo_plan || '')}</div></td>
-                      <td class="px-3 py-3"><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estatus_plan)}">${escapeHtml(item.estatus_label || item.estatus_plan || '—')}</span></td>
-                      <td class="px-3 py-3 text-slate-500">${escapeHtml(item.created_at || '')}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
+              <div class="grid grid-cols-[minmax(220px,1.35fr)_minmax(180px,1fr)_minmax(180px,1fr)_140px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div>Residencial</div>
+                <div>Ubicación</div>
+                <div>Plan</div>
+                <div>Estatus</div>
+                <div>Creado</div>
+              </div>
+              <div class="mt-3 space-y-3">
+                ${visible.map((item) => `
+                  <article class="grid grid-cols-[minmax(220px,1.35fr)_minmax(180px,1fr)_minmax(180px,1fr)_140px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
+                      <div class="mt-1 text-xs text-slate-500">Código: ${escapeHtml(item.codigo || '—')}</div>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm text-slate-700">${escapeHtml((item.ciudad || '') + ((item.estado ? ', ' + item.estado : '')))}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.pais || '')}</div>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm text-slate-700">${escapeHtml(item.nombre_plan || 'Sin plan')}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.codigo_plan || 'Sin código')}</div>
+                    </div>
+                    <div><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estatus_plan)}">${escapeHtml(item.estatus_label || item.estatus_plan || '—')}</span></div>
+                    <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
+                  </article>
+                `).join('')}
+              </div>
             </div>
         `;
 

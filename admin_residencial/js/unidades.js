@@ -88,7 +88,7 @@ console.log('[UNIDADES] JS ACTIVO');
 
     try {
       const json = await fetchJSON(
-        '/admin_residencial/php/api/unidades.php'
+        '/Residencial/admin_residencial/php/api/unidades.php'
       );
 
       state.unidades = json.unidades || [];
@@ -122,7 +122,7 @@ console.log('[UNIDADES] JS ACTIVO');
     visibles.forEach(u => {
       const card = document.createElement('div');
       card.className =
-        'rounded-2xl border bg-white p-4 shadow-sm';
+        'rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm';
 
       card.innerHTML = `
         <div class="space-y-4">
@@ -153,20 +153,33 @@ console.log('[UNIDADES] JS ACTIVO');
             <div class="text-sm text-slate-600 text-center">
               ${u.titular || 'Sin titular'}
             </div>
-            <div></div>
+            <div class="flex justify-end gap-2 flex-wrap">
+              <button data-more="${u.id}"
+                class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+                Ver más
+              </button>
+              <button data-edit="${u.id}"
+                class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">
+                Editar
+              </button>
+              <button data-del="${u.id}"
+                class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-200">
+                Eliminar
+              </button>
+            </div>
           </div>
 
           <div class="flex flex-wrap justify-end gap-2">
             <button data-more="${u.id}"
-              class="text-xs px-3 py-1 rounded-full bg-slate-100">
+              class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
               Ver más
             </button>
             <button data-edit="${u.id}"
-              class="text-xs px-3 py-1 rounded-full border">
+              class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">
               Editar
             </button>
             <button data-del="${u.id}"
-              class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white">
+              class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-200">
               Eliminar
             </button>
           </div>

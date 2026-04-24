@@ -47,7 +47,7 @@ function get_context(PDO $pdo, int $uid): array {
   return $status['ctx'];
 }
 
-function list_items(PDO $pdo, int $residencialId, int $unidadId): array {
+function list_items(PDO $pdo, int $residencialId, int $unidadId, int $residenteId): array {
   $stmt = $pdo->prepare("
     SELECT
       p.*,
@@ -58,12 +58,14 @@ function list_items(PDO $pdo, int $residencialId, int $unidadId): array {
     LEFT JOIN users gg ON gg.id = p.guardia_id
     WHERE p.residencial_id = :rid
       AND p.unidad_id = :uid
+      AND p.residente_id = :residente_id
     ORDER BY p.created_at DESC, p.id DESC
     LIMIT 300
   ");
   $stmt->execute([
     'rid' => $residencialId,
     'uid' => $unidadId,
+    'residente_id' => $residenteId,
   ]);
 
   return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -82,7 +84,7 @@ try {
       'data' => [
         'ctx' => $ctx,
         'caseta_phone' => $ctx['caseta_phone'] ?? null,
-        'items' => list_items($pdo, $residencialId, $unidadId),
+        'items' => list_items($pdo, $residencialId, $unidadId, $uid),
       ]
     ]);
   }
@@ -97,12 +99,14 @@ try {
       WHERE id = :id
         AND residencial_id = :rid
         AND unidad_id = :uid
+        AND residente_id = :residente_id
       LIMIT 1
     ");
     $chk->execute([
       'id' => $paqId,
       'rid' => $residencialId,
       'uid' => $unidadId,
+      'residente_id' => $uid,
     ]);
     $row = $chk->fetch(PDO::FETCH_ASSOC);
 
@@ -114,17 +118,19 @@ try {
     $upd = $pdo->prepare("
       UPDATE paqueteria
       SET estado = 'entregado',
-          residente_id = COALESCE(residente_id, :residente_id),
+          residente_id = COALESCE(residente_id, :set_residente_id),
           updated_at = NOW()
       WHERE id = :id
         AND residencial_id = :rid
         AND unidad_id = :uid
+        AND residente_id = :where_residente_id
     ");
     $upd->execute([
-      'residente_id' => $uid,
+      'set_residente_id' => $uid,
       'id' => $paqId,
       'rid' => $residencialId,
       'uid' => $unidadId,
+      'where_residente_id' => $uid,
     ]);
 
     json_out(true, ['message' => 'Paquete confirmado como entregado.']);
@@ -142,12 +148,14 @@ try {
       WHERE id = :id
         AND residencial_id = :rid
         AND unidad_id = :uid
+        AND residente_id = :residente_id
       LIMIT 1
     ");
     $chk->execute([
       'id' => $paqId,
       'rid' => $residencialId,
       'uid' => $unidadId,
+      'residente_id' => $uid,
     ]);
     $row = $chk->fetch(PDO::FETCH_ASSOC);
 
@@ -159,19 +167,21 @@ try {
     $upd = $pdo->prepare("
       UPDATE paqueteria
       SET estado = 'devuelto',
-          residente_id = COALESCE(residente_id, :residente_id),
+          residente_id = COALESCE(residente_id, :set_residente_id),
           notas = TRIM(CONCAT(COALESCE(notas, ''), CASE WHEN COALESCE(notas, '') = '' THEN '' ELSE '\n' END, :motivo)),
           updated_at = NOW()
       WHERE id = :id
         AND residencial_id = :rid
         AND unidad_id = :uid
+        AND residente_id = :where_residente_id
     ");
     $upd->execute([
-      'residente_id' => $uid,
+      'set_residente_id' => $uid,
       'motivo' => 'Devuelto por residente: ' . $motivo,
       'id' => $paqId,
       'rid' => $residencialId,
       'uid' => $unidadId,
+      'where_residente_id' => $uid,
     ]);
 
     json_out(true, ['message' => 'Paquete marcado como devuelto.']);

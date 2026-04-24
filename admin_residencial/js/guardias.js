@@ -135,19 +135,18 @@
     `;
   }
 
-  function turnoHTML(g) {
-    if (!g.nombre_turno) {
-      return `<div class="text-[11px] text-slate-400 mt-1">Sin turno asignado</div>`;
-    }
-
-    const inicio = (g.hora_inicio || '').slice(0, 5);
-    const fin = (g.hora_fin || '').slice(0, 5);
-
+  function servicioSummaryHTML(g) {
+    const btnLabel = g.nombre_turno ? 'Ver más' : 'Asignar';
     return `
-      <div class="mt-2 text-[11px] text-slate-600">
-        <div class="font-medium">${escapeHtml(g.nombre_turno)}</div>
-        <div>${escapeHtml(inicio)} - ${escapeHtml(fin)}</div>
-        <div class="text-slate-400">${escapeHtml(g.dias_semana || '')}</div>
+      <div class="flex items-center gap-3">
+        ${toggleHTML({ id: g.id, enServicio: Number(g.guardia_en_servicio || 0) === 1 })}
+        <button
+          type="button"
+          class="js-turno inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          data-id="${g.id}"
+        >
+          ${btnLabel}
+        </button>
       </div>
     `;
   }
@@ -264,7 +263,7 @@
 
       const row = document.createElement('div');
       row.className =
-        'bg-white border border-slate-200 rounded-2xl px-4 py-4 shadow-sm';
+        'bg-white border border-slate-200 rounded-2xl px-5 py-4 shadow-sm';
 
       row.innerHTML = `
         <div class="space-y-4">
@@ -282,25 +281,41 @@
                   telDigits
                     ? `
                       <div class="flex flex-wrap gap-2">
-                        <a href="tel:${escapeHtml(telDigits)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full border text-[11px] hover:bg-slate-50">
-                          📞 Llamar
+                        <a href="tel:${escapeHtml(telDigits)}" class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+                          Llamar
                         </a>
                         <a href="https://wa.me/${escapeHtml(telWa)}" target="_blank" rel="noopener noreferrer"
-                           class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] hover:bg-emerald-200">
-                          💬 WhatsApp
+                           class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-200">
+                          WhatsApp
                         </a>
                       </div>
-                      <div class="text-[11px] text-slate-500 mt-1">${escapeHtml(g.telefono || '')}</div>
+                      <div class="text-xs text-slate-500 mt-1">${escapeHtml(g.telefono || '')}</div>
                     `
                     : `<span class="text-[11px] text-slate-400">Sin teléfono</span>`
                 }
               </div>
-              <div>${toggleHTML({ id: g.id, enServicio })}${turnoHTML(g)}</div>
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                ${servicioSummaryHTML(g)}
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="js-edit inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+                data-id="${g.id}">
+                Editar
+              </button>
+              <button
+                type="button"
+                class="js-delete inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-200"
+                data-id="${g.id}">
+                Eliminar
+              </button>
             </div>
           </div>
 
-          <div class="hidden md:grid md:grid-cols-12 md:gap-3 md:items-center">
-            <div class="col-span-4 min-w-0">
+          <div class="hidden md:grid md:grid-cols-12 md:gap-4 md:items-center">
+            <div class="col-span-3 min-w-0">
               <div class="font-semibold text-slate-900 truncate">${escapeHtml(g.name || '—')}</div>
               <div class="text-xs text-slate-500 truncate">${escapeHtml(g.email || '')}</div>
             </div>
@@ -310,60 +325,44 @@
                 telDigits
                   ? `
                     <div class="flex flex-wrap gap-2">
-                      <a href="tel:${escapeHtml(telDigits)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full border text-[11px] hover:bg-slate-50">
-                        📞 Llamar
+                      <a href="tel:${escapeHtml(telDigits)}" class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+                        Llamar
                       </a>
                       <a href="https://wa.me/${escapeHtml(telWa)}" target="_blank" rel="noopener noreferrer"
-                         class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] hover:bg-emerald-200">
-                        💬 WhatsApp
+                         class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-200">
+                        WhatsApp
                       </a>
                     </div>
-                    <div class="text-[11px] text-slate-500 mt-1">${escapeHtml(g.telefono || '')}</div>
+                    <div class="text-xs text-slate-500 mt-1">${escapeHtml(g.telefono || '')}</div>
                   `
                   : `<span class="text-[11px] text-slate-400">Sin teléfono</span>`
               }
             </div>
 
-            <div class="col-span-2">
-              ${toggleHTML({ id: g.id, enServicio })}
-              ${turnoHTML(g)}
+            <div class="col-span-3">
+              ${servicioSummaryHTML(g)}
             </div>
 
-            <div class="col-span-2">
+            <div class="col-span-1">
               ${badgeCuenta(Number(g.is_active) === 1)}
             </div>
 
-            <div class="col-span-1"></div>
+            <div class="col-span-2 flex justify-end gap-2 flex-wrap">
+              <button
+                type="button"
+                class="js-edit inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+                data-id="${g.id}">
+                Editar
+              </button>
+
+              <button
+                type="button"
+                class="js-delete inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-200"
+                data-id="${g.id}">
+                Eliminar
+              </button>
+            </div>
           </div>
-
-          <div class="flex justify-end gap-2 flex-wrap">
-          <button
-            type="button"
-            class="js-turno inline-flex items-center justify-center px-3 py-2 rounded-xl bg-sky-100 text-sky-700 text-[11px] hover:bg-sky-200"
-            data-id="${g.id}"
-            title="Gestionar turno"
-          >
-            🕒
-          </button>
-
-          <button
-            type="button"
-            class="js-edit inline-flex items-center justify-center px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-[11px] hover:bg-slate-200"
-            data-id="${g.id}"
-            title="Editar guardia"
-          >
-            ✏️
-          </button>
-
-          <button
-            type="button"
-            class="js-delete inline-flex items-center justify-center px-3 py-2 rounded-xl bg-rose-100 text-rose-700 text-[11px] hover:bg-rose-200"
-            data-id="${g.id}"
-            title="Eliminar guardia"
-          >
-            🗑️
-          </button>
-        </div>
         </div>
       `;
 

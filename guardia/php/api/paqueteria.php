@@ -65,11 +65,13 @@ function validate_unit(PDO $pdo, int $unidadId, int $residencialId): ?array {
   return $row ?: null;
 }
 
-function residente_for_unit(PDO $pdo, int $unidadId, int $residencialId): ?array {
+function residentes_for_unit(PDO $pdo, int $unidadId, int $residencialId): array {
   $stmt = $pdo->prepare("
     SELECT
       ru.user_id AS id,
-      us.name
+      us.name,
+      us.email,
+      ru.es_titular
     FROM residentes_unidades ru
     JOIN unidades u ON u.id = ru.unidad_id
     JOIN users us ON us.id = ru.user_id
@@ -77,9 +79,32 @@ function residente_for_unit(PDO $pdo, int $unidadId, int $residencialId): ?array
       AND ru.activo = 1
       AND u.residencial_id = :rid
     ORDER BY ru.es_titular DESC, us.name ASC
+  ");
+  $stmt->execute([
+    'unidad_id' => $unidadId,
+    'rid' => $residencialId,
+  ]);
+
+  return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+}
+
+function residente_in_unit(PDO $pdo, int $residenteId, int $unidadId, int $residencialId): ?array {
+  $stmt = $pdo->prepare("
+    SELECT
+      ru.user_id AS id,
+      us.name,
+      us.email
+    FROM residentes_unidades ru
+    JOIN unidades u ON u.id = ru.unidad_id
+    JOIN users us ON us.id = ru.user_id
+    WHERE ru.user_id = :residente_id
+      AND ru.unidad_id = :unidad_id
+      AND ru.activo = 1
+      AND u.residencial_id = :rid
     LIMIT 1
   ");
   $stmt->execute([
+    'residente_id' => $residenteId,
     'unidad_id' => $unidadId,
     'rid' => $residencialId,
   ]);
@@ -141,12 +166,27 @@ try {
     json_out(true, ['data' => ['items' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []]]);
   }
 
+  if ($method === 'GET' && $action === 'residentes') {
+    $unidadId = (int)($_GET['unidad_id'] ?? 0);
+    if ($unidadId <= 0) {
+      json_out(false, ['error' => 'Unidad inválida.'], 422);
+    }
+
+    $unidad = validate_unit($pdo, $unidadId, $residencialId);
+    if (!$unidad) {
+      json_out(false, ['error' => 'La unidad no pertenece a este residencial.'], 422);
+    }
+
+    json_out(true, ['data' => ['items' => residentes_for_unit($pdo, $unidadId, $residencialId)]]);
+  }
+
   if ($method === 'GET' && $action === 'list') {
     json_out(true, ['data' => ['items' => list_items($pdo, $residencialId)]]);
   }
 
   if ($method === 'POST' && $action === 'create') {
     $unidadId = (int)($_POST['unidad_id'] ?? 0);
+    $residenteId = (int)($_POST['residente_id'] ?? 0);
     $empresa = clean_string($_POST['empresa'] ?? '', 100);
     $descripcion = clean_string($_POST['descripcion'] ?? '', 255);
     $codigoRastreo = clean_string($_POST['codigo_rastreo'] ?? '', 100);
@@ -160,12 +200,19 @@ try {
       json_out(false, ['error' => 'La descripción del paquete es obligatoria.'], 422);
     }
 
+    if ($residenteId <= 0) {
+      json_out(false, ['error' => 'Debes seleccionar al residente destinatario.'], 422);
+    }
+
     $unidad = validate_unit($pdo, $unidadId, $residencialId);
     if (!$unidad) {
       json_out(false, ['error' => 'La unidad no pertenece a este residencial.'], 422);
     }
 
-    $residente = residente_for_unit($pdo, $unidadId, $residencialId);
+    $residente = residente_in_unit($pdo, $residenteId, $unidadId, $residencialId);
+    if (!$residente) {
+      json_out(false, ['error' => 'El residente seleccionado no pertenece a esta unidad.'], 422);
+    }
 
     $stmt = $pdo->prepare("
       INSERT INTO paqueteria (
@@ -193,7 +240,7 @@ try {
     $stmt->execute([
       'rid' => $residencialId,
       'unidad_id' => $unidadId,
-      'residente_id' => $residente ? (int)$residente['id'] : null,
+      'residente_id' => (int)$residente['id'],
       'guardia_id' => $uid,
       'empresa' => $empresa !== '' ? $empresa : null,
       'descripcion' => $descripcion,

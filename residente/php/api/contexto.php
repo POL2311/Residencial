@@ -28,6 +28,20 @@ function clean_str(?string $v): string {
   return $v;
 }
 
+function table_exists(PDO $pdo, string $table): bool {
+  try {
+    $stmt = $pdo->prepare("
+      SELECT COUNT(*)
+      FROM INFORMATION_SCHEMA.TABLES
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :t
+    ");
+    $stmt->execute(['t' => $table]);
+    return (int)$stmt->fetchColumn() > 0;
+  } catch (Throwable $e) {
+    return false;
+  }
+}
+
 function join_parts(array $parts, string $sep = ' · '): string {
   $out = [];
   foreach ($parts as $p) {
@@ -142,6 +156,40 @@ try {
     $autos = $stmtA->fetchAll(PDO::FETCH_ASSOC) ?: [];
   } catch (Throwable $e) { $autos = []; }
 
+  $notifications = [
+    'total' => 0,
+    'latest_id' => 0,
+    'latest_updated_at' => null,
+  ];
+
+  if ($ctx && table_exists($pdo, 'comunicados_residenciales')) {
+    try {
+      $stmtN = $pdo->prepare("
+        SELECT
+          COUNT(*) AS total,
+          MAX(id) AS latest_id,
+          MAX(COALESCE(updated_at, fecha_publicacion)) AS latest_updated_at
+        FROM comunicados_residenciales
+        WHERE residencial_id = :rid
+          AND visible_para_residentes = 1
+          AND estado = 'publicado'
+      ");
+      $stmtN->execute(['rid' => (int)$ctx['residencial_id']]);
+      $rowN = $stmtN->fetch(PDO::FETCH_ASSOC) ?: [];
+      $notifications = [
+        'total' => (int)($rowN['total'] ?? 0),
+        'latest_id' => (int)($rowN['latest_id'] ?? 0),
+        'latest_updated_at' => $rowN['latest_updated_at'] ?? null,
+      ];
+    } catch (Throwable $e) {
+      $notifications = [
+        'total' => 0,
+        'latest_id' => 0,
+        'latest_updated_at' => null,
+      ];
+    }
+  }
+
   json_out(true, [
     'data' => [
       'user' => $user,
@@ -154,6 +202,7 @@ try {
       'residencial_direccion' => $residencial_direccion,
       'unidad_detalle' => $unidad_detalle,
       'autos' => $autos,
+      'notifications' => $notifications,
       'setup_incomplete' => $setupIncomplete,
       'setup_message' => $setupIncomplete ? (string)($ctxStatus['error'] ?? 'Falta configurar el contexto del residente.') : null,
       'setup_missing' => $setupIncomplete ? ($ctxStatus['missing'] ?? []) : []

@@ -34,7 +34,10 @@ CREATE TABLE `accesos_guardia` (
   `fecha_hora` datetime NOT NULL DEFAULT current_timestamp(),
   `tipo_evento` enum('entrada','salida','verificacion') NOT NULL DEFAULT 'entrada',
   `resultado` enum('permitido','denegado') NOT NULL DEFAULT 'permitido',
-  `observaciones` varchar(255) DEFAULT NULL
+  `observaciones` varchar(255) DEFAULT NULL,
+  `origen_acceso` enum('visita','residente_directo') NOT NULL DEFAULT 'visita',
+  `residente_id` int(11) DEFAULT NULL,
+  `unidad_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -482,6 +485,9 @@ CREATE TABLE `residentes_unidades` (
   `unidad_id` int(11) NOT NULL,
   `es_titular` tinyint(1) NOT NULL DEFAULT 1,
   `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `acceso_baneado_manual` tinyint(1) NOT NULL DEFAULT 0,
+  `acceso_baneo_motivo` varchar(255) DEFAULT NULL,
+  `acceso_baneado_at` datetime DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

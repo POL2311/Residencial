@@ -4,6 +4,8 @@
         addr: document.getElementById('residentAddress'),
         btnEdit: document.getElementById('btnEditAddress'),
         cars: document.getElementById('carsContainer'),
+        notificationsButton: document.getElementById('residentNotificationsButton'),
+        notificationsBadge: document.getElementById('residentNotificationsBadge'),
         body: document.getElementById('dashboardBody'),
         modal: document.getElementById('carModal'),
         modalBody: document.getElementById('carModalBody'),
@@ -20,10 +22,13 @@
     const BASE = baseResidentPath();
     const API = BASE + 'php/api/';
     const VIEWS = BASE + 'templates/views/';
-    const inlineViews = new Set(['home', 'visitas', 'incidencias', 'paqueteria', 'autos', 'pagos', 'comunicados', 'reglamento', 'perfil']);
+    const inlineViews = new Set(['home', 'visitas', 'incidencias', 'paqueteria', 'autos', 'pagos', 'comunicados', 'servicios', 'reglamento', 'perfil']);
 
     let currentViewScript = null;
     let currentViewName = null;
+    let currentNotificationMeta = null;
+    let currentNotificationUserId = 0;
+    let currentNotificationResidencialId = 0;
 
     function loadViewScript(view) {
         return new Promise((resolve) => {
@@ -36,6 +41,7 @@
             autos: BASE + 'js/autos.js',
             pagos: BASE + 'js/pagos.js',
             comunicados: BASE + 'js/comunicados.js',
+            servicios: BASE + 'js/servicios.js',
             reglamento: BASE + 'js/reglamento.js',
         };
 
@@ -90,6 +96,9 @@
         });
 
         await loadViewScript(view);
+        if (view === 'comunicados') {
+            markNotificationsSeen();
+        }
         window.location.hash = view;
     }
 
@@ -119,6 +128,9 @@
 
             const data = json.data || {};
             const ctx = data.ctx || {};
+            currentNotificationMeta = data.notifications || null;
+            currentNotificationUserId = Number(data.user?.id || 0);
+            currentNotificationResidencialId = Number(ctx.residencial_id || 0);
 
             els.name.textContent = data.user?.name || 'Residente';
 
@@ -140,11 +152,53 @@
             }
 
             renderCars(data.autos || []);
+            updateNotificationsUI();
         } catch (e) {
             console.warn('loadContext() fallo:', e);
             els.name.textContent = 'Residente';
             els.addr.textContent = '—';
             els.cars.innerHTML = `<span class="text-xs opacity-90">Sin autos</span>`;
+            currentNotificationMeta = null;
+            updateNotificationsUI();
+        }
+    }
+
+    function notificationsStorageKey() {
+        return `resident-notifications-seen:${currentNotificationUserId || 0}:${currentNotificationResidencialId || 0}`;
+    }
+
+    function currentNotificationMarker() {
+        return String(currentNotificationMeta?.latest_updated_at || currentNotificationMeta?.latest_id || '');
+    }
+
+    function markNotificationsSeen() {
+        const marker = currentNotificationMarker();
+        if (!marker) return;
+        try {
+            window.localStorage.setItem(notificationsStorageKey(), marker);
+        } catch (_) {
+            // ignore storage issues
+        }
+        updateNotificationsUI();
+    }
+
+    function updateNotificationsUI() {
+        if (!els.notificationsBadge) return;
+        const total = Number(currentNotificationMeta?.total || 0);
+        const marker = currentNotificationMarker();
+        let seenMarker = '';
+        try {
+            seenMarker = window.localStorage.getItem(notificationsStorageKey()) || '';
+        } catch (_) {
+            seenMarker = '';
+        }
+        const unread = total > 0 && marker !== '' && marker !== seenMarker;
+        els.notificationsBadge.classList.toggle('hidden', !unread);
+        if (els.notificationsButton) {
+            els.notificationsButton.setAttribute('aria-label', unread ? 'Hay comunicados nuevos' : 'Comunicados');
+            els.notificationsButton.title = unread ? 'Hay comunicados nuevos' : 'Comunicados';
+            els.notificationsButton.classList.toggle('ring-2', unread);
+            els.notificationsButton.classList.toggle('ring-white/40', unread);
         }
     }
 
@@ -228,6 +282,7 @@
         loadView,
         navigate: loadView,
         getCurrentView: () => currentViewName,
+        markComunicadosSeen: markNotificationsSeen,
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -236,6 +291,7 @@
         });
 
         els.btnEdit?.addEventListener('click', () => loadView('perfil'));
+        els.notificationsButton?.addEventListener('click', () => loadView('comunicados'));
 
         els.modalClose?.addEventListener('click', closeCarModal);
         els.modal?.addEventListener('click', (e) => {

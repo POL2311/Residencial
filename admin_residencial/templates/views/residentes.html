@@ -5,7 +5,10 @@
 
   <!-- HEADER -->
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <h1 class="text-lg font-semibold text-slate-800">Residentes</h1>
+    <div>
+      <div class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Gestión residencial</div>
+      <h1 class="mt-1 text-2xl font-semibold text-slate-800">Residentes</h1>
+    </div>
     <button id="btnAddResidente"
       class="hidden text-xs px-4 py-2 rounded-full bg-[#2E5D73] text-white hover:opacity-95">
       + Agregar residente
@@ -20,21 +23,21 @@
   </div>
 
   <!-- SEARCH -->
-  <div class="mb-4">
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
     <input
       id="residentSearch"
       type="text"
       placeholder="Buscar residente, unidad o teléfono..."
-      class="w-full rounded-xl border px-4 py-2 text-sm"
+      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm"
     />
   </div>
 
   <!-- HEADERS -->
-  <div class="hidden md:grid grid-cols-4 gap-4 px-3 mb-3 text-xs font-semibold text-slate-500">
+  <div class="hidden md:grid grid-cols-4 gap-4 rounded-2xl border border-slate-200 bg-white/70 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 shadow-sm">
     <div>Residente</div>
-    <div>Calle / Casa</div>
-    <div class="text-center">Estado servicio</div>
-    <div class="text-right">Más acciones</div>
+    <div>Unidad</div>
+    <div class="text-center">Servicio</div>
+    <div class="text-right">Acciones</div>
   </div>
 
   <!-- LIST -->

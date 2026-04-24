@@ -150,7 +150,7 @@
         els.usersWrap.innerHTML = state.users.length ? `
             <div class="space-y-3 md:hidden">
               ${visible.map((item) => `
-                <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                       <div class="font-semibold text-slate-800">${escapeHtml(item.name)}</div>
@@ -167,31 +167,27 @@
               `).join('')}
             </div>
             <div class="hidden md:block">
-              <table class="min-w-full text-sm">
-                <thead class="text-left text-xs uppercase tracking-wide text-slate-400">
-                  <tr>
-                    <th class="px-3 py-2">Nombre</th>
-                    <th class="px-3 py-2">Email</th>
-                    <th class="px-3 py-2">Rol</th>
-                    <th class="px-3 py-2">Estado</th>
-                    <th class="px-3 py-2">Creado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${visible.map((item) => `
-                    <tr class="border-t border-slate-100">
-                      <td class="px-3 py-3">
-                        <div class="font-medium text-slate-800">${escapeHtml(item.name)}</div>
-                        <div class="text-xs text-slate-500">${escapeHtml(item.telefono || 'Sin teléfono')}</div>
-                      </td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml(item.email)}</td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml(item.rol_nombre)}</td>
-                      <td class="px-3 py-3">${userStatusPill(item)}</td>
-                      <td class="px-3 py-3 text-slate-500">${escapeHtml(item.created_at || '')}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
+              <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_180px_130px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div>Nombre</div>
+                <div>Email</div>
+                <div>Rol</div>
+                <div>Estado</div>
+                <div>Creado</div>
+              </div>
+              <div class="mt-3 space-y-3">
+                ${visible.map((item) => `
+                  <article class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_180px_130px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-slate-800">${escapeHtml(item.name)}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.telefono || 'Sin teléfono')}</div>
+                    </div>
+                    <div class="text-sm text-slate-700 min-w-0">${escapeHtml(item.email)}</div>
+                    <div class="text-sm text-slate-700">${escapeHtml(item.rol_nombre)}</div>
+                    <div>${userStatusPill(item)}</div>
+                    <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
+                  </article>
+                `).join('')}
+              </div>
             </div>
         ` : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">No hay usuarios que coincidan con el filtro actual.</div>`;
 
@@ -206,7 +202,7 @@
         els.assignmentsWrap.innerHTML = state.assignments.length ? `
             <div class="space-y-3 md:hidden">
               ${visible.map((item) => `
-                <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                       <div class="font-semibold text-slate-800">${escapeHtml(item.usuario_nombre)}</div>
@@ -223,31 +219,30 @@
               `).join('')}
             </div>
             <div class="hidden md:block">
-              <table class="min-w-full text-sm">
-                <thead class="text-left text-xs uppercase tracking-wide text-slate-400">
-                  <tr>
-                    <th class="px-3 py-2">Usuario</th>
-                    <th class="px-3 py-2">Residencial</th>
-                    <th class="px-3 py-2">Rol</th>
-                    <th class="px-3 py-2">Principal</th>
-                    <th class="px-3 py-2">Asignado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${visible.map((item) => `
-                    <tr class="border-t border-slate-100">
-                      <td class="px-3 py-3">
-                        <div class="font-medium text-slate-800">${escapeHtml(item.usuario_nombre)}</div>
-                        <div class="text-xs text-slate-500">${escapeHtml(item.usuario_email)}</div>
-                      </td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml(item.residencial_nombre)}<div class="text-xs text-slate-500">${escapeHtml(item.residencial_codigo)}</div></td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml(item.usuario_rol)}</td>
-                      <td class="px-3 py-3">${Number(item.es_principal || 0) === 1 ? '<span class="inline-flex rounded-full px-2.5 py-1 text-[11px] bg-sky-50 text-sky-700 border border-sky-200">Sí</span>' : '<span class="text-slate-500">No</span>'}</td>
-                      <td class="px-3 py-3 text-slate-500">${escapeHtml(item.created_at || '')}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
+              <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_160px_120px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div>Usuario</div>
+                <div>Residencial</div>
+                <div>Rol</div>
+                <div>Principal</div>
+                <div>Asignado</div>
+              </div>
+              <div class="mt-3 space-y-3">
+                ${visible.map((item) => `
+                  <article class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_160px_120px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-slate-800">${escapeHtml(item.usuario_nombre)}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.usuario_email)}</div>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm text-slate-700">${escapeHtml(item.residencial_nombre)}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.residencial_codigo)}</div>
+                    </div>
+                    <div class="text-sm text-slate-700">${escapeHtml(item.usuario_rol)}</div>
+                    <div>${Number(item.es_principal || 0) === 1 ? '<span class="inline-flex rounded-full px-2.5 py-1 text-[11px] bg-sky-50 text-sky-700 border border-sky-200">Sí</span>' : '<span class="text-sm text-slate-500">No</span>'}</div>
+                    <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
+                  </article>
+                `).join('')}
+              </div>
             </div>
         ` : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Aún no hay asignaciones registradas.</div>`;
 

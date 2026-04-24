@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/auth.php';
+require_once __DIR__ . '/../../../config/resident_access.php';
 
 require_login();
 require_role(['guardia','super_admin']);
@@ -116,6 +117,7 @@ function evaluar_visita(array $visita): array {
 $user = current_user();
 $guardiaId = (int)($user['id'] ?? 0);
 $residencialId = get_residencial_id($pdo, $guardiaId);
+resident_access_ensure_schema($pdo);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_GET['action'] ?? $_POST['action'] ?? 'buscar';
@@ -157,6 +159,65 @@ try {
         'eval' => $ev,
       ]
     ]);
+  }
+
+  if ($method === 'GET' && $action === 'buscar_residente') {
+    $q = strv($_GET['q'] ?? '', 120);
+    if ($q === '') {
+      out(false, ['error' => 'Escribe algo para buscar al residente.'], 422);
+    }
+
+    $stmt = $pdo->prepare("
+      SELECT
+        u.id AS user_id,
+        u.name,
+        u.email,
+        u.telefono,
+        u.is_active,
+        ur.residencial_id,
+        ru.id AS resid_unid_id,
+        ru.unidad_id,
+        ru.activo AS activo_servicio,
+        ru.acceso_baneado_manual,
+        ru.acceso_baneo_motivo,
+        un.clave AS unidad_clave
+      FROM users u
+      JOIN tipos_usuario t ON t.id = u.tipo_usuario_id
+      JOIN usuarios_residenciales ur ON ur.user_id = u.id
+      LEFT JOIN residentes_unidades ru ON ru.user_id = u.id
+      LEFT JOIN unidades un ON un.id = ru.unidad_id
+      WHERE ur.residencial_id = :rid
+        AND t.nombre = 'residente'
+        AND (
+          u.name LIKE :q
+          OR u.email LIKE :q
+          OR u.telefono LIKE :q
+          OR un.clave LIKE :q
+        )
+      ORDER BY u.name ASC
+      LIMIT 20
+    ");
+    $stmt->execute([
+      'rid' => $residencialId,
+      'q' => '%' . $q . '%',
+    ]);
+
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    $items = array_map(function (array $row) use ($pdo) {
+      $access = resident_access_status($pdo, $row);
+      return [
+        'user_id' => (int)$row['user_id'],
+        'resid_unid_id' => (int)($row['resid_unid_id'] ?? 0),
+        'name' => (string)($row['name'] ?? ''),
+        'email' => (string)($row['email'] ?? ''),
+        'telefono' => (string)($row['telefono'] ?? ''),
+        'unidad_id' => (int)($row['unidad_id'] ?? 0),
+        'unidad_clave' => (string)($row['unidad_clave'] ?? '—'),
+        'access' => $access,
+      ];
+    }, $rows);
+
+    out(true, ['data' => ['items' => $items]]);
   }
 
   if ($method === 'POST' && $action === 'scan') {
@@ -259,6 +320,59 @@ try {
     ]);
   }
 
+  if ($method === 'POST' && $action === 'scan_residente') {
+    $residentId = intv_safe($_POST['resident_id'] ?? 0, 0);
+    $tipoEvento = strv($_POST['tipo_evento'] ?? 'entrada', 20);
+    $allowedTipoEvento = ['entrada', 'salida', 'verificacion'];
+
+    if ($residentId <= 0) {
+      out(false, ['error' => 'Falta seleccionar al residente.'], 422);
+    }
+    if (!in_array($tipoEvento, $allowedTipoEvento, true)) {
+      out(false, ['error' => 'tipo_evento inválido'], 422);
+    }
+
+    $resident = resident_access_status_for_user($pdo, $residentId, $residencialId);
+    if (!$resident) {
+      out(false, ['error' => 'Residente no encontrado en este residencial.'], 404);
+    }
+
+    $access = $resident['access'];
+    $permitido = (bool)($access['allow_direct_access'] ?? false);
+    $resultado = $permitido ? 'permitido' : 'denegado';
+    $obs = $permitido ? 'Acceso directo de residente validado.' : (string)($access['reason'] ?? 'Acceso directo denegado.');
+
+    $stmt = $pdo->prepare("
+      INSERT INTO accesos_guardia (
+        visita_id, guardia_id, fecha_hora, tipo_evento, resultado, observaciones, origen_acceso, residente_id, unidad_id
+      ) VALUES (
+        0, :gid, NOW(), :tipo, :resultado, :obs, 'residente_directo', :resident_id, :unidad_id
+      )
+    ");
+    $stmt->execute([
+      'gid' => $guardiaId,
+      'tipo' => $tipoEvento,
+      'resultado' => $resultado,
+      'obs' => $obs,
+      'resident_id' => $residentId,
+      'unidad_id' => (int)($resident['unidad_id'] ?? 0) ?: null,
+    ]);
+
+    out(true, [
+      'message' => $permitido ? 'Acceso directo permitido.' : 'Acceso directo denegado.',
+      'permitido' => $permitido,
+      'resident' => [
+        'user_id' => (int)$resident['user_id'],
+        'name' => (string)$resident['name'],
+        'email' => (string)$resident['email'],
+        'telefono' => (string)$resident['telefono'],
+        'unidad_clave' => (string)($resident['unidad_clave'] ?? '—'),
+      ],
+      'access' => $access,
+      'resultado' => $resultado,
+    ]);
+  }
+
   if ($method === 'GET' && $action === 'hist') {
     $limit = max(1, min(100, intv_safe($_GET['limit'] ?? 50, 50)));
 
@@ -272,10 +386,14 @@ try {
         v.codigo_acceso,
         v.nombre_visitante,
         v.placa_vehiculo,
-        u.clave AS unidad_clave
+        COALESCE(u.clave, uru.clave) AS unidad_clave,
+        ag.origen_acceso,
+        ru.name AS residente_nombre
       FROM accesos_guardia ag
       LEFT JOIN visitas v ON v.id = ag.visita_id
       LEFT JOIN unidades u ON u.id = v.unidad_id
+      LEFT JOIN users ru ON ru.id = ag.residente_id
+      LEFT JOIN unidades uru ON uru.id = ag.unidad_id
       WHERE ag.guardia_id = :gid
       ORDER BY ag.fecha_hora DESC, ag.id DESC
       LIMIT :lim

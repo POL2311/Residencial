@@ -50,6 +50,8 @@
             <p class="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-600">${escapeHtml(item.mensaje || '')}</p>
           </article>
         `).join('') : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">No hay comunicados publicados por el momento.</div>`;
+
+        window.ResidenteDashboard?.markComunicadosSeen?.();
     }
 
     load().catch((err) => showError(err.message || 'No se pudo cargar comunicados.'));

@@ -44,14 +44,60 @@ function get_context(PDO $pdo, int $uid): array {
   return $status['ctx'];
 }
 
-function build_code(): string {
-  return bin2hex(random_bytes(5));
+function build_code(PDO $pdo): string {
+  for ($i = 0; $i < 20; $i++) {
+    $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    $stmt = $pdo->prepare("SELECT 1 FROM visitas WHERE codigo_acceso = :code LIMIT 1");
+    $stmt->execute(['code' => $code]);
+    if (!$stmt->fetchColumn()) {
+      return $code;
+    }
+  }
+
+  return str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+}
+
+function is_six_digit_code(?string $value): bool {
+  return preg_match('/^\d{6}$/', (string)($value ?? '')) === 1;
+}
+
+function normalize_legacy_codes(PDO $pdo, int $rid, int $unidadId, int $uid): void {
+  $stmt = $pdo->prepare("
+    SELECT id, codigo_acceso
+    FROM visitas
+    WHERE residencial_id = :rid
+      AND unidad_id = :unidad
+      AND residente_id = :uid
+      AND codigo_acceso IS NOT NULL
+    ORDER BY id ASC
+  ");
+  $stmt->execute([
+    'rid' => $rid,
+    'unidad' => $unidadId,
+    'uid' => $uid,
+  ]);
+
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+  if (!$rows) return;
+
+  $update = $pdo->prepare("UPDATE visitas SET codigo_acceso = :code, updated_at = NOW() WHERE id = :id");
+  foreach ($rows as $row) {
+    if (is_six_digit_code($row['codigo_acceso'] ?? null)) {
+      continue;
+    }
+
+    $update->execute([
+      'code' => build_code($pdo),
+      'id' => (int)$row['id'],
+    ]);
+  }
 }
 
 try {
   $ctx = get_context($pdo, $uid);
   $rid = (int)$ctx['residencial_id'];
   $unidadId = (int)$ctx['unidad_id'];
+  normalize_legacy_codes($pdo, $rid, $unidadId, $uid);
 
   if ($action === 'list') {
     $stmt = $pdo->prepare("
@@ -116,7 +162,7 @@ try {
       'hora_desde' => ($horaDesde !== '' ? $horaDesde : null),
       'hora_hasta' => ($horaHasta !== '' ? $horaHasta : null),
       'uso_unico' => $usoUnico,
-      'codigo' => build_code(),
+      'codigo' => build_code($pdo),
       'notas' => ($notas !== '' ? $notas : null),
     ]);
 

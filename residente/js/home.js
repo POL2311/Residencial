@@ -20,10 +20,6 @@
         alert: $('homeAlert'),
         unitLabel: $('homeUnitLabel'),
         residentQuickName: $('residentQuickName'),
-        announcementTrack: $('homeAnnouncementsTrack'),
-        announcementDots: $('homeAnnouncementDots'),
-        announcementPrev: $('homeAnnPrev'),
-        announcementNext: $('homeAnnNext'),
         services: $('homeServices'),
         servicesPrev: $('homeSrvPrev'),
         servicesNext: $('homeSrvNext'),
@@ -35,10 +31,7 @@
     };
 
     const state = {
-        announcements: [],
         services: [],
-        currentAnnouncement: 0,
-        autoAnnouncement: null,
         tips: [],
     };
 
@@ -69,8 +62,6 @@
             els.residentQuickName.textContent = 'Residente';
         }
 
-        renderAnnouncements([]);
-        renderServices([]);
         renderTips([
             {
                 title: 'Vincula tu unidad',
@@ -108,124 +99,15 @@
         return json;
     }
 
-    function badgeClass(priority) {
-        if (priority === 'alta') return 'bg-rose-50 text-rose-700 border border-rose-200';
-        if (priority === 'media') return 'bg-amber-50 text-amber-700 border border-amber-200';
-        return 'bg-sky-50 text-sky-700 border border-sky-200';
-    }
-
-    function statusClass(status) {
-        if (status === 'entregado') return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-        if (status === 'devuelto') return 'bg-rose-50 text-rose-700 border border-rose-200';
-        return 'bg-amber-50 text-amber-700 border border-amber-200';
-    }
-
-    function statusLabel(status) {
-        if (status === 'entregado') return 'Entregado';
-        if (status === 'devuelto') return 'Devuelto';
-        return 'Pendiente';
-    }
-
-    function renderAnnouncements(items) {
-        if (!els.announcementTrack || !els.announcementDots) return;
-        state.announcements = items || [];
-        state.currentAnnouncement = 0;
-        els.announcementTrack.innerHTML = '';
-        els.announcementDots.innerHTML = '';
-
-        if (!state.announcements.length) {
-            els.announcementTrack.innerHTML = `
-                <div class="min-w-full">
-                  <div class="flex min-h-[18rem] items-center justify-center bg-slate-100 px-6 text-center text-sm text-slate-500">
-                    No hay comunicados publicados por el momento.
-                  </div>
-                </div>
-            `;
-            stopAutoAnnouncements();
-            return;
-        }
-
-        state.announcements.forEach((item, index) => {
-            const slide = document.createElement('div');
-            slide.className = 'min-w-full';
-            slide.innerHTML = `
-                <article class="flex min-h-[18rem] flex-col justify-end bg-gradient-to-br from-[#36596C] via-[#55798D] to-[#C7D7DD] p-6 text-white md:p-8">
-                  <div class="max-w-3xl">
-                    <div class="flex flex-wrap items-center gap-2">
-                      <span class="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs uppercase tracking-wide text-white/85">
-                        ${escapeHtml(item.tipo || 'general')}
-                      </span>
-                      <span class="inline-flex rounded-full px-3 py-1 text-xs ${badgeClass(item.prioridad || 'general')}">
-                        ${escapeHtml(item.prioridad || 'general')}
-                      </span>
-                    </div>
-                    <h3 class="mt-4 text-2xl font-semibold md:text-3xl">${escapeHtml(item.titulo || 'Comunicado')}</h3>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-white/85 md:text-base">
-                      ${escapeHtml(item.mensaje || '')}
-                    </p>
-                    <div class="mt-4 text-xs text-white/70">
-                      ${escapeHtml(item.fecha_publicacion || '')}
-                    </div>
-                  </div>
-                </article>
-            `;
-            els.announcementTrack.appendChild(slide);
-
-            const dot = document.createElement('button');
-            dot.type = 'button';
-            dot.className = index === 0 ? 'h-2.5 w-2.5 rounded-full bg-slate-700' : 'h-2.5 w-2.5 rounded-full bg-slate-300';
-            dot.dataset.announcement = String(index);
-            dot.addEventListener('click', () => {
-                state.currentAnnouncement = index;
-                updateAnnouncementSlider();
-                restartAutoAnnouncements();
-            });
-            els.announcementDots.appendChild(dot);
-        });
-
-        updateAnnouncementSlider();
-        startAutoAnnouncements();
-    }
-
-    function updateAnnouncementSlider() {
-        if (!els.announcementTrack || !els.announcementDots) return;
-        els.announcementTrack.style.transform = `translateX(-${state.currentAnnouncement * 100}%)`;
-
-        els.announcementDots.querySelectorAll('[data-announcement]').forEach((dot, index) => {
-            dot.className = index === state.currentAnnouncement
-                ? 'h-2.5 w-2.5 rounded-full bg-slate-700'
-                : 'h-2.5 w-2.5 rounded-full bg-slate-300';
-        });
-    }
-
-    function nextAnnouncement() {
-        if (!state.announcements.length) return;
-        state.currentAnnouncement = state.currentAnnouncement === state.announcements.length - 1 ? 0 : state.currentAnnouncement + 1;
-        updateAnnouncementSlider();
-    }
-
-    function prevAnnouncement() {
-        if (!state.announcements.length) return;
-        state.currentAnnouncement = state.currentAnnouncement === 0 ? state.announcements.length - 1 : state.currentAnnouncement - 1;
-        updateAnnouncementSlider();
-    }
-
-    function startAutoAnnouncements() {
-        stopAutoAnnouncements();
-        if (state.announcements.length <= 1) return;
-        state.autoAnnouncement = setInterval(nextAnnouncement, 5000);
-    }
-
-    function stopAutoAnnouncements() {
-        if (state.autoAnnouncement) {
-            clearInterval(state.autoAnnouncement);
-            state.autoAnnouncement = null;
-        }
-    }
-
-    function restartAutoAnnouncements() {
-        stopAutoAnnouncements();
-        startAutoAnnouncements();
+    function renderTips(items) {
+        state.tips = items || [];
+        if (!els.tipsModalBody) return;
+        els.tipsModalBody.innerHTML = state.tips.map((item) => `
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.title || '')}</div>
+              <p class="mt-2 text-sm text-slate-600">${escapeHtml(item.text || '')}</p>
+            </div>
+        `).join('');
     }
 
     function renderServices(items) {
@@ -243,11 +125,18 @@
 
         els.services.innerHTML = state.services.map((item) => `
             <article class="min-w-[290px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-              <div class="h-32 bg-gradient-to-br from-[#DCE9EE] via-[#EEF4F6] to-[#B9CCD5]"></div>
+              <div class="h-28 bg-gradient-to-br from-[#DCE9EE] via-[#EEF4F6] to-[#B9CCD5]"></div>
               <div class="p-5">
-                <div class="text-xs uppercase tracking-wide text-slate-400">${escapeHtml(item.categoria || 'servicio')}</div>
-                <div class="mt-2 text-lg font-semibold text-slate-800">${escapeHtml(item.nombre || 'Servicio')}</div>
-                <p class="mt-2 text-sm leading-6 text-slate-600">${escapeHtml(item.descripcion || '')}</p>
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="text-xs uppercase tracking-wide text-slate-400">${escapeHtml(item.categoria || 'servicio')}</div>
+                    <div class="mt-2 text-lg font-semibold text-slate-800">${escapeHtml(item.nombre || 'Servicio')}</div>
+                  </div>
+                  <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${item.origen === 'global' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
+                    ${item.origen === 'global' ? 'Global' : 'Residencial'}
+                  </span>
+                </div>
+                <p class="mt-3 text-sm leading-6 text-slate-600">${escapeHtml(item.descripcion || '')}</p>
                 <div class="mt-4 flex flex-wrap gap-2">
                   ${item.telefono ? `<a href="tel:${escapeHtml(item.telefono)}" class="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 hover:bg-slate-50">Llamar</a>` : ''}
                   ${item.whatsapp ? `<a href="https://wa.me/52${escapeHtml(String(item.whatsapp).replace(/\D+/g, ''))}" target="_blank" rel="noreferrer" class="rounded-full bg-[#2E5D73] px-3 py-2 text-xs text-white hover:opacity-95">WhatsApp</a>` : ''}
@@ -255,17 +144,6 @@
                 </div>
               </div>
             </article>
-        `).join('');
-    }
-
-    function renderTips(items) {
-        state.tips = items || [];
-        if (!els.tipsModalBody) return;
-        els.tipsModalBody.innerHTML = state.tips.map((item) => `
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.title || '')}</div>
-              <p class="mt-2 text-sm text-slate-600">${escapeHtml(item.text || '')}</p>
-            </div>
         `).join('');
     }
 
@@ -315,16 +193,6 @@
             });
         });
 
-        els.announcementPrev?.addEventListener('click', () => {
-            prevAnnouncement();
-            restartAutoAnnouncements();
-        });
-
-        els.announcementNext?.addEventListener('click', () => {
-            nextAnnouncement();
-            restartAutoAnnouncements();
-        });
-
         els.servicesPrev?.addEventListener('click', () => {
             els.services?.scrollBy({ left: -320, behavior: 'smooth' });
         });
@@ -370,8 +238,13 @@
             els.residentQuickName.textContent = user.name || 'Residente';
         }
 
-        renderAnnouncements(home.announcements || []);
-        renderServices(home.services || []);
+        try {
+            const servicesJson = await apiPost(`${API}servicios.php`, { action: 'list' });
+            renderServices(servicesJson.data?.items || []);
+        } catch (_) {
+            renderServices([]);
+        }
+
         renderTips(home.tips || []);
         maybeOpenTipsModal();
     }

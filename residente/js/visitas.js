@@ -11,6 +11,7 @@
     root.dataset.bound = '1';
 
     const API = baseResidentPath() + 'php/api/visitas.php';
+    const QR_BASE = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&format=png&data=';
     const els = {
         alert: document.getElementById('visitasAlert'),
         list: document.getElementById('residentVisitasList'),
@@ -29,6 +30,9 @@
         btnCloseCode: document.getElementById('btnCloseResidentVisitasCodeModal'),
         btnDismissCode: document.getElementById('btnDismissResidentVisitasCodeModal'),
         btnCopyCode: document.getElementById('btnCopyResidentVisitasCode'),
+        btnDownloadQr: document.getElementById('btnDownloadResidentVisitasQr'),
+        qrImage: document.getElementById('residentVisitasQrImage'),
+        qrHint: document.getElementById('residentVisitasQrHint'),
     };
 
     let items = [];
@@ -43,6 +47,28 @@
         els.alert.classList.remove('hidden');
         els.alert.className = `rounded-2xl px-4 py-3 text-sm border ${type === 'ok' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'}`;
         els.alert.textContent = msg;
+    }
+
+    function qrUrl(code) {
+        return `${QR_BASE}${encodeURIComponent(String(code || '').trim())}`;
+    }
+
+    async function renderQr(code) {
+        if (!els.qrImage) return;
+        if (!code) {
+            if (els.qrHint) els.qrHint.textContent = 'No hay código disponible para generar el QR.';
+            els.qrImage.removeAttribute('src');
+            return;
+        }
+
+        if (els.qrHint) els.qrHint.textContent = 'Generando QR…';
+        els.qrImage.onload = () => {
+            if (els.qrHint) els.qrHint.textContent = 'Listo para escanear en caseta.';
+        };
+        els.qrImage.onerror = () => {
+            if (els.qrHint) els.qrHint.textContent = 'No pudimos generar el QR. Usa el código manual.';
+        };
+        els.qrImage.src = qrUrl(code);
     }
 
     function renderUnavailable(message) {
@@ -92,14 +118,21 @@
         if (!els.codeModal) return;
         els.codeModal.classList.add('hidden');
         currentCode = '';
+        if (els.qrImage) {
+            els.qrImage.removeAttribute('src');
+            els.qrImage.onload = null;
+            els.qrImage.onerror = null;
+        }
+        if (els.qrHint) els.qrHint.textContent = 'El guardia puede escanear este QR o capturar el código manualmente.';
         document.body.style.overflow = '';
     }
 
-    function openCodeModal(code) {
+    async function openCodeModal(code) {
         currentCode = String(code || '').trim();
         if (els.codeValue) els.codeValue.textContent = currentCode || '----';
         els.codeModal?.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        await renderQr(currentCode);
     }
 
     function renderStats() {
@@ -127,7 +160,7 @@
               <div><span class="text-slate-500">Placa:</span> ${escapeHtml(item.placa_vehiculo || '—')}</div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
-              <button type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700" data-code="${escapeHtml(item.codigo_acceso || '')}">Ver codigo</button>
+              <button type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700" data-code="${escapeHtml(item.codigo_acceso || '')}">Codigo + QR</button>
               ${item.estado === 'pendiente' ? `<button type="button" class="rounded-full border border-rose-200 bg-white px-3 py-1.5 text-xs text-rose-700" data-cancel="${item.id}">Cancelar</button>` : ''}
             </div>
           </article>
@@ -166,6 +199,24 @@
             showAlert('ok', `Código copiado: ${currentCode || ''}`);
         } catch (_) {
             showAlert('error', 'No se pudo copiar el código automáticamente.');
+        }
+    });
+    els.btnDownloadQr?.addEventListener('click', () => {
+        if (!currentCode) {
+            showAlert('error', 'No hay un QR disponible para descargar.');
+            return;
+        }
+        try {
+            const link = document.createElement('a');
+            link.href = qrUrl(currentCode);
+            link.download = `visita-${currentCode}.png`;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (_) {
+            showAlert('error', 'No se pudo descargar el QR.');
         }
     });
     els.form?.addEventListener('submit', async (e) => {

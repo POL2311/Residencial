@@ -19,6 +19,13 @@
       video: document.getElementById('video'),
       btnCloseCamera: document.getElementById('btnCloseCamera'),
 
+      residentSearch: document.getElementById('residentDirectSearch'),
+      residentAlert: document.getElementById('residentDirectAlert'),
+      residentResults: document.getElementById('residentDirectResults'),
+      btnResidentSearch: document.getElementById('btnBuscarResidenteDirecto'),
+      btnResidentEntrada: document.getElementById('btnConfirmarEntradaResidente'),
+      btnResidentSalida: document.getElementById('btnConfirmarSalidaResidente'),
+
       hist: document.getElementById('accesosHist'),
       histPagination: document.getElementById('accesosHistPagination'),
       btnRefrescar: document.getElementById('btnRefrescarHist'),
@@ -29,6 +36,8 @@
 
     const state = {
       current: null,
+      currentResident: null,
+      residentSearchItems: [],
       stream: null,
       detector: null,
       scanning: false,
@@ -75,6 +84,23 @@
       els.alert.classList.remove('hidden');
     }
 
+    function residentAlertMsg(msg = '', type = 'error') {
+      if (!els.residentAlert || !isAlive()) return;
+
+      if (!msg) {
+        els.residentAlert.classList.add('hidden');
+        els.residentAlert.textContent = '';
+        return;
+      }
+
+      els.residentAlert.className =
+        type === 'success'
+          ? 'mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700'
+          : 'mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700';
+      els.residentAlert.textContent = msg;
+      els.residentAlert.classList.remove('hidden');
+    }
+
     function feedback(ok) {
       try {
         if (ok) els.soundOk?.play?.();
@@ -91,9 +117,16 @@
       if (els.btnSalida) els.btnSalida.disabled = disabled;
     }
 
+    function setResidentButtonsDisabled(disabled) {
+      if (els.btnResidentEntrada) els.btnResidentEntrada.disabled = disabled;
+      if (els.btnResidentSalida) els.btnResidentSalida.disabled = disabled;
+    }
+
     function enableActions(on) {
       const disabled = !on || state.loadingRegister || state.loadingSearch;
       setButtonsDisabled(disabled);
+      const residentDisabled = !state.currentResident?.access?.allow_direct_access || state.loadingRegister || state.loadingSearch;
+      setResidentButtonsDisabled(residentDisabled);
     }
 
     function setLoadingSearch(on, text = 'Buscando…') {
@@ -163,6 +196,78 @@
       }
 
       updateStatusUI('idle', 'Esperando validación');
+    }
+
+    function renderResidentSearchResults(items) {
+      if (!els.residentResults || !isAlive()) return;
+      state.residentSearchItems = items.slice();
+
+      if (!items.length) {
+        els.residentResults.innerHTML = `
+          <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+            No encontramos residentes con esa búsqueda.
+          </div>
+        `;
+        return;
+      }
+
+      els.residentResults.innerHTML = items.map((item, index) => {
+        const allow = !!item.access?.allow_direct_access;
+        const badge = allow
+          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+          : 'bg-rose-50 text-rose-700 border border-rose-200';
+        return `
+          <button type="button"
+            data-resident-select="${index}"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left hover:bg-white">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div class="font-semibold text-slate-800">${safeText(item.name)}</div>
+                <div class="mt-1 text-xs text-slate-500">${safeText(item.unidad_clave)} · ${safeText(item.telefono || item.email || 'Sin contacto')}</div>
+              </div>
+              <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-medium ${badge}">
+                ${safeText(item.access?.label || 'Sin estado')}
+              </span>
+            </div>
+            <div class="mt-2 text-xs ${allow ? 'text-emerald-700' : 'text-rose-700'}">
+              ${safeText(item.access?.reason || 'Sin detalles')}
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderResidentResult(resident) {
+      if (!els.residentResults || !isAlive()) return;
+      const access = resident?.access || {};
+      const allow = !!access.allow_direct_access;
+      els.residentResults.innerHTML = `
+        <div class="rounded-2xl border ${allow ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/40'} p-4">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div class="text-lg font-semibold text-slate-800">${safeText(resident?.name)}</div>
+              <div class="mt-1 text-sm text-slate-600">${safeText(resident?.unidad_clave)} · ${safeText(resident?.telefono || resident?.email || 'Sin contacto')}</div>
+            </div>
+            <span class="inline-flex rounded-full px-3 py-1 text-xs font-medium ${allow ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+              ${safeText(access.label || 'Sin estado')}
+            </span>
+          </div>
+          <div class="mt-3 rounded-xl ${allow ? 'border border-emerald-200 bg-white/80 text-emerald-700' : 'border border-rose-200 bg-white/80 text-rose-700'} px-3 py-2 text-sm">
+            ${safeText(access.reason || 'Sin detalles')}
+          </div>
+          <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div class="rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <div class="text-xs uppercase tracking-wide text-slate-400">Pago del mes</div>
+              <div class="mt-1 font-medium text-slate-800">${access.payment_current ? 'Al corriente' : 'Sin pago registrado'}</div>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <div class="text-xs uppercase tracking-wide text-slate-400">Último pago</div>
+              <div class="mt-1 font-medium text-slate-800">${safeText(access.payment_latest_date || '—')}</div>
+            </div>
+          </div>
+        </div>
+      `;
+      enableActions(!!state.current);
     }
 
     function renderVisitResult(visita, ev) {
@@ -284,6 +389,55 @@
       }
     }
 
+    async function buscarResidente(query) {
+      const cleanQuery = String(query || '').trim();
+      state.currentResident = null;
+      enableActions(!!state.current);
+      residentAlertMsg('');
+
+      if (!cleanQuery) {
+        residentAlertMsg('Escribe un nombre, unidad, teléfono o correo para buscar.');
+        return;
+      }
+
+      try {
+        const json = await fetchJSON(
+          `${API}accesos.php?action=buscar_residente&q=${encodeURIComponent(cleanQuery)}`
+        );
+        const items = Array.isArray(json.data?.items) ? json.data.items : [];
+        renderResidentSearchResults(items);
+      } catch (e) {
+        residentAlertMsg(e.message || 'No se pudo buscar al residente.');
+      }
+    }
+
+    async function registrarResidente(tipo) {
+      if (!state.currentResident || !isAlive()) return;
+
+      const fd = new FormData();
+      fd.set('action', 'scan_residente');
+      fd.set('resident_id', state.currentResident.user_id);
+      fd.set('tipo_evento', tipo);
+
+      try {
+        residentAlertMsg('');
+        const json = await fetchJSON(`${API}accesos.php`, {
+          method: 'POST',
+          body: fd,
+        });
+
+        state.currentResident = {
+          ...state.currentResident,
+          access: json.access || state.currentResident.access,
+        };
+        renderResidentResult(state.currentResident);
+        residentAlertMsg(json.message || 'Acceso de residente procesado correctamente.', 'success');
+        await loadHist();
+      } catch (e) {
+        residentAlertMsg(e.message || 'No se pudo registrar el acceso del residente.');
+      }
+    }
+
     async function registrar(tipo) {
       if (!state.current || !isAlive()) return;
 
@@ -342,21 +496,22 @@
 
     function renderHistItem(r) {
       const ok = r.resultado === 'permitido';
+      const isResident = r.origen_acceso === 'residente_directo';
 
       return `
         <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <div class="font-semibold text-slate-800 break-all">
-                ${safeText(r.codigo_acceso, 'Sin código')}
+                ${isResident ? safeText(r.residente_nombre, 'Residente') : safeText(r.codigo_acceso, 'Sin código')}
               </div>
 
               <div class="text-sm text-slate-600 mt-1">
-                ${safeText(r.nombre_visitante, 'Visitante no identificado')}
+                ${isResident ? 'Acceso directo de residente' : safeText(r.nombre_visitante, 'Visitante no identificado')}
               </div>
 
               <div class="text-xs text-slate-500 mt-1">
-                ${safeText(r.unidad_clave)} · ${safeText(r.tipo_evento)}
+                ${safeText(r.unidad_clave)} · ${safeText(r.tipo_evento)}${isResident ? ' · residente' : ''}
               </div>
 
               ${
@@ -587,12 +742,24 @@
       buscar(els.codigo?.value?.trim());
     }
 
+    function onBuscarResidenteClick() {
+      buscarResidente(els.residentSearch?.value?.trim());
+    }
+
     function onEntradaClick() {
       registrar('entrada');
     }
 
     function onSalidaClick() {
       registrar('salida');
+    }
+
+    function onResidentEntradaClick() {
+      registrarResidente('entrada');
+    }
+
+    function onResidentSalidaClick() {
+      registrarResidente('salida');
     }
 
     function onOpenCameraClick() {
@@ -614,32 +781,61 @@
       }
     }
 
+    function onResidentKeydown(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        buscarResidente(els.residentSearch?.value?.trim());
+      }
+    }
+
     function onCameraBackdropClick(e) {
       if (e.target === els.cameraModal) {
         closeCamera();
       }
     }
 
+    function onResidentResultsClick(e) {
+      const btn = e.target.closest('[data-resident-select]');
+      if (!btn) return;
+
+      const index = Number(btn.dataset.residentSelect || -1);
+      const resident = state.residentSearchItems[index];
+      if (!resident) return;
+
+      state.currentResident = resident;
+      renderResidentResult(resident);
+    }
+
     function bindEvents() {
       els.btnBuscar?.addEventListener('click', onBuscarClick);
+      els.btnResidentSearch?.addEventListener('click', onBuscarResidenteClick);
       els.btnEntrada?.addEventListener('click', onEntradaClick);
       els.btnSalida?.addEventListener('click', onSalidaClick);
+      els.btnResidentEntrada?.addEventListener('click', onResidentEntradaClick);
+      els.btnResidentSalida?.addEventListener('click', onResidentSalidaClick);
       els.btnOpenCamera?.addEventListener('click', onOpenCameraClick);
       els.btnCloseCamera?.addEventListener('click', onCloseCameraClick);
       els.btnRefrescar?.addEventListener('click', onRefreshHistClick);
       els.codigo?.addEventListener('keydown', onCodigoKeydown);
+      els.residentSearch?.addEventListener('keydown', onResidentKeydown);
       els.cameraModal?.addEventListener('click', onCameraBackdropClick);
+      els.residentResults?.addEventListener('click', onResidentResultsClick);
     }
 
     function unbindEvents() {
       els.btnBuscar?.removeEventListener('click', onBuscarClick);
+      els.btnResidentSearch?.removeEventListener('click', onBuscarResidenteClick);
       els.btnEntrada?.removeEventListener('click', onEntradaClick);
       els.btnSalida?.removeEventListener('click', onSalidaClick);
+      els.btnResidentEntrada?.removeEventListener('click', onResidentEntradaClick);
+      els.btnResidentSalida?.removeEventListener('click', onResidentSalidaClick);
       els.btnOpenCamera?.removeEventListener('click', onOpenCameraClick);
       els.btnCloseCamera?.removeEventListener('click', onCloseCameraClick);
       els.btnRefrescar?.removeEventListener('click', onRefreshHistClick);
       els.codigo?.removeEventListener('keydown', onCodigoKeydown);
+      els.residentSearch?.removeEventListener('keydown', onResidentKeydown);
       els.cameraModal?.removeEventListener('click', onCameraBackdropClick);
+      els.residentResults?.removeEventListener('click', onResidentResultsClick);
     }
 
     function init() {

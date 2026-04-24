@@ -49,7 +49,7 @@
   const PAGOS_PER_PAGE = 3;
   const AUTOS_PER_PAGE = 4;
   const RESIDENTES_PER_PAGE = 5;
-  const API_BASE = '/admin_residencial/php/api';
+  const API_BASE = '/Residencial/admin_residencial/php/api';
 
   const MESSAGES = {
     residenteCreado: 'Residente agregado correctamente.',
@@ -57,6 +57,8 @@
     residenteEliminado: 'Residente eliminado correctamente.',
     residenteSuspendido: 'Residente suspendido correctamente.',
     residenteReactivado: 'Residente reactivado correctamente.',
+    residenteBaneado: 'Residente bloqueado manualmente.',
+    residenteDesbaneado: 'Bloqueo manual retirado correctamente.',
     autoCreado: 'Auto registrado correctamente.',
     pagoCreado: 'Pago registrado correctamente.',
   };
@@ -352,6 +354,21 @@
     });
   }
 
+  function accessBadge(r) {
+    const label = escapeHtml(r.access_label || 'Sin estado');
+    const reason = escapeHtml(r.access_reason || 'Estado no disponible');
+    const classes = r.allow_direct_access
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+      : 'border-rose-200 bg-rose-50 text-rose-700';
+
+    return `
+      <div class="inline-flex flex-col gap-1 rounded-2xl border px-3 py-2 ${classes}">
+        <span class="text-[11px] font-semibold uppercase tracking-wide">${label}</span>
+        <span class="text-[11px] normal-case tracking-normal opacity-90">${reason}</span>
+      </div>
+    `;
+  }
+
   // =========================
   // API
   // =========================
@@ -407,6 +424,19 @@
         fd.append('action', 'toggle_active');
         fd.append('id', id);
         fd.append('active', active ? '1' : '0');
+
+        return fetchJSON(`${API_BASE}/residentes.php`, {
+          method: 'POST',
+          body: fd,
+        });
+      },
+
+      toggleManualBan: (id, ban, motivo = '') => {
+        const fd = new FormData();
+        fd.append('action', 'toggle_manual_ban');
+        fd.append('id', id);
+        fd.append('ban', ban ? '1' : '0');
+        if (motivo) fd.append('motivo', motivo);
 
         return fetchJSON(`${API_BASE}/residentes.php`, {
           method: 'POST',
@@ -547,6 +577,15 @@
                 <p class="font-medium text-slate-800">${escapeHtml(r.telefono || '—')}</p>
               </div>
             </div>
+            <div class="mt-4 flex flex-wrap items-start justify-between gap-3">
+              ${accessBadge(r)}
+              <button type="button"
+                data-ban-toggle="${escapeHtml(r.resid_unid_id)}"
+                data-ban-active="${r.acceso_baneado_manual ? '1' : '0'}"
+                class="inline-flex items-center justify-center rounded-full ${r.acceso_baneado_manual ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'} px-4 py-2 text-xs font-medium">
+                ${r.acceso_baneado_manual ? 'Quitar baneo' : 'Banear acceso'}
+              </button>
+            </div>
           </section>
 
           <section class="rounded-2xl border bg-white p-5 space-y-4">
@@ -616,6 +655,42 @@
           <div class="mt-3 text-sm text-slate-700">
             ${escapeHtml(r.unidad_detalle || '—')}
           </div>
+          <div class="mt-3">${accessBadge(r)}</div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            ${telUrl ? `
+              <a href="${telUrl}" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+                Llamar
+              </a>
+            ` : ''}
+
+            ${waUrl ? `
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center justify-center rounded-full bg-emerald-100 px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-200">
+                WhatsApp
+              </a>
+            ` : ''}
+
+            <button data-more="${escapeHtml(r.resid_unid_id)}"
+              class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+              Ver más
+            </button>
+
+            <button data-edit="${escapeHtml(r.resid_unid_id)}"
+              class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">
+              Editar
+            </button>
+
+            <button data-ban-toggle="${escapeHtml(r.resid_unid_id)}"
+              data-ban-active="${r.acceso_baneado_manual ? '1' : '0'}"
+              class="inline-flex items-center justify-center rounded-full ${r.acceso_baneado_manual ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'} px-3 py-1.5 text-xs">
+              ${r.acceso_baneado_manual ? 'Quitar baneo' : 'Banear'}
+            </button>
+
+            <button data-del="${escapeHtml(r.resid_unid_id)}"
+              class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-200">
+              Eliminar
+            </button>
+          </div>
         </div>
 
         <div class="hidden md:grid md:grid-cols-4 md:gap-4 md:items-center">
@@ -623,6 +698,7 @@
             <div class="font-semibold text-slate-800">${escapeHtml(r.nombre || '—')}</div>
             <div class="text-xs text-slate-500">Unidad: ${escapeHtml(r.unidad_clave || '—')}</div>
             <div class="text-xs text-slate-600">${escapeHtml(r.telefono || 'Sin teléfono')}</div>
+            <div class="mt-3">${accessBadge(r)}</div>
           </div>
 
           <div class="text-sm text-slate-700">
@@ -647,37 +723,41 @@
             </label>
           </div>
 
-          <div></div>
-        </div>
+          <div class="flex justify-end gap-2 flex-wrap">
+            ${telUrl ? `
+              <a href="${telUrl}" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+                Llamar
+              </a>
+            ` : ''}
 
-        <div class="flex justify-end gap-2 flex-wrap">
-          ${telUrl ? `
-            <a href="${telUrl}" class="text-xs px-3 py-1 rounded-full border">
-              Llamar
-            </a>
-          ` : ''}
+            ${waUrl ? `
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center justify-center rounded-full bg-emerald-100 px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-200">
+                WhatsApp
+              </a>
+            ` : ''}
 
-          ${waUrl ? `
-            <a href="${waUrl}" target="_blank" rel="noopener noreferrer"
-              class="text-xs px-3 py-1 rounded-full bg-green-500 text-white">
-              WhatsApp
-            </a>
-          ` : ''}
+            <button data-more="${escapeHtml(r.resid_unid_id)}"
+              class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+              Ver más
+            </button>
 
-          <button data-more="${escapeHtml(r.resid_unid_id)}"
-            class="text-xs px-3 py-1 rounded-full bg-slate-100">
-            Ver más
-          </button>
+            <button data-edit="${escapeHtml(r.resid_unid_id)}"
+              class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">
+              Editar
+            </button>
 
-          <button data-edit="${escapeHtml(r.resid_unid_id)}"
-            class="text-xs px-3 py-1 rounded-full border">
-            Editar
-          </button>
+            <button data-ban-toggle="${escapeHtml(r.resid_unid_id)}"
+              data-ban-active="${r.acceso_baneado_manual ? '1' : '0'}"
+              class="inline-flex items-center justify-center rounded-full ${r.acceso_baneado_manual ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'} px-3 py-1.5 text-xs">
+              ${r.acceso_baneado_manual ? 'Quitar baneo' : 'Banear'}
+            </button>
 
-          <button data-del="${escapeHtml(r.resid_unid_id)}"
-            class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white">
-            Eliminar
-          </button>
+            <button data-del="${escapeHtml(r.resid_unid_id)}"
+              class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-200">
+              Eliminar
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -701,7 +781,7 @@
 
     visibles.forEach((r) => {
       const card = document.createElement('div');
-      card.className = 'rounded-2xl border bg-white p-4 shadow-sm';
+      card.className = 'rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm';
       card.innerHTML = renderResidenteCard(r);
       els.list.appendChild(card);
     });
@@ -1112,6 +1192,29 @@
     }
   }
 
+  async function toggleManualBan(id, currentlyBanned) {
+    try {
+      let motivo = '';
+      if (!currentlyBanned) {
+        motivo = window.prompt('Motivo del baneo manual (opcional):', '') || '';
+      }
+
+      const resp = await api.residentes.toggleManualBan(id, !currentlyBanned, motivo);
+      await loadData();
+
+      if (state.selected?.resid_unid_id == id) {
+        await refreshCurrentDetail();
+      }
+
+      showToast(
+        resp.message || (currentlyBanned ? MESSAGES.residenteDesbaneado : MESSAGES.residenteBaneado),
+        'success'
+      );
+    } catch (err) {
+      showToast(err.message || 'No se pudo actualizar el bloqueo manual.', 'error');
+    }
+  }
+
   // =========================
   // EVENTOS
   // =========================
@@ -1139,6 +1242,12 @@
   });
 
   els.detailModalContent.addEventListener('click', (e) => {
+    const banBtn = e.target.closest('[data-ban-toggle]');
+    if (banBtn) {
+      toggleManualBan(banBtn.dataset.banToggle, banBtn.dataset.banActive === '1');
+      return;
+    }
+
     const btn = e.target.closest('[data-page]');
     if (!btn) return;
 
@@ -1178,6 +1287,7 @@
     const edit = e.target.closest('[data-edit]');
     const del = e.target.closest('[data-del]');
     const more = e.target.closest('[data-more]');
+    const banBtn = e.target.closest('[data-ban-toggle]');
 
     if (edit) {
       const r = state.residentes.find((x) => x.resid_unid_id == edit.dataset.edit);
@@ -1190,6 +1300,10 @@
 
     if (del) {
       confirmDeleteResidente(del.dataset.del);
+    }
+
+    if (banBtn) {
+      toggleManualBan(banBtn.dataset.banToggle, banBtn.dataset.banActive === '1');
     }
   });
 

@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/resident_access.php';
 require_login();
 require_role(['admin_residencial']);
 
@@ -20,6 +21,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 $sessionUser = current_user();
 $adminId = (int)($sessionUser['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
+resident_access_ensure_schema($pdo);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
@@ -49,11 +51,28 @@ function map_residente(array $r): array {
 
         'es_titular'      => (int)($r['es_titular'] ?? 0),
         'activo_servicio' => (int)($r['activo_servicio'] ?? 1),
+        'acceso_baneado_manual' => (int)($r['acceso_baneado_manual'] ?? 0),
+        'acceso_baneo_motivo'   => (string)($r['acceso_baneo_motivo'] ?? ''),
 
+        'residencial_id'  => (int)($r['residencial_id'] ?? 0),
         'unidad_id'       => (int)($r['unidad_id'] ?? 0),
         'unidad_clave'    => (string)($r['clave'] ?? '—'),
         'unidad_detalle'  => implode(' · ', $unidadDetalleParts),
     ];
+}
+
+function map_residente_with_access(PDO $pdo, array $row): array {
+    $mapped = map_residente($row);
+    $access = resident_access_status($pdo, $mapped);
+    return array_merge($mapped, [
+        'access_status' => $access['status'],
+        'access_label' => $access['label'],
+        'access_reason' => $access['reason'],
+        'allow_direct_access' => $access['allow_direct_access'],
+        'payment_current' => $access['payment_current'],
+        'payment_latest_date' => $access['payment_latest_date'],
+        'payment_latest_amount' => $access['payment_latest_amount'],
+    ]);
 }
 
 try {
@@ -76,10 +95,13 @@ try {
                     u.email,
                     u.telefono,
                     u.is_active,
+                    ur.residencial_id,
 
                     ru.id AS resid_unid_id,
                     ru.es_titular,
                     ru.activo AS activo_servicio,
+                    ru.acceso_baneado_manual,
+                    ru.acceso_baneo_motivo,
 
                     un.id AS unidad_id,
                     un.clave,
@@ -98,7 +120,7 @@ try {
             $stmt->execute(['rid' => $residencialId]);
 
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-            $residentes = array_map('map_residente', $rows);
+            $residentes = array_map(fn($row) => map_residente_with_access($pdo, $row), $rows);
 
             json_out(true, [
                 'residentes' => $residentes,
@@ -119,9 +141,12 @@ try {
                     u.email,
                     u.telefono,
                     u.is_active,
+                    ur.residencial_id,
                     ru.id AS resid_unid_id,
                     ru.es_titular,
                     ru.activo AS activo_servicio,
+                    ru.acceso_baneado_manual,
+                    ru.acceso_baneo_motivo,
                     un.id AS unidad_id,
                     un.clave,
                     un.torre,
@@ -149,7 +174,7 @@ try {
                 json_out(false, ['error' => 'Residente no encontrado.']);
             }
 
-            json_out(true, ['residente' => map_residente($row)]);
+            json_out(true, ['residente' => map_residente_with_access($pdo, $row)]);
         }
 
         json_out(false, ['error' => 'Acción GET no soportada.']);
@@ -196,6 +221,54 @@ try {
 
             json_out(true, [
                 'message' => $newStatus ? 'Residente reactivado.' : 'Residente suspendido.',
+            ]);
+        }
+
+        if ($action === 'toggle_manual_ban') {
+            $residUnitId = (int)($_POST['id'] ?? 0);
+            $ban = isset($_POST['ban']) ? (int)$_POST['ban'] : 0;
+            $motivo = clean_str($_POST['motivo'] ?? '');
+
+            if ($residUnitId <= 0) {
+                json_out(false, ['error' => 'ID inválido.']);
+            }
+
+            $stmtCheck = $pdo->prepare("
+                SELECT ru.id
+                FROM residentes_unidades ru
+                JOIN unidades un ON un.id = ru.unidad_id
+                WHERE ru.id = :id
+                  AND un.residencial_id = :rid
+                LIMIT 1
+            ");
+            $stmtCheck->execute([
+                'id' => $residUnitId,
+                'rid' => $residencialId,
+            ]);
+
+            if (!$stmtCheck->fetchColumn()) {
+                json_out(false, ['error' => 'Residente no encontrado o fuera de tu residencial.']);
+            }
+
+            $stmt = $pdo->prepare("
+                UPDATE residentes_unidades ru
+                JOIN unidades un ON un.id = ru.unidad_id
+                SET ru.acceso_baneado_manual = :ban,
+                    ru.acceso_baneo_motivo = :motivo,
+                    ru.acceso_baneado_at = :banned_at
+                WHERE ru.id = :id
+                  AND un.residencial_id = :rid
+            ");
+            $stmt->execute([
+                'ban' => $ban ? 1 : 0,
+                'motivo' => $ban ? ($motivo !== '' ? $motivo : null) : null,
+                'banned_at' => $ban ? date('Y-m-d H:i:s') : null,
+                'id' => $residUnitId,
+                'rid' => $residencialId,
+            ]);
+
+            json_out(true, [
+                'message' => $ban ? 'Residente bloqueado manualmente.' : 'Baneo manual eliminado.',
             ]);
         }
 

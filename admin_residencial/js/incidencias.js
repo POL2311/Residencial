@@ -404,7 +404,7 @@
     if (filtradas.length) {
       const header = document.createElement('div');
       header.className =
-        'hidden md:grid grid-cols-9 gap-4 px-4 py-2 text-xs font-semibold text-slate-500';
+        'hidden md:grid grid-cols-9 gap-4 rounded-2xl border border-slate-200 bg-white/70 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 shadow-sm';
 
       header.innerHTML = `
         <div class="col-span-2">Título</div>
@@ -430,7 +430,7 @@
 
     visibles.forEach((i) => {
       const card = document.createElement('div');
-      card.className = 'rounded-2xl border bg-white px-4 py-4';
+      card.className = 'rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm';
 
       card.innerHTML = `
         <div class="space-y-3 md:hidden">
@@ -452,8 +452,8 @@
           <div class="text-[11px] text-slate-400">${escapeHtml(fmtDate(i.created_at))}</div>
 
           <div class="flex gap-2 pt-2">
-            <button data-edit="${i.id}" class="flex-1 rounded-xl border px-3 py-2 text-sm">Editar</button>
-            <button data-del="${i.id}" class="flex-1 rounded-xl bg-rose-500 text-white px-3 py-2 text-sm">Eliminar</button>
+            <button data-edit="${i.id}" class="flex-1 rounded-full bg-slate-100 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200">Editar</button>
+            <button data-del="${i.id}" class="flex-1 rounded-full bg-rose-100 px-3 py-2 text-sm text-rose-700 hover:bg-rose-200">Eliminar</button>
           </div>
         </div>
 
@@ -471,8 +471,8 @@
             <div class="text-[11px] text-slate-400">${escapeHtml(fmtDate(i.created_at))}</div>
           </div>
           <div class="flex justify-end gap-2">
-            <button data-edit="${i.id}" class="text-xs px-3 py-1 rounded-full border hover:bg-slate-50">Editar</button>
-            <button data-del="${i.id}" class="text-xs px-3 py-1 rounded-full bg-rose-500 text-white hover:bg-rose-600">Eliminar</button>
+            <button data-edit="${i.id}" class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">Editar</button>
+            <button data-del="${i.id}" class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-200">Eliminar</button>
           </div>
         </div>
       `;

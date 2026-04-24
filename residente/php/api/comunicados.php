@@ -53,6 +53,11 @@ try {
   json_out(true, [
     'data' => [
       'ctx' => $ctx,
+      'meta' => [
+        'total' => count($items),
+        'latest_id' => (int)($items[0]['id'] ?? 0),
+        'latest_updated_at' => $items[0]['updated_at'] ?? ($items[0]['fecha_publicacion'] ?? null),
+      ],
       'items' => $items,
     ]
   ]);

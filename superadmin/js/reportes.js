@@ -95,7 +95,7 @@
 
     function renderSummary(summaryItems) {
         els.summary.innerHTML = summaryItems.length ? summaryItems.map((item) => `
-            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <article class="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4">
               <div class="text-xs uppercase tracking-wide text-slate-400">${escapeHtml(item.title)}</div>
               <div class="mt-2 text-2xl font-bold text-slate-900">${escapeHtml(item.value)}</div>
               <div class="mt-2 text-sm text-slate-600">${escapeHtml(item.detail || '')}</div>
@@ -194,7 +194,7 @@
         els.residenciales.innerHTML = items.length ? `
             <div class="space-y-3 md:hidden">
               ${visible.map((row) => `
-                <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
                   <div class="font-semibold text-slate-800">${escapeHtml(row.nombre)}</div>
                   <div class="mt-1 text-xs text-slate-500">${escapeHtml(row.codigo || 'Sin código')}</div>
                   <dl class="mt-4 grid grid-cols-1 gap-3 text-sm">
@@ -206,26 +206,28 @@
               `).join('')}
             </div>
             <div class="hidden md:block">
-              <table class="min-w-full text-sm">
-                <thead class="text-left text-xs uppercase tracking-wide text-slate-400">
-                  <tr>
-                    <th class="px-3 py-2">Residencial</th>
-                    <th class="px-3 py-2">Ubicación</th>
-                    <th class="px-3 py-2">Estatus</th>
-                    <th class="px-3 py-2">Creado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${visible.map((row) => `
-                    <tr class="border-t border-slate-100">
-                      <td class="px-3 py-3 font-medium text-slate-800">${escapeHtml(row.nombre)}<div class="text-xs text-slate-500">${escapeHtml(row.codigo || 'Sin código')}</div></td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml((row.ciudad || '') + ((row.estado ? ', ' + row.estado : '')))}<div class="text-xs text-slate-400">${escapeHtml(row.pais || '')}</div></td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml(row.estatus_plan || '—')}</td>
-                      <td class="px-3 py-3 text-slate-500">${escapeHtml(row.created_at || '')}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
+              <div class="grid grid-cols-[minmax(220px,1.3fr)_minmax(180px,1fr)_150px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div>Residencial</div>
+                <div>Ubicación</div>
+                <div>Estatus</div>
+                <div>Creado</div>
+              </div>
+              <div class="mt-3 space-y-3">
+                ${visible.map((row) => `
+                  <article class="grid grid-cols-[minmax(220px,1.3fr)_minmax(180px,1fr)_150px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-slate-800">${escapeHtml(row.nombre)}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(row.codigo || 'Sin código')}</div>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm text-slate-700">${escapeHtml((row.ciudad || '') + ((row.estado ? ', ' + row.estado : '')))}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(row.pais || '')}</div>
+                    </div>
+                    <div class="text-sm text-slate-700">${escapeHtml(row.estatus_plan || '—')}</div>
+                    <div class="text-sm text-slate-500">${escapeHtml(row.created_at || '')}</div>
+                  </article>
+                `).join('')}
+              </div>
             </div>
         ` : `<div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Sin residenciales recientes.</div>`;
 
@@ -239,7 +241,7 @@
         els.users.innerHTML = items.length ? `
             <div class="space-y-3 md:hidden">
               ${visible.map((row) => `
-                <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                       <div class="font-semibold text-slate-800">${escapeHtml(row.name)}</div>
@@ -255,28 +257,24 @@
               `).join('')}
             </div>
             <div class="hidden md:block">
-              <table class="min-w-full text-sm">
-                <thead class="text-left text-xs uppercase tracking-wide text-slate-400">
-                  <tr>
-                    <th class="px-3 py-2">Nombre</th>
-                    <th class="px-3 py-2">Email</th>
-                    <th class="px-3 py-2">Rol</th>
-                    <th class="px-3 py-2">Estado</th>
-                    <th class="px-3 py-2">Creado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${visible.map((row) => `
-                    <tr class="border-t border-slate-100">
-                      <td class="px-3 py-3 font-medium text-slate-800">${escapeHtml(row.name)}</td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml(row.email)}</td>
-                      <td class="px-3 py-3 text-slate-600">${escapeHtml(row.rol)}</td>
-                      <td class="px-3 py-3 text-slate-600">${Number(row.is_active || 0) === 1 ? 'Activo' : 'Inactivo'}</td>
-                      <td class="px-3 py-3 text-slate-500">${escapeHtml(row.created_at || '')}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
+              <div class="grid grid-cols-[minmax(200px,1fr)_minmax(220px,1.15fr)_160px_130px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div>Nombre</div>
+                <div>Email</div>
+                <div>Rol</div>
+                <div>Estado</div>
+                <div>Creado</div>
+              </div>
+              <div class="mt-3 space-y-3">
+                ${visible.map((row) => `
+                  <article class="grid grid-cols-[minmax(200px,1fr)_minmax(220px,1.15fr)_160px_130px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                    <div class="font-semibold text-slate-800">${escapeHtml(row.name)}</div>
+                    <div class="text-sm text-slate-700 min-w-0">${escapeHtml(row.email)}</div>
+                    <div class="text-sm text-slate-700">${escapeHtml(row.rol)}</div>
+                    <div><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${Number(row.is_active || 0) === 1 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}">${Number(row.is_active || 0) === 1 ? 'Activo' : 'Inactivo'}</span></div>
+                    <div class="text-sm text-slate-500">${escapeHtml(row.created_at || '')}</div>
+                  </article>
+                `).join('')}
+              </div>
             </div>
         ` : `<div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Sin usuarios recientes.</div>`;
 
