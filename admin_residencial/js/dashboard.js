@@ -1,5 +1,6 @@
 (function () {
   const els = {
+    header: document.getElementById('shellHeader'),
     name: document.getElementById('residentName'),
     addr: document.getElementById('residentAddress'),
     btnEdit: document.getElementById('btnEditAddress'),
@@ -33,8 +34,26 @@
   const VIEWS = BASE + 'templates/views/';
 
   let currentViewScript = null;
+  const state = {
+    currentView: null,
+    targetView: null,
+    navToken: 0,
+    isNavigating: false,
+  };
 
-  function loadViewScript(view) {
+  function showShellHeader() {
+    if (!els.header) return;
+    els.header.style.marginTop = '0px';
+    els.header.style.opacity = '1';
+    els.header.style.transform = 'translateY(0)';
+  }
+
+  function initShellHeader() {
+    if (!els.header) return;
+    showShellHeader();
+  }
+
+  function loadViewScript(view, token) {
     // Solo mete aquí lo que realmente tengas
     const scriptsMap = {
       perfil: BASE + 'js/perfil.js',
@@ -61,37 +80,81 @@
     s.src = scriptsMap[view];
     s.defer = true;
     s.dataset.viewScript = view;
-    document.body.appendChild(s);
-    currentViewScript = s;
+    return new Promise((resolve) => {
+      s.onload = () => resolve(token === state.navToken);
+      s.onerror = () => resolve(false);
+      document.body.appendChild(s);
+      currentViewScript = s;
+    });
   }
 
-  async function loadView(view) {
+  function setActiveButtons(view) {
+    document.querySelectorAll('.dashBtn').forEach(btn => {
+      const isActive = btn.dataset.view === view;
+      btn.classList.toggle('ring-2', isActive);
+      btn.classList.toggle('ring-black/20', isActive);
+    });
+  }
+
+  function syncHash(view) {
+    if ((window.location.hash || '').replace('#', '') !== view) {
+      window.location.hash = view;
+    }
+  }
+
+  async function navigateTo(view, opts = {}) {
+    const { force = false } = opts;
+    showShellHeader();
+    if (!view) view = 'home';
+    if (!force && (state.targetView === view || state.currentView === view) && state.isNavigating === false) {
+      syncHash(view);
+      return;
+    }
+
+    const token = ++state.navToken;
+    state.isNavigating = true;
+    state.targetView = view;
+
     const url = `${VIEWS}${view}.html`;
     const wrap = els.body?.querySelector('.max-w-6xl') || els.body;
     if (!wrap) return;
 
+    setActiveButtons(view);
+    syncHash(view);
+
     try {
       const res = await fetch(url, { cache: 'no-store' });
+      if (token !== state.navToken) return;
       if (!res.ok) throw new Error('No se pudo cargar plantilla');
-      wrap.innerHTML = await res.text();
+      const html = await res.text();
+      if (token !== state.navToken) return;
+      wrap.innerHTML = html;
     } catch (e) {
+      if (token !== state.navToken) return;
       wrap.innerHTML = `
         <div class="rounded-2xl bg-white p-4 shadow">
           <div class="text-sm font-semibold text-rose-600">No se pudo cargar la sección</div>
           <div class="text-xs text-slate-600">Plantilla: ${escapeHtml(view)}.html</div>
         </div>
       `;
+      state.isNavigating = false;
+      return;
     }
 
-    // marcar activo el botón
-    document.querySelectorAll('.dashBtn').forEach(btn => {
-      const isActive = btn.dataset.view === view;
-      btn.classList.toggle('ring-2', isActive);
-      btn.classList.toggle('ring-black/20', isActive);
-    });
+    const scriptOk = await loadViewScript(view, token);
+    if (token !== state.navToken) return;
 
-    loadViewScript(view);
-    window.location.hash = view;
+    if (!scriptOk && currentViewScript) {
+      wrap.innerHTML = `
+        <div class="rounded-2xl bg-white p-4 shadow">
+          <div class="text-sm font-semibold text-rose-600">No se pudo cargar la sección</div>
+          <div class="text-xs text-slate-600">Script: ${escapeHtml(view)}.js</div>
+        </div>
+      `;
+    }
+
+    state.currentView = view;
+    state.isNavigating = false;
   }
 
   function initialView() {
@@ -141,7 +204,7 @@
       console.warn('loadContext() falló:', e);
       els.name.textContent = 'Admin residencial';
       els.addr.textContent = '—';
-      els.cars.innerHTML = `<span class="text-xs opacity-90">—</span>`;
+      els.cars.innerHTML = `<span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/80">Sin autos registrados</span>`;
     }
   }
 
@@ -149,7 +212,7 @@
     if (!els.cars) return;
 
     if (!autos || autos.length === 0) {
-      els.cars.innerHTML = `<span class="text-xs opacity-90">—</span>`;
+      els.cars.innerHTML = `<span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/80">Sin autos registrados</span>`;
       return;
     }
 
@@ -163,7 +226,7 @@
           : (idx % 3 === 2) ? 'text-yellow-300'
             : 'text-white';
 
-      btn.className = `h-8 w-8 flex items-center justify-center ${colorClass} opacity-95 hover:opacity-100`;
+      btn.className = `inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-full border border-white/10 bg-white/10 px-2 ${colorClass} opacity-95 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/20 hover:opacity-100 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35`;
       btn.title = a.placas || 'Auto';
 
       btn.innerHTML = `
@@ -198,6 +261,7 @@
         <div class="text-slate-900">${escapeHtml(auto.color || '—')}</div>
       </div>
     `;
+    showShellHeader();
     els.modal.classList.remove('hidden');
   }
 
@@ -222,7 +286,8 @@
     renderCars,
     openCarModal,
     closeCarModal,
-    loadView,
+    loadView: navigateTo,
+    navigate: navigateTo,
     BASE,
     API,
     VIEWS,
@@ -235,18 +300,27 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.dashBtn').forEach(btn => {
-      btn.addEventListener('click', () => loadView(btn.dataset.view));
+      btn.addEventListener('click', () => navigateTo(btn.dataset.view));
     });
 
-    els.btnReg?.addEventListener('click', () => loadView('reglamento'));
-    els.btnEdit?.addEventListener('click', () => loadView('perfil'));
+    els.btnReg?.addEventListener('click', () => navigateTo('reglamento'));
+    els.btnEdit?.addEventListener('click', () => navigateTo('perfil'));
 
     els.modalClose?.addEventListener('click', closeCarModal);
     els.modal?.addEventListener('click', (e) => {
       if (e.target === els.modal) closeCarModal();
     });
 
+    initShellHeader();
     loadContext();
-    loadView(initialView());
+    navigateTo(initialView(), { force: true });
+  });
+
+  window.addEventListener('hashchange', () => {
+    const next = (window.location.hash || '').replace('#', '').trim();
+    const current = state.targetView || state.currentView;
+    if (next && next !== current) {
+      navigateTo(next);
+    }
   });
 })();

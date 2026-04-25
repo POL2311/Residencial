@@ -18,8 +18,6 @@
 
     const els = {
         alert: $('homeAlert'),
-        unitLabel: $('homeUnitLabel'),
-        residentQuickName: $('residentQuickName'),
         services: $('homeServices'),
         servicesPrev: $('homeSrvPrev'),
         servicesNext: $('homeSrvNext'),
@@ -57,11 +55,6 @@
     }
 
     function setupState(message) {
-        if (els.unitLabel) els.unitLabel.textContent = 'Configuración pendiente';
-        if (els.residentQuickName && !els.residentQuickName.textContent.trim()) {
-            els.residentQuickName.textContent = 'Residente';
-        }
-
         renderTips([
             {
                 title: 'Vincula tu unidad',
@@ -221,21 +214,8 @@
         const ctx = home.ctx || ctxData.ctx || {};
 
         if (home.setup_incomplete || ctxData.setup_incomplete) {
-            if (els.residentQuickName) {
-                els.residentQuickName.textContent = user.name || 'Residente';
-            }
             setupState(home.setup_message || ctxData.setup_message || 'Tu cuenta residente todavía no está ligada a una unidad activa.');
             return;
-        }
-
-        if (els.unitLabel) {
-            const residencial = ctx.residencial_nombre || 'Tu residencial';
-            const unidad = ctx.unidad_clave ? ` · Unidad ${ctx.unidad_clave}` : '';
-            els.unitLabel.textContent = `${residencial}${unidad}`;
-        }
-
-        if (els.residentQuickName) {
-            els.residentQuickName.textContent = user.name || 'Residente';
         }
 
         try {

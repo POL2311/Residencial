@@ -1,5 +1,6 @@
 (function () {
     const els = {
+        header: document.getElementById('shellHeader'),
         name: document.getElementById('superadminName'),
         context: document.getElementById('superadminContext'),
         meta: document.getElementById('superadminMeta'),
@@ -23,8 +24,13 @@
     const inlineViews = new Set(['home', 'residenciales', 'usuarios', 'seguridad', 'reportes', 'configuracion']);
 
     let currentViewScript = null;
-    let currentViewName = null;
     let dashboardContext = null;
+    const state = {
+        currentView: null,
+        targetView: null,
+        navToken: 0,
+        isNavigating: false,
+    };
 
     function escapeHtml(s) {
         return String(s ?? '')
@@ -33,6 +39,18 @@
             .replaceAll('>', '&gt;')
             .replaceAll('"', '&quot;')
             .replaceAll("'", '&#039;');
+    }
+
+    function showShellHeader() {
+        if (!els.header) return;
+        els.header.style.marginTop = '0px';
+        els.header.style.opacity = '1';
+        els.header.style.transform = 'translateY(0)';
+    }
+
+    function initShellHeader() {
+        if (!els.header) return;
+        showShellHeader();
     }
 
     function initialView() {
@@ -52,7 +70,7 @@
         };
     }
 
-    function loadViewScript(view) {
+    function loadViewScript(view, token) {
         return new Promise((resolve) => {
             const map = scriptMap();
 
@@ -69,43 +87,79 @@
             const s = document.createElement('script');
             s.src = `${map[view]}?v=${Date.now()}`;
             s.dataset.viewScript = view;
-            s.onload = () => resolve();
-            s.onerror = () => resolve();
+            s.onload = () => resolve(token === state.navToken);
+            s.onerror = () => resolve(false);
             document.body.appendChild(s);
             currentViewScript = s;
         });
     }
 
-    async function loadView(view) {
+    function setActiveButtons(view) {
+        document.querySelectorAll('.dashBtn').forEach((btn) => {
+            const active = btn.dataset.view === view;
+            btn.classList.toggle('ring-2', active);
+            btn.classList.toggle('ring-black/20', active);
+        });
+    }
+
+    function syncHash(view) {
+        if ((window.location.hash || '').replace('#', '') !== view) {
+            window.location.hash = view;
+        }
+    }
+
+    async function navigateTo(view, opts = {}) {
+        const { force = false } = opts;
+        showShellHeader();
         if (!inlineViews.has(view)) {
             view = 'home';
         }
+        if (!force && (state.targetView === view || state.currentView === view) && state.isNavigating === false) {
+            syncHash(view);
+            return;
+        }
 
-        currentViewName = view;
+        const token = ++state.navToken;
+        state.isNavigating = true;
+        state.targetView = view;
         const wrap = els.body?.querySelector('.max-w-6xl') || els.body;
         if (!wrap) return;
+        setActiveButtons(view);
+        syncHash(view);
 
         try {
             const res = await fetch(`${VIEWS}${view}.html`, { cache: 'no-store' });
+            if (token !== state.navToken) return;
             if (!res.ok) throw new Error('No se pudo cargar plantilla');
-            wrap.innerHTML = await res.text();
+            const html = await res.text();
+            if (token !== state.navToken) return;
+            wrap.innerHTML = html;
         } catch {
+            if (token !== state.navToken) return;
             wrap.innerHTML = `
                 <div class="rounded-2xl bg-white p-4 shadow">
                   <div class="text-sm font-semibold text-rose-600">No se pudo cargar la sección</div>
                   <div class="text-xs text-slate-600">Plantilla: ${escapeHtml(view)}.html</div>
                 </div>
             `;
+            state.isNavigating = false;
+            return;
         }
 
-        document.querySelectorAll('.dashBtn').forEach((btn) => {
-            const active = btn.dataset.view === view;
-            btn.classList.toggle('ring-2', active);
-            btn.classList.toggle('ring-black/20', active);
-        });
+        const scriptOk = await loadViewScript(view, token);
+        if (token !== state.navToken) return;
 
-        await loadViewScript(view);
-        window.location.hash = view;
+        if (!scriptOk && currentViewScript) {
+            wrap.innerHTML = `
+                <div class="rounded-2xl bg-white p-4 shadow">
+                  <div class="text-sm font-semibold text-rose-600">No se pudo cargar la sección</div>
+                  <div class="text-xs text-slate-600">Script: ${escapeHtml(view)}.js</div>
+                </div>
+            `;
+        }
+
+        state.currentView = view;
+        state.isNavigating = false;
     }
 
     async function fetchContext() {
@@ -153,25 +207,27 @@
         API,
         VIEWS,
         loadContext,
-        loadView,
-        navigate: loadView,
-        getCurrentView: () => currentViewName,
+        loadView: navigateTo,
+        navigate: navigateTo,
+        getCurrentView: () => state.currentView,
         getContext: () => dashboardContext,
     };
 
     document.addEventListener('DOMContentLoaded', () => {
+        initShellHeader();
         document.querySelectorAll('.dashBtn').forEach((btn) => {
-            btn.addEventListener('click', () => loadView(btn.dataset.view));
+            btn.addEventListener('click', () => navigateTo(btn.dataset.view));
         });
 
         loadContext();
-        loadView(initialView());
+        navigateTo(initialView(), { force: true });
     });
 
     window.addEventListener('hashchange', () => {
         const next = (window.location.hash || '').replace('#', '').trim();
-        if (next && next !== currentViewName && inlineViews.has(next)) {
-            loadView(next);
+        const current = state.targetView || state.currentView;
+        if (next && next !== current && inlineViews.has(next)) {
+            navigateTo(next);
         }
     });
 })();

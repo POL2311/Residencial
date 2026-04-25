@@ -1,5 +1,6 @@
 (function () {
   const els = {
+    header: document.getElementById('shellHeader'),
     name: document.getElementById('guardName'),
     ctx: document.getElementById('guardContext'),
     hint: document.getElementById('guardHint'),
@@ -35,6 +36,7 @@
 
   const state = {
     currentView: null,
+    targetView: null,
     currentViewScript: null,
     currentViewController: null,
     context: null,
@@ -49,6 +51,18 @@
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
+  }
+
+  function showShellHeader() {
+    if (!els.header) return;
+    els.header.style.marginTop = '0px';
+    els.header.style.opacity = '1';
+    els.header.style.transform = 'translateY(0)';
+  }
+
+  function initShellHeader() {
+    if (!els.header) return;
+    showShellHeader();
   }
 
   async function fetchJSON(url, opts = {}) {
@@ -68,6 +82,7 @@
 
   function openModal(title, html) {
     if (!els.modal || !els.modalBody || !els.modalTitle) return;
+    showShellHeader();
     els.modalTitle.textContent = title || 'Detalle';
     els.modalBody.innerHTML = html || '';
     els.modal.classList.remove('hidden');
@@ -253,7 +268,9 @@
 
     const token = ++state.navToken;
     state.isNavigating = true;
+    state.targetView = view;
     state.currentView = view;
+    showShellHeader();
 
     setActiveButtons(view);
     unloadCurrentView();
@@ -276,6 +293,7 @@
 
     if (token === state.navToken) {
       state.isNavigating = false;
+      state.targetView = view;
     }
   }
 
@@ -373,17 +391,6 @@
   }
 
   function bindStaticEvents() {
-    document.querySelectorAll('.dashBtn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const v = btn.dataset.view || 'home';
-        if (window.location.hash.replace('#', '') !== v) {
-          window.location.hash = v;
-        } else {
-          navigateTo(v, { force: true });
-        }
-      });
-    });
-
     document.addEventListener('click', (e) => {
       const t = e.target.closest('[data-view]');
       if (!t) return;
@@ -392,9 +399,10 @@
 
       if (window.location.hash.replace('#', '') !== v) {
         window.location.hash = v;
-      } else {
-        navigateTo(v, { force: true });
+        return;
       }
+
+      navigateTo(v);
     });
 
     els.btnReg?.addEventListener('click', openReglamento);
@@ -405,7 +413,11 @@
     });
 
     window.addEventListener('hashchange', () => {
-      navigateTo(initialView(), { force: true });
+      const next = initialView();
+      const current = state.targetView || state.currentView;
+      if (next && next !== current) {
+        navigateTo(next);
+      }
     });
   }
 
@@ -422,6 +434,7 @@
   };
 
   document.addEventListener('DOMContentLoaded', async () => {
+    initShellHeader();
     bindStaticEvents();
     await loadContext();
     await navigateTo(initialView(), { force: true });
