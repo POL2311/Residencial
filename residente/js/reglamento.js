@@ -25,11 +25,29 @@
         els.alert.textContent = msg;
     }
 
+    function showEmpty(msg) {
+        if (!els.alert) return;
+        els.alert.classList.remove('hidden');
+        els.alert.className = 'rounded-2xl px-4 py-3 text-sm bg-slate-50 text-slate-700 border border-slate-200';
+        els.alert.textContent = msg;
+    }
+
     async function load() {
         const res = await fetch(API, { credentials: 'same-origin', headers: { Accept: 'application/json' }, cache: 'no-store' });
         const json = await res.json().catch(() => null);
         if (!json || !json.ok) throw new Error(json?.error || 'No se pudo cargar el reglamento.');
-        const item = json.data?.item || {};
+        const item = json.data?.item || null;
+
+        if (!item) {
+            if (els.title) els.title.textContent = 'Reglamento';
+            if (els.meta) els.meta.textContent = 'Sin version disponible';
+            if (els.content) {
+                els.content.textContent = 'Aun no hay reglamento disponible para tu residencial.';
+            }
+            showEmpty('Aun no hay reglamento disponible para tu residencial.');
+            return;
+        }
+
         if (els.title) els.title.textContent = item.titulo || 'Reglamento';
         if (els.meta) els.meta.textContent = `Version ${item.version_label || '—'} · Actualizado ${item.updated_at || item.created_at || '—'}`;
         if (els.content) els.content.textContent = item.contenido || 'Sin contenido.';

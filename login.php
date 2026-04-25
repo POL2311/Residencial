@@ -51,20 +51,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login - Sistema Residencial</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 px-4 py-8 md:py-16">
-    <div class="mx-auto w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <h1 class="text-2xl font-bold text-slate-800 mb-2 text-center">
+<body class="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200">
+    <div class="flex min-h-screen items-center justify-center px-4 py-5 sm:px-6 sm:py-8">
+    <div class="mx-auto w-full max-w-md rounded-[1.75rem] bg-white p-5 shadow-xl sm:p-8">
+        <h1 class="mb-2 text-center text-2xl font-bold text-slate-800 sm:text-[1.9rem]">
             Acceso al sistema
         </h1>
-        <p class="text-sm text-slate-500 mb-6 text-center">
+        <p class="mb-5 text-center text-sm leading-6 text-slate-500 sm:mb-6">
             Inicia sesión con tu cuenta
         </p>
 
         <?php if ($error): ?>
-            <div class="mb-4 rounded-lg bg-red-100 border border-red-300 text-red-700 px-4 py-3 text-sm">
+            <div class="mb-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm text-red-700">
                 <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
             </div>
         <?php endif; ?>
@@ -79,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     id="email"
                     name="email"
                     required
-                    class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500 text-sm px-3 py-2"
+                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-slate-500 focus:ring-slate-500"
                     placeholder="tucorreo@ejemplo.com"
                 >
             </div>
@@ -93,22 +95,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     id="password"
                     name="password"
                     required
-                    class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500 text-sm px-3 py-2"
+                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-slate-500 focus:ring-slate-500"
                     placeholder="••••••••"
                 >
             </div>
 
             <button
                 type="submit"
-                class="w-full inline-flex justify-center items-center px-4 py-2 rounded-lg bg-slate-800 text-white font-medium text-sm hover:bg-slate-900 transition"
+                class="inline-flex w-full items-center justify-center rounded-xl bg-slate-800 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-900"
             >
                 Iniciar sesión
             </button>
         </form>
 
-        <p class="mt-6 text-xs text-center text-slate-400">
+        <p class="mt-5 text-center text-xs leading-5 text-slate-400 sm:mt-6">
             © <?= date('Y') ?> Sistema Residencial. Todos los derechos reservados.
         </p>
+    </div>
     </div>
 </body>
 </html>

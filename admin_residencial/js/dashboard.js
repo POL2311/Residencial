@@ -8,6 +8,7 @@
 
     btnReg: document.getElementById('btnReglamento'),
     body: document.getElementById('dashboardBody'),
+    mount: document.getElementById('dashboardViewMount'),
 
     modal: document.getElementById('carModal'),
     modalBody: document.getElementById('carModalBody'),
@@ -32,11 +33,22 @@
   const BASE = basePath();
   const API = BASE + 'php/api/';
   const VIEWS = BASE + 'templates/views/';
+  const ALLOWED_VIEWS = new Set([
+    'home',
+    'unidades',
+    'residentes',
+    'guardias',
+    'incidencias',
+    'comunicados',
+    'perfil',
+    'reglamento',
+    'autos',
+  ]);
 
   let currentViewScript = null;
   const state = {
     currentView: null,
-    targetView: null,
+    pendingView: null,
     navToken: 0,
     isNavigating: false,
   };
@@ -51,6 +63,10 @@
   function initShellHeader() {
     if (!els.header) return;
     showShellHeader();
+  }
+
+  function normalizeView(view) {
+    return ALLOWED_VIEWS.has(view) ? view : 'home';
   }
 
   function loadViewScript(view, token) {
@@ -74,10 +90,10 @@
       currentViewScript = null;
     }
 
-    if (!scriptsMap[view]) return;
+    if (!scriptsMap[view]) return Promise.resolve(true);
 
     const s = document.createElement('script');
-    s.src = scriptsMap[view];
+    s.src = `${scriptsMap[view]}?v=${Date.now()}`;
     s.defer = true;
     s.dataset.viewScript = view;
     return new Promise((resolve) => {
@@ -102,28 +118,48 @@
     }
   }
 
+  function scrollToViewTop() {
+    const wrap = els.mount || els.body;
+    if (els.body && typeof els.body.scrollTo === 'function') {
+      els.body.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (wrap && typeof wrap.scrollIntoView === 'function') {
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
   async function navigateTo(view, opts = {}) {
     const { force = false } = opts;
     showShellHeader();
-    if (!view) view = 'home';
-    if (!force && (state.targetView === view || state.currentView === view) && state.isNavigating === false) {
+    view = normalizeView(view || 'home');
+
+    if (!force && (state.pendingView === view || state.currentView === view) && state.isNavigating === false) {
       syncHash(view);
       return;
     }
 
     const token = ++state.navToken;
     state.isNavigating = true;
-    state.targetView = view;
+    state.pendingView = view;
 
-    const url = `${VIEWS}${view}.html`;
-    const wrap = els.body?.querySelector('.max-w-6xl') || els.body;
+    const wrap = els.mount || els.body;
     if (!wrap) return;
 
     setActiveButtons(view);
     syncHash(view);
+    scrollToViewTop();
+
+    wrap.innerHTML = `
+      <div class="rounded-2xl bg-white p-4 shadow">
+        <div class="text-sm font-semibold text-slate-700">Cargando sección…</div>
+        <div class="text-xs text-slate-500 mt-1">${escapeHtml(view)}</div>
+      </div>
+    `;
 
     try {
-      const res = await fetch(url, { cache: 'no-store' });
+      const res = await fetch(`${VIEWS}${view}.html`, { cache: 'no-store' });
       if (token !== state.navToken) return;
       if (!res.ok) throw new Error('No se pudo cargar plantilla');
       const html = await res.text();
@@ -137,6 +173,7 @@
           <div class="text-xs text-slate-600">Plantilla: ${escapeHtml(view)}.html</div>
         </div>
       `;
+      state.pendingView = null;
       state.isNavigating = false;
       return;
     }
@@ -151,15 +188,19 @@
           <div class="text-xs text-slate-600">Script: ${escapeHtml(view)}.js</div>
         </div>
       `;
+      state.pendingView = null;
+      state.isNavigating = false;
+      return;
     }
 
     state.currentView = view;
+    state.pendingView = null;
     state.isNavigating = false;
   }
 
   function initialView() {
     const h = (window.location.hash || '').replace('#', '').trim();
-    return h || 'home';
+    return normalizeView(h || 'home');
   }
 
   async function loadContext() {
@@ -299,12 +340,16 @@
   window.ResidenteDashboard = api;
 
   document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.dashBtn').forEach(btn => {
-      btn.addEventListener('click', () => navigateTo(btn.dataset.view));
-    });
+    els.mount = els.mount || document.getElementById('dashboardViewMount');
 
-    els.btnReg?.addEventListener('click', () => navigateTo('reglamento'));
-    els.btnEdit?.addEventListener('click', () => navigateTo('perfil'));
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-view]');
+      if (!target) return;
+      const view = target.getAttribute('data-view');
+      if (!view) return;
+      e.preventDefault();
+      navigateTo(view);
+    });
 
     els.modalClose?.addEventListener('click', closeCarModal);
     els.modal?.addEventListener('click', (e) => {
@@ -317,8 +362,8 @@
   });
 
   window.addEventListener('hashchange', () => {
-    const next = (window.location.hash || '').replace('#', '').trim();
-    const current = state.targetView || state.currentView;
+    const next = normalizeView((window.location.hash || '').replace('#', '').trim());
+    const current = state.pendingView || state.currentView;
     if (next && next !== current) {
       navigateTo(next);
     }

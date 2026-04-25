@@ -42,8 +42,7 @@ try {
     LIMIT 1
   ");
   $stmt->execute(['rid' => (int)$ctx['residencial_id']]);
-  $item = $stmt->fetch(PDO::FETCH_ASSOC);
-  if (!$item) json_out(false, ['error' => 'No hay reglamento disponible.'], 404);
+  $item = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
   json_out(true, ['data' => ['ctx' => $ctx, 'item' => $item]]);
 } catch (Throwable $e) {

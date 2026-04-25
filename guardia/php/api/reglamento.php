@@ -36,23 +36,24 @@ try {
     out(false, ['error'=>'Guardia sin residencial asignado'], 403);
   }
 
-  // 2️⃣ Traer reglamento público más reciente
+  // 2️⃣ Traer reglamento más reciente del residencial.
+  // En el esquema actual no existe la columna `es_publico`,
+  // así que guardia consume el documento oficial más reciente.
   $stmt = $pdo->prepare("
-    SELECT titulo, contenido, version_label, updated_at
+    SELECT id, titulo, contenido, version_label, updated_at
     FROM reglamentos_residenciales
     WHERE residencial_id = :rid
-      AND es_publico = 1
-    ORDER BY updated_at DESC
+    ORDER BY id DESC, updated_at DESC
     LIMIT 1
   ");
   $stmt->execute(['rid'=>$residencialId]);
   $reglamento = $stmt->fetch(PDO::FETCH_ASSOC);
 
   if (!$reglamento) {
-    out(true, ['data'=>null]);
+    out(true, ['data'=>null, 'reglamento'=>null]);
   }
 
-  out(true, ['data'=>$reglamento]);
+  out(true, ['data'=>$reglamento, 'reglamento'=>$reglamento]);
 
 } catch (Throwable $e) {
   out(false, ['error'=>'Error: '.$e->getMessage()], 500);

@@ -341,12 +341,19 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         initShellHeader();
-        document.querySelectorAll('.dashBtn').forEach(btn => {
-            btn.addEventListener('click', () => navigateTo(btn.dataset.view));
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('[data-view]');
+            if (!target) return;
+
+            const view = (target.getAttribute('data-view') || '').trim();
+            if (!view || !inlineViews.has(view)) return;
+
+            e.preventDefault();
+            navigateTo(view);
         });
 
-        els.btnEdit?.addEventListener('click', () => navigateTo('perfil'));
-        els.notificationsButton?.addEventListener('click', () => navigateTo('comunicados'));
+        els.btnEdit?.setAttribute('data-view', 'perfil');
+        els.notificationsButton?.setAttribute('data-view', 'comunicados');
 
         els.modalClose?.addEventListener('click', closeCarModal);
         els.modal?.addEventListener('click', (e) => {
