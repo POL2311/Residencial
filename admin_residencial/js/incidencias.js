@@ -35,6 +35,7 @@
     incidencias: [],
     unidades: [],
     guardias: [],
+    meta: { modo_operacion: 'residencial', areas: [], personas: [], visitantes: [], permisos: [] },
     filter: 'todas',
     search: '',
     page: 1,
@@ -122,6 +123,9 @@
     },
     guardias: {
       list: () => fetchJSON(API_GUARDIAS),
+    },
+    meta: {
+      get: () => fetchJSON(API_INCIDENCIAS + '?action=meta'),
     },
   };
 
@@ -255,15 +259,17 @@
   async function loadAll() {
     hideAlert();
     try {
-      const [i, u, g] = await Promise.all([
+      const [i, u, g, m] = await Promise.all([
         api.incidencias.list(),
         api.unidades.list(),
         api.guardias.list(),
+        api.meta.get(),
       ]);
 
       state.incidencias = i.incidencias || [];
       state.unidades = u.unidades || [];
       state.guardias = g.guardias || [];
+      state.meta = m.data || state.meta;
 
       render();
     } catch (e) {
@@ -278,11 +284,30 @@
     els.formAdd.reset();
 
     const selU = els.formAdd.querySelector('[name="unidad_id"]');
+    const operationalWrap = document.getElementById('incOperationalFields');
+    const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
     if (selU) {
+      selU.closest('div')?.classList.toggle('hidden', isOperational);
       selU.innerHTML = '';
       state.unidades.forEach((u) => {
         selU.innerHTML += `<option value="${u.id}">${escapeHtml(u.clave)}</option>`;
       });
+    }
+
+    if (operationalWrap) {
+      operationalWrap.classList.toggle('hidden', !isOperational);
+      const fillSelect = (name, rows, labelKey = 'nombre', placeholder = 'Sin selección') => {
+        const select = els.formAdd.querySelector(`[name="${name}"]`);
+        if (!select) return;
+        select.innerHTML = `<option value="">${placeholder}</option>` + rows.map((row) => {
+          const label = row[labelKey] || row.nombre_visitante || row.tipo_movimiento || row.name || '—';
+          return `<option value="${row.id}">${escapeHtml(label)}</option>`;
+        }).join('');
+      };
+      fillSelect('area_id', state.meta.areas || [], 'nombre', 'Sin área');
+      fillSelect('persona_recurrente_id', state.meta.personas || [], 'nombre', 'Sin persona');
+      fillSelect('visitante_rapido_id', state.meta.visitantes || [], 'nombre_visitante', 'Sin visitante');
+      fillSelect('permiso_material_id', state.meta.permisos || [], 'tipo_movimiento', 'Sin permiso');
     }
 
     els.modalAdd.classList.remove('hidden');
@@ -345,14 +370,15 @@
   }
 
   function validateAddForm(fd) {
+    const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
     const unidadId = Number(fd.get('unidad_id') || 0);
     const tipo = String(fd.get('tipo') || '').trim();
     const titulo = String(fd.get('titulo') || '').trim();
     const descripcion = String(fd.get('descripcion') || '').trim();
     const prioridad = String(fd.get('prioridad') || '').trim();
 
-    if (unidadId <= 0) throw new Error('Debes seleccionar una unidad.');
-    if (!['seguridad', 'servicio', 'vecino', 'infraestructura', 'otro'].includes(tipo)) {
+    if (!isOperational && unidadId <= 0) throw new Error('Debes seleccionar una unidad.');
+    if (!['seguridad', 'servicio', 'vecino', 'infraestructura', 'otro', 'robo', 'conflicto', 'salida_sin_permiso', 'visitante_sin_ine', 'material_no_coincide', 'evento_general'].includes(tipo)) {
       throw new Error('Tipo inválido.');
     }
     if (titulo.length < 3) throw new Error('El título debe tener al menos 3 caracteres.');
@@ -441,7 +467,8 @@
           </div>
 
           <div><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || '—')}</div></div>
-          <div><span class="text-xs text-slate-500">Residente</span><div>${escapeHtml(i.residente_nombre || '—')}</div></div>
+          <div><span class="text-xs text-slate-500">Contexto</span><div>${escapeHtml(i.unidad_clave || i.area_nombre || '—')}</div></div>
+          <div><span class="text-xs text-slate-500">Relación</span><div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div></div>
           <div><span class="text-xs text-slate-500">Guardia</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
 
           <div class="flex gap-2">
@@ -462,8 +489,8 @@
             <div class="font-semibold text-slate-800">${escapeHtml(i.titulo || '—')}</div>
             <div class="text-xs text-slate-500 capitalize">${escapeHtml(i.tipo || '—')}</div>
           </div>
-          <div>${escapeHtml(i.unidad_clave || '—')}</div>
-          <div class="col-span-2">${escapeHtml(i.residente_nombre || '—')}</div>
+          <div>${escapeHtml(i.unidad_clave || i.area_nombre || '—')}</div>
+          <div class="col-span-2">${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div>
           <div>${escapeHtml(i.guardia_nombre || '—')}</div>
           <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${escapeHtml(i.prioridad || '')}</span></div>
           <div>
@@ -566,6 +593,15 @@
 
     try {
       const fd = new FormData(els.formAdd);
+      if (String(state.meta?.modo_operacion || 'residencial') === 'residencial') {
+        fd.delete('area_id');
+        fd.delete('persona_recurrente_id');
+        fd.delete('visitante_rapido_id');
+        fd.delete('permiso_material_id');
+        fd.delete('origen_tipo');
+      } else {
+        fd.delete('unidad_id');
+      }
       validateAddForm(fd);
 
       const resp = await api.incidencias.save(fd);

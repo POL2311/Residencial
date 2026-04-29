@@ -1,0 +1,113 @@
+<div id="materialesOperativosView" class="space-y-4">
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div>
+        <div class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Materiales y equipos</div>
+        <h1 class="mt-1 text-2xl font-semibold text-slate-800">Permisos y catálogo</h1>
+        <p class="mt-1 text-sm text-slate-500">Gestiona catálogo recurrente y permisos autorizados para entrada o salida.</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="btnMaterialCatalogoNuevo" type="button" class="rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">+ Material</button>
+        <button id="btnPermisoNuevo" type="button" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">+ Permiso</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="materialesAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <div class="grid gap-4 xl:grid-cols-[0.95fr_1.25fr]">
+    <div class="space-y-4">
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="mb-3 text-sm font-semibold text-slate-700">Catálogo recurrente</div>
+        <div id="catalogoList" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="mb-3 text-sm font-semibold text-slate-700">Permisos registrados</div>
+        <div id="permisosList" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="catalogoModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 p-0 md:items-center md:p-4">
+    <div class="w-full max-w-lg rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
+      <div class="flex items-center justify-between border-b bg-slate-50 px-4 py-3">
+        <h2 id="catalogoModalTitle" class="text-base font-semibold">Nuevo material</h2>
+        <button id="btnCatalogoClose" type="button" class="h-9 w-9 rounded-full border bg-white hover:bg-slate-100">✕</button>
+      </div>
+      <form id="catalogoForm" class="space-y-3 p-4">
+        <input type="hidden" name="id" />
+        <div id="catalogoError" class="hidden rounded-xl bg-rose-100 px-4 py-3 text-sm text-rose-700"></div>
+        <div>
+          <label class="mb-1 block text-xs text-slate-600">Nombre</label>
+          <input name="nombre" type="text" class="w-full rounded-xl border px-3 py-2 text-sm" required />
+        </div>
+        <div>
+          <label class="mb-1 block text-xs text-slate-600">Categoría</label>
+          <input name="categoria" type="text" class="w-full rounded-xl border px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="mb-1 block text-xs text-slate-600">Descripción</label>
+          <textarea name="descripcion" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm"></textarea>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" name="activo" value="1" checked />
+          Material activo
+        </label>
+        <div class="flex flex-col-reverse gap-2 border-t pt-3 sm:flex-row sm:justify-end">
+          <button id="btnCatalogoCancel" type="button" class="rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="permisoModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 p-0 md:items-center md:p-4">
+    <div class="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
+      <div class="flex items-center justify-between border-b bg-slate-50 px-4 py-3">
+        <h2 id="permisoModalTitle" class="text-base font-semibold">Nuevo permiso</h2>
+        <button id="btnPermisoClose" type="button" class="h-9 w-9 rounded-full border bg-white hover:bg-slate-100">✕</button>
+      </div>
+      <form id="permisoForm" class="flex min-h-0 flex-1 flex-col">
+        <div class="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+          <input type="hidden" name="id" />
+          <div id="permisoError" class="hidden rounded-xl bg-rose-100 px-4 py-3 text-sm text-rose-700"></div>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Tipo</label>
+              <select name="tipo_movimiento" class="w-full rounded-xl border px-3 py-2 text-sm">
+                <option value="entrada">Entrada</option>
+                <option value="salida">Salida</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Responsable interno</label>
+              <select name="responsable_user_id" class="w-full rounded-xl border px-3 py-2 text-sm"></select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Área</label>
+              <select name="area_id" class="w-full rounded-xl border px-3 py-2 text-sm"></select>
+            </div>
+          </div>
+          <div>
+            <label class="mb-1 block text-xs text-slate-600">Notas</label>
+            <textarea name="notas" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm"></textarea>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="mb-3 flex items-center justify-between">
+              <div class="text-sm font-semibold text-slate-700">Items del permiso</div>
+              <button id="btnAddPermisoItem" type="button" class="rounded-xl border px-3 py-2 text-xs hover:bg-white">+ Agregar item</button>
+            </div>
+            <div id="permisoItems" class="space-y-3"></div>
+          </div>
+        </div>
+        <div class="flex flex-col-reverse gap-2 border-t bg-white px-4 py-3 sm:flex-row sm:justify-end">
+          <button id="btnPermisoCancel" type="button" class="rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

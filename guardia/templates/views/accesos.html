@@ -43,7 +43,7 @@
   </div>
 
   <!-- BUSCAR / ESCANEAR -->
-  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
+  <div id="residentDirectSection" class="rounded-2xl bg-white shadow p-4 border border-slate-200">
     <div class="text-sm font-semibold text-slate-700">Escanear o ingresar código</div>
     <div class="text-xs text-slate-500 mt-1">
       Puedes escanear un QR o capturar manualmente el código de acceso.
@@ -107,6 +107,34 @@
 
     <div id="accesoResultado" class="mt-4 text-sm text-slate-600">
       Ingresa un código para validar el acceso.
+    </div>
+
+    <div id="accesoDynamicForm" class="mt-4 hidden space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <div id="accessPinWrap" class="hidden">
+        <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">PIN de la persona</label>
+        <input id="accessPin"
+          inputmode="numeric"
+          type="password"
+          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+          placeholder="Ingresa PIN para validar" />
+      </div>
+
+      <div id="accessEvidenceWrap" class="hidden">
+        <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Foto de evidencia</label>
+        <input id="accessEvidence"
+          type="file"
+          accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white" />
+        <p class="mt-1 text-[11px] text-slate-400">Idealmente INE junto con placa o evidencia del material/equipo.</p>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Notas de caseta</label>
+        <textarea id="accessNotes"
+          rows="3"
+          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+          placeholder="Observaciones rápidas, novedades o aclaraciones"></textarea>
+      </div>
     </div>
 
     <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">

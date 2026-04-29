@@ -53,6 +53,17 @@
           <option value="cancelado">Cancelado</option>
         </select>
       </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Modo</label>
+        <select id="resFiltroModo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <option value="">Todos</option>
+          <option value="residencial">Residencial</option>
+          <option value="empresa">Empresa</option>
+          <option value="obra">Obra</option>
+          <option value="comercio">Comercio</option>
+          <option value="servicio">Servicio</option>
+        </select>
+      </div>
       <div class="md:col-span-4 flex justify-end gap-2">
         <button id="btnLimpiarResidenciales" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Limpiar</button>
         <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Filtrar</button>
@@ -104,6 +115,16 @@
                     <option value="mixto">Mixto</option>
                     <option value="privado">Privado</option>
                     <option value="otro">Otro</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs text-slate-600">Modo operativo</label>
+                  <select name="modo_operacion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                    <option value="residencial">Residencial</option>
+                    <option value="empresa">Empresa / oficina</option>
+                    <option value="obra">Obra / construcción</option>
+                    <option value="comercio">Comercio / súper</option>
+                    <option value="servicio">Servicio con guardias</option>
                   </select>
                 </div>
                 <div>

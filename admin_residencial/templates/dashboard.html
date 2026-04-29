@@ -28,6 +28,17 @@
                 <span class="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(110,231,183,0.18)]"></span>
                 <span class="font-medium text-white/85">Sistema activo</span>
               </div>
+              <label class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs text-white/90">
+                <span class="font-medium text-white/75">Modo</span>
+                <select id="modeOperationSelect"
+                        class="rounded-full border border-white/15 bg-slate-950/15 px-2 py-1 text-xs text-white outline-none transition focus:border-white/30">
+                  <option value="residencial">Residencial</option>
+                  <option value="empresa">Empresa</option>
+                  <option value="obra">Obra</option>
+                  <option value="comercio">Comercio</option>
+                  <option value="servicio">Servicio</option>
+                </select>
+              </label>
               <a id="btnEditAddress"
                       href="#perfil"
                       data-view="perfil"
@@ -48,6 +59,8 @@
             <span>Vista rápida</span>
             <span class="h-1 w-1 rounded-full bg-white/35"></span>
             <span>Autos registrados</span>
+            <span class="h-1 w-1 rounded-full bg-white/35"></span>
+            <span id="operationalModeBadge">Modo residencial</span>
           </div>
           <div id="carsContainer" class="flex flex-wrap items-center gap-2">
             <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/82">Cargando…</span>
@@ -68,7 +81,11 @@
     <div class="max-w-6xl mx-auto px-4 pb-5">
       <!-- Reglamento pill -->
         <!-- Pills Comunicados / Reglamento -->
-    <div class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:justify-end sm:items-center">
+      <div class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:justify-end sm:items-center">
+    <div id="operationalModeHint"
+         class="hidden rounded-2xl border border-dashed border-[#2E5D73]/20 bg-white px-4 py-3 text-sm text-slate-600 sm:mr-auto">
+      Activa modo empresa, obra, comercio o servicio para mostrar los módulos operativos nuevos.
+    </div>
   
     <a id="btnReglamento"
             href="#reglamento"
@@ -164,6 +181,71 @@
                     stroke="currentColor" stroke-width="1.8"/>
             </svg>
             <div class="text-base font-light">Comunicados</div>
+          </div>
+        </button>
+
+        <button type="button"
+                data-operational-only="1"
+                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                data-view="personal_recurrente">
+          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
+            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+              <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <div class="text-base font-light">Personal</div>
+          </div>
+        </button>
+
+        <button type="button"
+                data-operational-only="1"
+                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                data-view="visitantes_rapidos">
+          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
+            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+              <path d="M5 10h14M7 14h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M5 4h14a2 2 0 0 1 2 2v13l-4-2-4 2-4-2-4 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+            <div class="text-base font-light">Visitantes</div>
+          </div>
+        </button>
+
+        <button type="button"
+                data-operational-only="1"
+                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                data-view="materiales">
+          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
+            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+              <path d="M3 7l9-4 9 4-9 4-9-4Z" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M3 7v10l9 4 9-4V7" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <div class="text-base font-light">Materiales</div>
+          </div>
+        </button>
+
+        <button type="button"
+                data-operational-only="1"
+                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                data-view="solicitudes_pendientes">
+          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
+            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+              <path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M5 4h14a1 1 0 0 1 1 1v14l-3-2-3 2-3-2-3 2-3-2V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+            <div class="text-base font-light">Pendientes</div>
+          </div>
+        </button>
+
+        <button type="button"
+                data-operational-only="1"
+                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                data-view="bitacora_operativa">
+          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
+            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+              <path d="M6 5h12M6 10h12M6 15h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M5 3h14a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+            <div class="text-base font-light">Bitácora</div>
           </div>
         </button>
 

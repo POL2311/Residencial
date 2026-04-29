@@ -6,6 +6,7 @@
     hint: document.getElementById('guardHint'),
     turnoBadge: document.getElementById('guardTurnoBadge'),
     statusBadge: document.getElementById('guardStatusBadge'),
+    modeBadge: document.getElementById('guardModeBadge'),
     btnReg: document.getElementById('btnReglamento'),
     body: document.getElementById('dashboardBody'),
 
@@ -32,6 +33,9 @@
     autos: BASE + 'js/autos.js',
     incidencias: BASE + 'js/incidencias.js',
     paqueteria: BASE + 'js/paqueteria.js',
+    personas_dentro: BASE + 'js/personas_dentro.js',
+    materiales_autorizados: BASE + 'js/materiales_autorizados.js',
+    bitacora_hoy: BASE + 'js/bitacora_hoy.js',
   };
 
   const state = {
@@ -40,6 +44,7 @@
     currentViewScript: null,
     currentViewController: null,
     context: null,
+    operationalMode: 'residencial',
     navToken: 0,
     isNavigating: false,
   };
@@ -58,6 +63,17 @@
     els.header.style.marginTop = '0px';
     els.header.style.opacity = '1';
     els.header.style.transform = 'translateY(0)';
+  }
+
+  function toggleOperationalButtons() {
+    const isOperational = state.operationalMode && state.operationalMode !== 'residencial';
+    document.querySelectorAll('[data-operational-only="1"]').forEach((el) => {
+      el.classList.toggle('hidden', !isOperational);
+    });
+    if (els.modeBadge) {
+      const label = isOperational ? state.operationalMode : 'residencial';
+      els.modeBadge.textContent = `Modo: ${label}`;
+    }
   }
 
   function initShellHeader() {
@@ -331,14 +347,18 @@
     try {
       const json = await fetchJSON(`${API}contexto.php`);
       state.context = json.data || {};
+      state.operationalMode = String(state.context?.modo_operacion || 'residencial').trim() || 'residencial';
       updateHeaderContext(state.context);
+      toggleOperationalButtons();
       return state.context;
     } catch (e) {
       console.warn('loadContext fallo:', e);
       state.context = null;
+      state.operationalMode = 'residencial';
 
       if (els.name) els.name.textContent = 'Guardia';
       if (els.ctx) els.ctx.textContent = '—';
+      toggleOperationalButtons();
 
       return null;
     }
@@ -431,6 +451,7 @@
     closeModal,
     escapeHtml,
     getContext: () => state.context,
+    getOperationalMode: () => state.operationalMode,
   };
 
   document.addEventListener('DOMContentLoaded', async () => {

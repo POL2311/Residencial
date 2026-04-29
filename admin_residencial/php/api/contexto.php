@@ -9,6 +9,7 @@ header('Expires: 0');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/operational_mode.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -37,6 +38,7 @@ function join_parts(array $parts, string $sep = ' · '): string {
 }
 
 try {
+  operational_schema_ensure($pdo);
   // 1) Usuario fresco desde BD (evita datos viejos de sesión)
   $stmtU = $pdo->prepare("SELECT id, name, email, telefono FROM users WHERE id = :id LIMIT 1");
   $stmtU->execute(['id' => $uid]);
@@ -51,6 +53,7 @@ try {
     SELECT
       r.id     AS residencial_id,
       r.nombre AS residencial_nombre,
+      r.modo_operacion AS modo_operacion,
       r.calle  AS res_calle,
       r.numero_exterior AS res_numero_exterior,
       r.numero_interior AS res_numero_interior,
@@ -139,6 +142,7 @@ try {
     'data' => [
       'user' => $user,
       'ctx'  => $ctx,
+      'modo_operacion' => operational_normalize_mode((string)($ctx['modo_operacion'] ?? 'residencial')),
       // lo que ya usas en el header
       'direccion' => $direccion,
       'header_line' => $header_line,

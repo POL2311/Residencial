@@ -7,6 +7,7 @@ header('Pragma: no-cache');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/operational_mode.php';
 
 require_login();
 require_role(['guardia','super_admin']);
@@ -18,6 +19,7 @@ function out(bool $ok, array $data = [], int $code = 200): void {
 }
 
 try {
+  operational_schema_ensure($pdo);
   $session = current_user();
   $uid = (int)($session['id'] ?? 0);
 
@@ -38,6 +40,7 @@ try {
     SELECT
       r.id,
       r.nombre,
+      r.modo_operacion,
       r.calle,
       r.colonia,
       r.ciudad,
@@ -88,6 +91,7 @@ try {
       'turno_actual' => $turnoActual,
       'guardia_en_servicio' => $guardiaEnServicio,
       'stats' => $stats,
+      'modo_operacion' => operational_normalize_mode((string)($res['modo_operacion'] ?? 'residencial')),
     ]
   ]);
 

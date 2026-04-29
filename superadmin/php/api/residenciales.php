@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_bootstrap.php';
+require_once __DIR__ . '/../../../config/operational_mode.php';
 
 $action = sa_post_action('list');
 
@@ -17,6 +18,8 @@ function sa_residencial_status_badge(string $status): string
 }
 
 try {
+    operational_schema_ensure($pdo);
+
     if ($action === 'meta') {
         $planes = $pdo->query("
             SELECT id, nombre, codigo
@@ -37,6 +40,8 @@ try {
         $q = sa_clean_str($_POST['q'] ?? $_GET['q'] ?? '', 120);
         $planId = (string)($_POST['plan_id'] ?? $_GET['plan_id'] ?? '');
         $estatus = sa_clean_str($_POST['estatus_plan'] ?? $_GET['estatus_plan'] ?? '', 30);
+        $modoOperacion = operational_normalize_mode((string)($_POST['modo_operacion'] ?? $_GET['modo_operacion'] ?? ''));
+        $modoRaw = trim((string)($_POST['modo_operacion'] ?? $_GET['modo_operacion'] ?? ''));
 
         $sql = "
             SELECT r.*, p.nombre AS nombre_plan, p.codigo AS codigo_plan
@@ -61,6 +66,11 @@ try {
             $params['estatus_plan'] = $estatus;
         }
 
+        if ($modoRaw !== '') {
+            $sql .= " AND r.modo_operacion = :modo_operacion";
+            $params['modo_operacion'] = $modoOperacion;
+        }
+
         $sql .= " ORDER BY r.created_at DESC";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -82,6 +92,7 @@ try {
         sa_json_out(true, [
             'data' => [
                 'items' => array_map(static function (array $item): array {
+                    $item['modo_operacion'] = operational_normalize_mode((string)($item['modo_operacion'] ?? 'residencial'));
                     $item['estatus_label'] = sa_residencial_status_badge((string)($item['estatus_plan'] ?? ''));
                     return $item;
                 }, $items),
@@ -97,6 +108,7 @@ try {
             'nombre' => sa_clean_str($_POST['nombre'] ?? '', 150),
             'codigo' => sa_clean_str($_POST['codigo'] ?? '', 50),
             'tipo' => sa_clean_str($_POST['tipo'] ?? 'fraccionamiento', 40),
+            'modo_operacion' => operational_normalize_mode((string)($_POST['modo_operacion'] ?? 'residencial')),
             'max_casas' => (int)($_POST['max_casas'] ?? 0),
             'max_guardias' => (int)($_POST['max_guardias'] ?? 0),
             'pais' => sa_clean_str($_POST['pais'] ?? 'México', 80),
@@ -152,6 +164,7 @@ try {
         $stmt = $pdo->prepare("
             INSERT INTO residenciales (
                 nombre, codigo, tipo, max_casas, max_guardias,
+                modo_operacion,
                 pais, estado, ciudad, colonia, calle,
                 numero_exterior, numero_interior, codigo_postal,
                 nombre_contacto, telefono_contacto, email_contacto,
@@ -160,6 +173,7 @@ try {
                 requiere_placa_vehiculo, requiere_identificacion_visita, activo
             ) VALUES (
                 :nombre, :codigo, :tipo, :max_casas, :max_guardias,
+                :modo_operacion,
                 :pais, :estado, :ciudad, :colonia, :calle,
                 :numero_exterior, :numero_interior, :codigo_postal,
                 :nombre_contacto, :telefono_contacto, :email_contacto,
@@ -174,6 +188,7 @@ try {
             'tipo' => $form['tipo'],
             'max_casas' => $form['max_casas'],
             'max_guardias' => $form['max_guardias'],
+            'modo_operacion' => $form['modo_operacion'],
             'pais' => $form['pais'],
             'estado' => $form['estado'],
             'ciudad' => $form['ciudad'],

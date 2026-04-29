@@ -27,6 +27,7 @@
       destroyed: false,
       items: [],
       filteredItems: [],
+      meta: { modo_operacion: 'residencial', areas: [], personas: [], visitantes: [], permisos: [] },
       page: 1,
       perPage: 5,
       loading: false,
@@ -206,7 +207,7 @@
                   </div>
 
                   <div class="text-[11px] text-slate-500 mt-3">
-                    Unidad: <b>${safeText(i.unidad_clave)}</b> · Tipo: ${safeText(i.tipo)} · ${safeText(i.created_at, '')}
+                    ${safeText(i.unidad_clave, '') ? `Unidad: <b>${safeText(i.unidad_clave)}</b>` : `Área: <b>${safeText(i.area_nombre || '—')}</b>`} · Tipo: ${safeText(i.tipo)} · ${safeText(i.created_at, '')}
                   </div>
                 </div>
 
@@ -268,10 +269,14 @@
         if (els.tipo?.value) q.set('tipo', els.tipo.value);
 
         const url = `${API}incidencias.php${q.toString() ? `?${q.toString()}` : ''}`;
-        const json = await fetchJSON(url);
+        const [json, meta] = await Promise.all([
+          fetchJSON(url),
+          fetchJSON(`${API}incidencias.php?action=meta`),
+        ]);
         if (!isAlive()) return;
 
         state.items = json.data?.items || [];
+        state.meta = meta.data || state.meta;
         applyFilters();
         renderList();
       } catch (e) {
@@ -403,30 +408,78 @@
       submitText = 'Guardar',
     }) {
       const isEdit = !!item;
+      const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
+      const typeOptions = isOperational
+        ? `
+              <option value="seguridad" ${item?.tipo === 'seguridad' ? 'selected' : ''}>Seguridad</option>
+              <option value="robo" ${item?.tipo === 'robo' ? 'selected' : ''}>Intento de robo</option>
+              <option value="conflicto" ${item?.tipo === 'conflicto' ? 'selected' : ''}>Conflicto</option>
+              <option value="salida_sin_permiso" ${item?.tipo === 'salida_sin_permiso' ? 'selected' : ''}>Salida sin permiso</option>
+              <option value="visitante_sin_ine" ${item?.tipo === 'visitante_sin_ine' ? 'selected' : ''}>Visitante sin INE</option>
+              <option value="material_no_coincide" ${item?.tipo === 'material_no_coincide' ? 'selected' : ''}>Material no coincide</option>
+              <option value="evento_general" ${item?.tipo === 'evento_general' ? 'selected' : ''}>Evento general</option>
+              <option value="otro" ${item?.tipo === 'otro' ? 'selected' : ''}>Otro</option>
+          `
+        : `
+              <option value="seguridad" ${item?.tipo === 'seguridad' ? 'selected' : ''}>Seguridad</option>
+              <option value="ruido" ${item?.tipo === 'ruido' ? 'selected' : ''}>Ruido</option>
+              <option value="mantenimiento" ${item?.tipo === 'mantenimiento' ? 'selected' : ''}>Mantenimiento</option>
+              <option value="otros" ${item?.tipo === 'otros' ? 'selected' : ''}>Otros</option>
+          `;
 
       openModal(title, `
         <form id="frmNewInc" class="space-y-3">
           ${isEdit ? `<input type="hidden" id="incId" value="${escapeHtml(String(item.id || ''))}" />` : ''}
 
-          <div>
-            <label class="text-xs text-slate-500">Unidad *</label>
-            <select id="incUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
-          </div>
+          ${isOperational ? `
+            <div>
+              <label class="text-xs text-slate-500">Área</label>
+              <select id="incArea" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+            </div>
 
-          <div>
-            <label class="text-xs text-slate-500">Residente *</label>
-            <select id="incResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-              <option value="">Selecciona primero una unidad</option>
-            </select>
-          </div>
+            <div>
+              <label class="text-xs text-slate-500">Origen</label>
+              <select id="incOrigenTipo" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="">Evento general</option>
+                <option value="persona_recurrente" ${item?.origen_tipo === 'persona_recurrente' ? 'selected' : ''}>Persona recurrente</option>
+                <option value="visitante_rapido" ${item?.origen_tipo === 'visitante_rapido' ? 'selected' : ''}>Visitante rápido</option>
+                <option value="permiso_material" ${item?.origen_tipo === 'permiso_material' ? 'selected' : ''}>Permiso material</option>
+                <option value="area" ${item?.origen_tipo === 'area' ? 'selected' : ''}>Área</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-500">Persona recurrente</label>
+              <select id="incPersona" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-500">Visitante rápido</label>
+              <select id="incVisitante" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-500">Permiso material</label>
+              <select id="incPermiso" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+            </div>
+          ` : `
+            <div>
+              <label class="text-xs text-slate-500">Unidad *</label>
+              <select id="incUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-500">Residente *</label>
+              <select id="incResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="">Selecciona primero una unidad</option>
+              </select>
+            </div>
+          `}
 
           <div>
             <label class="text-xs text-slate-500">Tipo</label>
             <select id="incTipo" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-              <option value="seguridad" ${item?.tipo === 'seguridad' ? 'selected' : ''}>Seguridad</option>
-              <option value="ruido" ${item?.tipo === 'ruido' ? 'selected' : ''}>Ruido</option>
-              <option value="mantenimiento" ${item?.tipo === 'mantenimiento' ? 'selected' : ''}>Mantenimiento</option>
-              <option value="otros" ${item?.tipo === 'otros' ? 'selected' : ''}>Otros</option>
+              ${typeOptions}
             </select>
           </div>
 
@@ -472,34 +525,53 @@
       const $ = (id) => document.getElementById(id);
       const unidadSel = $('incUnidad');
       const residenteSel = $('incResidente');
+      const areaSel = $('incArea');
+      const personaSel = $('incPersona');
+      const visitanteSel = $('incVisitante');
+      const permisoSel = $('incPermiso');
 
       $('incCancel')?.addEventListener('click', closeModal);
 
-      fetchJSON(`${API}incidencias.php?action=unidades`)
-        .then(async (j) => {
-          const items = j.data?.items || [];
-          if (!unidadSel) return;
+      if (isOperational) {
+        if (areaSel) {
+          areaSel.innerHTML = `<option value="">Sin área</option>` + (state.meta.areas || []).map((row) => `<option value="${escapeHtml(String(row.id))}" ${String(row.id) === String(item?.area_id || '') ? 'selected' : ''}>${escapeHtml(row.nombre || '—')}</option>`).join('');
+        }
+        if (personaSel) {
+          personaSel.innerHTML = `<option value="">Sin persona</option>` + (state.meta.personas || []).map((row) => `<option value="${escapeHtml(String(row.id))}" ${String(row.id) === String(item?.persona_recurrente_id || '') ? 'selected' : ''}>${escapeHtml(row.nombre || '—')}</option>`).join('');
+        }
+        if (visitanteSel) {
+          visitanteSel.innerHTML = `<option value="">Sin visitante</option>` + (state.meta.visitantes || []).map((row) => `<option value="${escapeHtml(String(row.id))}" ${String(row.id) === String(item?.visitante_rapido_id || '') ? 'selected' : ''}>${escapeHtml(row.nombre_visitante || '—')}</option>`).join('');
+        }
+        if (permisoSel) {
+          permisoSel.innerHTML = `<option value="">Sin permiso</option>` + (state.meta.permisos || []).map((row) => `<option value="${escapeHtml(String(row.id))}" ${String(row.id) === String(item?.permiso_material_id || '') ? 'selected' : ''}>${escapeHtml(row.tipo_movimiento || '—')} #${escapeHtml(String(row.id))}</option>`).join('');
+        }
+      } else {
+        fetchJSON(`${API}incidencias.php?action=unidades`)
+          .then(async (j) => {
+            const items = j.data?.items || [];
+            if (!unidadSel) return;
 
-          unidadSel.innerHTML =
-            `<option value="">Selecciona unidad</option>` +
-            items.map(u => `
-              <option value="${escapeHtml(String(u.id))}" ${String(u.id) === String(item?.unidad_id || '') ? 'selected' : ''}>
-                ${escapeHtml(u.clave)}
-              </option>
-            `).join('');
+            unidadSel.innerHTML =
+              `<option value="">Selecciona unidad</option>` +
+              items.map(u => `
+                <option value="${escapeHtml(String(u.id))}" ${String(u.id) === String(item?.unidad_id || '') ? 'selected' : ''}>
+                  ${escapeHtml(u.clave)}
+                </option>
+              `).join('');
 
-          await loadResidentesByUnidad(
-            item?.unidad_id || '',
-            'incResidente',
-            item?.residente_id || ''
-          );
-        })
-        .catch(e => setModalError(e.message || 'No se pudieron cargar las unidades.'));
+            await loadResidentesByUnidad(
+              item?.unidad_id || '',
+              'incResidente',
+              item?.residente_id || ''
+            );
+          })
+          .catch(e => setModalError(e.message || 'No se pudieron cargar las unidades.'));
 
-      unidadSel?.addEventListener('change', async () => {
-        setModalError('');
-        await loadResidentesByUnidad(unidadSel.value, 'incResidente', '');
-      });
+        unidadSel?.addEventListener('change', async () => {
+          setModalError('');
+          await loadResidentesByUnidad(unidadSel.value, 'incResidente', '');
+        });
+      }
 
       $('frmNewInc')?.addEventListener('submit', async (ev) => {
         ev.preventDefault();
@@ -512,6 +584,11 @@
 
         payload.set('unidad_id', unidadSel?.value || '');
         payload.set('residente_id', residenteSel?.value || '');
+        payload.set('area_id', areaSel?.value || '');
+        payload.set('persona_recurrente_id', personaSel?.value || '');
+        payload.set('visitante_rapido_id', visitanteSel?.value || '');
+        payload.set('permiso_material_id', permisoSel?.value || '');
+        payload.set('origen_tipo', $('incOrigenTipo')?.value || '');
         payload.set('tipo', $('incTipo')?.value || 'seguridad');
         payload.set('prioridad', $('incPrioridad')?.value || 'media');
         payload.set('titulo', ($('incTitulo')?.value || '').trim());
@@ -521,14 +598,16 @@
           payload.set('estado', $('incEstadoEdit')?.value || 'abierta');
         }
 
-        if (!payload.get('unidad_id')) {
-          setModalSubmitting(false);
-          return setModalError('Selecciona una unidad.');
-        }
+        if (!isOperational) {
+          if (!payload.get('unidad_id')) {
+            setModalSubmitting(false);
+            return setModalError('Selecciona una unidad.');
+          }
 
-        if (!payload.get('residente_id')) {
-          setModalSubmitting(false);
-          return setModalError('Selecciona un residente.');
+          if (!payload.get('residente_id')) {
+            setModalSubmitting(false);
+            return setModalError('Selecciona un residente.');
+          }
         }
 
         if (!String(payload.get('titulo') || '').trim()) {

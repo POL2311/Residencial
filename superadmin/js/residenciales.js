@@ -15,6 +15,7 @@
         q: document.getElementById('resFiltroQ'),
         plan: document.getElementById('resFiltroPlan'),
         estatus: document.getElementById('resFiltroEstatus'),
+        modo: document.getElementById('resFiltroModo'),
         btnClear: document.getElementById('btnLimpiarResidenciales'),
         btnRefresh: document.getElementById('btnRefreshResidenciales'),
         tableWrap: document.getElementById('residencialesTableWrap'),
@@ -144,6 +145,10 @@
                       <dd class="text-xs text-slate-500">${escapeHtml(item.pais || '')}</dd>
                     </div>
                     <div>
+                      <dt class="text-xs uppercase tracking-wide text-slate-400">Modo</dt>
+                      <dd class="mt-1 text-slate-700">${escapeHtml(item.modo_operacion || 'residencial')}</dd>
+                    </div>
+                    <div>
                       <dt class="text-xs uppercase tracking-wide text-slate-400">Plan</dt>
                       <dd class="mt-1 text-slate-700">${escapeHtml(item.nombre_plan || 'Sin plan')}</dd>
                       <dd class="text-xs text-slate-500">${escapeHtml(item.codigo_plan || 'Sin código')}</dd>
@@ -157,16 +162,17 @@
               `).join('')}
             </div>
             <div class="hidden md:block">
-              <div class="grid grid-cols-[minmax(220px,1.35fr)_minmax(180px,1fr)_minmax(180px,1fr)_140px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div class="grid grid-cols-[minmax(220px,1.25fr)_minmax(160px,0.85fr)_minmax(180px,1fr)_minmax(140px,0.8fr)_120px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 <div>Residencial</div>
                 <div>Ubicación</div>
+                <div>Modo</div>
                 <div>Plan</div>
                 <div>Estatus</div>
                 <div>Creado</div>
               </div>
               <div class="mt-3 space-y-3">
                 ${visible.map((item) => `
-                  <article class="grid grid-cols-[minmax(220px,1.35fr)_minmax(180px,1fr)_minmax(180px,1fr)_140px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                  <article class="grid grid-cols-[minmax(220px,1.25fr)_minmax(160px,0.85fr)_minmax(180px,1fr)_minmax(140px,0.8fr)_120px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
                     <div class="min-w-0">
                       <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
                       <div class="mt-1 text-xs text-slate-500">Código: ${escapeHtml(item.codigo || '—')}</div>
@@ -174,6 +180,10 @@
                     <div class="min-w-0">
                       <div class="text-sm text-slate-700">${escapeHtml((item.ciudad || '') + ((item.estado ? ', ' + item.estado : '')))}</div>
                       <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.pais || '')}</div>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm text-slate-700">${escapeHtml(item.modo_operacion || 'residencial')}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.tipo || '—')}</div>
                     </div>
                     <div class="min-w-0">
                       <div class="text-sm text-slate-700">${escapeHtml(item.nombre_plan || 'Sin plan')}</div>
@@ -204,6 +214,7 @@
             q: els.q.value,
             plan_id: els.plan.value,
             estatus_plan: els.estatus.value,
+            modo_operacion: els.modo?.value || '',
         });
 
         const summary = json.data?.summary || {};
@@ -220,6 +231,7 @@
         if (els.form.pais) els.form.pais.value = 'México';
         if (els.form.zona_horaria) els.form.zona_horaria.value = 'America/Mexico_City';
         if (els.form.estatus_plan) els.form.estatus_plan.value = 'activo';
+        if (els.form.modo_operacion) els.form.modo_operacion.value = 'residencial';
         els.modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -250,6 +262,7 @@
 
     els.btnClear?.addEventListener('click', () => {
         els.filterForm.reset();
+        if (els.modo) els.modo.value = '';
         loadList(true).catch((err) => showAlert('error', err.message || 'No se pudo limpiar.'));
     });
 

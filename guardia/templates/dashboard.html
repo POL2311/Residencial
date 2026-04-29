@@ -58,6 +58,10 @@
               class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs text-white/90">
               Estado: —
             </span>
+            <span id="guardModeBadge"
+              class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs text-white/90">
+              Modo: residencial
+            </span>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 opacity-95 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/20 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" data-view="accesos" title="Buscar acceso">
@@ -105,6 +109,17 @@
             <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.8"/>
           </svg>
           <span class="text-sm">Reglamento</span>
+        </button>
+
+        <button type="button"
+                data-view="bitacora_hoy"
+                data-operational-only="1"
+                class="hidden inline-flex items-center gap-2 rounded-full bg-[#4E7287] text-white px-4 py-2 shadow hover:bg-[#3f6275]">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+            <path d="M6 5h12M6 10h12M6 15h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M5 3h14a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          <span class="text-sm">Bitácora</span>
         </button>
       </div>
 
@@ -154,6 +169,42 @@
               <path d="M12 11v10" stroke="currentColor" stroke-width="1.8"/>
             </svg>
             <div class="text-base font-light">Paquetería</div>
+          </div>
+        </button>
+
+        <button data-operational-only="1"
+                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                data-view="personas_dentro" type="button">
+          <div class="h-[92px] sm:h-[110px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <div class="text-base font-light">Personal dentro</div>
+          </div>
+        </button>
+
+        <button data-operational-only="1"
+                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                data-view="materiales_autorizados" type="button">
+          <div class="h-[92px] sm:h-[110px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M3 7l9-4 9 4-9 4-9-4Z" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M3 7v10l9 4 9-4V7" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <div class="text-base font-light">Materiales autorizados</div>
+          </div>
+        </button>
+
+        <button data-operational-only="1"
+                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                data-view="bitacora_hoy" type="button">
+          <div class="h-[92px] sm:h-[110px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
+            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+              <path d="M6 5h12M6 10h12M6 15h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M5 3h14a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+            <div class="text-base font-light">Bitácora del día</div>
           </div>
         </button>
 
