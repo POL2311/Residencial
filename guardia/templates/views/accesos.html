@@ -1,13 +1,8 @@
-<!-- guardia/templates/views/accesos.html -->
 <div class="space-y-5" id="accesosView">
 
-  <!-- HEADER -->
   <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
     <div>
       <h2 class="text-3xl font-semibold text-slate-700">Control de accesos</h2>
-      <p class="text-sm text-slate-500">
-        Escanea o valida códigos de acceso, registra entradas/salidas y consulta el historial del turno.
-      </p>
     </div>
 
     <button
@@ -17,37 +12,8 @@
     </button>
   </div>
 
-  <!-- RESUMEN OPERATIVO -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Estado actual</div>
-      <div id="accesoEstadoBadge" class="mt-3 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700">
-        Esperando validación
-      </div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Modo de captura</div>
-      <div class="mt-3 text-sm text-slate-700">Manual o QR</div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Acción rápida</div>
-      <div class="mt-3 text-sm text-slate-700">Entrada / salida</div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Historial por página</div>
-      <div class="mt-3 text-sm text-slate-700">5 registros</div>
-    </div>
-  </div>
-
-  <!-- BUSCAR / ESCANEAR -->
-  <div id="residentDirectSection" class="rounded-2xl bg-white shadow p-4 border border-slate-200">
+  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
     <div class="text-sm font-semibold text-slate-700">Escanear o ingresar código</div>
-    <div class="text-xs text-slate-500 mt-1">
-      Puedes escanear un QR o capturar manualmente el código de acceso.
-    </div>
 
     <div class="mt-4 flex flex-col lg:flex-row gap-2">
       <button id="btnOpenCamera"
@@ -70,96 +36,33 @@
     </div>
   </div>
 
-  <!-- MODAL CAMARA -->
   <div id="cameraModal"
     class="fixed inset-0 bg-black/70 hidden items-end md:items-center justify-center z-50 p-0 md:p-4">
     <div class="bg-white rounded-t-2xl md:rounded-2xl p-4 w-full max-w-sm shadow-2xl">
       <div class="text-sm font-semibold mb-2">Escanea el código QR</div>
-      <div class="text-xs text-slate-500 mb-3">
-        Coloca el código frente a la cámara para capturarlo automáticamente.
-      </div>
       <video id="video" class="w-full rounded-xl bg-slate-100 aspect-video" autoplay playsinline></video>
       <div id="cameraHint" class="mt-2 text-xs text-slate-500">
         Esperando código QR…
       </div>
-      <button id="btnCloseCamera"
-        class="mt-3 w-full rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">
-        Cancelar
-      </button>
+      <div id="cameraSupportNote" class="mt-2 text-[11px] text-slate-400">
+        Si no abre o no detecta el QR, puedes ingresar el código manualmente.
+      </div>
+      <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <button id="btnRetryCamera"
+          type="button"
+          class="hidden rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white hover:opacity-95">
+          Reintentar cámara
+        </button>
+        <button id="btnCloseCamera"
+          class="w-full rounded-xl border px-4 py-2 text-sm hover:bg-slate-50 sm:col-span-1">
+          Cancelar
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- RESULTADO -->
-  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <div class="text-sm font-semibold text-slate-700">Resultado</div>
-        <div class="text-xs text-slate-500 mt-1">
-          Aquí se muestra la evaluación del código escaneado o capturado.
-        </div>
-      </div>
-
-      <div id="accesoMiniStatus"
-           class="hidden rounded-full px-3 py-1 text-xs font-medium">
-        —
-      </div>
-    </div>
-
-    <div id="accesoResultado" class="mt-4 text-sm text-slate-600">
-      Ingresa un código para validar el acceso.
-    </div>
-
-    <div id="accesoDynamicForm" class="mt-4 hidden space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <div id="accessPinWrap" class="hidden">
-        <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">PIN de la persona</label>
-        <input id="accessPin"
-          inputmode="numeric"
-          type="password"
-          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-          placeholder="Ingresa PIN para validar" />
-      </div>
-
-      <div id="accessEvidenceWrap" class="hidden">
-        <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Foto de evidencia</label>
-        <input id="accessEvidence"
-          type="file"
-          accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white" />
-        <p class="mt-1 text-[11px] text-slate-400">Idealmente INE junto con placa o evidencia del material/equipo.</p>
-      </div>
-
-      <div>
-        <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Notas de caseta</label>
-        <textarea id="accessNotes"
-          rows="3"
-          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-          placeholder="Observaciones rápidas, novedades o aclaraciones"></textarea>
-      </div>
-    </div>
-
-    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <button id="btnConfirmarEntrada"
-              class="rounded-xl bg-emerald-600 text-white px-4 py-2 text-sm shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-700">
-        Registrar entrada
-      </button>
-
-      <button id="btnConfirmarSalida"
-              class="rounded-xl bg-[#2E5D73] text-white px-4 py-2 text-sm shadow disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-95">
-        Registrar salida
-      </button>
-    </div>
-  </div>
-
-  <!-- RESIDENTE DIRECTO -->
-  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <div class="text-sm font-semibold text-slate-700">Acceso directo de residentes</div>
-        <div class="text-xs text-slate-500 mt-1">
-          Busca al residente y valida si está en lista blanca o negra para permitir su acceso directo.
-        </div>
-      </div>
-    </div>
+  <div id="residentDirectSection" class="rounded-2xl bg-white shadow p-4 border border-slate-200">
+    <div class="text-sm font-semibold text-slate-700">Acceso directo de residentes</div>
 
     <div class="mt-4 flex flex-col lg:flex-row gap-2">
       <input id="residentDirectSearch"
@@ -179,21 +82,8 @@
     <div id="residentDirectResults" class="mt-4 space-y-3 text-sm text-slate-600">
       Busca un residente para validar su acceso directo.
     </div>
-
-    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <button id="btnConfirmarEntradaResidente"
-              class="rounded-xl bg-emerald-600 text-white px-4 py-2 text-sm shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-700">
-        Registrar entrada residente
-      </button>
-
-      <button id="btnConfirmarSalidaResidente"
-              class="rounded-xl bg-[#2E5D73] text-white px-4 py-2 text-sm shadow disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-95">
-        Registrar salida residente
-      </button>
-    </div>
   </div>
 
-  <!-- HISTORIAL -->
   <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
     <div class="flex items-center justify-between gap-3">
       <div>
@@ -214,6 +104,69 @@
     </div>
 
     <div id="accesosHistPagination" class="mt-4 flex justify-end gap-2"></div>
+  </div>
+
+  <div id="accessActionModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm">
+    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
+      <div class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-xl sm:rounded-3xl">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-base font-semibold text-slate-800" id="accessActionTitle">Validación de acceso</div>
+            <div id="accessActionStatus" class="mt-1 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">Esperando validación</div>
+          </div>
+          <button id="btnCloseAccessActionModal" type="button"
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-5 py-4">
+          <div id="accessActionBody" class="space-y-3 text-sm text-slate-700">
+            Ingresa un código para validar el acceso.
+          </div>
+
+          <div id="accessActionDynamicForm" class="mt-4 hidden space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div id="accessPinWrap" class="hidden">
+              <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">PIN de la persona</label>
+              <input id="accessPin"
+                inputmode="numeric"
+                type="password"
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                placeholder="Ingresa PIN para validar" />
+            </div>
+
+            <div id="accessEvidenceWrap" class="hidden">
+              <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Foto de evidencia</label>
+              <input id="accessEvidence"
+                type="file"
+                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white" />
+              <p class="mt-1 text-[11px] text-slate-400">Idealmente INE junto con placa o evidencia del material/equipo.</p>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Notas de caseta</label>
+              <textarea id="accessNotes"
+                rows="3"
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                placeholder="Observaciones rápidas, novedades o aclaraciones"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-100 bg-white px-5 py-4">
+          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <button id="btnConfirmarEntrada"
+                    class="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow disabled:cursor-not-allowed disabled:opacity-50 hover:bg-emerald-700">
+              Registrar entrada
+            </button>
+
+            <button id="btnConfirmarSalida"
+                    class="rounded-2xl bg-[#2E5D73] px-4 py-3 text-sm font-medium text-white shadow disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-95">
+              Registrar salida
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>

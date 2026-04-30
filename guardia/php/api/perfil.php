@@ -6,12 +6,17 @@ header('Cache-Control: no-store');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['guardia','super_admin']);
 
 $user = current_user();
 $uid  = (int)$user['id'];
+$residencialId = service_profile_resolve_residencial_id_for_user($pdo, $uid);
+if ($residencialId > 0 && ($user['role'] ?? '') !== 'super_admin') {
+  service_profile_api_require_module($pdo, $residencialId, 'guardia', 'perfil', 'El perfil no está habilitado para este cliente.');
+}
 
 function out(bool $ok, array $extra = []) {
   echo json_encode(array_merge(['ok'=>$ok], $extra), JSON_UNESCAPED_UNICODE);

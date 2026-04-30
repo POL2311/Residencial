@@ -26,13 +26,28 @@
         btnCloseModal: document.getElementById('btnCloseResidencialModal'),
         btnCancelModal: document.getElementById('btnCancelResidencialModal'),
         planSelectModal: document.getElementById('resPlanSelect'),
+        createPreset: document.getElementById('resServicePreset'),
+        createRoleFields: document.getElementById('resServiceRoleFields'),
+        createModuleFields: document.getElementById('resServiceModuleFields'),
+        serviceModal: document.getElementById('serviceProfileModal'),
+        serviceModalName: document.getElementById('serviceProfileModalName'),
+        serviceForm: document.getElementById('serviceProfileForm'),
+        serviceId: document.getElementById('serviceProfileResidencialId'),
+        servicePreset: document.getElementById('serviceProfilePreset'),
+        serviceRoleFields: document.getElementById('serviceProfileRoleFields'),
+        serviceModuleFields: document.getElementById('serviceProfileModuleFields'),
+        btnCloseServiceModal: document.getElementById('btnCloseServiceProfileModal'),
+        btnCancelServiceModal: document.getElementById('btnCancelServiceProfileModal'),
     };
 
     let csrf = '';
     let planes = [];
+    let serviceLabels = { roles: {}, modules: {} };
+    let servicePresets = [];
     const state = {
         items: [],
         page: 1,
+        serviceProfileItem: null,
     };
 
     function escapeHtml(value) {
@@ -72,13 +87,6 @@
         els.planSelectModal.innerHTML = modalOptions.join('');
     }
 
-    function statusClass(status) {
-        if (status === 'activo') return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-        if (status === 'prueba') return 'bg-sky-50 text-sky-700 border border-sky-200';
-        if (status === 'suspendido') return 'bg-amber-50 text-amber-700 border border-amber-200';
-        return 'bg-rose-50 text-rose-700 border border-rose-200';
-    }
-
     function getPageInfo(items, page) {
         const total = items.length;
         const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
@@ -93,6 +101,27 @@
             end: Math.min(start + visible.length, total),
             visible,
         };
+    }
+
+    function statusClass(status) {
+        if (status === 'activo') return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+        if (status === 'prueba') return 'bg-sky-50 text-sky-700 border border-sky-200';
+        if (status === 'suspendido') return 'bg-amber-50 text-amber-700 border border-amber-200';
+        return 'bg-rose-50 text-rose-700 border border-rose-200';
+    }
+
+    function presetLabel(preset) {
+        const key = String(preset || 'residencial');
+        return key.charAt(0).toUpperCase() + key.slice(1);
+    }
+
+    function enabledSummary(profile, fieldGroup) {
+        const source = profile?.[fieldGroup] || {};
+        return Object.values(source)
+            .filter((meta) => meta?.enabled)
+            .map((meta) => meta.label)
+            .slice(0, fieldGroup === 'roles' ? 3 : 4)
+            .join(', ');
     }
 
     function renderPagination() {
@@ -121,7 +150,7 @@
         state.items = Array.isArray(items) ? items : [];
 
         if (!state.items.length) {
-            els.tableWrap.innerHTML = `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">No hay residenciales que coincidan con el filtro actual.</div>`;
+            els.tableWrap.innerHTML = `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">No hay servicios que coincidan con el filtro actual.</div>`;
             if (els.pagination) els.pagination.innerHTML = '';
             return;
         }
@@ -129,70 +158,83 @@
         const { visible } = getPageInfo(state.items, state.page);
         els.tableWrap.innerHTML = `
             <div class="space-y-3 md:hidden">
-              ${visible.map((item) => `
-                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
-                      <div class="mt-1 text-xs text-slate-500">Código: ${escapeHtml(item.codigo || '—')}</div>
-                    </div>
-                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estatus_plan)}">${escapeHtml(item.estatus_label || item.estatus_plan || '—')}</span>
-                  </div>
-                  <dl class="mt-4 grid grid-cols-1 gap-3 text-sm">
-                    <div>
-                      <dt class="text-xs uppercase tracking-wide text-slate-400">Ubicación</dt>
-                      <dd class="mt-1 text-slate-700">${escapeHtml((item.ciudad || '') + (item.estado ? ', ' + item.estado : ''))}</dd>
-                      <dd class="text-xs text-slate-500">${escapeHtml(item.pais || '')}</dd>
-                    </div>
-                    <div>
-                      <dt class="text-xs uppercase tracking-wide text-slate-400">Modo</dt>
-                      <dd class="mt-1 text-slate-700">${escapeHtml(item.modo_operacion || 'residencial')}</dd>
-                    </div>
-                    <div>
-                      <dt class="text-xs uppercase tracking-wide text-slate-400">Plan</dt>
-                      <dd class="mt-1 text-slate-700">${escapeHtml(item.nombre_plan || 'Sin plan')}</dd>
-                      <dd class="text-xs text-slate-500">${escapeHtml(item.codigo_plan || 'Sin código')}</dd>
-                    </div>
-                    <div>
-                      <dt class="text-xs uppercase tracking-wide text-slate-400">Creado</dt>
-                      <dd class="mt-1 text-slate-700">${escapeHtml(item.created_at || '—')}</dd>
-                    </div>
-                  </dl>
-                </article>
-              `).join('')}
+              ${visible.map((item) => {
+                  const roles = enabledSummary(item.service_profile, 'roles');
+                  const modules = enabledSummary(item.service_profile, 'modules');
+                  return `
+                    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
+                          <div class="mt-1 text-xs text-slate-500">Código: ${escapeHtml(item.codigo || '—')}</div>
+                        </div>
+                        <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estatus_plan)}">${escapeHtml(item.estatus_label || item.estatus_plan || '—')}</span>
+                      </div>
+                      <dl class="mt-4 grid grid-cols-1 gap-3 text-sm">
+                        <div>
+                          <dt class="text-xs uppercase tracking-wide text-slate-400">Ubicación</dt>
+                          <dd class="mt-1 text-slate-700">${escapeHtml((item.ciudad || '') + (item.estado ? ', ' + item.estado : ''))}</dd>
+                          <dd class="text-xs text-slate-500">${escapeHtml(item.pais || '')}</dd>
+                        </div>
+                        <div>
+                          <dt class="text-xs uppercase tracking-wide text-slate-400">Servicio</dt>
+                          <dd class="mt-1 text-slate-700">${escapeHtml(item.preset_servicio || 'residencial')}</dd>
+                          <dd class="text-xs text-slate-500">${escapeHtml(item.modo_operacion || 'residencial')}</dd>
+                        </div>
+                        <div>
+                          <dt class="text-xs uppercase tracking-wide text-slate-400">Roles activos</dt>
+                          <dd class="mt-1 text-slate-700">${escapeHtml(roles || 'Sin roles visibles')}</dd>
+                        </div>
+                        <div>
+                          <dt class="text-xs uppercase tracking-wide text-slate-400">Módulos clave</dt>
+                          <dd class="mt-1 text-slate-700">${escapeHtml(modules || 'Sin módulos visibles')}</dd>
+                        </div>
+                      </dl>
+                      <div class="mt-4 flex justify-end">
+                        <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Perfil de servicio</button>
+                      </div>
+                    </article>
+                  `;
+              }).join('')}
             </div>
             <div class="hidden md:block">
-              <div class="grid grid-cols-[minmax(220px,1.25fr)_minmax(160px,0.85fr)_minmax(180px,1fr)_minmax(140px,0.8fr)_120px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                <div>Residencial</div>
+              <div class="grid grid-cols-[minmax(220px,1.15fr)_minmax(150px,0.8fr)_minmax(170px,0.9fr)_minmax(220px,1.2fr)_120px_130px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div>Servicio / cliente</div>
                 <div>Ubicación</div>
-                <div>Modo</div>
-                <div>Plan</div>
+                <div>Servicio</div>
+                <div>Roles / módulos</div>
                 <div>Estatus</div>
-                <div>Creado</div>
+                <div>Acciones</div>
               </div>
               <div class="mt-3 space-y-3">
-                ${visible.map((item) => `
-                  <article class="grid grid-cols-[minmax(220px,1.25fr)_minmax(160px,0.85fr)_minmax(180px,1fr)_minmax(140px,0.8fr)_120px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
-                    <div class="min-w-0">
-                      <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
-                      <div class="mt-1 text-xs text-slate-500">Código: ${escapeHtml(item.codigo || '—')}</div>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="text-sm text-slate-700">${escapeHtml((item.ciudad || '') + ((item.estado ? ', ' + item.estado : '')))}</div>
-                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.pais || '')}</div>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="text-sm text-slate-700">${escapeHtml(item.modo_operacion || 'residencial')}</div>
-                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.tipo || '—')}</div>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="text-sm text-slate-700">${escapeHtml(item.nombre_plan || 'Sin plan')}</div>
-                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.codigo_plan || 'Sin código')}</div>
-                    </div>
-                    <div><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estatus_plan)}">${escapeHtml(item.estatus_label || item.estatus_plan || '—')}</span></div>
-                    <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
-                  </article>
-                `).join('')}
+                ${visible.map((item) => {
+                    const roles = enabledSummary(item.service_profile, 'roles');
+                    const modules = enabledSummary(item.service_profile, 'modules');
+                    return `
+                      <article class="grid grid-cols-[minmax(220px,1.15fr)_minmax(150px,0.8fr)_minmax(170px,0.9fr)_minmax(220px,1.2fr)_120px_130px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                        <div class="min-w-0">
+                          <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
+                          <div class="mt-1 text-xs text-slate-500">Código: ${escapeHtml(item.codigo || '—')}</div>
+                        </div>
+                        <div class="min-w-0">
+                          <div class="text-sm text-slate-700">${escapeHtml((item.ciudad || '') + ((item.estado ? ', ' + item.estado : '')))}</div>
+                          <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.pais || '')}</div>
+                        </div>
+                        <div class="min-w-0">
+                          <div class="text-sm text-slate-700">${escapeHtml(presetLabel(item.preset_servicio || 'residencial'))}</div>
+                          <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.modo_operacion || 'residencial')}</div>
+                        </div>
+                        <div class="min-w-0 text-sm text-slate-700">
+                          <div>${escapeHtml(roles || 'Sin roles visibles')}</div>
+                          <div class="mt-1 text-xs text-slate-500">${escapeHtml(modules || 'Sin módulos visibles')}</div>
+                        </div>
+                        <div><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estatus_plan)}">${escapeHtml(item.estatus_label || item.estatus_plan || '—')}</span></div>
+                        <div class="flex justify-end">
+                          <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">Servicio</button>
+                        </div>
+                      </article>
+                    `;
+                }).join('')}
               </div>
             </div>
         `;
@@ -200,11 +242,104 @@
         renderPagination();
     }
 
+    function renderServiceFields(container, labels, values = {}) {
+        if (!container) return;
+        container.innerHTML = Object.entries(labels).map(([key, label]) => `
+            <label class="flex items-center gap-2 text-sm text-slate-600">
+              <input type="checkbox" name="${escapeHtml(key)}" value="1" ${values[key] ? 'checked' : ''}>
+              <span>${escapeHtml(label)}</span>
+            </label>
+        `).join('');
+    }
+
+    function applyPresetToForm(form, presetKey) {
+        const preset = servicePresets.find((item) => item.key === presetKey);
+        const defaults = preset?.defaults || {};
+        Object.keys(serviceLabels.roles || {}).forEach((key) => {
+            const field = form.querySelector(`[name="${key}"]`);
+            if (field) field.checked = Number(defaults[key] || 0) === 1;
+        });
+        Object.keys(serviceLabels.modules || {}).forEach((key) => {
+            const field = form.querySelector(`[name="${key}"]`);
+            if (field) field.checked = Number(defaults[key] || 0) === 1;
+        });
+    }
+
+    function fillServicePresetOptions(select) {
+        if (!select) return;
+        select.innerHTML = servicePresets.map((preset) => `<option value="${escapeHtml(preset.key)}">${escapeHtml(preset.label)}</option>`).join('');
+    }
+
+    function initServiceForms() {
+        fillServicePresetOptions(els.createPreset);
+        fillServicePresetOptions(els.servicePreset);
+        renderServiceFields(els.createRoleFields, serviceLabels.roles || {});
+        renderServiceFields(els.createModuleFields, serviceLabels.modules || {});
+        renderServiceFields(els.serviceRoleFields, serviceLabels.roles || {});
+        renderServiceFields(els.serviceModuleFields, serviceLabels.modules || {});
+        if (els.createPreset) {
+            applyPresetToForm(els.form, els.createPreset.value || 'residencial');
+        }
+    }
+
+    function openCreateModal() {
+        els.form.reset();
+        if (els.form.pais) els.form.pais.value = 'México';
+        if (els.form.zona_horaria) els.form.zona_horaria.value = 'America/Mexico_City';
+        if (els.form.estatus_plan) els.form.estatus_plan.value = 'activo';
+        if (els.form.modo_operacion) els.form.modo_operacion.value = 'residencial';
+        if (els.createPreset) {
+            els.createPreset.value = 'residencial';
+            applyPresetToForm(els.form, 'residencial');
+        }
+        els.modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCreateModal() {
+        els.modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    async function openServiceModal(id) {
+        const json = await api({ action: 'get_service_profile', id });
+        const item = json.data?.item || null;
+        if (!item) throw new Error('No encontramos el cliente seleccionado.');
+
+        state.serviceProfileItem = item;
+        els.serviceId.value = String(item.id);
+        els.serviceModalName.textContent = `${item.nombre} · ${presetLabel(item.service_profile?.preset_servicio || item.modo_operacion || 'residencial')}`;
+        if (els.servicePreset) {
+            els.servicePreset.value = item.service_profile?.preset_servicio || item.modo_operacion || 'residencial';
+        }
+
+        Object.keys(serviceLabels.roles || {}).forEach((key) => {
+            const field = els.serviceForm.querySelector(`[name="${key}"]`);
+            if (field) field.checked = !!item.service_profile?.roles?.[key]?.enabled;
+        });
+        Object.keys(serviceLabels.modules || {}).forEach((key) => {
+            const field = els.serviceForm.querySelector(`[name="${key}"]`);
+            if (field) field.checked = !!item.service_profile?.modules?.[key]?.enabled;
+        });
+
+        els.serviceModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeServiceModal() {
+        els.serviceModal.classList.add('hidden');
+        document.body.style.overflow = '';
+        state.serviceProfileItem = null;
+    }
+
     async function loadMeta() {
         const json = await api({ action: 'meta' });
         planes = json.data?.planes || [];
         csrf = json.data?.csrf_token || '';
+        serviceLabels = json.data?.service_labels || { roles: {}, modules: {} };
+        servicePresets = json.data?.service_presets || [];
         fillPlans();
+        initServiceForms();
     }
 
     async function loadList(resetPage = true) {
@@ -226,19 +361,16 @@
         renderTable(json.data?.items || []);
     }
 
-    function openModal() {
-        els.form.reset();
-        if (els.form.pais) els.form.pais.value = 'México';
-        if (els.form.zona_horaria) els.form.zona_horaria.value = 'America/Mexico_City';
-        if (els.form.estatus_plan) els.form.estatus_plan.value = 'activo';
-        if (els.form.modo_operacion) els.form.modo_operacion.value = 'residencial';
-        els.modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-        els.modal.classList.add('hidden');
-        document.body.style.overflow = '';
+    function collectServicePayload(form) {
+        const payload = {};
+        payload.preset_servicio = form.querySelector('[name="preset_servicio"]')?.value || 'residencial';
+        Object.keys(serviceLabels.roles || {}).forEach((key) => {
+            payload[key] = form.querySelector(`[name="${key}"]`)?.checked ? '1' : '0';
+        });
+        Object.keys(serviceLabels.modules || {}).forEach((key) => {
+            payload[key] = form.querySelector(`[name="${key}"]`)?.checked ? '1' : '0';
+        });
+        return payload;
     }
 
     els.pagination?.addEventListener('click', (e) => {
@@ -270,10 +402,38 @@
         loadList(true).then(() => showAlert('ok', 'Listado actualizado.')).catch((err) => showAlert('error', err.message || 'No se pudo actualizar.'));
     });
 
-    els.btnNuevo?.addEventListener('click', openModal);
-    els.btnCloseModal?.addEventListener('click', closeModal);
-    els.btnCancelModal?.addEventListener('click', closeModal);
-    els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
+    els.btnNuevo?.addEventListener('click', openCreateModal);
+    els.btnCloseModal?.addEventListener('click', closeCreateModal);
+    els.btnCancelModal?.addEventListener('click', closeCreateModal);
+    els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeCreateModal(); });
+
+    els.createPreset?.addEventListener('change', (e) => {
+        const nextPreset = e.target.value || 'residencial';
+        const modeField = els.form?.querySelector('[name="modo_operacion"]');
+        if (modeField) modeField.value = nextPreset;
+        applyPresetToForm(els.form, e.target.value || 'residencial');
+    });
+    els.form?.querySelector('[name="modo_operacion"]')?.addEventListener('change', (e) => {
+        if (els.createPreset) {
+            els.createPreset.value = e.target.value || 'residencial';
+            applyPresetToForm(els.form, els.createPreset.value);
+        }
+    });
+
+    els.tableWrap?.addEventListener('click', (e) => {
+        const button = e.target.closest('[data-service-profile-id]');
+        if (!button) return;
+        openServiceModal(Number(button.getAttribute('data-service-profile-id') || 0)).catch((err) => {
+            showAlert('error', err.message || 'No se pudo abrir el perfil de servicio.');
+        });
+    });
+
+    els.btnCloseServiceModal?.addEventListener('click', closeServiceModal);
+    els.btnCancelServiceModal?.addEventListener('click', closeServiceModal);
+    els.serviceModal?.addEventListener('click', (e) => { if (e.target === els.serviceModal) closeServiceModal(); });
+    els.servicePreset?.addEventListener('change', (e) => {
+        applyPresetToForm(els.serviceForm, e.target.value || 'residencial');
+    });
 
     els.form?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -289,15 +449,35 @@
         ['permite_qr', 'permite_trabajadores_recurrentes', 'requiere_placa_vehiculo', 'requiere_identificacion_visita'].forEach((field) => {
             if (!Object.prototype.hasOwnProperty.call(payload, field)) payload[field] = '0';
         });
+        Object.assign(payload, collectServicePayload(els.form));
 
         try {
             await api(payload);
-            closeModal();
+            closeCreateModal();
             await loadList(true);
             window.SuperadminDashboard?.loadContext?.();
-            showAlert('ok', 'Residencial creado correctamente.');
+            showAlert('ok', 'Cliente creado correctamente.');
         } catch (err) {
-            showAlert('error', err.message || 'No se pudo crear el residencial.');
+            showAlert('error', err.message || 'No se pudo crear el cliente.');
+        }
+    });
+
+    els.serviceForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            action: 'update_service_profile',
+            csrf_token: csrf,
+            id: els.serviceId?.value || '',
+            ...collectServicePayload(els.serviceForm),
+        };
+
+        try {
+            await api(payload);
+            closeServiceModal();
+            await loadList(false);
+            showAlert('ok', 'Perfil de servicio actualizado correctamente.');
+        } catch (err) {
+            showAlert('error', err.message || 'No se pudo guardar el perfil de servicio.');
         }
     });
 

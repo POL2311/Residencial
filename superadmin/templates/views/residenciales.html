@@ -4,11 +4,11 @@
   <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
     <div>
       <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Superadmin</div>
-      <h2 class="text-3xl font-semibold text-slate-700">Residenciales</h2>
-      <p class="text-sm text-slate-500">Administra altas, planes y estatus operativos de la plataforma.</p>
+      <h2 class="text-3xl font-semibold text-slate-700">Servicios</h2>
+      <p class="text-sm text-slate-500">Administra altas, planes y estatus operativos de cada cliente o servicio.</p>
     </div>
     <button id="btnNuevoResidencial" type="button" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">
-      + Nuevo residencial
+      + Nuevo servicio
     </button>
   </div>
 
@@ -75,8 +75,8 @@
     <div class="flex items-center justify-between gap-3">
       <div>
         <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Directorio</div>
-        <div class="mt-1 text-sm font-semibold text-slate-700">Listado de residenciales</div>
-        <div class="mt-1 text-xs text-slate-500">Vista consolidada de altas, ubicación, plan y estatus.</div>
+        <div class="mt-1 text-sm font-semibold text-slate-700">Listado de servicios</div>
+        <div class="mt-1 text-xs text-slate-500">Vista consolidada de clientes, ubicación, plan y estatus.</div>
       </div>
       <button id="btnRefreshResidenciales" type="button" class="rounded-lg border px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Refrescar</button>
     </div>
@@ -88,7 +88,7 @@
     <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
       <div class="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden bg-white shadow-2xl rounded-t-2xl md:rounded-2xl">
         <div class="sticky top-0 z-10 px-4 py-3 border-b border-slate-100 bg-white flex items-center justify-between">
-          <div class="text-sm font-semibold text-slate-800">Nuevo residencial</div>
+          <div class="text-sm font-semibold text-slate-800">Nuevo servicio</div>
           <button id="btnCloseResidencialModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
         </div>
         <form id="residencialForm" class="flex min-h-0 flex-1 flex-col">
@@ -96,11 +96,11 @@
             <section class="space-y-4">
               <div>
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Datos generales</div>
-                <div class="mt-1 text-xs text-slate-500">Define la identidad operativa y capacidad base del residencial.</div>
+                <div class="mt-1 text-xs text-slate-500">Define la identidad operativa y capacidad base del cliente o servicio.</div>
               </div>
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="md:col-span-2">
-                  <label class="mb-1 block text-xs text-slate-600">Nombre del residencial *</label>
+                  <label class="mb-1 block text-xs text-slate-600">Nombre del servicio o cliente *</label>
                   <input name="nombre" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
                 </div>
                 <div>
@@ -203,7 +203,7 @@
             <section class="space-y-4 border-t border-slate-100 pt-4">
               <div>
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Plan y configuración</div>
-                <div class="mt-1 text-xs text-slate-500">Ajusta vigencia y reglas operativas del residencial.</div>
+                <div class="mt-1 text-xs text-slate-500">Ajusta vigencia y reglas operativas del servicio.</div>
               </div>
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
@@ -241,12 +241,84 @@
                 <label class="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" name="requiere_identificacion_visita" value="1"> Requerir identificación de visita</label>
               </div>
             </section>
+
+            <section class="space-y-4 border-t border-slate-100 pt-4">
+              <div>
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Perfil de servicio</div>
+                <div class="mt-1 text-xs text-slate-500">Define qué roles y módulos estarán disponibles para este cliente desde el alta.</div>
+              </div>
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="md:col-span-2">
+                  <label class="mb-1 block text-xs text-slate-600">Preset del servicio</label>
+                  <select name="preset_servicio" id="resServicePreset" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                    <option value="residencial">Residencial</option>
+                    <option value="empresa">Empresa</option>
+                    <option value="obra">Obra</option>
+                    <option value="comercio">Comercio</option>
+                    <option value="servicio">Servicio</option>
+                  </select>
+                </div>
+                <div>
+                  <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Roles permitidos</div>
+                  <div id="resServiceRoleFields" class="space-y-2"></div>
+                </div>
+                <div>
+                  <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Módulos habilitados</div>
+                  <div id="resServiceModuleFields" class="grid grid-cols-1 gap-2"></div>
+                </div>
+              </div>
+            </section>
           </div>
 
           <div class="sticky bottom-0 border-t border-slate-100 bg-white px-4 py-3">
             <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button id="btnCancelResidencialModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
-              <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Crear residencial</button>
+              <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Crear servicio</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="serviceProfileModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+    <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
+      <div class="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden bg-white shadow-2xl rounded-t-2xl md:rounded-2xl">
+        <div class="sticky top-0 z-10 px-4 py-3 border-b border-slate-100 bg-white flex items-center justify-between">
+          <div>
+            <div class="text-sm font-semibold text-slate-800">Perfil de servicio</div>
+            <div id="serviceProfileModalName" class="mt-1 text-xs text-slate-500">—</div>
+          </div>
+          <button id="btnCloseServiceProfileModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
+        </div>
+        <form id="serviceProfileForm" class="flex min-h-0 flex-1 flex-col">
+          <input type="hidden" name="id" id="serviceProfileResidencialId" />
+          <div class="flex-1 overflow-y-auto p-4 space-y-5">
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Preset del servicio</label>
+              <select name="preset_servicio" id="serviceProfilePreset" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="residencial">Residencial</option>
+                <option value="empresa">Empresa</option>
+                <option value="obra">Obra</option>
+                <option value="comercio">Comercio</option>
+                <option value="servicio">Servicio</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Roles permitidos</div>
+                <div id="serviceProfileRoleFields" class="space-y-2"></div>
+              </div>
+              <div>
+                <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Módulos habilitados</div>
+                <div id="serviceProfileModuleFields" class="grid grid-cols-1 gap-2"></div>
+              </div>
+            </div>
+          </div>
+          <div class="sticky bottom-0 border-t border-slate-100 bg-white px-4 py-3">
+            <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button id="btnCancelServiceProfileModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
+              <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Guardar perfil</button>
             </div>
           </div>
         </form>

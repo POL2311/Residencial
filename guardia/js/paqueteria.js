@@ -15,10 +15,6 @@
       search: document.getElementById('pkgSearch'),
       estado: document.getElementById('pkgEstado'),
       btnClear: document.getElementById('btnClearPkgFilters'),
-      countTotal: document.getElementById('pkgCountTotal'),
-      countPendientes: document.getElementById('pkgCountPendientes'),
-      countEntregados: document.getElementById('pkgCountEntregados'),
-      filterStatus: document.getElementById('pkgFilterStatus'),
     };
 
     const state = {
@@ -69,29 +65,6 @@
       }
     }
 
-    function updateSummary() {
-      if (els.countTotal) {
-        els.countTotal.textContent = String(state.filteredItems.length);
-      }
-
-      if (els.countPendientes) {
-        const pending = state.filteredItems.filter((item) => normalize(item.estado) === 'registrado').length;
-        els.countPendientes.textContent = String(pending);
-      }
-
-      if (els.countEntregados) {
-        const delivered = state.filteredItems.filter((item) => normalize(item.estado) === 'entregado').length;
-        els.countEntregados.textContent = String(delivered);
-      }
-
-      if (els.filterStatus) {
-        const filters = [];
-        if (els.search?.value?.trim()) filters.push(`Texto: ${els.search.value.trim()}`);
-        if (els.estado?.value) filters.push(`Estado: ${stateLabel(els.estado.value)}`);
-        els.filterStatus.textContent = filters.length ? filters.join(' · ') : 'Sin filtros';
-      }
-    }
-
     function applyFilters() {
       const q = normalize(els.search?.value);
       const estado = normalize(els.estado?.value);
@@ -113,7 +86,6 @@
       });
 
       state.page = 1;
-      updateSummary();
     }
 
     function paginate(items, page, perPage) {

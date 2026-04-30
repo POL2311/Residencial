@@ -9,6 +9,7 @@ header('Expires: 0');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['guardia', 'super_admin']);
@@ -19,6 +20,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
 $user = current_user();
 $uid  = (int)($user['id'] ?? 0);
+$residencialId = service_profile_resolve_residencial_id_for_user($pdo, $uid);
+if ($residencialId > 0 && ($user['role'] ?? '') !== 'super_admin') {
+  service_profile_api_require_module($pdo, $residencialId, 'guardia', 'autos', 'Los autos no están habilitados para este cliente.');
+}
 
 function json_out(bool $ok, array $extra = [], int $status = 200): void {
   http_response_code($status);

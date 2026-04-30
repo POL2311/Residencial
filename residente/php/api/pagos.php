@@ -10,6 +10,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['residente']);
@@ -35,9 +36,11 @@ function get_context(PDO $pdo, int $uid): array {
 }
 
 try {
+  service_profile_schema_ensure($pdo);
   $ctx = get_context($pdo, $uid);
   $rid = (int)($ctx['residencial_id'] ?? 0);
   $unidadId = (int)($ctx['unidad_id'] ?? 0);
+  service_profile_api_require_module($pdo, $rid, 'residente', 'pagos', 'Los pagos no están habilitados para este cliente.');
 
   $stmt = $pdo->prepare("
     SELECT id, monto, fecha, metodo, concepto, activo, created_at, updated_at

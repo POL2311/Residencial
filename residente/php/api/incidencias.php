@@ -10,6 +10,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['residente']);
@@ -45,9 +46,11 @@ function get_context(PDO $pdo, int $uid): array {
 }
 
 try {
+  service_profile_schema_ensure($pdo);
   $ctx = get_context($pdo, $uid);
   $rid = (int)$ctx['residencial_id'];
   $unidadId = (int)$ctx['unidad_id'];
+  service_profile_api_require_module($pdo, $rid, 'residente', 'incidencias', 'Las incidencias no están habilitadas para este cliente.');
 
   if ($action === 'list') {
     $stmt = $pdo->prepare("

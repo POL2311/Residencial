@@ -9,6 +9,7 @@ header('Expires: 0');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['residente']);
@@ -19,6 +20,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
 $user = current_user();
 $uid  = (int)($user['id'] ?? 0);
+$ctxService = service_profile_resolve_residencial_id_for_user($pdo, $uid);
+if ($ctxService > 0) {
+  service_profile_api_require_module($pdo, $ctxService, 'residente', 'autos', 'Los autos no están habilitados para este cliente.');
+}
 
 function json_out(bool $ok, array $extra = []): void {
   echo json_encode(array_merge(['ok' => $ok], $extra), JSON_UNESCAPED_UNICODE);

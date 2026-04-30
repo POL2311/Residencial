@@ -167,26 +167,28 @@
               `).join('')}
             </div>
             <div class="hidden md:block">
-              <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_180px_130px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                <div>Nombre</div>
-                <div>Email</div>
-                <div>Rol</div>
-                <div>Estado</div>
-                <div>Creado</div>
-              </div>
-              <div class="mt-3 space-y-3">
-                ${visible.map((item) => `
-                  <article class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_180px_130px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
-                    <div class="min-w-0">
-                      <div class="font-semibold text-slate-800">${escapeHtml(item.name)}</div>
-                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.telefono || 'Sin teléfono')}</div>
-                    </div>
-                    <div class="text-sm text-slate-700 min-w-0">${escapeHtml(item.email)}</div>
-                    <div class="text-sm text-slate-700">${escapeHtml(item.rol_nombre)}</div>
-                    <div>${userStatusPill(item)}</div>
-                    <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
-                  </article>
-                `).join('')}
+              <div class="min-w-[930px]">
+                <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(240px,1.15fr)_180px_130px_140px] items-center gap-4 rounded-t-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <div>Nombre</div>
+                  <div>Email</div>
+                  <div>Rol</div>
+                  <div>Estado</div>
+                  <div>Creado</div>
+                </div>
+                <div class="overflow-hidden rounded-b-[1.5rem] border-x border-b border-slate-200 bg-white shadow-sm">
+                  ${visible.map((item, index) => `
+                    <article class="grid grid-cols-[minmax(220px,1.1fr)_minmax(240px,1.15fr)_180px_130px_140px] items-center gap-4 px-4 py-4 ${index < visible.length - 1 ? 'border-b border-slate-100' : ''}">
+                      <div class="min-w-0">
+                        <div class="font-semibold text-slate-800">${escapeHtml(item.name)}</div>
+                        <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.telefono || 'Sin teléfono')}</div>
+                      </div>
+                      <div class="min-w-0 text-sm text-slate-700">${escapeHtml(item.email)}</div>
+                      <div class="text-sm text-slate-700">${escapeHtml(item.rol_nombre)}</div>
+                      <div>${userStatusPill(item)}</div>
+                      <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
+                    </article>
+                  `).join('')}
+                </div>
               </div>
             </div>
         ` : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">No hay usuarios que coincidan con el filtro actual.</div>`;
@@ -219,29 +221,31 @@
               `).join('')}
             </div>
             <div class="hidden md:block">
-              <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_160px_120px_140px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                <div>Usuario</div>
-                <div>Residencial</div>
-                <div>Rol</div>
-                <div>Principal</div>
-                <div>Asignado</div>
-              </div>
-              <div class="mt-3 space-y-3">
-                ${visible.map((item) => `
-                  <article class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_160px_120px_140px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
-                    <div class="min-w-0">
-                      <div class="font-semibold text-slate-800">${escapeHtml(item.usuario_nombre)}</div>
-                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.usuario_email)}</div>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="text-sm text-slate-700">${escapeHtml(item.residencial_nombre)}</div>
-                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.residencial_codigo)}</div>
-                    </div>
-                    <div class="text-sm text-slate-700">${escapeHtml(item.usuario_rol)}</div>
-                    <div>${Number(item.es_principal || 0) === 1 ? '<span class="inline-flex rounded-full px-2.5 py-1 text-[11px] bg-sky-50 text-sky-700 border border-sky-200">Sí</span>' : '<span class="text-sm text-slate-500">No</span>'}</div>
-                    <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
-                  </article>
-                `).join('')}
+              <div class="min-w-[900px]">
+                <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_160px_120px_160px] items-center gap-4 rounded-t-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <div>Usuario</div>
+                  <div>Residencial</div>
+                  <div>Rol</div>
+                  <div>Principal</div>
+                  <div>Asignado</div>
+                </div>
+                <div class="overflow-hidden rounded-b-[1.5rem] border-x border-b border-slate-200 bg-white shadow-sm">
+                  ${visible.map((item, index) => `
+                    <article class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_160px_120px_160px] items-center gap-4 px-4 py-4 ${index < visible.length - 1 ? 'border-b border-slate-100' : ''}">
+                      <div class="min-w-0">
+                        <div class="font-semibold text-slate-800">${escapeHtml(item.usuario_nombre)}</div>
+                        <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.usuario_email)}</div>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-sm text-slate-700">${escapeHtml(item.residencial_nombre)}</div>
+                        <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.residencial_codigo)}</div>
+                      </div>
+                      <div class="text-sm text-slate-700">${escapeHtml(item.usuario_rol)}</div>
+                      <div>${Number(item.es_principal || 0) === 1 ? '<span class="inline-flex rounded-full px-2.5 py-1 text-[11px] bg-sky-50 text-sky-700 border border-sky-200">Sí</span>' : '<span class="text-sm text-slate-500">No</span>'}</div>
+                      <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
+                    </article>
+                  `).join('')}
+                </div>
               </div>
             </div>
         ` : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Aún no hay asignaciones registradas.</div>`;

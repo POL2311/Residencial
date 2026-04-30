@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_operational_bootstrap.php';
+guardia_module_required('incidencias', 'Las incidencias no están habilitadas para este cliente.');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $isOperational = operational_is_operational_mode($operationalMode);

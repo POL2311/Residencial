@@ -15,10 +15,6 @@
     const els = {
         alert: document.getElementById('visitasAlert'),
         list: document.getElementById('residentVisitasList'),
-        statTotal: document.getElementById('visitasStatTotal'),
-        statPendientes: document.getElementById('visitasStatPendientes'),
-        statUsadas: document.getElementById('visitasStatUsadas'),
-        statCanceladas: document.getElementById('visitasStatCanceladas'),
         btnNew: document.getElementById('btnNuevaVisitaResident'),
         modal: document.getElementById('residentVisitasModal'),
         modalTitle: document.getElementById('residentVisitasModalTitle'),
@@ -37,6 +33,18 @@
 
     let items = [];
     let currentCode = '';
+
+    function pad2(value) {
+        return String(value).padStart(2, '0');
+    }
+
+    function formatDateInput(date) {
+        return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+    }
+
+    function formatTimeInput(date) {
+        return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+    }
 
     function escapeHtml(s) {
         return String(s ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
@@ -72,10 +80,6 @@
     }
 
     function renderUnavailable(message) {
-        if (els.statTotal) els.statTotal.textContent = '0';
-        if (els.statPendientes) els.statPendientes.textContent = '0';
-        if (els.statUsadas) els.statUsadas.textContent = '0';
-        if (els.statCanceladas) els.statCanceladas.textContent = '0';
         if (els.list) {
             els.list.innerHTML = `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">${escapeHtml(message)}</div>`;
         }
@@ -110,6 +114,19 @@
 
     function openFormModal() {
         els.modalTitle.textContent = 'Nueva visita';
+        if (els.form) {
+            els.form.reset();
+            const now = new Date();
+            const plusOneHour = new Date(now.getTime() + 60 * 60 * 1000);
+            const fechaDesde = els.form.querySelector('[name="fecha_desde"]');
+            const fechaHasta = els.form.querySelector('[name="fecha_hasta"]');
+            const horaDesde = els.form.querySelector('[name="hora_desde"]');
+            const horaHasta = els.form.querySelector('[name="hora_hasta"]');
+            if (fechaDesde) fechaDesde.value = formatDateInput(now);
+            if (fechaHasta) fechaHasta.value = formatDateInput(plusOneHour);
+            if (horaDesde) horaDesde.value = formatTimeInput(now);
+            if (horaHasta) horaHasta.value = formatTimeInput(plusOneHour);
+        }
         els.modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -135,15 +152,7 @@
         await renderQr(currentCode);
     }
 
-    function renderStats() {
-        if (els.statTotal) els.statTotal.textContent = String(items.length);
-        if (els.statPendientes) els.statPendientes.textContent = String(items.filter((item) => item.estado === 'pendiente').length);
-        if (els.statUsadas) els.statUsadas.textContent = String(items.filter((item) => item.estado === 'usado').length);
-        if (els.statCanceladas) els.statCanceladas.textContent = String(items.filter((item) => item.estado === 'cancelado').length);
-    }
-
     function render() {
-        renderStats();
         els.list.innerHTML = items.length ? items.map((item) => `
           <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div class="flex items-start justify-between gap-3">
@@ -201,20 +210,27 @@
             showAlert('error', 'No se pudo copiar el código automáticamente.');
         }
     });
-    els.btnDownloadQr?.addEventListener('click', () => {
+    els.btnDownloadQr?.addEventListener('click', async () => {
         if (!currentCode) {
             showAlert('error', 'No hay un QR disponible para descargar.');
             return;
         }
         try {
+            const response = await fetch(qrUrl(currentCode), {
+                credentials: 'omit',
+                mode: 'cors',
+                cache: 'no-store',
+            });
+            if (!response.ok) throw new Error('No se pudo generar el archivo QR.');
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = qrUrl(currentCode);
+            link.href = objectUrl;
             link.download = `visita-${currentCode}.png`;
-            link.target = '_blank';
-            link.rel = 'noopener';
             document.body.appendChild(link);
             link.click();
             link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
         } catch (_) {
             showAlert('error', 'No se pudo descargar el QR.');
         }

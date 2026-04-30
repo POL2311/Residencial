@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/_bootstrap.php';
 require_once __DIR__ . '/../../../config/operational_mode.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 $action = sa_post_action('list');
 
@@ -19,6 +20,7 @@ function sa_residencial_status_badge(string $status): string
 
 try {
     operational_schema_ensure($pdo);
+    service_profile_schema_ensure($pdo);
 
     if ($action === 'meta') {
         $planes = $pdo->query("
@@ -31,6 +33,15 @@ try {
         sa_json_out(true, [
             'data' => [
                 'planes' => $planes,
+                'service_labels' => service_profile_labels(),
+                'service_presets' => array_map(static function (string $preset): array {
+                    $defaults = service_profile_defaults($preset);
+                    return [
+                        'key' => $preset,
+                        'label' => ucfirst($preset),
+                        'defaults' => $defaults,
+                    ];
+                }, service_profile_allowed_presets()),
                 'csrf_token' => sa_csrf_token(),
             ],
         ]);
@@ -44,9 +55,10 @@ try {
         $modoRaw = trim((string)($_POST['modo_operacion'] ?? $_GET['modo_operacion'] ?? ''));
 
         $sql = "
-            SELECT r.*, p.nombre AS nombre_plan, p.codigo AS codigo_plan
+            SELECT r.*, p.nombre AS nombre_plan, p.codigo AS codigo_plan, sc.preset_servicio
             FROM residenciales r
             LEFT JOIN planes p ON p.id = r.plan_id
+            LEFT JOIN residenciales_servicio_config sc ON sc.residencial_id = r.id
             WHERE 1 = 1
         ";
         $params = [];
@@ -91,12 +103,84 @@ try {
 
         sa_json_out(true, [
             'data' => [
-                'items' => array_map(static function (array $item): array {
+                'items' => array_map(static function (array $item) use ($pdo): array {
                     $item['modo_operacion'] = operational_normalize_mode((string)($item['modo_operacion'] ?? 'residencial'));
+                    $profile = service_profile_get($pdo, (int)$item['id']);
+                    $item['service_profile'] = service_profile_frontend_payload($pdo, (int)$item['id'], 'admin_residencial');
+                    $item['preset_servicio'] = $profile['preset_servicio'];
                     $item['estatus_label'] = sa_residencial_status_badge((string)($item['estatus_plan'] ?? ''));
                     return $item;
                 }, $items),
                 'summary' => $summary,
+            ],
+        ]);
+    }
+
+    if ($action === 'get_service_profile') {
+        $id = (int)($_POST['id'] ?? $_GET['id'] ?? 0);
+        if ($id <= 0) {
+            sa_json_out(false, ['error' => 'Cliente inválido.'], 422);
+        }
+
+        $stmt = $pdo->prepare("SELECT id, nombre, modo_operacion FROM residenciales WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        $residencial = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$residencial) {
+            sa_json_out(false, ['error' => 'Cliente no encontrado.'], 404);
+        }
+
+        sa_json_out(true, [
+            'data' => [
+                'item' => [
+                    'id' => (int)$residencial['id'],
+                    'nombre' => (string)$residencial['nombre'],
+                    'modo_operacion' => operational_normalize_mode((string)$residencial['modo_operacion']),
+                    'service_profile' => service_profile_frontend_payload($pdo, (int)$residencial['id'], 'admin_residencial'),
+                ],
+            ],
+        ]);
+    }
+
+    if ($action === 'update_service_profile') {
+        sa_require_csrf();
+
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            sa_json_out(false, ['error' => 'Cliente inválido.'], 422);
+        }
+
+        $stmt = $pdo->prepare("SELECT id FROM residenciales WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            sa_json_out(false, ['error' => 'Cliente no encontrado.'], 404);
+        }
+
+        $input = [
+            'preset_servicio' => service_profile_normalize_preset((string)($_POST['preset_servicio'] ?? 'residencial')),
+        ];
+        foreach (service_profile_all_flags() as $flag) {
+            $input[$flag] = isset($_POST[$flag]) && (string)$_POST[$flag] === '1' ? 1 : 0;
+        }
+
+        $stmtUpdateMode = $pdo->prepare("
+            UPDATE residenciales
+            SET modo_operacion = :modo_operacion,
+                updated_at = NOW()
+            WHERE id = :id
+            LIMIT 1
+        ");
+        $stmtUpdateMode->execute([
+            'modo_operacion' => $input['preset_servicio'],
+            'id' => $id,
+        ]);
+
+        $saved = service_profile_save($pdo, $id, $input);
+
+        sa_json_out(true, [
+            'message' => 'Perfil de servicio actualizado correctamente.',
+            'data' => [
+                'service_profile' => service_profile_frontend_payload($pdo, $id, 'admin_residencial'),
+                'preset_servicio' => $saved['preset_servicio'],
             ],
         ]);
     }
@@ -210,6 +294,27 @@ try {
             'requiere_placa_vehiculo' => $form['requiere_placa_vehiculo'],
             'requiere_identificacion_visita' => $form['requiere_identificacion_visita'],
         ]);
+
+        $residencialId = (int)$pdo->lastInsertId();
+        $serviceInput = [
+            'preset_servicio' => service_profile_normalize_preset((string)($_POST['preset_servicio'] ?? $form['modo_operacion'])),
+        ];
+        if ($serviceInput['preset_servicio'] !== $form['modo_operacion']) {
+            $pdo->prepare("UPDATE residenciales SET modo_operacion = :modo WHERE id = :id LIMIT 1")
+                ->execute([
+                    'modo' => $serviceInput['preset_servicio'],
+                    'id' => $residencialId,
+                ]);
+        }
+        foreach (service_profile_all_flags() as $flag) {
+            $serviceInput[$flag] = isset($_POST[$flag]) && (string)$_POST[$flag] === '1' ? 1 : 0;
+        }
+        service_profile_seed_defaults($pdo, $residencialId, [
+            'modo_operacion' => $form['modo_operacion'],
+            'permite_qr' => $form['permite_qr'],
+            'permite_trabajadores_recurrentes' => $form['permite_trabajadores_recurrentes'],
+        ]);
+        service_profile_save($pdo, $residencialId, $serviceInput);
 
         sa_json_out(true, ['message' => 'Residencial creado correctamente.']);
     }

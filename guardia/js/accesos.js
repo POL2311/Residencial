@@ -5,10 +5,12 @@
     const els = {
       codigo: document.getElementById('codigo'),
       alert: document.getElementById('accesosAlert'),
-      resultado: document.getElementById('accesoResultado'),
-      estadoBadge: document.getElementById('accesoEstadoBadge'),
-      miniStatus: document.getElementById('accesoMiniStatus'),
-      dynamicForm: document.getElementById('accesoDynamicForm'),
+      modal: document.getElementById('accessActionModal'),
+      modalTitle: document.getElementById('accessActionTitle'),
+      modalStatus: document.getElementById('accessActionStatus'),
+      modalBody: document.getElementById('accessActionBody'),
+      modalClose: document.getElementById('btnCloseAccessActionModal'),
+      dynamicForm: document.getElementById('accessActionDynamicForm'),
       pinWrap: document.getElementById('accessPinWrap'),
       pin: document.getElementById('accessPin'),
       evidenceWrap: document.getElementById('accessEvidenceWrap'),
@@ -22,7 +24,9 @@
       btnOpenCamera: document.getElementById('btnOpenCamera'),
       cameraModal: document.getElementById('cameraModal'),
       cameraHint: document.getElementById('cameraHint'),
+      cameraSupportNote: document.getElementById('cameraSupportNote'),
       video: document.getElementById('video'),
+      btnRetryCamera: document.getElementById('btnRetryCamera'),
       btnCloseCamera: document.getElementById('btnCloseCamera'),
 
       residentSection: document.getElementById('residentDirectSection'),
@@ -30,8 +34,6 @@
       residentAlert: document.getElementById('residentDirectAlert'),
       residentResults: document.getElementById('residentDirectResults'),
       btnResidentSearch: document.getElementById('btnBuscarResidenteDirecto'),
-      btnResidentEntrada: document.getElementById('btnConfirmarEntradaResidente'),
-      btnResidentSalida: document.getElementById('btnConfirmarSalidaResidente'),
 
       hist: document.getElementById('accesosHist'),
       histPagination: document.getElementById('accesosHistPagination'),
@@ -49,7 +51,12 @@
       residentSearchItems: [],
       stream: null,
       detector: null,
+      scannerMode: null,
+      jsQrLoadPromise: null,
+      canvas: null,
+      canvasCtx: null,
       scanning: false,
+      lastScanAt: 0,
       loadingSearch: false,
       loadingRegister: false,
       histItems: [],
@@ -58,8 +65,11 @@
       rafId: null,
       searchToken: 0,
       registerToken: 0,
+      actionSource: null,
       operationalMode: window.GuardiaDashboard?.getOperationalMode?.() || 'residencial',
     };
+
+    const SCAN_INTERVAL_MS = 240;
 
     function isAlive() {
       return !state.destroyed;
@@ -113,21 +123,168 @@
       if (navigator.vibrate) navigator.vibrate(ok ? 120 : [100, 60, 100]);
     }
 
+    function getAppRoot() {
+      const path = window.location.pathname || '';
+      const idx = path.indexOf('/guardia/');
+      return idx === -1 ? '' : path.slice(0, idx);
+    }
+
+    function showCameraRetry(show) {
+      els.btnRetryCamera?.classList.toggle('hidden', !show);
+      if (els.btnCloseCamera) {
+        els.btnCloseCamera.classList.toggle('sm:col-span-2', !!show);
+        els.btnCloseCamera.classList.toggle('sm:col-span-1', !show);
+      }
+    }
+
+    function setCameraState(kind, message, note = '') {
+      if (els.cameraHint) {
+        els.cameraHint.className = `mt-2 text-xs ${
+          kind === 'error'
+            ? 'text-rose-700'
+            : kind === 'success'
+            ? 'text-emerald-700'
+            : 'text-slate-500'
+        }`;
+        els.cameraHint.textContent = message;
+      }
+
+      if (els.cameraSupportNote) {
+        els.cameraSupportNote.className = `mt-2 text-[11px] ${
+          kind === 'error' ? 'text-rose-500' : 'text-slate-400'
+        }`;
+        els.cameraSupportNote.textContent = note || 'Si no abre o no detecta el QR, puedes ingresar el código manualmente.';
+      }
+
+      showCameraRetry(kind === 'error');
+    }
+
+    function isSecureCameraContext() {
+      if (window.isSecureContext) return true;
+      const host = window.location.hostname || '';
+      return host === 'localhost' || host === '127.0.0.1';
+    }
+
+    async function getCameraPermissionState() {
+      if (!navigator.permissions?.query) return 'unknown';
+      try {
+        const status = await navigator.permissions.query({ name: 'camera' });
+        return status?.state || 'unknown';
+      } catch (_) {
+        return 'unknown';
+      }
+    }
+
+    function mapCameraError(error) {
+      const name = String(error?.name || '').toLowerCase();
+      if (name === 'notallowederror' || name === 'securityerror') {
+        return {
+          message: 'Activa el permiso de cámara en tu navegador.',
+          note: 'Revisa permisos del sitio y vuelve a intentar desde HTTPS.',
+        };
+      }
+      if (name === 'notfounderror' || name === 'overconstrainederror') {
+        return {
+          message: 'No encontramos una cámara disponible en este dispositivo.',
+          note: 'Prueba desde otro dispositivo o usa el código manual.',
+        };
+      }
+      if (name === 'notreadableerror' || name === 'aborterror') {
+        return {
+          message: 'La cámara está ocupada o no se pudo iniciar.',
+          note: 'Cierra otras apps que usen cámara y vuelve a intentar.',
+        };
+      }
+      return {
+        message: 'No se pudo abrir la cámara.',
+        note: 'Si el problema continúa, usa el código manual.',
+      };
+    }
+
+    async function loadJsQrFallback() {
+      if (window.jsQR) return window.jsQR;
+      if (state.jsQrLoadPromise) return state.jsQrLoadPromise;
+
+      state.jsQrLoadPromise = new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-jsqr-fallback="1"]');
+        if (existing) {
+          existing.addEventListener('load', () => resolve(window.jsQR), { once: true });
+          existing.addEventListener('error', () => reject(new Error('No se pudo cargar el lector QR.')), { once: true });
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `${getAppRoot()}/assets/vendor/jsQR.js`;
+        script.defer = true;
+        script.dataset.jsqrFallback = '1';
+        script.onload = () => {
+          if (window.jsQR) resolve(window.jsQR);
+          else reject(new Error('El lector QR no quedó disponible.'));
+        };
+        script.onerror = () => reject(new Error('No se pudo cargar el lector QR local.'));
+        document.body.appendChild(script);
+      }).catch((error) => {
+        state.jsQrLoadPromise = null;
+        throw error;
+      });
+
+      return state.jsQrLoadPromise;
+    }
+
+    async function prepareScannerEngine() {
+      if ('BarcodeDetector' in window) {
+        try {
+          state.detector = new BarcodeDetector({ formats: ['qr_code'] });
+          state.scannerMode = 'native';
+          return;
+        } catch (_) {
+          state.detector = null;
+          state.scannerMode = null;
+        }
+      }
+
+      await loadJsQrFallback();
+      state.scannerMode = 'jsqr';
+      if (!state.canvas) state.canvas = document.createElement('canvas');
+      if (!state.canvasCtx) {
+        state.canvasCtx = state.canvas.getContext('2d', { willReadFrequently: true }) || state.canvas.getContext('2d');
+      }
+    }
+
+    async function detectCode() {
+      if (!els.video) return '';
+
+      if (state.scannerMode === 'native' && state.detector) {
+        const codes = await state.detector.detect(els.video);
+        return codes?.[0]?.rawValue || '';
+      }
+
+      if (state.scannerMode === 'jsqr' && window.jsQR && state.canvas && state.canvasCtx) {
+        const width = els.video.videoWidth || 0;
+        const height = els.video.videoHeight || 0;
+        if (!width || !height) return '';
+
+        state.canvas.width = width;
+        state.canvas.height = height;
+        state.canvasCtx.drawImage(els.video, 0, 0, width, height);
+        const imageData = state.canvasCtx.getImageData(0, 0, width, height);
+        const qr = window.jsQR(imageData.data, width, height, { inversionAttempts: 'dontInvert' });
+        return qr?.data || '';
+      }
+
+      return '';
+    }
+
     function setButtonsDisabled(disabled) {
       if (els.btnEntrada) els.btnEntrada.disabled = disabled;
       if (els.btnSalida) els.btnSalida.disabled = disabled;
     }
 
-    function setResidentButtonsDisabled(disabled) {
-      if (els.btnResidentEntrada) els.btnResidentEntrada.disabled = disabled;
-      if (els.btnResidentSalida) els.btnResidentSalida.disabled = disabled;
-    }
-
     function enableActions(on) {
-      const disabled = !on || state.loadingSearch || state.loadingRegister;
+      const canUseCodeFlow = state.actionSource === 'code' && !!state.current;
+      const canUseResidentFlow = state.actionSource === 'resident' && !!state.currentResident?.access?.allow_direct_access;
+      const disabled = !on || state.loadingSearch || state.loadingRegister || (!canUseCodeFlow && !canUseResidentFlow);
       setButtonsDisabled(disabled);
-      const residentDisabled = !state.currentResident?.access?.allow_direct_access || state.loadingRegister || state.loadingSearch;
-      setResidentButtonsDisabled(residentDisabled);
     }
 
     function setLoadingSearch(on, text = 'Buscando…') {
@@ -137,7 +294,7 @@
         els.btnBuscar.textContent = on ? text : 'Buscar';
       }
       if (els.codigo) els.codigo.disabled = on;
-      enableActions(!!state.current);
+      enableActions(!!state.current || !!state.currentResident);
     }
 
     function setLoadingRegister(on, tipo = 'entrada') {
@@ -148,7 +305,7 @@
       if (els.btnSalida) {
         els.btnSalida.textContent = on && tipo === 'salida' ? 'Registrando…' : 'Registrar salida';
       }
-      enableActions(!!state.current);
+      enableActions(!!state.current || !!state.currentResident);
     }
 
     function updateStatusUI(type, text) {
@@ -159,15 +316,31 @@
           ? 'bg-rose-100 text-rose-700'
           : 'bg-slate-100 text-slate-700';
 
-      if (els.estadoBadge) {
-        els.estadoBadge.className = `mt-3 inline-flex items-center rounded-full px-3 py-1 text-sm ${classes}`;
-        els.estadoBadge.textContent = text;
+      if (els.modalStatus) {
+        els.modalStatus.className = `mt-1 inline-flex rounded-full px-3 py-1 text-xs ${classes}`;
+        els.modalStatus.textContent = text;
       }
-      if (els.miniStatus) {
-        els.miniStatus.classList.remove('hidden');
-        els.miniStatus.className = `rounded-full px-3 py-1 text-xs font-medium ${classes}`;
-        els.miniStatus.textContent = text;
+    }
+
+    function openActionModal(title = 'Validación de acceso') {
+      if (els.modalTitle) els.modalTitle.textContent = title;
+      els.modal?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeActionModal() {
+      els.modal?.classList.add('hidden');
+      document.body.style.overflow = '';
+      state.actionSource = null;
+      state.current = null;
+      state.currentKind = null;
+      state.currentResident = null;
+      resetDynamicForm();
+      if (els.modalBody) {
+        els.modalBody.innerHTML = 'Ingresa un código para validar el acceso.';
       }
+      updateStatusUI('idle', 'Esperando validación');
+      enableActions(false);
     }
 
     function resetDynamicForm() {
@@ -191,11 +364,13 @@
     function resetResultArea() {
       state.current = null;
       state.currentKind = null;
+      state.currentResident = null;
+      state.actionSource = null;
       resetDynamicForm();
       enableActions(false);
 
-      if (els.resultado) {
-        els.resultado.textContent = 'Ingresa un código para validar el acceso.';
+      if (els.modalBody) {
+        els.modalBody.textContent = 'Ingresa un código para validar el acceso.';
       }
       updateStatusUI('idle', 'Esperando validación');
     }
@@ -229,10 +404,10 @@
     }
 
     function renderResidentResult(resident) {
-      if (!els.residentResults || !isAlive()) return;
+      if (!els.modalBody || !isAlive()) return;
       const access = resident?.access || {};
       const allow = !!access.allow_direct_access;
-      els.residentResults.innerHTML = `
+      els.modalBody.innerHTML = `
         <div class="rounded-2xl border ${allow ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/40'} p-4">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -246,11 +421,13 @@
           </div>
         </div>
       `;
+      resetDynamicForm();
     }
 
     function renderVisitResult(visita, ev) {
       const permitido = !!ev?.permitido;
-      els.resultado.innerHTML = `
+      if (!els.modalBody) return;
+      els.modalBody.innerHTML = `
         <div class="space-y-4">
           <div class="font-semibold text-base ${permitido ? 'text-emerald-700' : 'text-rose-700'}">
             ${permitido ? '✔ Acceso permitido' : '✖ Acceso denegado'}
@@ -268,7 +445,8 @@
     }
 
     function renderPersonaResult(persona) {
-      els.resultado.innerHTML = `
+      if (!els.modalBody) return;
+      els.modalBody.innerHTML = `
         <div class="space-y-4">
           <div class="font-semibold text-base text-slate-800">Personal recurrente identificado</div>
           <div class="flex gap-4">
@@ -289,7 +467,8 @@
 
     function renderVisitanteOperativoResult(item) {
       const evalInfo = item?.eval || {};
-      els.resultado.innerHTML = `
+      if (!els.modalBody) return;
+      els.modalBody.innerHTML = `
         <div class="space-y-4">
           <div class="font-semibold text-base ${evalInfo.permitido ? 'text-emerald-700' : 'text-rose-700'}">
             ${evalInfo.permitido ? 'Visitante listo para validación' : 'Visitante con restricciones'}
@@ -309,7 +488,8 @@
 
     function renderPermisoResult(item) {
       const evalInfo = item?.eval || {};
-      els.resultado.innerHTML = `
+      if (!els.modalBody) return;
+      els.modalBody.innerHTML = `
         <div class="space-y-4">
           <div class="font-semibold text-base ${evalInfo.permitido ? 'text-emerald-700' : 'text-rose-700'}">
             ${evalInfo.permitido ? 'Permiso listo para validación' : 'Permiso con restricciones'}
@@ -349,6 +529,8 @@
 
         const data = json.data || {};
         state.currentKind = data.kind || 'visita_residencial';
+        state.actionSource = 'code';
+        openActionModal('Validación de acceso');
 
         if (state.currentKind === 'persona_recurrente') {
           state.current = data.persona || null;
@@ -378,11 +560,9 @@
         if (!isAlive() || token !== state.searchToken) return;
         state.current = null;
         state.currentKind = null;
+        state.actionSource = null;
         feedback(false);
         resetDynamicForm();
-        if (els.resultado) {
-          els.resultado.innerHTML = `<div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">Código no válido o no encontrado.</div>`;
-        }
         updateStatusUI('error', 'Denegado');
         alertMsg(e.message || 'No se pudo validar el código.');
       } finally {
@@ -417,14 +597,23 @@
       fd.set('resident_id', state.currentResident.user_id);
       fd.set('tipo_evento', tipo);
       try {
+        setLoadingRegister(true, tipo);
         residentAlertMsg('');
         const json = await fetchJSON(`${API}accesos.php`, { method: 'POST', body: fd });
         state.currentResident = { ...state.currentResident, access: json.access || state.currentResident.access };
         renderResidentResult(state.currentResident);
         residentAlertMsg(json.message || 'Acceso de residente procesado correctamente.', 'success');
         await loadHist();
+        window.setTimeout(() => {
+          if (isAlive()) closeActionModal();
+        }, 1200);
       } catch (e) {
         residentAlertMsg(e.message || 'No se pudo registrar el acceso del residente.');
+      } finally {
+        if (isAlive()) {
+          setLoadingRegister(false, tipo);
+          enableActions(!!state.current || !!state.currentResident);
+        }
       }
     }
 
@@ -474,8 +663,8 @@
           state.current = json.data?.permiso_material || state.current;
           renderPermisoResult(state.current);
         } else {
-          if (els.resultado) {
-            els.resultado.innerHTML = `
+          if (els.modalBody) {
+            els.modalBody.innerHTML = `
               <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                 <div class="text-emerald-700 font-semibold">✔ ${tipo === 'entrada' ? 'Entrada registrada' : 'Salida registrada'}</div>
                 <div class="text-sm text-slate-600 mt-1">${safeText(json.visita?.nombre_visitante || state.current?.nombre_visitante)}</div>
@@ -488,7 +677,7 @@
 
         setTimeout(() => {
           if (isAlive() && json.permitido) {
-            resetResultArea();
+            closeActionModal();
           }
         }, 1500);
       } catch (e) {
@@ -497,7 +686,7 @@
       } finally {
         if (isAlive() && token === state.registerToken) {
           setLoadingRegister(false, tipo);
-          enableActions(!!state.current);
+          enableActions(!!state.current || !!state.currentResident);
         }
       }
     }
@@ -609,51 +798,67 @@
 
     async function openCamera() {
       if (!els.cameraModal || !els.video || !isAlive()) return;
+      closeCamera();
+      els.cameraModal.classList.remove('hidden');
+      els.cameraModal.classList.add('flex');
+      setCameraState('idle', 'Estamos solicitando permiso de cámara…');
+      alertMsg('');
+
+      if (!isSecureCameraContext()) {
+        setCameraState('error', 'La cámara requiere HTTPS.', 'Abre este panel desde un dominio seguro para que el navegador permita la cámara.');
+        return;
+      }
       if (!navigator.mediaDevices?.getUserMedia) {
-        alertMsg('Este dispositivo no soporta acceso a cámara.');
+        setCameraState('error', 'Este navegador no puede abrir cámara.', 'Usa el código manual o prueba desde otro navegador móvil.');
         return;
       }
-      if (!('BarcodeDetector' in window)) {
-        alertMsg('Tu navegador no soporta lectura QR automática. Usa captura manual.');
-        return;
-      }
+
       try {
-        els.cameraModal.classList.remove('hidden');
-        els.cameraModal.classList.add('flex');
-        if (els.cameraHint) els.cameraHint.textContent = 'Esperando código QR…';
+        const permissionState = await getCameraPermissionState();
+        if (permissionState === 'denied') {
+          setCameraState('error', 'Activa el permiso de cámara en tu navegador.', 'Revisa permisos del sitio y luego toca "Reintentar cámara".');
+          return;
+        }
+
         state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         if (!isAlive()) {
           closeCamera();
           return;
         }
         els.video.srcObject = state.stream;
-        state.detector = new BarcodeDetector({ formats: ['qr_code'] });
+        await prepareScannerEngine();
+        if (!state.scannerMode) {
+          throw new Error('No se pudo preparar el lector QR.');
+        }
+        setCameraState('success', 'Apunta al código QR.', state.scannerMode === 'native'
+          ? 'La lectura está lista. Si no detecta, también puedes ingresar el código manualmente.'
+          : 'Usando lector QR compatible con este navegador. Si no detecta, usa el código manual.');
         scanLoop();
       } catch (e) {
-        alertMsg('No se pudo abrir la cámara.');
+        const mapped = mapCameraError(e);
         closeCamera();
+        els.cameraModal?.classList.remove('hidden');
+        els.cameraModal?.classList.add('flex');
+        setCameraState('error', mapped.message, mapped.note);
+        alertMsg(mapped.message);
       }
     }
 
-    async function scanLoop() {
-      if (!state.detector || !els.video || !state.stream || !isAlive()) return;
+    async function scanLoop(now = 0) {
+      if (!els.video || !state.stream || !isAlive()) return;
       try {
-        if (!state.scanning) {
-          const codes = await state.detector.detect(els.video);
+        if (!state.scanning && (!state.lastScanAt || now - state.lastScanAt >= SCAN_INTERVAL_MS)) {
+          state.lastScanAt = now;
+          const raw = await detectCode();
           if (!isAlive()) return;
-          if (codes.length) {
+          if (raw) {
             state.scanning = true;
-            const raw = codes[0]?.rawValue || '';
-            if (raw) {
-              if (els.codigo) els.codigo.value = raw;
-              if (els.cameraHint) els.cameraHint.textContent = 'Código detectado. Validando…';
-              await buscar(raw);
-              if (!isAlive()) return;
-              closeCamera();
-            }
-            setTimeout(() => {
-              if (isAlive()) state.scanning = false;
-            }, 2000);
+            if (els.codigo) els.codigo.value = raw;
+            setCameraState('success', 'Código detectado. Validando…');
+            await buscar(raw);
+            if (!isAlive()) return;
+            closeCamera();
+            return;
           }
         }
       } catch (_) {}
@@ -669,19 +874,27 @@
       if (els.video) els.video.srcObject = null;
       state.stream = null;
       state.detector = null;
+      state.scannerMode = null;
       state.scanning = false;
-      if (els.cameraHint) els.cameraHint.textContent = 'Esperando código QR…';
+      state.lastScanAt = 0;
+      setCameraState('idle', 'Esperando código QR…');
     }
 
     function bindEvents() {
       els.btnBuscar?.addEventListener('click', () => buscar(els.codigo?.value?.trim()));
       els.btnResidentSearch?.addEventListener('click', () => buscarResidente(els.residentSearch?.value?.trim()));
-      els.btnEntrada?.addEventListener('click', () => registrar('entrada'));
-      els.btnSalida?.addEventListener('click', () => registrar('salida'));
-      els.btnResidentEntrada?.addEventListener('click', () => registrarResidente('entrada'));
-      els.btnResidentSalida?.addEventListener('click', () => registrarResidente('salida'));
+      els.btnEntrada?.addEventListener('click', () => {
+        if (state.actionSource === 'resident') registrarResidente('entrada');
+        else registrar('entrada');
+      });
+      els.btnSalida?.addEventListener('click', () => {
+        if (state.actionSource === 'resident') registrarResidente('salida');
+        else registrar('salida');
+      });
       els.btnOpenCamera?.addEventListener('click', openCamera);
+      els.btnRetryCamera?.addEventListener('click', openCamera);
       els.btnCloseCamera?.addEventListener('click', closeCamera);
+      els.modalClose?.addEventListener('click', closeActionModal);
       els.btnRefrescar?.addEventListener('click', loadHist);
       els.codigo?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -698,13 +911,20 @@
       els.cameraModal?.addEventListener('click', (e) => {
         if (e.target === els.cameraModal) closeCamera();
       });
+      els.modal?.addEventListener('click', (e) => {
+        if (e.target === els.modal) closeActionModal();
+      });
       els.residentResults?.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-resident-select]');
         if (!btn) return;
         const resident = state.residentSearchItems[Number(btn.dataset.residentSelect || -1)];
         if (!resident) return;
         state.currentResident = resident;
+        state.actionSource = 'resident';
+        openActionModal('Acceso directo de residente');
+        updateStatusUI(resident?.access?.allow_direct_access ? 'ok' : 'error', resident?.access?.allow_direct_access ? 'Listo para validar' : 'Con restricciones');
         renderResidentResult(resident);
+        enableActions(true);
       });
     }
 

@@ -10,6 +10,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['residente']);
@@ -52,6 +53,7 @@ function join_parts(array $parts, string $sep = ' · '): string {
 }
 
 try {
+  service_profile_schema_ensure($pdo);
   // 1) Usuario fresco desde BD (evita datos viejos de sesión)
   $stmtU = $pdo->prepare("SELECT id, name, email, telefono FROM users WHERE id = :id LIMIT 1");
   $stmtU->execute(['id' => $uid]);
@@ -104,6 +106,7 @@ try {
   $unidad_detalle = null;
 
   if ($ctx) {
+    $profile = service_profile_api_require_module($pdo, (int)$ctx['residencial_id'], 'residente', 'contexto', 'El portal de residente no está habilitado para este cliente.');
     $resName = clean_str($ctx['residencial_nombre'] ?? '');
     $unidad  = clean_str($ctx['unidad_clave'] ?? '');
 
@@ -203,6 +206,7 @@ try {
       'unidad_detalle' => $unidad_detalle,
       'autos' => $autos,
       'notifications' => $notifications,
+      'service_profile' => isset($profile) ? service_profile_frontend_payload($pdo, (int)$ctx['residencial_id'], 'residente') : null,
       'setup_incomplete' => $setupIncomplete,
       'setup_message' => $setupIncomplete ? (string)($ctxStatus['error'] ?? 'Falta configurar el contexto del residente.') : null,
       'setup_missing' => $setupIncomplete ? ($ctxStatus['missing'] ?? []) : []

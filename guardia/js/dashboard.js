@@ -45,6 +45,8 @@
     currentViewController: null,
     context: null,
     operationalMode: 'residencial',
+    serviceProfile: null,
+    enabledViews: new Set(),
     navToken: 0,
     isNavigating: false,
   };
@@ -66,14 +68,29 @@
   }
 
   function toggleOperationalButtons() {
-    const isOperational = state.operationalMode && state.operationalMode !== 'residencial';
-    document.querySelectorAll('[data-operational-only="1"]').forEach((el) => {
-      el.classList.toggle('hidden', !isOperational);
+    document.querySelectorAll('[data-view]').forEach((el) => {
+      const view = el.getAttribute('data-view') || '';
+      if (!view) return;
+      const allow = !state.enabledViews.size || state.enabledViews.has(view);
+      if (el.classList.contains('dashBtn')) {
+        el.classList.toggle('hidden', !allow);
+      }
     });
     if (els.modeBadge) {
-      const label = isOperational ? state.operationalMode : 'residencial';
-      els.modeBadge.textContent = `Modo: ${label}`;
+      const label = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial');
+      els.modeBadge.textContent = `Servicio: ${label}`;
     }
+  }
+
+  function buildEnabledViews() {
+    const allowed = Array.isArray(state.serviceProfile?.allowed_views) ? state.serviceProfile.allowed_views : [];
+    return new Set(allowed);
+  }
+
+  function firstEnabledView() {
+    if (state.enabledViews.has('home')) return 'home';
+    const [first] = state.enabledViews;
+    return first || 'home';
   }
 
   function initShellHeader() {
@@ -270,12 +287,16 @@
 
   function initialView() {
     const h = (window.location.hash || '').replace('#', '').trim();
-    return h || 'home';
+    if (!h) return firstEnabledView();
+    return state.enabledViews.size && !state.enabledViews.has(h) ? firstEnabledView() : h;
   }
 
   async function navigateTo(view, opts = {}) {
     const { force = false } = opts;
-    if (!view) view = 'home';
+    if (!view) view = firstEnabledView();
+    if (state.enabledViews.size && !state.enabledViews.has(view)) {
+      view = firstEnabledView();
+    }
 
     // Si ya estás en la misma vista pero quieres recargarla, se permite con force
     if (!force && state.currentView === view && state.isNavigating === false) {
@@ -348,6 +369,8 @@
       const json = await fetchJSON(`${API}contexto.php`);
       state.context = json.data || {};
       state.operationalMode = String(state.context?.modo_operacion || 'residencial').trim() || 'residencial';
+      state.serviceProfile = state.context?.service_profile || null;
+      state.enabledViews = buildEnabledViews();
       updateHeaderContext(state.context);
       toggleOperationalButtons();
       return state.context;
@@ -355,6 +378,8 @@
       console.warn('loadContext fallo:', e);
       state.context = null;
       state.operationalMode = 'residencial';
+      state.serviceProfile = null;
+      state.enabledViews = new Set(['home', 'perfil', 'reglamento']);
 
       if (els.name) els.name.textContent = 'Guardia';
       if (els.ctx) els.ctx.textContent = '—';
@@ -452,6 +477,7 @@
     escapeHtml,
     getContext: () => state.context,
     getOperationalMode: () => state.operationalMode,
+    getServiceProfile: () => state.serviceProfile,
   };
 
   document.addEventListener('DOMContentLoaded', async () => {

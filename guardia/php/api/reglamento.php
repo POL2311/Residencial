@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/auth.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['guardia','super_admin']);
@@ -21,6 +22,7 @@ $user = current_user();
 $uid  = (int)($user['id'] ?? 0);
 
 try {
+  service_profile_schema_ensure($pdo);
   // 1️⃣ Obtener residencial del guardia
   $stmt = $pdo->prepare("
     SELECT residencial_id
@@ -34,6 +36,9 @@ try {
 
   if ($residencialId <= 0) {
     out(false, ['error'=>'Guardia sin residencial asignado'], 403);
+  }
+  if (($user['role'] ?? '') !== 'super_admin') {
+    service_profile_api_require_module($pdo, $residencialId, 'guardia', 'reglamento', 'El reglamento no está habilitado para este cliente.');
   }
 
   // 2️⃣ Traer reglamento más reciente del residencial.

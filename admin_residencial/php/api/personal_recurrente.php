@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/_operational_bootstrap.php';
 
 admin_operational_required();
+admin_module_required('personal_recurrente');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 

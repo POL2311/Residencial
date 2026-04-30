@@ -34,6 +34,8 @@
         targetView: null,
         navToken: 0,
         isNavigating: false,
+        serviceProfile: null,
+        enabledViews: new Set(),
     };
     function showShellHeader() {
         if (!els.header) return;
@@ -100,7 +102,10 @@
         const { force = false } = opts;
         showShellHeader();
         if (!inlineViews.has(view)) {
-            view = 'home';
+            view = firstEnabledView();
+        }
+        if (state.enabledViews.size && !state.enabledViews.has(view)) {
+            view = firstEnabledView();
         }
         if (!force && (state.targetView === view || state.currentView === view) && state.isNavigating === false) {
             syncHash(view);
@@ -157,8 +162,26 @@
 
     function initialView() {
         const h = (window.location.hash || '').replace('#', '').trim();
-        if (!h) return 'home';
-        return inlineViews.has(h) ? h : 'home';
+        if (!h) return firstEnabledView();
+        if (!inlineViews.has(h)) return firstEnabledView();
+        return state.enabledViews.size && !state.enabledViews.has(h) ? firstEnabledView() : h;
+    }
+
+    function firstEnabledView() {
+        if (state.enabledViews.has('home')) return 'home';
+        const [first] = state.enabledViews;
+        return first || 'home';
+    }
+
+    function applyViewVisibility() {
+        document.querySelectorAll('[data-view]').forEach((el) => {
+            const view = (el.getAttribute('data-view') || '').trim();
+            if (!view) return;
+            const allow = !state.enabledViews.size || state.enabledViews.has(view);
+            if (el.classList.contains('dashBtn') || el.id === 'btnReglamento' || el.id === 'btnEditAddress' || el.id === 'residentNotificationsButton') {
+                el.classList.toggle('hidden', !allow);
+            }
+        });
     }
 
     async function loadContext() {
@@ -181,6 +204,8 @@
 
             const data = json.data || {};
             const ctx = data.ctx || {};
+            state.serviceProfile = data.service_profile || null;
+            state.enabledViews = new Set(Array.isArray(data.service_profile?.allowed_views) ? data.service_profile.allowed_views : ['home', 'perfil', 'reglamento']);
             currentNotificationMeta = data.notifications || null;
             currentNotificationUserId = Number(data.user?.id || 0);
             currentNotificationResidencialId = Number(ctx.residencial_id || 0);
@@ -206,13 +231,17 @@
 
             renderCars(data.autos || []);
             updateNotificationsUI();
+            applyViewVisibility();
         } catch (e) {
             console.warn('loadContext() fallo:', e);
             els.name.textContent = 'Residente';
             els.addr.textContent = '—';
             els.cars.innerHTML = `<span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/80">Sin autos registrados</span>`;
             currentNotificationMeta = null;
+            state.serviceProfile = null;
+            state.enabledViews = new Set(['home', 'perfil', 'reglamento']);
             updateNotificationsUI();
+            applyViewVisibility();
         }
     }
 
@@ -337,6 +366,7 @@
         navigate: navigateTo,
         getCurrentView: () => state.currentView,
         markComunicadosSeen: markNotificationsSeen,
+        getServiceProfile: () => state.serviceProfile,
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -360,8 +390,9 @@
             if (e.target === els.modal) closeCarModal();
         });
 
-        loadContext();
-        navigateTo(initialView(), { force: true });
+        loadContext().then(() => {
+            navigateTo(initialView(), { force: true });
+        });
     });
 
     window.addEventListener('hashchange', () => {

@@ -9,6 +9,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['residente']);
@@ -36,6 +37,7 @@ function table_exists(PDO $pdo, string $table): bool {
 }
 
 try {
+  service_profile_schema_ensure($pdo);
   $status = resolve_resident_context($pdo, $uid, false);
   if (!$status['ok']) {
     json_out(false, [
@@ -47,13 +49,14 @@ try {
 
   $ctx = $status['ctx'] ?? [];
   $rid = (int)($ctx['residencial_id'] ?? 0);
+  service_profile_api_require_module($pdo, $rid, 'residente', 'servicios', 'Los servicios no están habilitados para este cliente.');
 
   $items = [];
 
   if (table_exists($pdo, 'home_servicios_globales')) {
     try {
       $stmt = $pdo->query("
-        SELECT id, nombre, descripcion, telefono, whatsapp, link_url, categoria, orden
+        SELECT id, nombre, descripcion, imagen_url, telefono, whatsapp, link_url, categoria, orden
         FROM home_servicios_globales
         WHERE activo = 1
         ORDER BY orden ASC, id DESC
@@ -70,7 +73,7 @@ try {
   if ($rid > 0 && table_exists($pdo, 'home_servicios_residenciales')) {
     try {
       $stmt = $pdo->prepare("
-        SELECT id, nombre, descripcion, telefono, whatsapp, link_url, categoria, orden
+        SELECT id, nombre, descripcion, imagen_url, telefono, whatsapp, link_url, categoria, orden
         FROM home_servicios_residenciales
         WHERE residencial_id = :rid
           AND activo = 1

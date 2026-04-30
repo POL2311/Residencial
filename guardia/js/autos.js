@@ -14,8 +14,6 @@
       fColor: document.getElementById('fColor'),
       btnClear: document.getElementById('btnClearAutosFilters'),
       btnNew: document.getElementById('btnNuevoAuto'),
-      count: document.getElementById('autosCount'),
-      filterStatus: document.getElementById('autosFilterStatus'),
     };
 
     const state = {
@@ -117,20 +115,6 @@
       return json.data?.items || [];
     }
 
-    function updateSummary() {
-      if (els.count) {
-        els.count.textContent = String(state.filteredItems.length);
-      }
-
-      if (els.filterStatus) {
-        const filters = [];
-        if (els.fPlacas?.value?.trim()) filters.push(`Placas: ${els.fPlacas.value.trim()}`);
-        if (els.fModelo?.value?.trim()) filters.push(`Modelo: ${els.fModelo.value.trim()}`);
-        if (els.fColor?.value?.trim()) filters.push(`Color: ${els.fColor.value.trim()}`);
-        els.filterStatus.textContent = filters.length ? filters.join(' · ') : 'Todos los autos';
-      }
-    }
-
     function applyFilters() {
       const fPlacas = normalize(els.fPlacas?.value);
       const fModelo = normalize(els.fModelo?.value);
@@ -149,7 +133,6 @@
       });
 
       state.page = 1;
-      updateSummary();
     }
 
     function paginate(items, page, perPage) {
@@ -223,29 +206,26 @@
             <button type="button"
               class="js-auto-card w-full text-left rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 hover:bg-slate-100 transition"
               data-auto='${escapeHtml(JSON.stringify(a))}'>
-              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <div class="font-semibold text-slate-800 text-base">${safeText(a.placas)}</div>
-                    <span class="inline-flex rounded-full bg-slate-200 px-2 py-1 text-[11px] text-slate-700">
-                      ${safeText(a.unidad_clave)}
-                    </span>
-                  </div>
-
-                  <div class="text-sm text-slate-600 mt-2">
-                    ${safeText(a.modelo)} · ${safeText(a.color)} · ${safeText(a.propietario_nombre)}
-                  </div>
-
-                  ${
-                    a.notas
-                      ? `<div class="text-xs text-slate-400 mt-2">${safeText(a.notas, '')}</div>`
-                      : ''
-                  }
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <div class="font-semibold text-slate-800 text-base">${safeText(a.placas)}</div>
+                  <span class="inline-flex rounded-full bg-slate-200 px-2 py-1 text-[11px] text-slate-700">
+                    ${safeText(a.unidad_clave)}
+                  </span>
                 </div>
 
-                <div class="shrink-0 text-xs text-slate-400">
-                  ID #${safeText(a.id)}
+                <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-600">
+                  <div><span class="text-slate-500">Placas:</span> <span class="font-medium text-slate-800">${safeText(a.placas)}</span></div>
+                  <div><span class="text-slate-500">Modelo:</span> <span class="font-medium text-slate-800">${safeText(a.modelo)}</span></div>
+                  <div><span class="text-slate-500">Color:</span> <span class="font-medium text-slate-800">${safeText(a.color)}</span></div>
+                  <div><span class="text-slate-500">Propietario:</span> <span class="font-medium text-slate-800">${safeText(a.propietario_nombre)}</span></div>
                 </div>
+
+                ${
+                  a.notas
+                    ? `<div class="text-xs text-slate-400 mt-3">${safeText(a.notas, '')}</div>`
+                    : ''
+                }
               </div>
             </button>
           `).join('')}

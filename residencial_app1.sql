@@ -1071,6 +1071,36 @@ ALTER TABLE `visitas`
 ALTER TABLE `residenciales`
   ADD COLUMN `modo_operacion` ENUM('residencial','empresa','obra','comercio','servicio') NOT NULL DEFAULT 'residencial' AFTER `tipo`;
 
+CREATE TABLE `residenciales_servicio_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `residencial_id` int(11) NOT NULL,
+  `preset_servicio` varchar(30) NOT NULL DEFAULT 'residencial',
+  `habilita_admin_operativo` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_guardia` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_residente` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_unidades` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_residentes_catalogo` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_guardias_catalogo` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_autos` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_visitas_residente` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_paqueteria` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_pagos` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_comunicados` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_servicios_directorio` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_control_acceso` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_incidencias` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_personal_recurrente` tinyint(1) NOT NULL DEFAULT 0,
+  `habilita_visitantes_rapidos` tinyint(1) NOT NULL DEFAULT 0,
+  `habilita_materiales` tinyint(1) NOT NULL DEFAULT 0,
+  `habilita_solicitudes_pendientes` tinyint(1) NOT NULL DEFAULT 0,
+  `habilita_bitacora_operativa` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_residenciales_servicio_config_rid` (`residencial_id`),
+  CONSTRAINT `fk_residenciales_servicio_config_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE `areas_operativas` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `residencial_id` int(11) NOT NULL,

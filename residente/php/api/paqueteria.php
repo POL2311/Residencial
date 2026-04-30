@@ -10,6 +10,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['residente']);
@@ -75,9 +76,11 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_POST['action'] ?? $_GET['action'] ?? 'list';
 
 try {
+  service_profile_schema_ensure($pdo);
   $ctx = get_context($pdo, $uid);
   $residencialId = (int)$ctx['residencial_id'];
   $unidadId = (int)$ctx['unidad_id'];
+  service_profile_api_require_module($pdo, $residencialId, 'residente', 'paqueteria', 'La paquetería no está habilitada para este cliente.');
 
   if ($action === 'list') {
     json_out(true, [

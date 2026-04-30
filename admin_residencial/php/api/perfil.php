@@ -7,12 +7,17 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['admin_residencial']);
 
 $user = current_user();
 $uid  = (int)$user['id'];
+$residencialId = service_profile_resolve_residencial_id_for_user($pdo, $uid);
+if ($residencialId > 0) {
+  service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'perfil', 'El perfil no está habilitado para este cliente.');
+}
 
 function json_out(bool $ok, array $extra = []): void {
   echo json_encode(array_merge(['ok' => $ok], $extra), JSON_UNESCAPED_UNICODE);

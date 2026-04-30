@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/resident_access.php';
 require_once __DIR__ . '/../../../config/operational_mode.php';
 require_once __DIR__ . '/../../../config/image_uploads.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['guardia', 'super_admin']);
@@ -392,6 +393,10 @@ $residencialId = get_residencial_id($pdo, $guardiaId);
 $operationalMode = operational_mode_for_rid($pdo, $residencialId);
 resident_access_ensure_schema($pdo);
 operational_schema_ensure($pdo);
+service_profile_schema_ensure($pdo);
+if (($user['role'] ?? '') !== 'super_admin') {
+    service_profile_api_require_module($pdo, $residencialId, 'guardia', 'accesos', 'El control de accesos no está habilitado para este cliente.');
+}
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_GET['action'] ?? $_POST['action'] ?? 'buscar';

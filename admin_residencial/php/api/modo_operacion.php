@@ -7,29 +7,19 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 try {
     if ($method === 'GET') {
+        $profile = service_profile_frontend_payload($pdo, $residencialId, 'admin_residencial');
         json_out(true, [
             'data' => [
                 'modo_operacion' => $operationalMode,
                 'modos' => operational_allowed_modes(),
                 'context' => admin_operational_context(),
+                'service_profile' => $profile,
+                'locked_by_superadmin' => true,
             ],
         ]);
     }
 
-    $modo = operational_normalize_mode((string)($_POST['modo_operacion'] ?? 'residencial'));
-
-    $stmt = $pdo->prepare("
-        UPDATE residenciales
-        SET modo_operacion = :modo
-        WHERE id = :rid
-        LIMIT 1
-    ");
-    $stmt->execute([
-        'modo' => $modo,
-        'rid' => $residencialId,
-    ]);
-
-    json_out(true, ['message' => 'Modo operativo actualizado.', 'data' => ['modo_operacion' => $modo]]);
+    json_out(false, ['error' => 'El perfil de servicio se administra desde Superadmin.'], 403);
 } catch (Throwable $e) {
     app_json_exception($e, 'No pudimos actualizar el modo operativo.');
 }

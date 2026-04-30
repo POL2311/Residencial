@@ -8,6 +8,7 @@ header('Pragma: no-cache');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/operational_mode.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['guardia','super_admin']);
@@ -20,6 +21,7 @@ function out(bool $ok, array $data = [], int $code = 200): void {
 
 try {
   operational_schema_ensure($pdo);
+  service_profile_schema_ensure($pdo);
   $session = current_user();
   $uid = (int)($session['id'] ?? 0);
 
@@ -60,6 +62,7 @@ try {
 
   if ($res) {
     $residencialId = (int)$res['id'];
+    $profile = service_profile_api_require_module($pdo, $residencialId, 'guardia', 'contexto', 'El panel de guardia no está habilitado para este cliente.');
     $header_line = 'Residencial: ' . $res['nombre'];
 
     $direccion = implode(', ', array_filter([
@@ -92,6 +95,7 @@ try {
       'guardia_en_servicio' => $guardiaEnServicio,
       'stats' => $stats,
       'modo_operacion' => operational_normalize_mode((string)($res['modo_operacion'] ?? 'residencial')),
+      'service_profile' => isset($profile) ? service_profile_frontend_payload($pdo, $residencialId, 'guardia') : null,
     ]
   ]);
 

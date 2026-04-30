@@ -9,6 +9,7 @@ header('Expires: 0');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['residente']);
@@ -22,6 +23,7 @@ function json_out(bool $ok, array $extra = [], int $status = 200): void {
 }
 
 try {
+  service_profile_schema_ensure($pdo);
   $stmtCtx = $pdo->prepare("
     SELECT r.id AS residencial_id, r.nombre AS residencial_nombre
     FROM usuarios_residenciales ur
@@ -33,6 +35,7 @@ try {
   $stmtCtx->execute(['uid' => $uid]);
   $ctx = $stmtCtx->fetch(PDO::FETCH_ASSOC);
   if (!$ctx) json_out(false, ['error' => 'No se encontró el residencial del residente.'], 404);
+  service_profile_api_require_module($pdo, (int)$ctx['residencial_id'], 'residente', 'reglamento', 'El reglamento no está habilitado para este cliente.');
 
   $stmt = $pdo->prepare("
     SELECT id, titulo, contenido, version_label, created_at, updated_at

@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -21,6 +22,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 $user = current_user();
 $adminId = (int)($user['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
+service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'guardias', 'La gestión de guardias no está habilitada para este cliente.');
 
 function hasColumn(PDO $pdo, string $table, string $column): bool {
     $stmt = $pdo->prepare("

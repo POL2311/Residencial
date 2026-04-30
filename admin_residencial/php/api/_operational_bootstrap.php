@@ -12,6 +12,7 @@ require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/operational_mode.php';
 require_once __DIR__ . '/../../../config/image_uploads.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -21,11 +22,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 }
 
 operational_schema_ensure($pdo);
+service_profile_schema_ensure($pdo);
 
 $adminUser = current_user();
 $adminId = (int)($adminUser['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
 $operationalMode = operational_get_mode($pdo, $residencialId);
+$serviceProfile = service_profile_require_role_enabled($pdo, $residencialId, 'admin_residencial', 'El panel administrativo no está habilitado para este cliente.');
 
 function admin_operational_required(string $message = 'Este módulo solo está disponible en modo operativo.'): void
 {
@@ -41,4 +44,13 @@ function admin_operational_context(): array
     global $pdo, $residencialId, $operationalMode;
 
     return operational_get_context($pdo, $residencialId, $operationalMode);
+}
+
+function admin_module_required(string $module, string $message = 'Este módulo no está habilitado para este cliente.'): void
+{
+    global $serviceProfile;
+
+    if (!service_profile_module_enabled($serviceProfile, $module)) {
+        json_out(false, ['error' => $message], 403);
+    }
 }

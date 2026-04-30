@@ -118,7 +118,9 @@
 
         els.services.innerHTML = state.services.map((item) => `
             <article class="min-w-[290px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-              <div class="h-28 bg-gradient-to-br from-[#DCE9EE] via-[#EEF4F6] to-[#B9CCD5]"></div>
+              <div class="h-28 ${item.imagen_url ? 'bg-slate-100' : 'bg-gradient-to-br from-[#DCE9EE] via-[#EEF4F6] to-[#B9CCD5]'}">
+                ${item.imagen_url ? `<img src="${escapeHtml(item.imagen_url)}" alt="${escapeHtml(item.nombre || 'Servicio')}" class="h-full w-full object-cover" loading="lazy" />` : ''}
+              </div>
               <div class="p-5">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">

@@ -61,6 +61,8 @@
     isNavigating: false,
     context: null,
     operationalMode: 'residencial',
+    serviceProfile: null,
+    enabledViews: new Set(),
   };
 
   function showShellHeader() {
@@ -76,7 +78,9 @@
   }
 
   function normalizeView(view) {
-    return ALLOWED_VIEWS.has(view) ? view : 'home';
+    const normalized = ALLOWED_VIEWS.has(view) ? view : 'home';
+    if (!state.enabledViews.size) return normalized;
+    return state.enabledViews.has(normalized) ? normalized : firstEnabledView();
   }
 
   function isOperationalMode(mode) {
@@ -93,6 +97,17 @@
       servicio: 'Servicio',
     };
     return map[key] || 'Residencial';
+  }
+
+  function firstEnabledView() {
+    if (state.enabledViews.has('home')) return 'home';
+    const [first] = state.enabledViews;
+    return first || 'home';
+  }
+
+  function buildEnabledViews(profile) {
+    const allowed = Array.isArray(profile?.allowed_views) ? profile.allowed_views : [];
+    return new Set(allowed.filter((view) => ALLOWED_VIEWS.has(view)));
   }
 
   function loadViewScript(view, token) {
@@ -255,6 +270,8 @@
       const ctx = data.ctx || {};
       state.context = data;
       state.operationalMode = String(data.modo_operacion || ctx.modo_operacion || 'residencial').trim() || 'residencial';
+      state.serviceProfile = data.service_profile || null;
+      state.enabledViews = buildEnabledViews(state.serviceProfile);
 
       // Nombre
       els.name.textContent = data.user?.name || 'Admin residencial';
@@ -282,66 +299,34 @@
       els.cars.innerHTML = `<span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/80">Sin autos registrados</span>`;
       state.context = null;
       state.operationalMode = 'residencial';
+      state.serviceProfile = null;
+      state.enabledViews = new Set(['home', 'perfil', 'reglamento']);
       toggleOperationalButtons();
     }
   }
 
   function toggleOperationalButtons() {
     const isOperational = isOperationalMode(state.operationalMode);
-    document.querySelectorAll('[data-operational-only="1"]').forEach((el) => {
-      el.classList.toggle('hidden', !isOperational);
+    document.querySelectorAll('[data-view]').forEach((el) => {
+      const view = el.getAttribute('data-view') || '';
+      if (!view) return;
+      const allow = !state.enabledViews.size || state.enabledViews.has(view);
+      if (el.classList.contains('dashBtn')) {
+        el.classList.toggle('hidden', !allow);
+      } else if (el.id === 'btnReglamento' || el.id === 'btnEditAddress') {
+        el.classList.toggle('hidden', !allow);
+      }
     });
     if (els.modeBadge) {
-      els.modeBadge.textContent = `Modo ${modeLabel(state.operationalMode).toLowerCase()}`;
+      const preset = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial');
+      els.modeBadge.textContent = `Servicio ${modeLabel(preset).toLowerCase()}`;
     }
     if (els.modeHint) {
-      els.modeHint.classList.toggle('hidden', isOperational);
+      els.modeHint.classList.toggle('hidden', isOperational || !!state.serviceProfile);
     }
     if (els.modeSelect) {
-      els.modeSelect.value = String(state.operationalMode || 'residencial');
-    }
-  }
-
-  async function updateOperationalMode(mode) {
-    const nextMode = String(mode || 'residencial').trim() || 'residencial';
-    if (nextMode === state.operationalMode) return;
-
-    const previousMode = state.operationalMode;
-    if (els.modeSelect) els.modeSelect.disabled = true;
-
-    try {
-      const fd = new FormData();
-      fd.append('modo_operacion', nextMode);
-
-      const res = await fetch(`${API}modo_operacion.php`, {
-        method: 'POST',
-        body: fd,
-        credentials: 'same-origin',
-        headers: { Accept: 'application/json' },
-      });
-      const json = await res.json().catch(() => null);
-      if (!res.ok || !json?.ok) {
-        throw new Error(json?.error || 'No se pudo actualizar el modo operativo.');
-      }
-
-      state.operationalMode = String(json?.data?.modo_operacion || nextMode);
-      if (state.context) {
-        state.context.modo_operacion = state.operationalMode;
-        if (state.context.ctx) state.context.ctx.modo_operacion = state.operationalMode;
-      }
-      toggleOperationalButtons();
-
-      const currentView = state.currentView || 'home';
-      if (!isOperationalMode(state.operationalMode) && currentView && currentView !== 'home' && !['unidades', 'residentes', 'guardias', 'incidencias', 'comunicados', 'perfil', 'reglamento', 'autos'].includes(currentView)) {
-        navigateTo('home', { force: true });
-      }
-    } catch (e) {
-      console.warn('updateOperationalMode() falló:', e);
-      state.operationalMode = previousMode;
-      toggleOperationalButtons();
-      window.alert(e?.message || 'No se pudo actualizar el modo operativo.');
-    } finally {
-      if (els.modeSelect) els.modeSelect.disabled = false;
+      const preset = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial');
+      els.modeSelect.textContent = modeLabel(preset);
     }
   }
 
@@ -430,6 +415,7 @@
     VIEWS,
     getContext: () => state.context,
     getOperationalMode: () => state.operationalMode,
+    getServiceProfile: () => state.serviceProfile,
   };
 
   window.AdminResidencialDashboard = api;
@@ -454,14 +440,10 @@
       if (e.target === els.modal) closeCarModal();
     });
 
-    els.modeSelect?.addEventListener('change', (e) => {
-      const nextMode = e.target?.value || 'residencial';
-      updateOperationalMode(nextMode);
-    });
-
     initShellHeader();
-    loadContext();
-    navigateTo(initialView(), { force: true });
+    loadContext().then(() => {
+      navigateTo(initialView(), { force: true });
+    });
   });
 
   window.addEventListener('hashchange', () => {

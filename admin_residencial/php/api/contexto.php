@@ -10,6 +10,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/operational_mode.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -39,6 +40,7 @@ function join_parts(array $parts, string $sep = ' · '): string {
 
 try {
   operational_schema_ensure($pdo);
+  service_profile_schema_ensure($pdo);
   // 1) Usuario fresco desde BD (evita datos viejos de sesión)
   $stmtU = $pdo->prepare("SELECT id, name, email, telefono FROM users WHERE id = :id LIMIT 1");
   $stmtU->execute(['id' => $uid]);
@@ -78,6 +80,7 @@ try {
   ");
   $stmtRU->execute(['user_id' => $uid]);
   $ctx = $stmtRU->fetch(PDO::FETCH_ASSOC) ?: null;
+  $profile = $ctx ? service_profile_api_require_module($pdo, (int)$ctx['residencial_id'], 'admin_residencial', 'contexto', 'El panel de administración no está habilitado para este cliente.') : null;
 
   // 3) Header line (lo “correcto” para tu app)
   $header_line = null;
@@ -143,6 +146,7 @@ try {
       'user' => $user,
       'ctx'  => $ctx,
       'modo_operacion' => operational_normalize_mode((string)($ctx['modo_operacion'] ?? 'residencial')),
+      'service_profile' => $profile ? service_profile_frontend_payload($pdo, (int)$ctx['residencial_id'], 'admin_residencial') : null,
       // lo que ya usas en el header
       'direccion' => $direccion,
       'header_line' => $header_line,

@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/resident_access.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 require_login();
 require_role(['admin_residencial']);
 
@@ -21,6 +22,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 $sessionUser = current_user();
 $adminId = (int)($sessionUser['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
+service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'residentes', 'Los residentes no están habilitados para este cliente.');
 resident_access_ensure_schema($pdo);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';

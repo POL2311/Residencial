@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/operational_mode.php';
 require_once __DIR__ . '/../../../config/image_uploads.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['guardia', 'super_admin']);
@@ -20,6 +21,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 }
 
 operational_schema_ensure($pdo);
+service_profile_schema_ensure($pdo);
 
 $guardUser = current_user();
 $guardiaId = (int)($guardUser['id'] ?? 0);
@@ -39,6 +41,7 @@ if ($residencialId <= 0) {
 }
 
 $operationalMode = operational_get_mode($pdo, $residencialId);
+$serviceProfile = service_profile_require_role_enabled($pdo, $residencialId, 'guardia', 'El panel de guardia no está habilitado para este cliente.');
 
 function guardia_operational_required(string $message = 'Este módulo solo está disponible en modo operativo.'): void
 {
@@ -54,4 +57,13 @@ function guardia_operational_context(): array
     global $pdo, $residencialId, $operationalMode;
 
     return operational_get_context($pdo, $residencialId, $operationalMode);
+}
+
+function guardia_module_required(string $module, string $message = 'Este módulo no está habilitado para este cliente.'): void
+{
+    global $serviceProfile;
+
+    if (!service_profile_module_enabled($serviceProfile, $module)) {
+        json_out(false, ['error' => $message], 403);
+    }
 }

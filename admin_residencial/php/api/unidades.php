@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -22,6 +23,7 @@ $adminId = (int)(current_user()['id'] ?? 0);
    CONTEXTO RESIDENCIAL (helper)
 ========================= */
 $residencialId = require_residencial_id($pdo, $adminId);
+service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'unidades', 'Las unidades no están habilitadas para este cliente.');
 
 /* =========================
    GET: LIST

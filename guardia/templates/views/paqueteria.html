@@ -4,9 +4,6 @@
   <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
     <div>
       <h2 class="text-3xl font-semibold text-slate-700">Paquetería</h2>
-      <p class="text-sm text-slate-500">
-        Registra paquetes recibidos, consulta su estado y marca entregas o devoluciones.
-      </p>
     </div>
 
     <button id="btnNuevoPkg"
@@ -14,28 +11,6 @@
       class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm shadow hover:opacity-95">
       + Nuevo paquete
     </button>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Total</div>
-      <div id="pkgCountTotal" class="mt-2 text-3xl font-bold text-slate-900">0</div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Pendientes</div>
-      <div id="pkgCountPendientes" class="mt-2 text-3xl font-bold text-amber-600">0</div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Entregados</div>
-      <div id="pkgCountEntregados" class="mt-2 text-3xl font-bold text-emerald-600">0</div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Filtro actual</div>
-      <div id="pkgFilterStatus" class="mt-2 text-sm text-slate-700">Sin filtros</div>
-    </div>
   </div>
 
   <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
@@ -56,10 +31,6 @@
         <option value="entregado">Entregado</option>
         <option value="devuelto">Devuelto</option>
       </select>
-
-      <div class="text-sm text-slate-500 flex items-center px-2">
-        5 registros por página
-      </div>
 
       <div class="flex gap-2">
         <button

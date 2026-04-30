@@ -13,6 +13,7 @@ header('Expires: 0');
 
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 // Exigir autenticación y rol adecuado
 require_login();
@@ -25,6 +26,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 $user    = current_user();
 $uid     = (int)($user['id'] ?? 0);
 $isAdmin = ($user['role'] ?? ($user['tipo_usuario_nombre'] ?? '')) === 'admin_residencial';
+if ($isAdmin) {
+    $residencialId = service_profile_resolve_residencial_id_for_user($pdo, $uid);
+    if ($residencialId > 0) {
+        service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'autos', 'Los autos no están habilitados para este cliente.');
+    }
+}
 
 /**
  * Responde en JSON y termina la ejecución.

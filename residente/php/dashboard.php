@@ -1,9 +1,15 @@
 <?php
 require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/service_profile.php';
 
 require_login();
 require_role(['residente']);
+$resident = current_user();
+$residencialId = service_profile_resolve_residencial_id_for_user($pdo, (int)($resident['id'] ?? 0));
+if ($residencialId > 0) {
+  service_profile_require_role_enabled($pdo, $residencialId, 'residente', 'El portal de residente no está habilitado para el perfil de servicio de este cliente.');
+}
 
 $pageTitle = 'Portal del residente';
 ?>
