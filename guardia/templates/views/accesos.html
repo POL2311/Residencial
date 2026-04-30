@@ -4,18 +4,10 @@
     <div>
       <h2 class="text-3xl font-semibold text-slate-700">Control de accesos</h2>
     </div>
-
-    <button
-      class="rounded-xl border bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
-      onclick="location.hash='home'">
-      Inicio
-    </button>
   </div>
 
   <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="text-sm font-semibold text-slate-700">Escanear o ingresar código</div>
-
-    <div class="mt-4 flex flex-col lg:flex-row gap-2">
+    <div class="flex flex-col lg:flex-row gap-2">
       <button id="btnOpenCamera"
         class="rounded-xl bg-slate-800 text-white px-4 py-2 text-sm hover:bg-slate-900">
         📷 Escanear QR
@@ -62,9 +54,7 @@
   </div>
 
   <div id="residentDirectSection" class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="text-sm font-semibold text-slate-700">Acceso directo de residentes</div>
-
-    <div class="mt-4 flex flex-col lg:flex-row gap-2">
+    <div class="flex flex-col lg:flex-row gap-2">
       <input id="residentDirectSearch"
         class="flex-1 rounded-xl border px-3 py-2 text-sm"
         placeholder="Buscar por nombre, unidad, teléfono o email" />
@@ -79,31 +69,21 @@
       class="hidden mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
     </div>
 
-    <div id="residentDirectResults" class="mt-4 space-y-3 text-sm text-slate-600">
-      Busca un residente para validar su acceso directo.
-    </div>
-  </div>
-
-  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <div class="text-sm font-semibold text-slate-700">Historial reciente</div>
-        <div class="text-xs text-slate-500 mt-1">
-          Últimos movimientos registrados por el guardia actual.
-        </div>
-      </div>
-
+    <div id="residentDirectResults" class="mt-4 space-y-3 text-sm text-slate-600"></div>
+    <div class="mt-4 border-t border-slate-100 pt-4">
+      <div class="flex justify-end">
       <button id="btnRefrescarHist"
         class="rounded-lg border px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
         Refrescar
       </button>
-    </div>
+      </div>
 
-    <div id="accesosHist" class="mt-4 text-xs text-slate-500">
-      Cargando…
-    </div>
+      <div id="accesosHist" class="mt-4 text-xs text-slate-500">
+        Cargando…
+      </div>
 
-    <div id="accesosHistPagination" class="mt-4 flex justify-end gap-2"></div>
+      <div id="accesosHistPagination" class="mt-4 flex justify-end gap-2"></div>
+    </div>
   </div>
 
   <div id="accessActionModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm">

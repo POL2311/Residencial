@@ -75,16 +75,29 @@
           <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.titulo)}</div>
-                <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.tipo)} · ${escapeHtml(item.created_at || '')}</div>
+                <div class="text-xs uppercase tracking-wide text-slate-400">Título</div>
+                <div class="mt-1 text-sm font-semibold text-slate-800">${escapeHtml(item.titulo)}</div>
               </div>
               <div class="flex flex-wrap gap-2 justify-end">
-                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${priorityBadge(item.prioridad)}">${escapeHtml(item.prioridad)}</span>
-                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${badge(item.estado)}">${escapeHtml(item.estado)}</span>
+                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${priorityBadge(item.prioridad)}">Prioridad: ${escapeHtml(item.prioridad)}</span>
+                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${badge(item.estado)}">Estado: ${escapeHtml(item.estado)}</span>
               </div>
             </div>
-            <p class="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">${escapeHtml(item.descripcion || '')}</p>
-            ${item.guardia_nombre ? `<div class="mt-3 text-xs text-slate-500">Atendida por: <span class="font-medium text-slate-700">${escapeHtml(item.guardia_nombre)}</span></div>` : ''}
+            <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-600">
+              <div>
+                <span class="text-slate-500">Tipo:</span>
+                <span class="font-medium text-slate-700">${escapeHtml(item.tipo || '—')}</span>
+              </div>
+              <div>
+                <span class="text-slate-500">Fecha:</span>
+                <span class="font-medium text-slate-700">${escapeHtml(item.created_at || '—')}</span>
+              </div>
+              <div>
+                <span class="text-slate-500">Descripción:</span>
+                <span class="whitespace-pre-wrap font-medium text-slate-700">${escapeHtml(item.descripcion || 'Sin descripción')}</span>
+              </div>
+              ${item.guardia_nombre ? `<div><span class="text-slate-500">Atendida por:</span> <span class="font-medium text-slate-700">${escapeHtml(item.guardia_nombre)}</span></div>` : ''}
+            </div>
           </article>
         `).join('') : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Aun no has reportado incidencias.</div>`;
     }

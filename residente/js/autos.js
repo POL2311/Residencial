@@ -82,7 +82,11 @@
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-3">
             <div>
               <div class="text-sm font-semibold text-slate-800">${escapeHtml(auto.placas)}</div>
-              <div class="mt-1 text-xs text-slate-500">${escapeHtml(auto.modelo || 'Sin modelo')} · ${escapeHtml(auto.color || 'Sin color')}</div>
+              <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-600">
+                <div><span class="text-slate-500">Placas:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.placas || 'Sin placas')}</span></div>
+                <div><span class="text-slate-500">Modelo:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.modelo || 'Sin modelo')}</span></div>
+                <div><span class="text-slate-500">Color:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.color || 'Sin color')}</span></div>
+              </div>
             </div>
             <div class="flex items-center gap-2">
               <button type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700" data-edit="${auto.id}">Editar</button>

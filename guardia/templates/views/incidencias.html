@@ -4,9 +4,6 @@
   <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
     <div>
       <h2 class="text-3xl font-semibold text-slate-700">Incidencias</h2>
-      <p class="text-sm text-slate-500">
-        Registra, consulta y da seguimiento a incidencias del residencial.
-      </p>
     </div>
 
     <button id="btnNuevaInc"
@@ -16,34 +13,7 @@
     </button>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Total</div>
-      <div id="incCountTotal" class="mt-2 text-3xl font-bold text-slate-900">0</div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Abiertas</div>
-      <div id="incCountAbiertas" class="mt-2 text-3xl font-bold text-rose-600">0</div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Filtros</div>
-      <div id="incFilterStatus" class="mt-2 text-sm text-slate-700">Sin filtros</div>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-      <div class="text-xs uppercase tracking-wide text-slate-400">Paginación</div>
-      <div class="mt-2 text-sm text-slate-700">5 registros por página</div>
-    </div>
-  </div>
-
   <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="text-sm font-semibold text-slate-700">Filtros de búsqueda</div>
-    <div class="text-xs text-slate-500 mt-1">
-      Busca por título, descripción, unidad o aplica filtros por estado, prioridad y tipo.
-    </div>
-
     <form id="frmIncFilter" class="mt-4 grid grid-cols-1 md:grid-cols-5 gap-2">
       <input id="incSearch"
         class="rounded-xl border border-slate-200 px-3 py-2 text-sm"
@@ -89,18 +59,6 @@
         </button>
       </div>
     </form>
-  </div>
-
-  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <div class="text-sm font-semibold text-slate-700">Listado</div>
-        <div class="text-xs text-slate-500 mt-1">
-          Incidencias registradas en el residencial.
-        </div>
-      </div>
-    </div>
-
     <div id="incList" class="mt-4 text-xs text-slate-500">Cargando…</div>
     <div id="incPagination" class="mt-4 flex justify-end gap-2"></div>
   </div>

@@ -18,9 +18,6 @@
       tipo: document.getElementById('incTipoFilter'),
       btnClear: document.getElementById('btnClearIncFilters'),
 
-      countTotal: document.getElementById('incCountTotal'),
-      countAbiertas: document.getElementById('incCountAbiertas'),
-      filterStatus: document.getElementById('incFilterStatus'),
     };
 
     const state = {
@@ -40,6 +37,14 @@
     function safeText(v, fallback = '—') {
       const s = String(v ?? '').trim();
       return escapeHtml(s || fallback);
+    }
+
+    function humanizeValue(value, fallback = '—') {
+      const raw = String(value ?? '').trim();
+      if (!raw) return fallback;
+      return raw
+        .replaceAll('_', ' ')
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
     }
 
     function normalize(v) {
@@ -72,26 +77,6 @@
       }
     }
 
-    function updateSummary() {
-      if (els.countTotal) {
-        els.countTotal.textContent = String(state.filteredItems.length);
-      }
-
-      if (els.countAbiertas) {
-        const abiertas = state.filteredItems.filter(i => String(i.estado || '') === 'abierta').length;
-        els.countAbiertas.textContent = String(abiertas);
-      }
-
-      if (els.filterStatus) {
-        const filters = [];
-        if (els.search?.value?.trim()) filters.push(`Texto: ${els.search.value.trim()}`);
-        if (els.estado?.value) filters.push(`Estado: ${els.estado.value}`);
-        if (els.prioridad?.value) filters.push(`Prioridad: ${els.prioridad.value}`);
-        if (els.tipo?.value) filters.push(`Tipo: ${els.tipo.value}`);
-        els.filterStatus.textContent = filters.length ? filters.join(' · ') : 'Sin filtros';
-      }
-    }
-
     function applyFilters() {
       const q = normalize(els.search?.value);
       const estado = normalize(els.estado?.value);
@@ -115,7 +100,6 @@
       });
 
       state.page = 1;
-      updateSummary();
     }
 
     function paginate(items, page, perPage) {
@@ -189,33 +173,43 @@
               <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                 <div class="min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
-                    <div class="font-semibold text-slate-800 text-base">
-                      ${safeText(i.titulo)}
+                    <div>
+                      <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Título</div>
+                      <div class="font-semibold text-slate-800 text-base">
+                        ${safeText(i.titulo)}
+                      </div>
                     </div>
 
                     <span class="text-[11px] px-2 py-0.5 rounded-full border ${badgePrioridad(i.prioridad)}">
-                      ${safeText(i.prioridad)}
+                      ${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}
                     </span>
 
                     <span class="text-[11px] px-2 py-0.5 rounded-full border ${badgeEstado(i.estado)}">
-                      ${safeText(i.estado)}
+                      ${escapeHtml(`Estado: ${humanizeValue(i.estado, '')}`.trim())}
                     </span>
                   </div>
 
-                  <div class="text-sm text-slate-600 mt-2">
-                    ${safeText(i.descripcion, '')}
-                  </div>
-
-                  <div class="text-[11px] text-slate-500 mt-3">
-                    ${safeText(i.unidad_clave, '') ? `Unidad: <b>${safeText(i.unidad_clave)}</b>` : `Área: <b>${safeText(i.area_nombre || '—')}</b>`} · Tipo: ${safeText(i.tipo)} · ${safeText(i.created_at, '')}
+                  <div class="text-sm text-slate-600 mt-3 space-y-2">
+                    <div>
+                      <span class="text-slate-500">Descripción:</span>
+                      <span class="whitespace-pre-wrap font-medium text-slate-700">${safeText(i.descripcion, 'Sin descripción')}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500">${safeText(i.unidad_clave, '') ? 'Unidad:' : 'Área:'}</span>
+                      <span class="font-medium text-slate-700">${safeText(i.unidad_clave || i.area_nombre || '—')}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500">Tipo:</span>
+                      <span class="font-medium text-slate-700">${escapeHtml(humanizeValue(i.tipo))}</span>
+                    </div>
+                    <div>
+                      <span class="text-slate-500">Fecha:</span>
+                      <span class="font-medium text-slate-700">${safeText(i.created_at, '—')}</span>
+                    </div>
                   </div>
                 </div>
 
                 <div class="shrink-0 flex flex-col items-end gap-2">
-                  <div class="text-xs text-slate-400">
-                    ID #${safeText(i.id)}
-                  </div>
-
                   <div class="flex gap-2">
                     <button
                       type="button"

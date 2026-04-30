@@ -14,12 +14,7 @@
   </div>
 
   <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="text-sm font-semibold text-slate-700">Filtros de búsqueda</div>
-    <div class="text-xs text-slate-500 mt-1">
-      Busca por descripción, unidad, empresa o rastreo y filtra por estado.
-    </div>
-
-    <form id="frmPkgFilter" class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-2">
+    <form id="frmPkgFilter" class="grid grid-cols-1 md:grid-cols-4 gap-2">
       <input id="pkgSearch"
         class="rounded-xl border border-slate-200 px-3 py-2 text-sm"
         placeholder="Buscar paquete..." />
@@ -47,17 +42,7 @@
         </button>
       </div>
     </form>
-  </div>
-
-  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <div class="text-sm font-semibold text-slate-700">Listado de paquetes</div>
-        <div class="text-xs text-slate-500 mt-1">
-          Gestiona el ciclo del paquete desde recepción hasta entrega final.
-        </div>
-      </div>
-
+    <div class="mt-4 flex justify-end">
       <button id="btnRefreshPkg"
         type="button"
         class="rounded-lg border px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">

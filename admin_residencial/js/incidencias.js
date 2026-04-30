@@ -51,6 +51,14 @@
       .replace(/'/g, '&#039;');
   }
 
+  function humanizeValue(value, fallback = '—') {
+    const raw = String(value ?? '').trim();
+    if (!raw) return fallback;
+    return raw
+      .replaceAll('_', ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
   function showAlert(msg, type = 'info') {
     if (!els.alert) return;
     els.alert.className =
@@ -463,20 +471,20 @@
           <div>
             <div class="text-xs text-slate-500">Título</div>
             <div class="font-semibold">${escapeHtml(i.titulo || '—')}</div>
-            <div class="text-xs text-slate-400 capitalize">${escapeHtml(i.tipo || '—')}</div>
           </div>
 
+          <div><span class="text-xs text-slate-500">Descripción</span><div class="whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</div></div>
+          <div><span class="text-xs text-slate-500">Tipo</span><div>${escapeHtml(humanizeValue(i.tipo))}</div></div>
+          <div><span class="text-xs text-slate-500">Fecha</span><div>${escapeHtml(fmtDate(i.created_at))}</div></div>
           <div><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || '—')}</div></div>
           <div><span class="text-xs text-slate-500">Contexto</span><div>${escapeHtml(i.unidad_clave || i.area_nombre || '—')}</div></div>
           <div><span class="text-xs text-slate-500">Relación</span><div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div></div>
           <div><span class="text-xs text-slate-500">Guardia</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
 
           <div class="flex gap-2">
-            <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${escapeHtml(i.prioridad || '')}</span>
-            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)} capitalize">${escapeHtml(i.estado || '')}</span>
+            <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}</span>
+            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)}">${escapeHtml(`Estado: ${humanizeValue(i.estado, '')}`.trim())}</span>
           </div>
-
-          <div class="text-[11px] text-slate-400">${escapeHtml(fmtDate(i.created_at))}</div>
 
           <div class="flex gap-2 pt-2">
             <button data-edit="${i.id}" class="flex-1 rounded-full bg-slate-100 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200">Editar</button>
@@ -486,16 +494,30 @@
 
         <div class="hidden md:grid grid-cols-9 gap-4 items-center">
           <div class="col-span-2">
+            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Título</div>
             <div class="font-semibold text-slate-800">${escapeHtml(i.titulo || '—')}</div>
-            <div class="text-xs text-slate-500 capitalize">${escapeHtml(i.tipo || '—')}</div>
+            <div class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">Descripción</div>
+            <div class="text-xs text-slate-600 whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</div>
           </div>
-          <div>${escapeHtml(i.unidad_clave || i.area_nombre || '—')}</div>
-          <div class="col-span-2">${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div>
-          <div>${escapeHtml(i.guardia_nombre || '—')}</div>
-          <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)} capitalize">${escapeHtml(i.prioridad || '')}</span></div>
           <div>
-            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)} capitalize">${escapeHtml(i.estado || '')}</span>
-            <div class="text-[11px] text-slate-400">${escapeHtml(fmtDate(i.created_at))}</div>
+            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Contexto</div>
+            <div>${escapeHtml(i.unidad_clave || i.area_nombre || '—')}</div>
+            <div class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">Tipo</div>
+            <div class="text-xs text-slate-600">${escapeHtml(humanizeValue(i.tipo))}</div>
+          </div>
+          <div class="col-span-2">
+            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Relación</div>
+            <div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div>
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Guardia</div>
+            <div>${escapeHtml(i.guardia_nombre || '—')}</div>
+          </div>
+          <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}</span></div>
+          <div>
+            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)}">${escapeHtml(`Estado: ${humanizeValue(i.estado, '')}`.trim())}</span>
+            <div class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">Fecha</div>
+            <div class="text-[11px] text-slate-500">${escapeHtml(fmtDate(i.created_at))}</div>
           </div>
           <div class="flex justify-end gap-2">
             <button data-edit="${i.id}" class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">Editar</button>

@@ -5,9 +5,6 @@
   <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
     <div>
       <h2 class="text-3xl font-semibold text-slate-700">Autos</h2>
-      <p class="text-sm text-slate-500">
-        Consulta, registra y administra los autos asociados al residencial.
-      </p>
     </div>
 
     <button id="btnNuevoAuto"
@@ -17,14 +14,8 @@
     </button>
   </div>
 
-  <!-- FILTROS -->
   <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="text-sm font-semibold text-slate-700">Filtros de búsqueda</div>
-    <div class="text-xs text-slate-500 mt-1">
-      Busca por placas, modelo o color para encontrar rápidamente un auto.
-    </div>
-
-    <form id="frmAutosFilter" class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-2">
+    <form id="frmAutosFilter" class="grid grid-cols-1 md:grid-cols-4 gap-2">
       <input id="fPlacas"
         class="rounded-xl border border-slate-200 px-3 py-2 text-sm"
         placeholder="Placas" />
@@ -52,20 +43,7 @@
         </button>
       </div>
     </form>
-  </div>
-
-  <!-- LISTADO -->
-  <div class="rounded-2xl bg-white shadow p-4 border border-slate-200">
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <div class="text-sm font-semibold text-slate-700">Listado de autos</div>
-        <div class="text-xs text-slate-500 mt-1">
-          Selecciona un auto para editarlo o desactivarlo.
-        </div>
-      </div>
-    </div>
-
-    <div id="autosList" class="mt-4 text-xs text-slate-500">Cargando…</div>
+    <div id="autosList" class="mt-4 max-h-[26rem] overflow-y-auto pr-1 text-xs text-slate-500">Cargando…</div>
     <div id="autosPagination" class="mt-4 flex justify-end gap-2"></div>
   </div>
 
