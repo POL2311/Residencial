@@ -39,6 +39,12 @@
         userTipoSelect: document.getElementById('userTipoSelect'),
         assignUserSelect: document.getElementById('assignUserSelect'),
         assignResidencialSelect: document.getElementById('assignResidencialSelect'),
+        deleteUserModal: document.getElementById('deleteUserModal'),
+        deleteUserName: document.getElementById('deleteUserName'),
+        deleteUserEmail: document.getElementById('deleteUserEmail'),
+        btnCloseDeleteUserModal: document.getElementById('btnCloseDeleteUserModal'),
+        btnCancelDeleteUserModal: document.getElementById('btnCancelDeleteUserModal'),
+        btnConfirmDeleteUser: document.getElementById('btnConfirmDeleteUser'),
     };
 
     let csrf = '';
@@ -50,6 +56,7 @@
         usersPage: 1,
         assignments: [],
         assignmentsPage: 1,
+        deleteUser: null,
     };
 
     function escapeHtml(value) {
@@ -163,21 +170,27 @@
                     <div><dt class="text-xs uppercase tracking-wide text-slate-400">Rol</dt><dd class="mt-1 text-slate-700">${escapeHtml(item.rol_nombre)}</dd></div>
                     <div><dt class="text-xs uppercase tracking-wide text-slate-400">Creado</dt><dd class="mt-1 text-slate-700">${escapeHtml(item.created_at || '—')}</dd></div>
                   </dl>
+                  <div class="mt-4 flex justify-end">
+                    <button type="button" data-user-delete="${escapeHtml(item.id)}" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 hover:bg-rose-100 ${Number(item.is_active || 0) === 1 ? '' : 'opacity-60'}">
+                      Eliminar
+                    </button>
+                  </div>
                 </article>
               `).join('')}
             </div>
             <div class="hidden md:block">
               <div class="min-w-[930px]">
-                <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(240px,1.15fr)_180px_130px_140px] items-center gap-4 rounded-t-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(240px,1.15fr)_180px_130px_140px_120px] items-center gap-4 rounded-t-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   <div>Nombre</div>
                   <div>Email</div>
                   <div>Rol</div>
                   <div>Estado</div>
                   <div>Creado</div>
+                  <div class="text-right">Acciones</div>
                 </div>
                 <div class="overflow-hidden rounded-b-[1.5rem] border-x border-b border-slate-200 bg-white shadow-sm">
                   ${visible.map((item, index) => `
-                    <article class="grid grid-cols-[minmax(220px,1.1fr)_minmax(240px,1.15fr)_180px_130px_140px] items-center gap-4 px-4 py-4 ${index < visible.length - 1 ? 'border-b border-slate-100' : ''}">
+                    <article class="grid grid-cols-[minmax(220px,1.1fr)_minmax(240px,1.15fr)_180px_130px_140px_120px] items-center gap-4 px-4 py-4 ${index < visible.length - 1 ? 'border-b border-slate-100' : ''}">
                       <div class="min-w-0">
                         <div class="font-semibold text-slate-800">${escapeHtml(item.name)}</div>
                         <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.telefono || 'Sin teléfono')}</div>
@@ -186,6 +199,11 @@
                       <div class="text-sm text-slate-700">${escapeHtml(item.rol_nombre)}</div>
                       <div>${userStatusPill(item)}</div>
                       <div class="text-sm text-slate-500">${escapeHtml(item.created_at || '')}</div>
+                      <div class="flex justify-end">
+                        <button type="button" data-user-delete="${escapeHtml(item.id)}" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-100 ${Number(item.is_active || 0) === 1 ? '' : 'opacity-60'}">
+                          Eliminar
+                        </button>
+                      </div>
                     </article>
                   `).join('')}
                 </div>
@@ -213,7 +231,7 @@
                     ${Number(item.es_principal || 0) === 1 ? '<span class="inline-flex rounded-full px-2.5 py-1 text-[11px] bg-sky-50 text-sky-700 border border-sky-200">Principal</span>' : '<span class="inline-flex rounded-full px-2.5 py-1 text-[11px] bg-slate-100 text-slate-600 border border-slate-200">Secundario</span>'}
                   </div>
                   <dl class="mt-4 grid grid-cols-1 gap-3 text-sm">
-                    <div><dt class="text-xs uppercase tracking-wide text-slate-400">Residencial</dt><dd class="mt-1 text-slate-700">${escapeHtml(item.residencial_nombre)}</dd><dd class="text-xs text-slate-500">${escapeHtml(item.residencial_codigo || '—')}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-400">Cliente / servicio</dt><dd class="mt-1 text-slate-700">${escapeHtml(item.residencial_nombre)}</dd><dd class="text-xs text-slate-500">${escapeHtml(item.residencial_codigo || '—')}</dd></div>
                     <div><dt class="text-xs uppercase tracking-wide text-slate-400">Rol</dt><dd class="mt-1 text-slate-700">${escapeHtml(item.usuario_rol)}</dd></div>
                     <div><dt class="text-xs uppercase tracking-wide text-slate-400">Asignado</dt><dd class="mt-1 text-slate-700">${escapeHtml(item.created_at || '—')}</dd></div>
                   </dl>
@@ -224,7 +242,7 @@
               <div class="min-w-[900px]">
                 <div class="grid grid-cols-[minmax(220px,1.1fr)_minmax(220px,1.15fr)_160px_120px_160px] items-center gap-4 rounded-t-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   <div>Usuario</div>
-                  <div>Residencial</div>
+                  <div>Cliente / servicio</div>
                   <div>Rol</div>
                   <div>Principal</div>
                   <div>Asignado</div>
@@ -311,6 +329,27 @@
         if (els.userModal?.classList.contains('hidden')) document.body.style.overflow = '';
     }
 
+    function openDeleteUserModal(userId) {
+        const user = state.users.find((item) => String(item.id) === String(userId));
+        if (!user) {
+            showAlert('error', 'No encontramos el usuario seleccionado.');
+            return;
+        }
+        state.deleteUser = user;
+        if (els.deleteUserName) els.deleteUserName.textContent = user.name || '—';
+        if (els.deleteUserEmail) els.deleteUserEmail.textContent = `${user.email || '—'} · ${user.rol_nombre || 'Sin rol'}`;
+        els.deleteUserModal?.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteUserModal() {
+        els.deleteUserModal?.classList.add('hidden');
+        state.deleteUser = null;
+        if (els.userModal?.classList.contains('hidden') && els.assignmentModal?.classList.contains('hidden')) {
+            document.body.style.overflow = '';
+        }
+    }
+
     function handlePagerClick(e) {
         const button = e.target.closest('button[data-page-group]');
         if (!button) return;
@@ -376,6 +415,9 @@
     els.btnCloseAssignmentModal?.addEventListener('click', closeAssignmentModal);
     els.btnCancelAssignmentModal?.addEventListener('click', closeAssignmentModal);
     els.assignmentModal?.addEventListener('click', (e) => { if (e.target === els.assignmentModal) closeAssignmentModal(); });
+    els.btnCloseDeleteUserModal?.addEventListener('click', closeDeleteUserModal);
+    els.btnCancelDeleteUserModal?.addEventListener('click', closeDeleteUserModal);
+    els.deleteUserModal?.addEventListener('click', (e) => { if (e.target === els.deleteUserModal) closeDeleteUserModal(); });
 
     els.userForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -423,6 +465,30 @@
             showAlert('ok', 'Asignación creada correctamente.');
         } catch (err) {
             showAlert('error', err.message || 'No se pudo crear la asignación.');
+        }
+    });
+
+    els.usersWrap?.addEventListener('click', (e) => {
+        const button = e.target.closest('[data-user-delete]');
+        if (!button) return;
+        openDeleteUserModal(button.getAttribute('data-user-delete') || '');
+    });
+
+    els.btnConfirmDeleteUser?.addEventListener('click', async () => {
+        if (!state.deleteUser) return;
+        try {
+            await api({
+                action: 'disable_user',
+                csrf_token: csrf,
+                user_id: state.deleteUser.id,
+            });
+            closeDeleteUserModal();
+            await loadMeta();
+            await loadUsers(false);
+            await loadAssignments(false);
+            showAlert('ok', 'Usuario desactivado correctamente.');
+        } catch (err) {
+            showAlert('error', err.message || 'No se pudo desactivar el usuario.');
         }
     });
 

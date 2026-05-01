@@ -5,7 +5,7 @@
     <div>
       <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Superadmin</div>
       <h2 class="text-3xl font-semibold text-slate-700">Servicios</h2>
-      <p class="text-sm text-slate-500">Administra altas, planes y estatus operativos de cada cliente o servicio.</p>
+      <p class="text-sm text-slate-500">Administra clientes, define su tipo operativo y controla qué roles y módulos tienen habilitados.</p>
     </div>
     <button id="btnNuevoResidencial" type="button" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">
       + Nuevo servicio
@@ -76,7 +76,7 @@
       <div>
         <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Directorio</div>
         <div class="mt-1 text-sm font-semibold text-slate-700">Listado de servicios</div>
-        <div class="mt-1 text-xs text-slate-500">Vista consolidada de clientes, ubicación, plan y estatus.</div>
+        <div class="mt-1 text-xs text-slate-500">Vista consolidada del cliente, su tipo operativo, roles habilitados, módulos activos y estatus.</div>
       </div>
       <button id="btnRefreshResidenciales" type="button" class="rounded-lg border px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Refrescar</button>
     </div>
@@ -245,11 +245,11 @@
             <section class="space-y-4 border-t border-slate-100 pt-4">
               <div>
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Perfil de servicio</div>
-                <div class="mt-1 text-xs text-slate-500">Define qué roles y módulos estarán disponibles para este cliente desde el alta.</div>
+                <div class="mt-1 text-xs text-slate-500">Define qué tipo de servicio es, quién puede operar y qué módulos estarán disponibles para ese cliente.</div>
               </div>
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="md:col-span-2">
-                  <label class="mb-1 block text-xs text-slate-600">Preset del servicio</label>
+                  <label class="mb-1 block text-xs text-slate-600">Tipo de servicio</label>
                   <select name="preset_servicio" id="resServicePreset" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                     <option value="residencial">Residencial</option>
                     <option value="empresa">Empresa</option>
@@ -259,7 +259,7 @@
                   </select>
                 </div>
                 <div>
-                  <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Roles permitidos</div>
+                  <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Roles habilitados</div>
                   <div id="resServiceRoleFields" class="space-y-2"></div>
                 </div>
                 <div>
@@ -295,7 +295,7 @@
           <input type="hidden" name="id" id="serviceProfileResidencialId" />
           <div class="flex-1 overflow-y-auto p-4 space-y-5">
             <div>
-              <label class="mb-1 block text-xs text-slate-600">Preset del servicio</label>
+              <label class="mb-1 block text-xs text-slate-600">Tipo de servicio</label>
               <select name="preset_servicio" id="serviceProfilePreset" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                 <option value="residencial">Residencial</option>
                 <option value="empresa">Empresa</option>
@@ -306,7 +306,7 @@
             </div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Roles permitidos</div>
+                <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Roles habilitados</div>
                 <div id="serviceProfileRoleFields" class="space-y-2"></div>
               </div>
               <div>

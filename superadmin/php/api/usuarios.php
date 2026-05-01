@@ -205,6 +205,54 @@ try {
         sa_json_out(true, ['message' => 'Asignación creada correctamente.']);
     }
 
+    if ($action === 'disable_user') {
+        sa_require_csrf();
+
+        $userId = (int)($_POST['user_id'] ?? 0);
+        if ($userId <= 0) {
+            sa_json_out(false, ['error' => 'Debes indicar un usuario válido.'], 422);
+        }
+
+        $currentUser = sa_current_user($pdo);
+        if ((int)$currentUser['id'] === $userId) {
+            sa_json_out(false, ['error' => 'No puedes desactivar tu propio usuario desde esta sesión.'], 422);
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT u.id, u.name, u.email, u.is_active, t.nombre AS rol_nombre
+            FROM users u
+            JOIN tipos_usuario t ON t.id = u.tipo_usuario_id
+            WHERE u.id = :id
+            LIMIT 1
+        ");
+        $stmt->execute(['id' => $userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            sa_json_out(false, ['error' => 'No encontramos el usuario seleccionado.'], 404);
+        }
+
+        if ((int)$user['is_active'] !== 1) {
+            sa_json_out(false, ['error' => 'Ese usuario ya se encuentra inactivo.'], 422);
+        }
+
+        $disable = $pdo->prepare("UPDATE users SET is_active = 0 WHERE id = :id LIMIT 1");
+        $disable->execute(['id' => $userId]);
+
+        sa_json_out(true, [
+            'message' => 'Usuario desactivado correctamente. Se conservó su historial y relaciones.',
+            'data' => [
+                'user' => [
+                    'id' => (int)$user['id'],
+                    'name' => $user['name'],
+                    'email' => $user['email'],
+                    'rol_nombre' => $user['rol_nombre'],
+                    'is_active' => 0,
+                ],
+            ],
+        ]);
+    }
+
     sa_json_out(false, ['error' => 'Acción no soportada.'], 400);
 } catch (Throwable $e) {
     app_json_exception($e, 'No pudimos procesar la información de usuarios.');

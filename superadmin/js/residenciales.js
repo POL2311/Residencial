@@ -115,6 +115,10 @@
         return key.charAt(0).toUpperCase() + key.slice(1);
     }
 
+    function modeLabel(mode) {
+        return presetLabel(mode || 'residencial');
+    }
+
     function enabledSummary(profile, fieldGroup) {
         const source = profile?.[fieldGroup] || {};
         return Object.values(source)
@@ -177,32 +181,33 @@
                           <dd class="text-xs text-slate-500">${escapeHtml(item.pais || '')}</dd>
                         </div>
                         <div>
-                          <dt class="text-xs uppercase tracking-wide text-slate-400">Servicio</dt>
-                          <dd class="mt-1 text-slate-700">${escapeHtml(item.preset_servicio || 'residencial')}</dd>
-                          <dd class="text-xs text-slate-500">${escapeHtml(item.modo_operacion || 'residencial')}</dd>
+                          <dt class="text-xs uppercase tracking-wide text-slate-400">Tipo de servicio</dt>
+                          <dd class="mt-1 text-slate-700">${escapeHtml(presetLabel(item.preset_servicio || 'residencial'))}</dd>
+                          <dd class="text-xs text-slate-500">Modo base: ${escapeHtml(modeLabel(item.modo_operacion || 'residencial'))}</dd>
                         </div>
                         <div>
-                          <dt class="text-xs uppercase tracking-wide text-slate-400">Roles activos</dt>
+                          <dt class="text-xs uppercase tracking-wide text-slate-400">Roles habilitados</dt>
                           <dd class="mt-1 text-slate-700">${escapeHtml(roles || 'Sin roles visibles')}</dd>
                         </div>
                         <div>
-                          <dt class="text-xs uppercase tracking-wide text-slate-400">Módulos clave</dt>
+                          <dt class="text-xs uppercase tracking-wide text-slate-400">Módulos habilitados</dt>
                           <dd class="mt-1 text-slate-700">${escapeHtml(modules || 'Sin módulos visibles')}</dd>
                         </div>
                       </dl>
                       <div class="mt-4 flex justify-end">
-                        <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Perfil de servicio</button>
+                        <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Configurar</button>
                       </div>
                     </article>
                   `;
               }).join('')}
             </div>
             <div class="hidden md:block">
-              <div class="grid grid-cols-[minmax(220px,1.15fr)_minmax(150px,0.8fr)_minmax(170px,0.9fr)_minmax(220px,1.2fr)_120px_130px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div class="grid grid-cols-[minmax(220px,1.05fr)_minmax(150px,0.75fr)_minmax(160px,0.8fr)_minmax(190px,1fr)_minmax(220px,1.15fr)_120px_130px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 <div>Servicio / cliente</div>
                 <div>Ubicación</div>
-                <div>Servicio</div>
-                <div>Roles / módulos</div>
+                <div>Tipo de servicio</div>
+                <div>Roles habilitados</div>
+                <div>Módulos habilitados</div>
                 <div>Estatus</div>
                 <div>Acciones</div>
               </div>
@@ -211,7 +216,7 @@
                     const roles = enabledSummary(item.service_profile, 'roles');
                     const modules = enabledSummary(item.service_profile, 'modules');
                     return `
-                      <article class="grid grid-cols-[minmax(220px,1.15fr)_minmax(150px,0.8fr)_minmax(170px,0.9fr)_minmax(220px,1.2fr)_120px_130px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                      <article class="grid grid-cols-[minmax(220px,1.05fr)_minmax(150px,0.75fr)_minmax(160px,0.8fr)_minmax(190px,1fr)_minmax(220px,1.15fr)_120px_130px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
                         <div class="min-w-0">
                           <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
                           <div class="mt-1 text-xs text-slate-500">Código: ${escapeHtml(item.codigo || '—')}</div>
@@ -222,15 +227,17 @@
                         </div>
                         <div class="min-w-0">
                           <div class="text-sm text-slate-700">${escapeHtml(presetLabel(item.preset_servicio || 'residencial'))}</div>
-                          <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.modo_operacion || 'residencial')}</div>
+                          <div class="mt-1 text-xs text-slate-500">Modo base: ${escapeHtml(modeLabel(item.modo_operacion || 'residencial'))}</div>
                         </div>
                         <div class="min-w-0 text-sm text-slate-700">
                           <div>${escapeHtml(roles || 'Sin roles visibles')}</div>
-                          <div class="mt-1 text-xs text-slate-500">${escapeHtml(modules || 'Sin módulos visibles')}</div>
+                        </div>
+                        <div class="min-w-0 text-sm text-slate-700">
+                          <div>${escapeHtml(modules || 'Sin módulos visibles')}</div>
                         </div>
                         <div><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estatus_plan)}">${escapeHtml(item.estatus_label || item.estatus_plan || '—')}</span></div>
                         <div class="flex justify-end">
-                          <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">Servicio</button>
+                          <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">Configurar</button>
                         </div>
                       </article>
                     `;
