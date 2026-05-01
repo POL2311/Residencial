@@ -20,6 +20,7 @@
       btnBuscar: document.getElementById('btnBuscar'),
       btnEntrada: document.getElementById('btnConfirmarEntrada'),
       btnSalida: document.getElementById('btnConfirmarSalida'),
+      actionButtonsWrap: document.getElementById('accessActionButtons'),
 
       btnOpenCamera: document.getElementById('btnOpenCamera'),
       cameraModal: document.getElementById('cameraModal'),
@@ -66,6 +67,7 @@
       searchToken: 0,
       registerToken: 0,
       actionSource: null,
+      currentEval: null,
       operationalMode: window.GuardiaDashboard?.getOperationalMode?.() || 'residencial',
     };
 
@@ -280,10 +282,26 @@
       if (els.btnSalida) els.btnSalida.disabled = disabled;
     }
 
+    function setActionsVisible(show) {
+      els.actionButtonsWrap?.classList.toggle('hidden', !show);
+    }
+
+    function canRegisterCurrentAction() {
+      if (state.actionSource === 'resident') {
+        return !!state.currentResident?.access?.allow_direct_access;
+      }
+
+      if (state.actionSource !== 'code' || !state.current) return false;
+
+      if (state.currentKind === 'persona_recurrente') return true;
+
+      return !!state.currentEval?.permitido;
+    }
+
     function enableActions(on) {
-      const canUseCodeFlow = state.actionSource === 'code' && !!state.current;
-      const canUseResidentFlow = state.actionSource === 'resident' && !!state.currentResident?.access?.allow_direct_access;
-      const disabled = !on || state.loadingSearch || state.loadingRegister || (!canUseCodeFlow && !canUseResidentFlow);
+      const visible = canRegisterCurrentAction();
+      const disabled = !on || state.loadingSearch || state.loadingRegister || !visible;
+      setActionsVisible(visible);
       setButtonsDisabled(disabled);
     }
 
@@ -335,6 +353,7 @@
       state.current = null;
       state.currentKind = null;
       state.currentResident = null;
+      state.currentEval = null;
       resetDynamicForm();
       if (els.modalBody) {
         els.modalBody.innerHTML = 'Ingresa un código para validar el acceso.';
@@ -366,6 +385,7 @@
       state.currentKind = null;
       state.currentResident = null;
       state.actionSource = null;
+      state.currentEval = null;
       resetDynamicForm();
       enableActions(false);
 
@@ -483,7 +503,11 @@
           ${evalInfo.permitido ? '' : `<div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">${safeText(evalInfo.motivo || 'Acceso denegado.', '')}</div>`}
         </div>
       `;
-      showDynamicForm({ pin: false, evidence: true });
+      if (evalInfo.permitido) {
+        showDynamicForm({ pin: false, evidence: true });
+      } else {
+        resetDynamicForm();
+      }
     }
 
     function renderPermisoResult(item) {
@@ -506,7 +530,11 @@
           ${evalInfo.permitido ? '' : `<div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">${safeText(evalInfo.motivo || 'Acceso denegado.', '')}</div>`}
         </div>
       `;
-      showDynamicForm({ pin: false, evidence: true });
+      if (evalInfo.permitido) {
+        showDynamicForm({ pin: false, evidence: true });
+      } else {
+        resetDynamicForm();
+      }
     }
 
     async function buscar(code) {
@@ -530,6 +558,7 @@
         const data = json.data || {};
         state.currentKind = data.kind || 'visita_residencial';
         state.actionSource = 'code';
+        state.currentEval = null;
         openActionModal('Validación de acceso');
 
         if (state.currentKind === 'persona_recurrente') {
@@ -539,17 +568,20 @@
           updateStatusUI('ok', 'PIN requerido');
         } else if (state.currentKind === 'visitante_rapido') {
           state.current = data.visitante_rapido || null;
+          state.currentEval = state.current?.eval || null;
           feedback(!!state.current?.eval?.permitido);
           renderVisitanteOperativoResult(state.current);
           updateStatusUI(state.current?.eval?.permitido ? 'ok' : 'error', state.current?.eval?.permitido ? 'Listo para validar' : 'Con restricciones');
         } else if (state.currentKind === 'permiso_material') {
           state.current = data.permiso_material || null;
+          state.currentEval = state.current?.eval || null;
           feedback(!!state.current?.eval?.permitido);
           renderPermisoResult(state.current);
           updateStatusUI(state.current?.eval?.permitido ? 'ok' : 'error', state.current?.eval?.permitido ? 'Listo para validar' : 'Con restricciones');
         } else {
           state.current = data.visita || null;
           const ev = data.eval || {};
+          state.currentEval = ev;
           feedback(ev.permitido);
           renderVisitResult(state.current, ev);
           updateStatusUI(ev.permitido ? 'ok' : 'error', ev.permitido ? 'Permitido' : 'Denegado');
@@ -561,6 +593,7 @@
         state.current = null;
         state.currentKind = null;
         state.actionSource = null;
+        state.currentEval = null;
         feedback(false);
         resetDynamicForm();
         updateStatusUI('error', 'Denegado');
@@ -658,16 +691,22 @@
           renderPersonaResult(state.current);
         } else if (state.currentKind === 'visitante_rapido') {
           state.current = json.data?.visitante_rapido || state.current;
+          state.currentEval = state.current?.eval || { permitido: !!json.permitido, motivo: json.message || '' };
           renderVisitanteOperativoResult(state.current);
         } else if (state.currentKind === 'permiso_material') {
           state.current = json.data?.permiso_material || state.current;
+          state.currentEval = state.current?.eval || { permitido: !!json.permitido, motivo: json.message || '' };
           renderPermisoResult(state.current);
         } else {
+          state.currentEval = { permitido: !!json.permitido, motivo: json.message || '' };
           if (els.modalBody) {
             els.modalBody.innerHTML = `
-              <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                <div class="text-emerald-700 font-semibold">✔ ${tipo === 'entrada' ? 'Entrada registrada' : 'Salida registrada'}</div>
+              <div class="rounded-xl px-4 py-3 ${json.permitido ? 'border border-emerald-200 bg-emerald-50' : 'border border-rose-200 bg-rose-50'}">
+                <div class="${json.permitido ? 'text-emerald-700' : 'text-rose-700'} font-semibold">
+                  ${json.permitido ? `✔ ${tipo === 'entrada' ? 'Entrada registrada' : 'Salida registrada'}` : '✖ Acceso denegado'}
+                </div>
                 <div class="text-sm text-slate-600 mt-1">${safeText(json.visita?.nombre_visitante || state.current?.nombre_visitante)}</div>
+                ${json.permitido ? '' : `<div class="mt-2 text-sm text-rose-700">${safeText(json.message || state.currentEval?.motivo || 'Acceso denegado.', '')}</div>`}
               </div>
             `;
           }
@@ -921,6 +960,7 @@
         if (!resident) return;
         state.currentResident = resident;
         state.actionSource = 'resident';
+        state.currentEval = null;
         openActionModal('Acceso directo de residente');
         updateStatusUI(resident?.access?.allow_direct_access ? 'ok' : 'error', resident?.access?.allow_direct_access ? 'Listo para validar' : 'Con restricciones');
         renderResidentResult(resident);

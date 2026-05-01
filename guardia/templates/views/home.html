@@ -1,21 +1,4 @@
 <div id="guardiaHomeView" class="space-y-6">
-
-  <div class="rounded-3xl bg-white border border-slate-200 shadow-sm p-5">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-slate-800">Centro operativo</h1>
-        <p class="text-sm text-slate-500">
-          Resumen del turno, actividad reciente y accesos rápidos.
-        </p>
-      </div>
-
-      <div id="homeTurnoInfo"
-           class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">
-        Turno actual: —
-      </div>
-    </div>
-  </div>
-
   <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
     <div class="rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
       <div class="text-sm text-slate-500">Accesos hoy</div>
@@ -38,25 +21,9 @@
     </div>
   </section>
 
-  <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <div class="lg:col-span-2 rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h2 class="text-lg font-semibold text-slate-800">Actividad reciente</h2>
-          <p class="text-sm text-slate-500">Movimientos operativos del turno.</p>
-        </div>
-      </div>
-
-      <div id="homeRecentActivity" class="space-y-3">
-        <div class="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">
-          No hay actividad reciente para mostrar.
-        </div>
-      </div>
-    </div>
-
+  <section class="grid grid-cols-1 gap-4">
     <div class="rounded-3xl bg-white border border-slate-200 p-5 shadow-sm">
       <h2 class="text-lg font-semibold text-slate-800">Acciones rápidas</h2>
-      <p class="text-sm text-slate-500 mb-4">Accede rápido a lo más usado.</p>
 
       <div class="space-y-3">
         <button data-home-action="accesos"
