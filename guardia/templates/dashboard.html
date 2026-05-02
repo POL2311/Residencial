@@ -37,6 +37,20 @@
                 <span class="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(110,231,183,0.18)]"></span>
                 <span class="font-medium text-white/85">Caseta operando</span>
               </div>
+              <button
+                id="guardNotificationsButton"
+                type="button"
+                class="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/20 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                aria-label="Notificaciones operativas"
+                title="Notificaciones operativas">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M15 17H5l1.2-1.6A2 2 0 0 0 6.5 14.2V10a5.5 5.5 0 1 1 11 0v4.2c0 .43.14.85.4 1.2L19 17h-4Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                <span
+                  id="guardNotificationsBadge"
+                  class="hidden absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-rose-400 shadow-[0_0_0_3px_rgba(244,63,94,0.18)]"></span>
+              </button>
               <a id="logoutLink"
                  href="../../logout.php"
                  class="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/20 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">

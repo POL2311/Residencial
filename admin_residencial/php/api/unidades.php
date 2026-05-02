@@ -23,7 +23,18 @@ $adminId = (int)(current_user()['id'] ?? 0);
    CONTEXTO RESIDENCIAL (helper)
 ========================= */
 $residencialId = require_residencial_id($pdo, $adminId);
-service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'unidades', 'Las unidades no están habilitadas para este cliente.');
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$action = $method === 'POST'
+  ? (string)($_POST['action'] ?? '')
+  : (string)($_GET['action'] ?? 'list');
+
+$serviceProfile = service_profile_require_role_enabled($pdo, $residencialId, 'admin_residencial', 'El panel administrativo no está habilitado para este cliente.');
+
+if ($method === 'POST' && $action === 'create_inline_for_residente') {
+  service_profile_require_module_enabled($serviceProfile, 'residentes', 'Los residentes no están habilitados para este cliente.');
+} else {
+  service_profile_require_module_enabled($serviceProfile, 'unidades', 'Las unidades no están habilitadas para este cliente.');
+}
 
 /* =========================
    GET: LIST
@@ -62,8 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
    POST: ACTIONS
 ========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-  $action = $_POST['action'] ?? '';
 
   /* =========================
      DELETE
@@ -131,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   /* =========================
      CREATE
   ========================= */
-  if ($action === 'create') {
+  if ($action === 'create' || $action === 'create_inline_for_residente') {
 
     $exists = $pdo->prepare("
       SELECT id FROM unidades
@@ -162,7 +171,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $torre ?: null
     ]);
 
-    json_out(true, ['message' => 'Unidad creada']);
+    $unidadId = (int)$pdo->lastInsertId();
+    $stmtCreated = $pdo->prepare("
+      SELECT id, tipo, clave, torre, activo
+      FROM unidades
+      WHERE id = ? AND residencial_id = ?
+      LIMIT 1
+    ");
+    $stmtCreated->execute([$unidadId, $residencialId]);
+    $unidad = $stmtCreated->fetch(PDO::FETCH_ASSOC) ?: [
+      'id' => $unidadId,
+      'tipo' => $tipo,
+      'clave' => $clave,
+      'torre' => $torre ?: null,
+      'activo' => 1,
+    ];
+
+    json_out(true, [
+      'message' => 'Unidad creada',
+      'unidad' => $unidad,
+    ]);
   }
 
   json_out(false, ['error' => 'Acción no válida']);

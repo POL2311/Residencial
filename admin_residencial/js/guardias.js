@@ -26,6 +26,7 @@
     guardias: [],
     editingId: null,
     supportsGuardiaServicio: true,
+    canManageGuardias: true,
     selectedTurnosGuardiaId: null,
   };
 
@@ -136,6 +137,17 @@
   }
 
   function servicioSummaryHTML(g) {
+    if (!state.canManageGuardias) {
+      return `
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div class="text-xs font-medium text-slate-700">
+            ${Number(g.guardia_en_servicio || 0) === 1 ? 'En servicio' : 'Descanso'}
+          </div>
+          <div class="mt-1 text-[11px] text-slate-500">Superadmin deshabilitó la operación de guardias para este cliente.</div>
+        </div>
+      `;
+    }
+
     const btnLabel = g.nombre_turno ? 'Ver más' : 'Asignar';
     return `
       <div class="flex items-center gap-3">
@@ -167,6 +179,10 @@
   }
 
   function openCreateModal() {
+    if (!state.canManageGuardias) {
+      showAlert('Superadmin deshabilitó las acciones de guardias para este cliente.', true);
+      return;
+    }
     state.editingId = null;
     clearModalError();
     els.form?.reset();
@@ -188,6 +204,10 @@
   }
 
   function openEditModal(guardia) {
+    if (!state.canManageGuardias) {
+      showAlert('Superadmin deshabilitó las acciones de guardias para este cliente.', true);
+      return;
+    }
     state.editingId = guardia.id;
     clearModalError();
     els.form?.reset();
@@ -238,6 +258,10 @@
       const json = await fetchJSON(API);
       state.guardias = json.guardias || [];
       state.supportsGuardiaServicio = !!json.supports_guardia_servicio;
+      state.canManageGuardias = json.can_manage_guardias !== false;
+      if (els.btnAdd) {
+        els.btnAdd.classList.toggle('hidden', !state.canManageGuardias);
+      }
       render(state.guardias);
     } catch (e) {
       showAlert(e.message || 'Error al cargar guardias', true);
@@ -275,8 +299,8 @@
               </div>
               <div>${badgeCuenta(Number(g.is_active) === 1)}</div>
             </div>
-            <div class="mt-3 space-y-3">
-              <div>
+              <div class="mt-3 space-y-3">
+                <div>
                 ${
                   telDigits
                     ? `
@@ -294,24 +318,28 @@
                     : `<span class="text-[11px] text-slate-400">Sin teléfono</span>`
                 }
               </div>
-              <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                ${servicioSummaryHTML(g)}
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  ${servicioSummaryHTML(g)}
+                </div>
               </div>
-            </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="js-edit inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
-                data-id="${g.id}">
-                Editar
-              </button>
-              <button
-                type="button"
-                class="js-delete inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-200"
-                data-id="${g.id}">
-                Eliminar
-              </button>
-            </div>
+            ${state.canManageGuardias ? `
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="js-edit inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+                  data-id="${g.id}">
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  class="js-delete inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-200"
+                  data-id="${g.id}">
+                  Eliminar
+                </button>
+              </div>
+            ` : `
+              <div class="mt-4 text-xs text-slate-400">Solo lectura</div>
+            `}
           </div>
 
           <div class="hidden md:grid md:grid-cols-12 md:gap-4 md:items-center">
@@ -348,19 +376,23 @@
             </div>
 
             <div class="col-span-2 flex justify-end gap-2 flex-wrap">
-              <button
-                type="button"
-                class="js-edit inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
-                data-id="${g.id}">
-                Editar
-              </button>
+              ${state.canManageGuardias ? `
+                <button
+                  type="button"
+                  class="js-edit inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+                  data-id="${g.id}">
+                  Editar
+                </button>
 
-              <button
-                type="button"
-                class="js-delete inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-200"
-                data-id="${g.id}">
-                Eliminar
-              </button>
+                <button
+                  type="button"
+                  class="js-delete inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-200"
+                  data-id="${g.id}">
+                  Eliminar
+                </button>
+              ` : `
+                <div class="text-xs text-slate-400">Solo lectura</div>
+              `}
             </div>
           </div>
         </div>
@@ -523,6 +555,10 @@
   }
 
   async function handleDelete(id) {
+    if (!state.canManageGuardias) {
+      showAlert('Superadmin deshabilitó las acciones de guardias para este cliente.', true);
+      return;
+    }
     const ok = await showConfirmGuardia({
       title: 'Eliminar guardia',
       message: 'Esta acción eliminará al guardia del residencial. ¿Deseas continuar?',
@@ -550,6 +586,10 @@
   }
 
   async function handleToggle(id, nuevo) {
+    if (!state.canManageGuardias) {
+      showAlert('Superadmin deshabilitó las acciones de guardias para este cliente.', true);
+      return;
+    }
     try {
       const json = await fetchJSON(API, {
         method: 'POST',
@@ -825,6 +865,10 @@
   }
 
   async function handleTurno(guardiaId) {
+    if (!state.canManageGuardias) {
+      showAlert('Superadmin deshabilitó las acciones de guardias para este cliente.', true);
+      return;
+    }
     const guardia = state.guardias.find(g => Number(g.id) === Number(guardiaId));
     if (!guardia) return;
 

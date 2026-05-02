@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/operational_mode.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/resident_access.php';
 
 require_login();
 require_role(['guardia','super_admin']);
@@ -59,6 +60,12 @@ try {
   $header_line = null;
   $direccion = null;
   $residencialId = null;
+  $notifications = [
+    'total' => 0,
+    'latest_id' => 0,
+    'latest_updated_at' => null,
+    'items' => [],
+  ];
 
   if ($res) {
     $residencialId = (int)$res['id'];
@@ -71,6 +78,8 @@ try {
       $res['ciudad'] ?? '',
       $res['estado'] ?? '',
     ]));
+
+    $notifications = resident_access_notifications($pdo, $residencialId, 10);
   }
 
   // turno actual demo
@@ -94,6 +103,7 @@ try {
       'turno_actual' => $turnoActual,
       'guardia_en_servicio' => $guardiaEnServicio,
       'stats' => $stats,
+      'notifications' => $notifications,
       'modo_operacion' => operational_normalize_mode((string)($res['modo_operacion'] ?? 'residencial')),
       'service_profile' => isset($profile) ? service_profile_frontend_payload($pdo, $residencialId, 'guardia') : null,
     ]

@@ -394,12 +394,32 @@ $operationalMode = operational_mode_for_rid($pdo, $residencialId);
 resident_access_ensure_schema($pdo);
 operational_schema_ensure($pdo);
 service_profile_schema_ensure($pdo);
-if (($user['role'] ?? '') !== 'super_admin') {
-    service_profile_api_require_module($pdo, $residencialId, 'guardia', 'accesos', 'El control de accesos no está habilitado para este cliente.');
-}
-
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_GET['action'] ?? $_POST['action'] ?? 'buscar';
+$isSuperAdmin = (($user['role'] ?? '') === 'super_admin');
+$serviceProfile = $isSuperAdmin
+    ? service_profile_get($pdo, $residencialId)
+    : service_profile_require_role_enabled($pdo, $residencialId, 'guardia', 'El panel de guardia no está habilitado para este cliente.');
+
+function guardia_require_module_access(array $profile, bool $isSuperAdmin, string $module, string $message): void
+{
+    if ($isSuperAdmin) {
+        return;
+    }
+    if (!service_profile_module_enabled($profile, $module)) {
+        out(false, ['error' => $message], 403);
+    }
+}
+
+if ($action === 'personas_dentro') {
+    guardia_require_module_access($serviceProfile, $isSuperAdmin, 'personal_recurrente', 'El listado de personal no está habilitado para este cliente.');
+} elseif ($action === 'materiales_autorizados') {
+    guardia_require_module_access($serviceProfile, $isSuperAdmin, 'materiales', 'El módulo de materiales no está habilitado para este cliente.');
+} elseif ($action === 'bitacora_hoy') {
+    guardia_require_module_access($serviceProfile, $isSuperAdmin, 'bitacora_operativa', 'La bitácora operativa no está habilitada para este cliente.');
+} else {
+    guardia_require_module_access($serviceProfile, $isSuperAdmin, 'accesos', 'El control de accesos no está habilitado para este cliente.');
+}
 
 try {
     if ($method === 'GET' && $action === 'buscar') {
@@ -408,9 +428,15 @@ try {
             out(false, ['error' => 'Falta code'], 422);
         }
 
-        if (operational_is_operational_mode($operationalMode)) {
-            $scan = find_operational_scan($pdo, $residencialId, $code);
-            if ($scan) {
+        $scan = find_operational_scan($pdo, $residencialId, $code);
+        if ($scan) {
+            $moduleByType = [
+                'persona_recurrente' => 'personal_recurrente',
+                'visitante_rapido' => 'visitantes_rapidos',
+                'permiso_material' => 'materiales',
+            ];
+            $requiredModule = $moduleByType[$scan['type']] ?? '';
+            if ($requiredModule === '' || $isSuperAdmin || service_profile_module_enabled($serviceProfile, $requiredModule)) {
                 $payload = ['kind' => $scan['type']];
                 if ($scan['type'] === 'persona_recurrente') {
                     $payload['persona'] = normalize_persona_scan($scan['item']);
@@ -519,10 +545,6 @@ try {
     }
 
     if ($method === 'GET' && $action === 'personas_dentro') {
-        if (!operational_is_operational_mode($operationalMode)) {
-            out(true, ['data' => ['items' => []]]);
-        }
-
         $stmt = $pdo->prepare("
             SELECT p.id, p.nombre, p.empresa, p.puesto, p.telefono, p.foto_url, p.ultima_entrada_at, a.nombre AS area_nombre
             FROM personas_recurrentes p
@@ -537,10 +559,6 @@ try {
     }
 
     if ($method === 'GET' && $action === 'materiales_autorizados') {
-        if (!operational_is_operational_mode($operationalMode)) {
-            out(true, ['data' => ['items' => []]]);
-        }
-
         $stmt = $pdo->prepare("
             SELECT
                 p.id, p.tipo_movimiento, p.estado, p.aprobado_at, p.notas,
@@ -569,10 +587,6 @@ try {
     }
 
     if ($method === 'GET' && $action === 'bitacora_hoy') {
-        if (!operational_is_operational_mode($operationalMode)) {
-            out(true, ['data' => ['items' => []]]);
-        }
-
         $stmt = $pdo->prepare("
             SELECT
                 b.*,
@@ -694,9 +708,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'confirm_persona_recurrente') {
-        if (!operational_is_operational_mode($operationalMode)) {
-            out(false, ['error' => 'Este flujo solo está disponible en modo operativo.'], 422);
-        }
+        guardia_require_module_access($serviceProfile, $isSuperAdmin, 'personal_recurrente', 'El módulo de personal recurrente no está habilitado para este cliente.');
 
         $personaId = intv_safe($_POST['persona_id'] ?? 0, 0);
         $pin = preg_replace('/\D+/', '', (string)($_POST['pin'] ?? ''));
@@ -788,9 +800,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'confirm_visitante_rapido') {
-        if (!operational_is_operational_mode($operationalMode)) {
-            out(false, ['error' => 'Este flujo solo está disponible en modo operativo.'], 422);
-        }
+        guardia_require_module_access($serviceProfile, $isSuperAdmin, 'visitantes_rapidos', 'El módulo de visitantes rápidos no está habilitado para este cliente.');
 
         $visitanteId = intv_safe($_POST['visitante_id'] ?? 0, 0);
         $tipoEvento = strv($_POST['tipo_evento'] ?? 'entrada', 20);
@@ -872,9 +882,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'confirm_permiso_material') {
-        if (!operational_is_operational_mode($operationalMode)) {
-            out(false, ['error' => 'Este flujo solo está disponible en modo operativo.'], 422);
-        }
+        guardia_require_module_access($serviceProfile, $isSuperAdmin, 'materiales', 'El módulo de materiales no está habilitado para este cliente.');
 
         $permisoId = intv_safe($_POST['permiso_material_id'] ?? 0, 0);
         $tipoEvento = strv($_POST['tipo_evento'] ?? 'entrada', 20);

@@ -220,6 +220,7 @@ try {
                 'ru_id' => $residUnitId,
                 'rid'   => $residencialId,
             ]);
+            resident_access_touch($pdo, $residUnitId);
 
             json_out(true, [
                 'message' => $newStatus ? 'Residente reactivado.' : 'Residente suspendido.',
@@ -268,6 +269,7 @@ try {
                 'id' => $residUnitId,
                 'rid' => $residencialId,
             ]);
+            resident_access_touch($pdo, $residUnitId);
 
             json_out(true, [
                 'message' => $ban ? 'Residente bloqueado manualmente.' : 'Baneo manual eliminado.',
@@ -478,6 +480,8 @@ try {
                 'unid' => $unitId,
                 'tit'  => $isTitular,
             ]);
+            $residentUnitId = (int)$pdo->lastInsertId();
+            resident_access_touch($pdo, $residentUnitId);
 
             $pdo->commit();
 
@@ -591,6 +595,7 @@ try {
                 'id'   => $residUnitId,
                 'rid'  => $residencialId,
             ]);
+            resident_access_touch($pdo, $residUnitId);
 
             $pdo->commit();
 

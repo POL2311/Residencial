@@ -16,6 +16,13 @@
     modalForm: document.getElementById('modalForm'),
     btnCloseModal: document.getElementById('btnCloseModal'),
     btnCancelModal: document.getElementById('btnCancelModal'),
+    btnInlineAddUnidad: document.getElementById('btnInlineAddUnidad'),
+    inlineUnidadPanel: document.getElementById('inlineUnidadPanel'),
+    inlineUnidadForm: document.getElementById('inlineUnidadForm'),
+    inlineUnidadAlert: document.getElementById('inlineUnidadAlert'),
+    inlineUnidadEmptyHint: document.getElementById('inlineUnidadEmptyHint'),
+    btnCancelInlineUnidad: document.getElementById('btnCancelInlineUnidad'),
+    btnSaveInlineUnidad: document.getElementById('btnSaveInlineUnidad'),
 
     detailModal: document.getElementById('detailModal'),
     detailModalContent: document.getElementById('detailModalContent'),
@@ -41,6 +48,7 @@
     autosPage: 1,
     residentesPage: 1,
     currentUserId: null,
+    selectedUnidadId: '',
   };
 
   // =========================
@@ -466,6 +474,14 @@
           body: formData,
         }),
     },
+
+    unidades: {
+      createInline: (formData) =>
+        fetchJSON(`${API_BASE}/unidades.php`, {
+          method: 'POST',
+          body: formData,
+        }),
+    },
   };
 
   // =========================
@@ -797,6 +813,84 @@
     );
   }
 
+  function sortUnidades() {
+    state.unidades.sort((a, b) =>
+      String(a.clave || '').localeCompare(String(b.clave || ''), 'es', { numeric: true, sensitivity: 'base' })
+    );
+  }
+
+  function renderUnidadOptionLabel(unidad) {
+    return escapeHtml(unidad?.clave || '—');
+  }
+
+  function fillUnidades(selectedId = '') {
+    const sel = els.modalForm?.unidad_id;
+    if (!sel) return;
+
+    sortUnidades();
+
+    if (!state.unidades.length) {
+      sel.innerHTML = '<option value="">No hay casas/unidades registradas todavía</option>';
+      sel.value = '';
+      els.inlineUnidadEmptyHint?.classList.remove('hidden');
+      return;
+    }
+
+    els.inlineUnidadEmptyHint?.classList.add('hidden');
+
+    const placeholder = '<option value="">Selecciona una unidad</option>';
+    const options = state.unidades
+      .map((u) => `<option value="${escapeHtml(u.id)}">${renderUnidadOptionLabel(u)}</option>`)
+      .join('');
+
+    sel.innerHTML = placeholder + options;
+    sel.value = selectedId ? String(selectedId) : '';
+  }
+
+  function showInlineUnidadAlert(message, type = 'error') {
+    if (!els.inlineUnidadAlert) return;
+
+    els.inlineUnidadAlert.className =
+      'rounded-2xl px-4 py-3 text-xs ' +
+      (type === 'error'
+        ? 'bg-rose-100 text-rose-700'
+        : 'bg-emerald-100 text-emerald-700');
+
+    els.inlineUnidadAlert.textContent = message;
+    els.inlineUnidadAlert.classList.remove('hidden');
+  }
+
+  function hideInlineUnidadAlert() {
+    els.inlineUnidadAlert?.classList.add('hidden');
+  }
+
+  function openInlineUnidadPanel() {
+    hideInlineUnidadAlert();
+    els.inlineUnidadForm?.querySelectorAll('input, select').forEach((field) => {
+      if (field instanceof HTMLSelectElement) {
+        field.selectedIndex = 0;
+      } else {
+        field.value = '';
+      }
+    });
+    els.inlineUnidadPanel?.classList.remove('hidden');
+    els.inlineUnidadForm?.querySelector('[name="clave"]')?.focus();
+  }
+
+  function closeInlineUnidadPanel(reset = true) {
+    hideInlineUnidadAlert();
+    if (reset) {
+      els.inlineUnidadForm?.querySelectorAll('input, select').forEach((field) => {
+        if (field instanceof HTMLSelectElement) {
+          field.selectedIndex = 0;
+        } else {
+          field.value = '';
+        }
+      });
+    }
+    els.inlineUnidadPanel?.classList.add('hidden');
+  }
+
   // =========================
   // MODALES
   // =========================
@@ -804,12 +898,10 @@
     document.body.style.overflow = 'hidden';
     els.modal.classList.remove('hidden');
     els.modalForm.reset();
+    closeInlineUnidadPanel();
+    state.selectedUnidadId = '';
 
     const sel = els.modalForm.unidad_id;
-    sel.innerHTML = `<option value="">—</option>`;
-    state.unidades.forEach((u) => {
-      sel.innerHTML += `<option value="${escapeHtml(u.id)}">${escapeHtml(u.clave)}</option>`;
-    });
 
     const passwordHelp = els.modalForm
       .querySelector('[name="password"]')
@@ -828,12 +920,12 @@
         passwordHelp.textContent = 'Déjalo vacío si no deseas cambiar la contraseña.';
       }
 
-      setTimeout(() => {
-        sel.value = String(r.unidad_id);
-      }, 0);
+      state.selectedUnidadId = String(r.unidad_id || '');
+      fillUnidades(state.selectedUnidadId);
     } else {
       els.modalTitle.textContent = 'Agregar residente';
       state.editingId = null;
+      fillUnidades();
 
       if (passwordHelp) {
         passwordHelp.textContent = 'Si lo dejas vacío, se generará una contraseña temporal.';
@@ -845,6 +937,8 @@
     els.modal.classList.add('hidden');
     document.body.style.overflow = '';
     state.editingId = null;
+    state.selectedUnidadId = '';
+    closeInlineUnidadPanel();
   }
 
   function openAddPagoModal(residente) {
@@ -1314,6 +1408,51 @@
   els.btnAdd?.addEventListener('click', () => openModal('create'));
   els.btnCloseModal?.addEventListener('click', closeModal);
   els.btnCancelModal?.addEventListener('click', closeModal);
+  els.btnInlineAddUnidad?.addEventListener('click', openInlineUnidadPanel);
+  els.btnCancelInlineUnidad?.addEventListener('click', () => closeInlineUnidadPanel());
+
+  els.btnSaveInlineUnidad?.addEventListener('click', async () => {
+    const fd = new FormData();
+    const clave = String(els.inlineUnidadForm?.querySelector('[name="clave"]')?.value || '').trim();
+    const tipo = String(els.inlineUnidadForm?.querySelector('[name="tipo"]')?.value || '').trim();
+    const torre = String(els.inlineUnidadForm?.querySelector('[name="torre"]')?.value || '').trim();
+
+    if (!clave) {
+      showInlineUnidadAlert('La clave es obligatoria.');
+      return;
+    }
+
+    if (!['casa', 'departamento', 'local', 'otro'].includes(tipo)) {
+      showInlineUnidadAlert('Selecciona un tipo válido.');
+      return;
+    }
+
+    fd.set('action', 'create_inline_for_residente');
+    fd.set('clave', clave);
+    fd.set('tipo', tipo);
+    fd.set('torre', torre);
+
+    try {
+      const resp = await api.unidades.createInline(fd);
+      const unidad = resp.unidad || null;
+
+      if (unidad?.id) {
+        state.unidades = state.unidades.filter((item) => String(item.id) !== String(unidad.id));
+        state.unidades.push(unidad);
+        state.selectedUnidadId = String(unidad.id);
+        fillUnidades(state.selectedUnidadId);
+      }
+
+      showInlineUnidadAlert(resp.message || 'Casa agregada correctamente.', 'success');
+      showToast(resp.message || 'Casa agregada correctamente.', 'success');
+
+      setTimeout(() => {
+        closeInlineUnidadPanel();
+      }, 250);
+    } catch (err) {
+      showInlineUnidadAlert(err.message || 'No se pudo crear la casa.');
+    }
+  });
 
   els.modalForm.addEventListener('submit', async (e) => {
     e.preventDefault();

@@ -22,6 +22,7 @@ if (!function_exists('service_profile_module_flags')) {
             'habilita_unidades',
             'habilita_residentes_catalogo',
             'habilita_guardias_catalogo',
+            'habilita_guardias_admin_actions',
             'habilita_autos',
             'habilita_visitas_residente',
             'habilita_paqueteria',
@@ -74,6 +75,7 @@ if (!function_exists('service_profile_labels')) {
                 'habilita_unidades' => 'Unidades',
                 'habilita_residentes_catalogo' => 'Residentes',
                 'habilita_guardias_catalogo' => 'Guardias',
+                'habilita_guardias_admin_actions' => 'Acciones de guardias desde admin',
                 'habilita_autos' => 'Autos',
                 'habilita_visitas_residente' => 'Visitas',
                 'habilita_paqueteria' => 'Paquetería',
@@ -105,6 +107,7 @@ if (!function_exists('service_profile_defaults')) {
             'habilita_unidades' => 0,
             'habilita_residentes_catalogo' => 0,
             'habilita_guardias_catalogo' => 0,
+            'habilita_guardias_admin_actions' => 0,
             'habilita_autos' => 0,
             'habilita_visitas_residente' => 0,
             'habilita_paqueteria' => 0,
@@ -125,6 +128,7 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_admin_operativo' => 1,
                 'habilita_guardia' => 1,
                 'habilita_guardias_catalogo' => 1,
+                'habilita_guardias_admin_actions' => 1,
                 'habilita_control_acceso' => 1,
                 'habilita_incidencias' => 1,
                 'habilita_personal_recurrente' => 1,
@@ -137,6 +141,7 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_admin_operativo' => 1,
                 'habilita_guardia' => 1,
                 'habilita_guardias_catalogo' => 1,
+                'habilita_guardias_admin_actions' => 1,
                 'habilita_control_acceso' => 1,
                 'habilita_incidencias' => 1,
                 'habilita_personal_recurrente' => 1,
@@ -149,6 +154,7 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_admin_operativo' => 1,
                 'habilita_guardia' => 1,
                 'habilita_guardias_catalogo' => 1,
+                'habilita_guardias_admin_actions' => 1,
                 'habilita_control_acceso' => 1,
                 'habilita_incidencias' => 1,
                 'habilita_visitantes_rapidos' => 1,
@@ -167,6 +173,7 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_unidades' => 1,
                 'habilita_residentes_catalogo' => 1,
                 'habilita_guardias_catalogo' => 1,
+                'habilita_guardias_admin_actions' => 1,
                 'habilita_autos' => 1,
                 'habilita_visitas_residente' => 1,
                 'habilita_paqueteria' => 1,
@@ -202,6 +209,7 @@ if (!function_exists('service_profile_schema_ensure')) {
                     habilita_unidades TINYINT(1) NOT NULL DEFAULT 1,
                     habilita_residentes_catalogo TINYINT(1) NOT NULL DEFAULT 1,
                     habilita_guardias_catalogo TINYINT(1) NOT NULL DEFAULT 1,
+                    habilita_guardias_admin_actions TINYINT(1) NOT NULL DEFAULT 1,
                     habilita_autos TINYINT(1) NOT NULL DEFAULT 1,
                     habilita_visitas_residente TINYINT(1) NOT NULL DEFAULT 1,
                     habilita_paqueteria TINYINT(1) NOT NULL DEFAULT 1,
@@ -229,6 +237,14 @@ if (!function_exists('service_profile_schema_ensure')) {
                 ADD CONSTRAINT fk_residenciales_servicio_config_residencial
                 FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
                 ON DELETE CASCADE
+            ");
+        }
+
+        if (!operational_column_exists($pdo, 'residenciales_servicio_config', 'habilita_guardias_admin_actions')) {
+            $pdo->exec("
+                ALTER TABLE residenciales_servicio_config
+                ADD COLUMN habilita_guardias_admin_actions TINYINT(1) NOT NULL DEFAULT 1
+                AFTER habilita_guardias_catalogo
             ");
         }
 
@@ -338,6 +354,7 @@ if (!function_exists('service_profile_save')) {
                 habilita_unidades = :habilita_unidades,
                 habilita_residentes_catalogo = :habilita_residentes_catalogo,
                 habilita_guardias_catalogo = :habilita_guardias_catalogo,
+                habilita_guardias_admin_actions = :habilita_guardias_admin_actions,
                 habilita_autos = :habilita_autos,
                 habilita_visitas_residente = :habilita_visitas_residente,
                 habilita_paqueteria = :habilita_paqueteria,

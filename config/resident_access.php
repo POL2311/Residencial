@@ -34,6 +34,9 @@ if (!function_exists('resident_access_ensure_schema')) {
             if (!resident_access_column_exists($pdo, 'residentes_unidades', 'acceso_baneado_at')) {
                 $pdo->exec("ALTER TABLE residentes_unidades ADD COLUMN acceso_baneado_at DATETIME NULL DEFAULT NULL");
             }
+            if (!resident_access_column_exists($pdo, 'residentes_unidades', 'acceso_estado_actualizado_at')) {
+                $pdo->exec("ALTER TABLE residentes_unidades ADD COLUMN acceso_estado_actualizado_at DATETIME NULL DEFAULT NULL");
+            }
         }
 
         if (tableExists($pdo, 'accesos_guardia')) {
@@ -47,6 +50,25 @@ if (!function_exists('resident_access_ensure_schema')) {
                 $pdo->exec("ALTER TABLE accesos_guardia ADD COLUMN unidad_id INT(11) NULL DEFAULT NULL");
             }
         }
+    }
+}
+
+if (!function_exists('resident_access_touch')) {
+    function resident_access_touch(PDO $pdo, int $residentUnitId): void
+    {
+        if ($residentUnitId <= 0) {
+            return;
+        }
+
+        resident_access_ensure_schema($pdo);
+
+        $stmt = $pdo->prepare("
+            UPDATE residentes_unidades
+            SET acceso_estado_actualizado_at = NOW()
+            WHERE id = :id
+            LIMIT 1
+        ");
+        $stmt->execute(['id' => $residentUnitId]);
     }
 }
 
@@ -264,5 +286,90 @@ if (!function_exists('resident_access_status_for_user')) {
         return array_merge($row, [
             'access' => resident_access_status($pdo, $row),
         ]);
+    }
+}
+
+if (!function_exists('resident_access_notifications')) {
+    function resident_access_notifications(PDO $pdo, int $residencialId, int $limit = 10): array
+    {
+        resident_access_ensure_schema($pdo);
+
+        $limit = max(1, min(50, $limit));
+
+        $summary = [
+            'total' => 0,
+            'latest_id' => 0,
+            'latest_updated_at' => null,
+            'items' => [],
+        ];
+
+        if (!tableExists($pdo, 'residentes_unidades') || !resident_access_column_exists($pdo, 'residentes_unidades', 'acceso_estado_actualizado_at')) {
+            return $summary;
+        }
+
+        $stmtCount = $pdo->prepare("
+            SELECT
+                COUNT(*) AS total,
+                MAX(id) AS latest_id,
+                MAX(acceso_estado_actualizado_at) AS latest_updated_at
+            FROM residentes_unidades ru
+            JOIN unidades un ON un.id = ru.unidad_id
+            WHERE un.residencial_id = :rid
+              AND ru.acceso_estado_actualizado_at IS NOT NULL
+        ");
+        $stmtCount->execute(['rid' => $residencialId]);
+        $countRow = $stmtCount->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        $stmt = $pdo->prepare("
+            SELECT
+                ru.id AS resid_unid_id,
+                ru.user_id,
+                ru.unidad_id,
+                ru.activo AS activo_servicio,
+                ru.acceso_baneado_manual,
+                ru.acceso_baneo_motivo,
+                ru.acceso_estado_actualizado_at,
+                u.name,
+                u.email,
+                u.telefono,
+                u.is_active,
+                un.residencial_id,
+                un.clave AS unidad_clave
+            FROM residentes_unidades ru
+            JOIN users u ON u.id = ru.user_id
+            JOIN unidades un ON un.id = ru.unidad_id
+            JOIN tipos_usuario t ON t.id = u.tipo_usuario_id
+            WHERE un.residencial_id = :rid
+              AND t.nombre = 'residente'
+              AND ru.acceso_estado_actualizado_at IS NOT NULL
+            ORDER BY ru.acceso_estado_actualizado_at DESC, ru.id DESC
+            LIMIT {$limit}
+        ");
+        $stmt->execute(['rid' => $residencialId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $items = array_map(static function (array $row) use ($pdo): array {
+            $access = resident_access_status($pdo, $row);
+            $permitido = (bool)($access['allow_direct_access'] ?? false);
+
+            return [
+                'id' => (int)($row['resid_unid_id'] ?? 0),
+                'resident_id' => (int)($row['user_id'] ?? 0),
+                'resident_name' => (string)($row['name'] ?? '—'),
+                'unidad_clave' => (string)($row['unidad_clave'] ?? '—'),
+                'updated_at' => $row['acceso_estado_actualizado_at'] ?? null,
+                'status' => $permitido ? 'permitido' : 'bloqueado',
+                'status_label' => $permitido ? 'Permitido' : 'Bloqueado',
+                'reason' => (string)($access['reason'] ?? ''),
+                'access_status' => (string)($access['status'] ?? ''),
+            ];
+        }, $rows);
+
+        return [
+            'total' => (int)($countRow['total'] ?? 0),
+            'latest_id' => (int)($countRow['latest_id'] ?? 0),
+            'latest_updated_at' => $countRow['latest_updated_at'] ?? null,
+            'items' => $items,
+        ];
     }
 }

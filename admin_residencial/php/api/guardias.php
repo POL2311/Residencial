@@ -22,7 +22,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 $user = current_user();
 $adminId = (int)($user['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
-service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'guardias', 'La gestión de guardias no está habilitada para este cliente.');
+$serviceProfile = service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'guardias', 'La gestión de guardias no está habilitada para este cliente.');
+$canManageGuardias = (int)($serviceProfile['habilita_guardias_admin_actions'] ?? 1) === 1;
 
 function hasColumn(PDO $pdo, string $table, string $column): bool {
     $stmt = $pdo->prepare("
@@ -79,9 +80,13 @@ try {
         json_out(true, [
             'guardias' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [],
             'supports_guardia_servicio' => $hasGuardiaServicio,
+            'can_manage_guardias' => $canManageGuardias,
         ]);
     }
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_guardia') {
+        if (!$canManageGuardias) {
+            json_out(false, ['error' => 'Superadmin deshabilitó las acciones de guardias para este cliente.'], 403);
+        }
         $nombre    = trim((string)($_POST['nombre'] ?? ''));
         $email     = trim((string)($_POST['email'] ?? ''));
         $telefono  = trim((string)($_POST['telefono'] ?? ''));
@@ -163,6 +168,9 @@ try {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_servicio') {
+        if (!$canManageGuardias) {
+            json_out(false, ['error' => 'Superadmin deshabilitó las acciones de guardias para este cliente.'], 403);
+        }
         if (!$hasGuardiaServicio) {
             json_out(false, ['error' => 'La base de datos no tiene soporte para guardia_en_servicio.']);
         }
@@ -192,6 +200,9 @@ try {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_guardia') {
+        if (!$canManageGuardias) {
+            json_out(false, ['error' => 'Superadmin deshabilitó las acciones de guardias para este cliente.'], 403);
+        }
         $id = (int)($_POST['guardia_id'] ?? 0);
 
         if ($id <= 0) {
@@ -228,6 +239,9 @@ try {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'edit_guardia') {
+        if (!$canManageGuardias) {
+            json_out(false, ['error' => 'Superadmin deshabilitó las acciones de guardias para este cliente.'], 403);
+        }
         $id       = (int)($_POST['guardia_id'] ?? 0);
         $nombre   = trim((string)($_POST['nombre'] ?? ''));
         $email    = trim((string)($_POST['email'] ?? ''));

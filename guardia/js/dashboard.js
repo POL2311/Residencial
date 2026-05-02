@@ -4,6 +4,8 @@
     name: document.getElementById('guardName'),
     ctx: document.getElementById('guardContext'),
     hint: document.getElementById('guardHint'),
+    notificationsButton: document.getElementById('guardNotificationsButton'),
+    notificationsBadge: document.getElementById('guardNotificationsBadge'),
     turnoBadge: document.getElementById('guardTurnoBadge'),
     statusBadge: document.getElementById('guardStatusBadge'),
     modeBadge: document.getElementById('guardModeBadge'),
@@ -47,6 +49,7 @@
     operationalMode: 'residencial',
     serviceProfile: null,
     enabledViews: new Set(),
+    notifications: null,
     navToken: 0,
     isNavigating: false,
   };
@@ -91,6 +94,106 @@
     if (state.enabledViews.has('home')) return 'home';
     const [first] = state.enabledViews;
     return first || 'home';
+  }
+
+  function guardNotificationsStorageKey() {
+    const userId = Number(state.context?.user?.id || 0);
+    const residencialId = Number(state.context?.residencial_id || 0);
+    return `guard-notifications-seen:${userId}:${residencialId}`;
+  }
+
+  function currentNotificationMarker() {
+    const latestId = Number(state.notifications?.latest_id || 0);
+    const latestUpdatedAt = String(state.notifications?.latest_updated_at || '');
+    if (!latestId && !latestUpdatedAt) return '';
+    return `${latestId}:${latestUpdatedAt}`;
+  }
+
+  function markNotificationsSeen() {
+    const marker = currentNotificationMarker();
+    if (!marker) return;
+    try {
+      window.localStorage.setItem(guardNotificationsStorageKey(), marker);
+    } catch (_) {}
+  }
+
+  function updateNotificationsBadge() {
+    if (!els.notificationsBadge) return;
+
+    let seen = '';
+    try {
+      seen = window.localStorage.getItem(guardNotificationsStorageKey()) || '';
+    } catch (_) {}
+
+    const unread = !!currentNotificationMarker() && currentNotificationMarker() !== seen;
+    els.notificationsBadge.classList.toggle('hidden', !unread);
+
+    if (els.notificationsButton) {
+      els.notificationsButton.classList.toggle('ring-2', unread);
+      els.notificationsButton.classList.toggle('ring-white/40', unread);
+      els.notificationsButton.setAttribute('aria-label', unread ? 'Hay alertas operativas nuevas' : 'Notificaciones operativas');
+      els.notificationsButton.title = unread ? 'Hay alertas operativas nuevas' : 'Notificaciones operativas';
+    }
+  }
+
+  function formatNotificationDate(value) {
+    if (!value) return 'Sin fecha';
+    const date = new Date(String(value).replace(' ', 'T'));
+    if (Number.isNaN(date.getTime())) return escapeHtml(String(value));
+    return date.toLocaleString('es-MX', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  function renderNotificationsContent(items = []) {
+    if (!items.length) {
+      return `
+        <div class="space-y-3">
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+            No hay alertas operativas por el momento.
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="guardRefreshLocalData" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">
+              Actualizar base local
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="space-y-3">
+        <div class="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-xs text-sky-800">
+          Revisa estos cambios para mantener actualizada la base local de accesos del guardia.
+        </div>
+        <div class="space-y-3 max-h-[58vh] overflow-y-auto pr-1">
+          ${items.map((item) => `
+            <article class="rounded-2xl border ${item.status === 'permitido' ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'} px-4 py-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.resident_name || 'Residente')}</div>
+                  <div class="mt-1 text-xs text-slate-500">Unidad: ${escapeHtml(item.unidad_clave || '—')}</div>
+                </div>
+                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${item.status === 'permitido' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                  ${escapeHtml(item.status_label || 'Actualizado')}
+                </span>
+              </div>
+              <div class="mt-3 text-sm text-slate-700">${escapeHtml(item.reason || 'Sin detalle adicional.')}</div>
+              <div class="mt-2 text-[11px] text-slate-500">${escapeHtml(formatNotificationDate(item.updated_at))}</div>
+            </article>
+          `).join('')}
+        </div>
+        <div class="flex justify-end">
+          <button type="button" id="guardRefreshLocalData" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">
+            Actualizar base local
+          </button>
+        </div>
+      </div>
+    `;
   }
 
   function initShellHeader() {
@@ -370,22 +473,52 @@
       state.context = json.data || {};
       state.operationalMode = String(state.context?.modo_operacion || 'residencial').trim() || 'residencial';
       state.serviceProfile = state.context?.service_profile || null;
+      state.notifications = state.context?.notifications || null;
       state.enabledViews = buildEnabledViews();
       updateHeaderContext(state.context);
       toggleOperationalButtons();
+      updateNotificationsBadge();
       return state.context;
     } catch (e) {
       console.warn('loadContext fallo:', e);
       state.context = null;
       state.operationalMode = 'residencial';
       state.serviceProfile = null;
+      state.notifications = null;
       state.enabledViews = new Set(['home', 'perfil', 'reglamento']);
 
       if (els.name) els.name.textContent = 'Guardia';
       if (els.ctx) els.ctx.textContent = '—';
       toggleOperationalButtons();
+      updateNotificationsBadge();
 
       return null;
+    }
+  }
+
+  async function openNotifications() {
+    openModal('Notificaciones operativas', `<div class="text-sm text-slate-500">Cargando alertas…</div>`);
+
+    try {
+      const json = await fetchJSON(`${API}notificaciones.php`);
+      const notifications = json.data?.notifications || { items: [] };
+      state.notifications = notifications;
+      updateNotificationsBadge();
+      markNotificationsSeen();
+      updateNotificationsBadge();
+
+      if (els.modalBody) {
+        els.modalBody.innerHTML = renderNotificationsContent(notifications.items || []);
+        els.modalBody.querySelector('#guardRefreshLocalData')?.addEventListener('click', async () => {
+          closeModal();
+          await loadContext();
+          await navigateTo(state.currentView || firstEnabledView(), { force: true });
+        });
+      }
+    } catch (e) {
+      if (els.modalBody) {
+        els.modalBody.innerHTML = `<div class="text-sm text-rose-600">No se pudieron cargar las alertas operativas.</div>`;
+      }
     }
   }
 
@@ -451,6 +584,7 @@
     });
 
     els.btnReg?.addEventListener('click', openReglamento);
+    els.notificationsButton?.addEventListener('click', openNotifications);
 
     els.modalClose?.addEventListener('click', closeModal);
     els.modal?.addEventListener('click', (ev) => {

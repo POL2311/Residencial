@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -17,6 +18,8 @@ require_role(['admin_residencial']);
 $user = current_user();
 $adminId = (int)($user['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
+$serviceProfile = service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'guardias', 'La gestión de guardias no está habilitada para este cliente.');
+$canManageGuardias = (int)($serviceProfile['habilita_guardias_admin_actions'] ?? 1) === 1;
 
 function normalize_dias_semana(string $dias): string {
     $dias = strtoupper(trim($dias));
@@ -138,6 +141,10 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 
 try {
+    if ($method === 'POST' && !$canManageGuardias) {
+        json_out(false, ['error' => 'Superadmin deshabilitó las acciones de guardias para este cliente.'], 403);
+    }
+
     if ($method === 'GET' && $action === 'list') {
         $guardiaId = (int)($_GET['guardia_id'] ?? 0);
         if ($guardiaId <= 0) {
