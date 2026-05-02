@@ -3,10 +3,15 @@
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/auth.php';
 $error = '';
+$success = '';
 
 if (is_logged_in()) {
     header('Location: ' . app_role_home_url((string)($_SESSION['user_role'] ?? '')));
     exit;
+}
+
+if ((string)($_GET['reset'] ?? '') === '1') {
+    $success = 'Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -71,6 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
+        <?php if ($success): ?>
+            <div class="mb-4 rounded-xl border border-emerald-300 bg-emerald-100 px-4 py-3 text-sm text-emerald-700">
+                <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
+            </div>
+        <?php endif; ?>
+
         <form method="POST" action="<?= htmlspecialchars(app_login_url(), ENT_QUOTES, 'UTF-8') ?>" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1" for="email">
@@ -107,6 +118,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Iniciar sesión
             </button>
         </form>
+
+        <div class="mt-4 text-center">
+            <a
+                href="<?= htmlspecialchars(app_url('recuperar_password.php'), ENT_QUOTES, 'UTF-8') ?>"
+                class="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+            >
+                ¿Olvidaste tu contraseña?
+            </a>
+        </div>
 
         <p class="mt-5 text-center text-xs leading-5 text-slate-400 sm:mt-6">
             © <?= date('Y') ?> Sistema Residencial. Todos los derechos reservados.

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_bootstrap.php';
+require_once __DIR__ . '/../../../config/mailer.php';
 
 $action = sa_post_action('get');
 
@@ -44,6 +45,7 @@ if (!function_exists('sa_fetch_global_services')) {
 
 try {
     if ($action === 'get') {
+        app_mailer_ensure_schema($pdo);
         $config = sa_fetch_config_general($pdo);
         sa_json_out(true, [
             'data' => [
@@ -56,6 +58,7 @@ try {
 
     if ($action === 'save') {
         sa_require_csrf();
+        app_mailer_ensure_schema($pdo);
         $config = sa_fetch_config_general($pdo);
 
         $nombreSistema = sa_clean_str($_POST['nombre_sistema'] ?? 'Sistema Residencial', 150);
@@ -64,6 +67,13 @@ try {
         $logoUrl = trim((string)($_POST['logo_url'] ?? ''));
         $colorPrimario = sa_clean_str($_POST['color_primario'] ?? '', 20);
         $colorSecundario = sa_clean_str($_POST['color_secundario'] ?? '', 20);
+        $smtpHost = trim((string)($_POST['smtp_host'] ?? ''));
+        $smtpPort = (int)($_POST['smtp_port'] ?? 0);
+        $smtpUsername = trim((string)($_POST['smtp_username'] ?? ''));
+        $smtpPassword = (string)($_POST['smtp_password'] ?? '');
+        $smtpEncryption = strtolower(trim((string)($_POST['smtp_encryption'] ?? 'tls')));
+        $smtpFromEmail = trim((string)($_POST['smtp_from_email'] ?? ''));
+        $smtpFromName = sa_clean_str($_POST['smtp_from_name'] ?? '', 190);
 
         if ($nombreSistema === '') {
             $nombreSistema = 'Sistema Residencial';
@@ -71,6 +81,15 @@ try {
 
         if ($emailSoporte !== '' && !filter_var($emailSoporte, FILTER_VALIDATE_EMAIL)) {
             sa_json_out(false, ['error' => 'El email de soporte no tiene un formato válido.'], 422);
+        }
+        if (!in_array($smtpEncryption, ['none', 'tls', 'ssl'], true)) {
+            sa_json_out(false, ['error' => 'Selecciona un tipo de cifrado SMTP válido.'], 422);
+        }
+        if ($smtpPort < 0 || $smtpPort > 65535) {
+            sa_json_out(false, ['error' => 'El puerto SMTP no es válido.'], 422);
+        }
+        if ($smtpFromEmail !== '' && !filter_var($smtpFromEmail, FILTER_VALIDATE_EMAIL)) {
+            sa_json_out(false, ['error' => 'El correo remitente SMTP no tiene un formato válido.'], 422);
         }
 
         $stmt = $pdo->prepare("
@@ -80,7 +99,14 @@ try {
                 email_soporte = :email_soporte,
                 logo_url = :logo_url,
                 color_primario = :color_primario,
-                color_secundario = :color_secundario
+                color_secundario = :color_secundario,
+                smtp_host = :smtp_host,
+                smtp_port = :smtp_port,
+                smtp_username = :smtp_username,
+                smtp_password = :smtp_password,
+                smtp_encryption = :smtp_encryption,
+                smtp_from_email = :smtp_from_email,
+                smtp_from_name = :smtp_from_name
             WHERE id = :id
         ");
         $stmt->execute([
@@ -90,10 +116,47 @@ try {
             'logo_url' => ($logoUrl !== '' ? $logoUrl : null),
             'color_primario' => ($colorPrimario !== '' ? $colorPrimario : null),
             'color_secundario' => ($colorSecundario !== '' ? $colorSecundario : null),
+            'smtp_host' => ($smtpHost !== '' ? $smtpHost : null),
+            'smtp_port' => ($smtpPort > 0 ? $smtpPort : null),
+            'smtp_username' => ($smtpUsername !== '' ? $smtpUsername : null),
+            'smtp_password' => ($smtpPassword !== '' ? $smtpPassword : null),
+            'smtp_encryption' => $smtpEncryption,
+            'smtp_from_email' => ($smtpFromEmail !== '' ? $smtpFromEmail : null),
+            'smtp_from_name' => ($smtpFromName !== '' ? $smtpFromName : null),
             'id' => $config['id'],
         ]);
 
         sa_json_out(true, ['message' => 'Configuración general actualizada correctamente.']);
+    }
+
+    if ($action === 'test_smtp') {
+        sa_require_csrf();
+
+        $testEmail = trim((string)($_POST['test_email'] ?? ''));
+        if ($testEmail === '' || !filter_var($testEmail, FILTER_VALIDATE_EMAIL)) {
+            sa_json_out(false, ['error' => 'Ingresa un correo válido para la prueba SMTP.'], 422);
+        }
+
+        $settings = [
+            'nombre_sistema' => sa_clean_str($_POST['nombre_sistema'] ?? 'Sistema Residencial', 150),
+            'smtp_host' => trim((string)($_POST['smtp_host'] ?? '')),
+            'smtp_port' => (int)($_POST['smtp_port'] ?? 0),
+            'smtp_username' => trim((string)($_POST['smtp_username'] ?? '')),
+            'smtp_password' => (string)($_POST['smtp_password'] ?? ''),
+            'smtp_encryption' => trim((string)($_POST['smtp_encryption'] ?? 'tls')),
+            'smtp_from_email' => trim((string)($_POST['smtp_from_email'] ?? '')),
+            'smtp_from_name' => sa_clean_str($_POST['smtp_from_name'] ?? '', 190),
+        ];
+
+        app_mailer_send_with_settings(
+            $settings,
+            $testEmail,
+            'Prueba SMTP',
+            ($settings['nombre_sistema'] ?: 'Sistema Residencial') . ' · Correo de prueba',
+            "Hola,\n\nEste es un correo de prueba para validar la configuración SMTP del sistema.\n\nSi recibiste este mensaje, el envío está funcionando correctamente."
+        );
+
+        sa_json_out(true, ['message' => 'Correo de prueba enviado correctamente.']);
     }
 
     if ($action === 'save_service') {

@@ -15,6 +15,8 @@
         serviceForm: document.getElementById('globalServiceForm'),
         btnCloseModal: document.getElementById('btnCloseGlobalServiceModal'),
         btnCancelModal: document.getElementById('btnCancelGlobalServiceModal'),
+        btnTestSmtp: document.getElementById('btnTestSmtp'),
+        smtpTestEmail: document.getElementById('smtpTestEmail'),
     };
 
     let csrf = '';
@@ -103,6 +105,13 @@
         els.form.logo_url.value = config.logo_url || '';
         els.form.color_primario.value = config.color_primario || '';
         els.form.color_secundario.value = config.color_secundario || '';
+        els.form.smtp_host.value = config.smtp_host || '';
+        els.form.smtp_port.value = config.smtp_port || '';
+        els.form.smtp_username.value = config.smtp_username || '';
+        els.form.smtp_password.value = config.smtp_password || '';
+        els.form.smtp_encryption.value = config.smtp_encryption || 'tls';
+        els.form.smtp_from_email.value = config.smtp_from_email || '';
+        els.form.smtp_from_name.value = config.smtp_from_name || '';
     }
 
     function openModal(item = null) {
@@ -149,6 +158,13 @@
                 logo_url: els.form.logo_url.value,
                 color_primario: els.form.color_primario.value,
                 color_secundario: els.form.color_secundario.value,
+                smtp_host: els.form.smtp_host.value,
+                smtp_port: els.form.smtp_port.value,
+                smtp_username: els.form.smtp_username.value,
+                smtp_password: els.form.smtp_password.value,
+                smtp_encryption: els.form.smtp_encryption.value,
+                smtp_from_email: els.form.smtp_from_email.value,
+                smtp_from_name: els.form.smtp_from_name.value,
             });
             showAlert('ok', 'Configuración general actualizada correctamente.');
             await load();
@@ -160,6 +176,27 @@
 
     els.btnRefresh?.addEventListener('click', () => {
         load().then(() => showAlert('ok', 'Configuración recargada.')).catch((err) => showAlert('error', err.message || 'No se pudo recargar.'));
+    });
+
+    els.btnTestSmtp?.addEventListener('click', async () => {
+        try {
+            await api({
+                action: 'test_smtp',
+                csrf_token: csrf,
+                test_email: els.smtpTestEmail?.value || '',
+                nombre_sistema: els.form.nombre_sistema.value,
+                smtp_host: els.form.smtp_host.value,
+                smtp_port: els.form.smtp_port.value,
+                smtp_username: els.form.smtp_username.value,
+                smtp_password: els.form.smtp_password.value,
+                smtp_encryption: els.form.smtp_encryption.value,
+                smtp_from_email: els.form.smtp_from_email.value,
+                smtp_from_name: els.form.smtp_from_name.value,
+            });
+            showAlert('ok', 'Correo de prueba enviado correctamente.');
+        } catch (err) {
+            showAlert('error', err.message || 'No se pudo enviar el correo de prueba.');
+        }
     });
 
     els.btnNuevoServicio?.addEventListener('click', () => openModal());

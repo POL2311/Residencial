@@ -32,11 +32,60 @@
         <label class="mb-1 block text-xs text-slate-600">Color secundario</label>
         <input name="color_secundario" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="#1e293b" />
       </div>
+      <div class="md:col-span-2 border-t border-slate-100 pt-4">
+        <div class="text-sm font-semibold text-slate-700">Correo SMTP</div>
+        <p class="mt-1 text-xs text-slate-500">Esta configuración se usará para enviar códigos de recuperación y futuros correos automáticos.</p>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Host SMTP</label>
+        <input name="smtp_host" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="smtp.tudominio.com" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Puerto</label>
+        <input name="smtp_port" type="number" min="1" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="587" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Usuario SMTP</label>
+        <input name="smtp_username" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="no-reply@tudominio.com" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Contraseña SMTP</label>
+        <input name="smtp_password" type="password" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="••••••••" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Cifrado</label>
+        <select name="smtp_encryption" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <option value="tls">TLS</option>
+          <option value="ssl">SSL</option>
+          <option value="none">Ninguno</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Correo remitente</label>
+        <input name="smtp_from_email" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="no-reply@tudominio.com" />
+      </div>
+      <div class="md:col-span-2">
+        <label class="mb-1 block text-xs text-slate-600">Nombre remitente</label>
+        <input name="smtp_from_name" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Sistema Residencial" />
+      </div>
       <div class="md:col-span-2 flex justify-end gap-2">
         <button id="btnRefreshConfig" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Recargar</button>
         <button type="submit" class="rounded-xl bg-[#6B6B6B] px-4 py-2 text-sm text-white shadow hover:opacity-95">Guardar configuración</button>
       </div>
     </form>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <div class="text-lg font-semibold text-slate-700">Prueba de correo</div>
+        <p class="mt-1 text-sm text-slate-500">Envía un correo corto para validar que la configuración SMTP sí está funcionando.</p>
+      </div>
+      <div class="flex w-full flex-col gap-2 md:w-auto md:flex-row">
+        <input id="smtpTestEmail" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm md:w-80" placeholder="correo@destino.com" />
+        <button id="btnTestSmtp" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Enviar prueba</button>
+      </div>
+    </div>
   </div>
 
   <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -125,6 +125,13 @@ CREATE TABLE `config_general` (
   `logo_url` varchar(255) DEFAULT NULL,
   `color_primario` varchar(7) DEFAULT NULL,
   `color_secundario` varchar(7) DEFAULT NULL,
+  `smtp_host` varchar(190) DEFAULT NULL,
+  `smtp_port` int(11) DEFAULT NULL,
+  `smtp_username` varchar(190) DEFAULT NULL,
+  `smtp_password` varchar(255) DEFAULT NULL,
+  `smtp_encryption` enum('none','tls','ssl') NOT NULL DEFAULT 'tls',
+  `smtp_from_email` varchar(190) DEFAULT NULL,
+  `smtp_from_name` varchar(190) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -133,8 +140,8 @@ CREATE TABLE `config_general` (
 -- Volcado de datos para la tabla `config_general`
 --
 
-INSERT INTO `config_general` (`id`, `nombre_sistema`, `empresa`, `email_soporte`, `logo_url`, `color_primario`, `color_secundario`, `created_at`, `updated_at`) VALUES
-(1, 'Sistema Residencial', 'Tu Empresa', 'soporte@tuempresa.com', NULL, NULL, NULL, '2025-11-29 23:39:44', '2025-11-29 23:39:44');
+INSERT INTO `config_general` (`id`, `nombre_sistema`, `empresa`, `email_soporte`, `logo_url`, `color_primario`, `color_secundario`, `smtp_host`, `smtp_port`, `smtp_username`, `smtp_password`, `smtp_encryption`, `smtp_from_email`, `smtp_from_name`, `created_at`, `updated_at`) VALUES
+(1, 'Sistema Residencial', 'Tu Empresa', 'soporte@tuempresa.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'tls', NULL, NULL, '2025-11-29 23:39:44', '2025-11-29 23:39:44');
 
 -- --------------------------------------------------------
 
@@ -1274,6 +1281,23 @@ CREATE TABLE `bitacora_operativa` (
   CONSTRAINT `fk_bitacora_operativa_visitante` FOREIGN KEY (`visitante_rapido_id`) REFERENCES `visitantes_rapidos` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_bitacora_operativa_permiso` FOREIGN KEY (`permiso_material_id`) REFERENCES `permisos_materiales` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_bitacora_operativa_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `password_reset_codes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `codigo_hash` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `attempt_count` int(11) NOT NULL DEFAULT 0,
+  `last_attempt_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_password_reset_codes_email` (`email`),
+  KEY `idx_password_reset_codes_user` (`user_id`),
+  KEY `idx_password_reset_codes_expires` (`expires_at`),
+  CONSTRAINT `fk_password_reset_codes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 ALTER TABLE `incidencias`
