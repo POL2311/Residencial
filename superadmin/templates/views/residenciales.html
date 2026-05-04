@@ -234,6 +234,7 @@
                   <label class="mb-1 block text-xs text-slate-600">Zona horaria</label>
                   <input name="zona_horaria" value="America/Mexico_City" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
                 </div>
+                <div id="resPlanHint" class="md:col-span-2 hidden rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900"></div>
               </div>
               <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label class="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" name="permite_qr" value="1" checked> Permitir accesos con QR</label>
@@ -318,6 +319,25 @@
                     <option value="servicio">Servicio</option>
                   </select>
                 </div>
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label class="mb-1 block text-xs text-slate-600">Plan actual</label>
+                    <select name="plan_id" id="serviceProfilePlanSelect" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                      <option value="">Sin asignar</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs text-slate-600">Estatus del plan</label>
+                    <select name="estatus_plan" id="serviceProfilePlanStatus" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                      <option value="prueba">Prueba</option>
+                      <option value="activo">Activo</option>
+                      <option value="suspendido">Suspendido</option>
+                      <option value="cancelado">Cancelado</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="serviceProfilePlanInfo" class="mt-4 hidden rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900"></div>
+                <div id="serviceProfileWarnings" class="mt-4 hidden rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"></div>
                 <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Roles habilitados</div>

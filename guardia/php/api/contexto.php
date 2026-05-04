@@ -174,16 +174,16 @@ try {
     ]);
   }
 
-  if (!service_profile_role_assignable_to_service($profile, 'guardia')) {
-    $pendingReason = service_profile_role_pending_reason($profile, 'guardia');
+  $guardStatus = service_profile_operator_status_for_service($profile, 'guardia', true);
+  if (empty($guardStatus['ready'])) {
     out(true, [
       'data' => pending_payload(
         $user,
         $residencialId,
         $header_line,
         $direccion,
-        'guard_role_incompatible',
-        (string)($pendingReason['message'] ?? 'Tu cuenta está asignada, pero sigue pendiente: este servicio todavía no tiene módulos operables para Guardia.'),
+        (string)($guardStatus['reason_code'] ?? 'guard_role_incompatible'),
+        (string)($guardStatus['reason_message'] ?? 'Tu cuenta está asignada, pero sigue pendiente: este servicio todavía no tiene módulos operables para Guardia.'),
         service_profile_frontend_payload($pdo, $residencialId, 'guardia')
       ),
     ]);

@@ -28,6 +28,7 @@
         btnCancelModal: document.getElementById('btnCancelResidencialModal'),
         modalError: document.getElementById('residencialModalError'),
         planSelectModal: document.getElementById('resPlanSelect'),
+        createPlanHint: document.getElementById('resPlanHint'),
         createPreset: document.getElementById('resServicePreset'),
         createRoleFields: document.getElementById('resServiceRoleFields'),
         createModuleFields: document.getElementById('resServiceModuleFields'),
@@ -38,6 +39,10 @@
         serviceForm: document.getElementById('serviceProfileForm'),
         serviceId: document.getElementById('serviceProfileResidencialId'),
         servicePreset: document.getElementById('serviceProfilePreset'),
+        servicePlanSelect: document.getElementById('serviceProfilePlanSelect'),
+        servicePlanStatus: document.getElementById('serviceProfilePlanStatus'),
+        servicePlanInfo: document.getElementById('serviceProfilePlanInfo'),
+        serviceWarnings: document.getElementById('serviceProfileWarnings'),
         serviceRoleFields: document.getElementById('serviceProfileRoleFields'),
         serviceModuleFields: document.getElementById('serviceProfileModuleFields'),
         serviceModuleHint: document.getElementById('serviceProfileModuleHint'),
@@ -228,6 +233,112 @@
             planes.map((plan) => `<option value="${escapeHtml(plan.id)}">${escapeHtml(plan.nombre)} (${escapeHtml(plan.codigo)})</option>`)
         );
         els.planSelectModal.innerHTML = modalOptions.join('');
+        if (els.servicePlanSelect) {
+            els.servicePlanSelect.innerHTML = modalOptions.join('');
+        }
+    }
+
+    function getPlanMeta(planId) {
+        return planes.find((plan) => String(plan.id) === String(planId || '')) || null;
+    }
+
+    function getPlanAllowedFlags(planId, presetKey) {
+        const plan = getPlanMeta(planId);
+        if (!plan?.valid) return null;
+
+        const allowed = {};
+        const allowedRoles = new Set((plan.roles || []).map((role) => String(role || '').trim()));
+        const allowedModules = new Set([...(plan.modules || []), ...(plan.actions || [])].map((module) => String(module || '').trim()));
+
+        (serviceMatrix.roles || []).forEach((meta) => {
+            allowed[meta.flag] = allowedRoles.has(String(meta.role || '')) ? 1 : 0;
+        });
+
+        Object.entries(serviceMatrix.modules || {}).forEach(([flag, meta]) => {
+            const supportedRoles = Array.isArray(meta.roles) ? meta.roles.map((role) => String(role || '')) : [];
+            const roleCompatible = supportedRoles.some((role) => allowedRoles.has(role));
+            const dependencies = Array.isArray(meta.depends_on) ? meta.depends_on : [];
+            const dependencyCompatible = dependencies.every((dependencyFlag) => Number(allowed[dependencyFlag] || 0) === 1);
+
+            allowed[flag] = allowedModules.has(String(meta.module || '')) && roleCompatible && dependencyCompatible ? 1 : 0;
+        });
+
+        if (plan.extras?.permite_qr === false) {
+            allowed.habilita_control_acceso = 0;
+        }
+        if (plan.extras?.permite_trabajadores_recurrentes === false) {
+            allowed.habilita_personal_recurrente = 0;
+        }
+
+        return allowed;
+    }
+
+    function renderPlanNotice(target, options = {}) {
+        if (!target) return;
+        const { planId = '', presetKey = 'residencial', alignment = null, context = 'create' } = options;
+        const plan = getPlanMeta(planId);
+
+        if (!plan) {
+            target.className = 'rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900';
+            target.innerHTML = context === 'create'
+                ? 'Aún no hay plan asignado. El servicio se creará en modo de compatibilidad y después conviene alinearlo a un plan para que los entitlements SaaS manden de verdad.'
+                : 'Este servicio aún no tiene un plan válido. Seguirá operando en compatibilidad, pero Superadmin debería alinearlo a un plan.';
+            target.classList.remove('hidden');
+            return;
+        }
+
+        const rolesCount = Array.isArray(plan.roles) ? plan.roles.length : 0;
+        const modulesCount = Array.isArray(plan.modules) ? plan.modules.length : 0;
+        const limits = [];
+        if (plan.limits?.max_casas) limits.push(`${plan.limits.max_casas} casas`);
+        if (plan.limits?.max_guardias) limits.push(`${plan.limits.max_guardias} guardias`);
+
+        target.className = 'rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900';
+        target.innerHTML = `
+            <div class="font-medium">${escapeHtml(plan.nombre || 'Plan')} · ${escapeHtml((plan.codigo || '').toUpperCase())}</div>
+            <div class="mt-1">Este plan permite ${rolesCount} rol${rolesCount === 1 ? '' : 'es'} y ${modulesCount} módulo${modulesCount === 1 ? '' : 's'} base para un servicio tipo ${escapeHtml(presetLabel(presetKey))}.</div>
+            <div class="mt-1 text-sky-700">${escapeHtml(limits.length ? `Límites: ${limits.join(' · ')}.` : 'Los límites se controlan desde la configuración del plan.')}</div>
+            ${alignment?.message ? `<div class="mt-2 text-sky-700">${escapeHtml(alignment.message)}</div>` : ''}
+        `;
+        target.classList.remove('hidden');
+    }
+
+    function renderServiceWarnings(serviceProfile) {
+        if (!els.serviceWarnings) return;
+        const alignment = serviceProfile?.alignment || null;
+        const outOfPlan = Array.isArray(alignment?.out_of_plan_flags) ? alignment.out_of_plan_flags : [];
+        const manualOff = Array.isArray(alignment?.manual_off_flags) ? alignment.manual_off_flags : [];
+
+        if (!alignment) {
+            els.serviceWarnings.classList.add('hidden');
+            els.serviceWarnings.innerHTML = '';
+            return;
+        }
+
+        const parts = [];
+        if (outOfPlan.length) {
+            parts.push(`Fuera de plan hoy: ${outOfPlan.map((item) => item.label).join(', ')}.`);
+        }
+        if (manualOff.length) {
+            parts.push(`Apagado manualmente: ${manualOff.map((item) => item.label).join(', ')}.`);
+        }
+        if (!parts.length && alignment.code === 'alineado') {
+            els.serviceWarnings.classList.add('hidden');
+            els.serviceWarnings.innerHTML = '';
+            return;
+        }
+
+        els.serviceWarnings.className = `mt-4 rounded-2xl px-4 py-3 text-sm ${
+            alignment.code === 'con_capacidades_fuera_de_plan'
+                ? 'border border-amber-200 bg-amber-50 text-amber-900'
+                : 'border border-slate-200 bg-slate-50 text-slate-700'
+        }`;
+        els.serviceWarnings.innerHTML = `
+            <div class="font-medium">${escapeHtml(alignment.label || 'Compatibilidad')}</div>
+            <div class="mt-1">${escapeHtml(alignment.message || '')}</div>
+            ${parts.length ? `<div class="mt-2 text-xs">${escapeHtml(parts.join(' '))}</div>` : ''}
+        `;
+        els.serviceWarnings.classList.remove('hidden');
     }
 
     function getPageInfo(items, page) {
@@ -499,18 +610,45 @@
         const hintEl = isCreate ? els.createModuleHint : els.serviceModuleHint;
         const advanced = isCreate ? !!els.createAdvancedToggle?.checked : !!els.serviceAdvancedToggle?.checked;
         const presetKey = form.querySelector('[name="preset_servicio"]')?.value || 'residencial';
+        const planId = isCreate ? (els.planSelectModal?.value || '') : (els.servicePlanSelect?.value || '');
         const defaults = getPresetDefaults(presetKey);
+        const planAllowedFlags = getPlanAllowedFlags(planId, presetKey);
         const selectedRoles = selectedRoleKeys(form);
         const moduleValues = currentModuleValues(form);
 
         let visibleCount = 0;
         let optionalHiddenCount = 0;
+        let hiddenByPlanCount = 0;
+
+        Object.keys(serviceLabels.roles || {}).forEach((flag) => {
+            const wrapper = form.querySelector(`[data-service-role-flag="${flag}"]`);
+            const field = form.querySelector(`[name="${flag}"]`);
+            if (!wrapper || !field) return;
+
+            const planAllowed = !planAllowedFlags || Number(planAllowedFlags?.[flag] || 0) === 1;
+            if (!planAllowed) {
+                field.checked = false;
+                wrapper.classList.add('hidden');
+                hiddenByPlanCount += 1;
+                return;
+            }
+
+            wrapper.classList.remove('hidden');
+        });
 
         Object.entries(serviceLabels.modules || {}).forEach(([flag]) => {
             const wrapper = form.querySelector(`[data-service-module-flag="${flag}"]`);
             const field = form.querySelector(`[name="${flag}"]`);
             const meta = serviceMatrix.modules?.[flag] || null;
             if (!wrapper || !field || !meta) return;
+
+            const planAllowed = !planAllowedFlags || Number(planAllowedFlags?.[flag] || 0) === 1;
+            if (!planAllowed) {
+                field.checked = false;
+                wrapper.classList.add('hidden');
+                hiddenByPlanCount += 1;
+                return;
+            }
 
             const roleCompatible = (meta.roles || []).some((role) => selectedRoles.has(String(role || '')));
             const dependencies = Array.isArray(meta.depends_on) ? meta.depends_on : [];
@@ -541,12 +679,21 @@
         if (hintEl) {
             if (!selectedRoles.size) {
                 hintEl.textContent = 'Activa al menos un rol para ver módulos compatibles.';
+            } else if (hiddenByPlanCount > 0 && !advanced) {
+                hintEl.textContent = `El plan actual oculta ${hiddenByPlanCount} capacidad${hiddenByPlanCount === 1 ? '' : 'es'} fuera de entitlement para este servicio.`;
             } else if (optionalHiddenCount > 0 && !advanced) {
                 hintEl.textContent = `Se muestran ${visibleCount} módulos compatibles por default. Activa "Mostrar avanzados" para ver ${optionalHiddenCount} opcionales.`;
             } else {
                 hintEl.textContent = `Se muestran ${visibleCount} módulos compatibles con los roles activos.`;
             }
         }
+
+        renderPlanNotice(isCreate ? els.createPlanHint : els.servicePlanInfo, {
+            planId,
+            presetKey,
+            alignment: !isCreate ? state.serviceProfileItem?.service_profile?.alignment : null,
+            context: isCreate ? 'create' : 'edit',
+        });
 
         if (options.markDirty && !state.suppressServiceDirty) {
             state.serviceProfileDirty = true;
@@ -591,6 +738,7 @@
         if (els.form.zona_horaria) els.form.zona_horaria.value = 'America/Mexico_City';
         if (els.form.estatus_plan) els.form.estatus_plan.value = 'activo';
         if (els.form.modo_operacion) els.form.modo_operacion.value = 'residencial';
+        if (els.planSelectModal) els.planSelectModal.value = '';
         if (els.createAdvancedToggle) els.createAdvancedToggle.checked = false;
         if (els.createPreset) {
             els.createPreset.value = 'residencial';
@@ -636,6 +784,7 @@
                       ${(() => {
                           const code = String(operator.operator_status?.code || '');
                           if (code === 'listo') return '<span class="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-700">Listo</span>';
+                          if (code === 'suspendido_plan') return '<span class="inline-flex rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] text-rose-700">Suspendido por plan</span>';
                           if (code === 'pendiente') return '<span class="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700">Pendiente</span>';
                           return '<span class="inline-flex rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">Inactivo</span>';
                       })()}
@@ -665,6 +814,12 @@
         if (els.servicePreset) {
             els.servicePreset.value = item.service_profile?.preset_servicio || item.modo_operacion || 'residencial';
         }
+        if (els.servicePlanSelect) {
+            els.servicePlanSelect.value = String(item.service_profile?.plan_id || item.plan_id || '');
+        }
+        if (els.servicePlanStatus) {
+            els.servicePlanStatus.value = String(item.service_profile?.estatus_plan || item.estatus_plan || 'activo');
+        }
         if (els.serviceAdvancedToggle) els.serviceAdvancedToggle.checked = false;
 
         Object.keys(serviceLabels.roles || {}).forEach((key) => {
@@ -677,6 +832,7 @@
         });
 
         renderServiceOperators(item);
+        renderServiceWarnings(item.service_profile || null);
         syncServiceModuleVisibility(els.serviceForm);
         clearInlineError(els.serviceModalError);
         state.serviceProfileDirty = false;
@@ -837,6 +993,9 @@
         applyPresetToForm(els.form, e.target.value || 'residencial');
         syncServiceModuleVisibility(els.form);
     });
+    els.planSelectModal?.addEventListener('change', () => {
+        syncServiceModuleVisibility(els.form);
+    });
     els.form?.querySelector('[name="modo_operacion"]')?.addEventListener('change', (e) => {
         if (els.createPreset) {
             els.createPreset.value = e.target.value || 'residencial';
@@ -894,6 +1053,15 @@
     els.serviceModal?.addEventListener('click', (e) => { if (e.target === els.serviceModal) closeServiceModal(); });
     els.servicePreset?.addEventListener('change', (e) => {
         applyPresetToForm(els.serviceForm, e.target.value || 'residencial');
+        syncServiceModuleVisibility(els.serviceForm, { markDirty: true });
+    });
+    els.servicePlanSelect?.addEventListener('change', () => {
+        if (!state.suppressServiceDirty) state.serviceProfileDirty = true;
+        syncServiceModuleVisibility(els.serviceForm, { markDirty: true });
+        renderServiceWarnings(state.serviceProfileItem?.service_profile || null);
+    });
+    els.servicePlanStatus?.addEventListener('change', () => {
+        if (!state.suppressServiceDirty) state.serviceProfileDirty = true;
         syncServiceModuleVisibility(els.serviceForm, { markDirty: true });
     });
     els.serviceAdvancedToggle?.addEventListener('change', () => syncServiceModuleVisibility(els.serviceForm));
@@ -1017,6 +1185,8 @@
             action: 'update_service_profile',
             csrf_token: csrf,
             id: els.serviceId?.value || '',
+            plan_id: els.servicePlanSelect?.value || '',
+            estatus_plan: els.servicePlanStatus?.value || '',
             ...collectServicePayload(els.serviceForm),
         };
 

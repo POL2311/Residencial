@@ -64,7 +64,7 @@ function sa_service_operator_summary(array $operators): array
             $summary['inactive']++;
             continue;
         }
-        if ($code === 'pendiente') {
+        if ($code !== 'listo') {
             $summary['pending']++;
         }
     }
@@ -100,12 +100,7 @@ try {
     service_profile_schema_ensure($pdo);
 
     if ($action === 'meta') {
-        $planes = $pdo->query("
-            SELECT id, nombre, codigo
-            FROM planes
-            WHERE activo = 1
-            ORDER BY precio_mensual ASC, nombre ASC
-        ")->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $planes = service_profile_fetch_active_plans($pdo);
 
         sa_json_out(true, [
             'data' => [
@@ -200,6 +195,9 @@ try {
                     $item['service_profile'] = service_profile_frontend_payload($pdo, (int)$item['id'], 'admin_residencial');
                     $item['preset_servicio'] = $profile['preset_servicio'];
                     $item['estatus_label'] = sa_residencial_status_badge((string)($item['estatus_plan'] ?? ''));
+                    $item['plan'] = $profile['plan'];
+                    $item['alignment'] = $profile['alignment'];
+                    $item['entitlement_enforcement'] = $profile['entitlement_enforcement'];
                     $item['operators_summary'] = sa_service_operator_summary($operators);
                     return $item;
                 }, $items),
@@ -251,6 +249,43 @@ try {
         $stmt->execute(['id' => $id]);
         if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
             sa_json_out(false, ['error' => 'Cliente no encontrado.'], 404);
+        }
+
+        $planIdRaw = (string)($_POST['plan_id'] ?? '');
+        $estatusPlan = sa_clean_str($_POST['estatus_plan'] ?? '', 20);
+        if ($planIdRaw !== '') {
+            $planId = (int)$planIdRaw;
+            $stmtPlan = $pdo->prepare("SELECT id FROM planes WHERE id = :id LIMIT 1");
+            $stmtPlan->execute(['id' => $planId]);
+            if (!$stmtPlan->fetch(PDO::FETCH_ASSOC)) {
+                sa_json_out(false, ['error' => 'El plan seleccionado ya no existe.'], 422);
+            }
+        } else {
+            $planId = null;
+        }
+        if ($estatusPlan !== '' && !in_array($estatusPlan, ['prueba', 'activo', 'suspendido', 'cancelado'], true)) {
+            sa_json_out(false, ['error' => 'El estatus del plan no es válido.'], 422);
+        }
+
+        if ($planId !== null || $estatusPlan !== '') {
+            $fields = [];
+            $params = ['id' => $id];
+            if ($planId !== null) {
+                $fields[] = 'plan_id = :plan_id';
+                $params['plan_id'] = $planId;
+            }
+            if ($estatusPlan !== '') {
+                $fields[] = 'estatus_plan = :estatus_plan';
+                $params['estatus_plan'] = $estatusPlan;
+            }
+            $fields[] = 'updated_at = NOW()';
+            $stmtPlanUpdate = $pdo->prepare("
+                UPDATE residenciales
+                SET " . implode(', ', $fields) . "
+                WHERE id = :id
+                LIMIT 1
+            ");
+            $stmtPlanUpdate->execute($params);
         }
 
         $input = [
@@ -375,6 +410,13 @@ try {
         if ($form['email_contacto'] !== '' && !filter_var($form['email_contacto'], FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'El email de contacto no tiene un formato válido.';
         }
+        if ($form['plan_id'] !== '') {
+            $stmtPlan = $pdo->prepare("SELECT id FROM planes WHERE id = :id LIMIT 1");
+            $stmtPlan->execute(['id' => (int)$form['plan_id']]);
+            if (!$stmtPlan->fetch(PDO::FETCH_ASSOC)) {
+                $errors[] = 'El plan seleccionado ya no existe.';
+            }
+        }
         if (!in_array($form['estatus_plan'], ['prueba', 'activo', 'suspendido', 'cancelado'], true)) {
             $errors[] = 'El estatus del plan no es válido.';
         }
@@ -461,6 +503,7 @@ try {
             'permite_qr' => $form['permite_qr'],
             'permite_trabajadores_recurrentes' => $form['permite_trabajadores_recurrentes'],
         ]);
+        service_profile_set_entitlement_enforcement($pdo, $residencialId, $form['plan_id'] !== '' ? 'strict' : 'compat');
         service_profile_save($pdo, $residencialId, $serviceInput);
 
         sa_json_out(true, [

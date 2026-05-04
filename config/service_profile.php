@@ -94,6 +94,384 @@ if (!function_exists('service_profile_labels')) {
     }
 }
 
+if (!function_exists('service_profile_plan_schema_ensure')) {
+    function service_profile_plan_schema_ensure(PDO $pdo): void
+    {
+        if (!operational_table_exists($pdo, 'planes')) {
+            return;
+        }
+
+        if (!operational_column_exists($pdo, 'planes', 'entitlements')) {
+            $pdo->exec("
+                ALTER TABLE planes
+                ADD COLUMN entitlements LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL
+                AFTER limites
+            ");
+        }
+    }
+}
+
+if (!function_exists('service_profile_plan_aliases')) {
+    function service_profile_plan_aliases(): array
+    {
+        return [
+            'accesos' => 'accesos',
+            'control_acceso' => 'accesos',
+            'control_de_accesos' => 'accesos',
+            'visitas' => 'visitas',
+            'visitas_residente' => 'visitas',
+            'paqueteria' => 'paqueteria',
+            'pagos' => 'pagos',
+            'comunicados' => 'comunicados',
+            'servicios' => 'servicios',
+            'servicios_directorio' => 'servicios',
+            'autos' => 'autos',
+            'guardias' => 'guardias',
+            'guardias_admin_actions' => 'guardias_admin_actions',
+            'acciones_guardias_admin' => 'guardias_admin_actions',
+            'residentes' => 'residentes',
+            'unidades' => 'unidades',
+            'incidencias' => 'incidencias',
+            'personal_recurrente' => 'personal_recurrente',
+            'visitantes_rapidos' => 'visitantes_rapidos',
+            'materiales' => 'materiales',
+            'materiales_equipos' => 'materiales',
+            'solicitudes_pendientes' => 'solicitudes_pendientes',
+            'bitacora_operativa' => 'bitacora_operativa',
+            'rondines' => 'bitacora_operativa',
+        ];
+    }
+}
+
+if (!function_exists('service_profile_plan_normalize_feature_name')) {
+    function service_profile_plan_normalize_feature_name(?string $value): string
+    {
+        $raw = mb_strtolower(trim((string)($value ?? '')));
+        if ($raw === '') {
+            return '';
+        }
+        $raw = str_replace([' ', '-'], '_', $raw);
+        return service_profile_plan_aliases()[$raw] ?? $raw;
+    }
+}
+
+if (!function_exists('service_profile_plan_fallback_catalog')) {
+    function service_profile_plan_fallback_catalog(): array
+    {
+        $basicModules = [
+            'unidades',
+            'residentes',
+            'guardias',
+            'guardias_admin_actions',
+            'autos',
+            'visitas',
+            'paqueteria',
+            'comunicados',
+            'servicios',
+            'accesos',
+            'incidencias',
+        ];
+
+        $proModules = array_merge($basicModules, [
+            'pagos',
+            'personal_recurrente',
+            'visitantes_rapidos',
+            'bitacora_operativa',
+        ]);
+
+        $enterpriseModules = array_merge($proModules, [
+            'materiales',
+            'solicitudes_pendientes',
+        ]);
+
+        return [
+            'basic' => [
+                'roles' => ['admin_residencial', 'guardia', 'residente'],
+                'modules' => $basicModules,
+                'actions' => ['guardias_admin_actions'],
+                'extras' => [
+                    'permite_qr' => true,
+                    'permite_trabajadores_recurrentes' => false,
+                ],
+            ],
+            'pro' => [
+                'roles' => ['admin_residencial', 'guardia', 'residente'],
+                'modules' => $proModules,
+                'actions' => ['guardias_admin_actions'],
+                'extras' => [
+                    'permite_qr' => true,
+                    'permite_trabajadores_recurrentes' => true,
+                ],
+            ],
+            'enterprise' => [
+                'roles' => ['admin_residencial', 'guardia', 'residente'],
+                'modules' => $enterpriseModules,
+                'actions' => ['guardias_admin_actions'],
+                'extras' => [
+                    'permite_qr' => true,
+                    'permite_trabajadores_recurrentes' => true,
+                ],
+            ],
+        ];
+    }
+}
+
+if (!function_exists('service_profile_plan_fallback_entitlements')) {
+    function service_profile_plan_fallback_entitlements(?string $planCode): array
+    {
+        $code = mb_strtolower(trim((string)($planCode ?? '')));
+        $catalog = service_profile_plan_fallback_catalog();
+        return $catalog[$code] ?? [
+            'roles' => ['admin_residencial', 'guardia', 'residente'],
+            'modules' => array_values(array_unique(array_map(
+                static fn(array $meta): string => service_profile_plan_normalize_feature_name((string)($meta['module'] ?? '')),
+                service_profile_module_catalog()
+            ))),
+            'actions' => ['guardias_admin_actions'],
+            'extras' => [
+                'permite_qr' => true,
+                'permite_trabajadores_recurrentes' => true,
+            ],
+        ];
+    }
+}
+
+if (!function_exists('service_profile_plan_parse_json')) {
+    function service_profile_plan_parse_json($value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+        if (!is_string($value)) {
+            return [];
+        }
+        $value = trim($value);
+        if ($value === '') {
+            return [];
+        }
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+}
+
+if (!function_exists('service_profile_plan_normalize_array_values')) {
+    function service_profile_plan_normalize_array_values(array $values, callable $normalizer): array
+    {
+        $normalized = [];
+        foreach ($values as $value) {
+            $item = $normalizer($value);
+            if ($item === '') {
+                continue;
+            }
+            $normalized[] = $item;
+        }
+        return array_values(array_unique($normalized));
+    }
+}
+
+if (!function_exists('service_profile_plan_resolve_entitlements')) {
+    function service_profile_plan_resolve_entitlements(?array $planRow): ?array
+    {
+        if (!$planRow || (int)($planRow['id'] ?? 0) <= 0) {
+            return null;
+        }
+
+        $code = mb_strtolower(trim((string)($planRow['codigo'] ?? '')));
+        $limits = service_profile_plan_parse_json($planRow['limites'] ?? null);
+        $structured = service_profile_plan_parse_json($planRow['entitlements'] ?? null);
+        $fallback = service_profile_plan_fallback_entitlements($code);
+
+        $roles = service_profile_plan_normalize_array_values(
+            (array)($structured['roles_incluidos'] ?? $limits['roles_incluidos'] ?? $fallback['roles'] ?? []),
+            'service_profile_normalize_role_name'
+        );
+        if (!$roles) {
+            $roles = $fallback['roles'];
+        }
+
+        $modules = service_profile_plan_normalize_array_values(
+            (array)($structured['modulos_incluidos'] ?? $limits['modulos_incluidos'] ?? $fallback['modules'] ?? []),
+            'service_profile_plan_normalize_feature_name'
+        );
+        if (!$modules) {
+            $modules = $fallback['modules'];
+        }
+
+        $actions = service_profile_plan_normalize_array_values(
+            (array)($structured['acciones_incluidas'] ?? $limits['acciones_incluidas'] ?? $fallback['actions'] ?? []),
+            'service_profile_plan_normalize_feature_name'
+        );
+        if (!$actions) {
+            $actions = $fallback['actions'];
+        }
+
+        $extras = array_merge(
+            [
+                'permite_qr' => true,
+                'permite_trabajadores_recurrentes' => true,
+            ],
+            $fallback['extras'] ?? [],
+            is_array($limits['extras'] ?? null) ? $limits['extras'] : [],
+            is_array($structured['extras'] ?? null) ? $structured['extras'] : []
+        );
+
+        return [
+            'id' => (int)$planRow['id'],
+            'nombre' => (string)($planRow['nombre'] ?? ''),
+            'codigo' => $code,
+            'descripcion' => (string)($planRow['descripcion'] ?? ''),
+            'periodo' => (string)($planRow['periodo'] ?? ''),
+            'precio_mensual' => isset($planRow['precio_mensual']) ? (float)$planRow['precio_mensual'] : null,
+            'precio_anual' => isset($planRow['precio_anual']) ? (float)$planRow['precio_anual'] : null,
+            'activo' => (int)($planRow['activo'] ?? 0) === 1,
+            'roles' => $roles,
+            'modules' => $modules,
+            'actions' => $actions,
+            'extras' => [
+                'permite_qr' => !empty($extras['permite_qr']),
+                'permite_trabajadores_recurrentes' => !empty($extras['permite_trabajadores_recurrentes']),
+            ],
+            'limits' => [
+                'max_casas' => isset($limits['max_casas']) ? (int)$limits['max_casas'] : null,
+                'max_guardias' => isset($limits['max_guardias']) ? (int)$limits['max_guardias'] : null,
+            ],
+            'has_structured_entitlements' => !empty($structured),
+            'valid' => true,
+        ];
+    }
+}
+
+if (!function_exists('service_profile_fetch_plan')) {
+    function service_profile_fetch_plan(PDO $pdo, int $planId): ?array
+    {
+        if ($planId <= 0 || !operational_table_exists($pdo, 'planes')) {
+            return null;
+        }
+
+        service_profile_plan_schema_ensure($pdo);
+
+        $hasEntitlementsColumn = operational_column_exists($pdo, 'planes', 'entitlements');
+        $sql = "
+            SELECT id, nombre, codigo, descripcion, periodo, precio_mensual, precio_anual, limites, activo" .
+            ($hasEntitlementsColumn ? ", entitlements" : "") . "
+            FROM planes
+            WHERE id = :id
+            LIMIT 1
+        ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['id' => $planId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        return service_profile_plan_resolve_entitlements($row);
+    }
+}
+
+if (!function_exists('service_profile_fetch_active_plans')) {
+    function service_profile_fetch_active_plans(PDO $pdo): array
+    {
+        if (!operational_table_exists($pdo, 'planes')) {
+            return [];
+        }
+
+        service_profile_plan_schema_ensure($pdo);
+
+        $hasEntitlementsColumn = operational_column_exists($pdo, 'planes', 'entitlements');
+        $sql = "
+            SELECT id, nombre, codigo, descripcion, periodo, precio_mensual, precio_anual, limites, activo" .
+            ($hasEntitlementsColumn ? ", entitlements" : "") . "
+            FROM planes
+            WHERE activo = 1
+            ORDER BY precio_mensual ASC, nombre ASC
+        ";
+
+        $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return array_values(array_filter(array_map(
+            'service_profile_plan_resolve_entitlements',
+            $rows
+        )));
+    }
+}
+
+if (!function_exists('service_profile_entitlement_mode_normalize')) {
+    function service_profile_entitlement_mode_normalize(?string $mode): string
+    {
+        $mode = mb_strtolower(trim((string)($mode ?? '')));
+        return in_array($mode, ['compat', 'strict'], true) ? $mode : 'compat';
+    }
+}
+
+if (!function_exists('service_profile_plan_status_operational')) {
+    function service_profile_plan_status_operational(?string $status): bool
+    {
+        $status = mb_strtolower(trim((string)($status ?? '')));
+        return in_array($status, ['activo', 'prueba'], true);
+    }
+}
+
+if (!function_exists('service_profile_plan_allowed_flags')) {
+    function service_profile_plan_allowed_flags(?array $plan, string $preset, array $residencial = []): array
+    {
+        if (!$plan || empty($plan['valid'])) {
+            return service_profile_defaults($preset);
+        }
+
+        $roles = array_values(array_unique(array_map(
+            'service_profile_normalize_role_name',
+            (array)($plan['roles'] ?? [])
+        )));
+        $modules = array_values(array_unique(array_map(
+            'service_profile_plan_normalize_feature_name',
+            array_merge((array)($plan['modules'] ?? []), (array)($plan['actions'] ?? []))
+        )));
+
+        $allowed = ['preset_servicio' => service_profile_normalize_preset($preset)];
+        foreach (service_profile_all_flags() as $flag) {
+            $allowed[$flag] = 0;
+        }
+
+        $roleFlags = service_profile_role_flag_map();
+        foreach ($roleFlags as $role => $flag) {
+            $allowed[$flag] = in_array($role, $roles, true) ? 1 : 0;
+        }
+
+        foreach (service_profile_module_catalog() as $flag => $meta) {
+            $moduleName = service_profile_plan_normalize_feature_name((string)($meta['module'] ?? ''));
+            $allowed[$flag] = in_array($moduleName, $modules, true) ? 1 : 0;
+        }
+
+        foreach (service_profile_module_catalog() as $flag => $meta) {
+            if ((int)($allowed[$flag] ?? 0) !== 1) {
+                continue;
+            }
+
+            $supportedRoles = array_values(array_unique(array_map(
+                'service_profile_normalize_role_name',
+                (array)($meta['roles'] ?? [])
+            )));
+
+            if ($supportedRoles && !array_intersect($supportedRoles, $roles)) {
+                $allowed[$flag] = 0;
+                continue;
+            }
+
+            foreach ((array)($meta['depends_on'] ?? []) as $dependencyFlag) {
+                if ((int)($allowed[$dependencyFlag] ?? 0) !== 1) {
+                    $allowed[$flag] = 0;
+                    break;
+                }
+            }
+        }
+
+        if (empty($plan['extras']['permite_qr']) || (int)($residencial['permite_qr'] ?? 1) !== 1) {
+            $allowed['habilita_control_acceso'] = 0;
+        }
+        if (empty($plan['extras']['permite_trabajadores_recurrentes']) || (int)($residencial['permite_trabajadores_recurrentes'] ?? 1) !== 1) {
+            $allowed['habilita_personal_recurrente'] = 0;
+        }
+
+        return service_profile_sanitize_flags($allowed);
+    }
+}
+
 if (!function_exists('service_profile_defaults')) {
     function service_profile_defaults(string $preset = 'residencial'): array
     {
@@ -187,6 +565,7 @@ if (!function_exists('service_profile_schema_ensure')) {
         }
 
         operational_schema_ensure($pdo);
+        service_profile_plan_schema_ensure($pdo);
 
         if (!operational_table_exists($pdo, 'residenciales_servicio_config')) {
             $pdo->exec("
@@ -194,6 +573,7 @@ if (!function_exists('service_profile_schema_ensure')) {
                     id INT(11) NOT NULL AUTO_INCREMENT,
                     residencial_id INT(11) NOT NULL,
                     preset_servicio VARCHAR(30) NOT NULL DEFAULT 'residencial',
+                    entitlement_enforcement VARCHAR(20) NOT NULL DEFAULT 'compat',
                     habilita_admin_operativo TINYINT(1) NOT NULL DEFAULT 1,
                     habilita_guardia TINYINT(1) NOT NULL DEFAULT 1,
                     habilita_residente TINYINT(1) NOT NULL DEFAULT 1,
@@ -239,6 +619,14 @@ if (!function_exists('service_profile_schema_ensure')) {
             ");
         }
 
+        if (!operational_column_exists($pdo, 'residenciales_servicio_config', 'entitlement_enforcement')) {
+            $pdo->exec("
+                ALTER TABLE residenciales_servicio_config
+                ADD COLUMN entitlement_enforcement VARCHAR(20) NOT NULL DEFAULT 'compat'
+                AFTER preset_servicio
+            ");
+        }
+
         $done = true;
     }
 }
@@ -268,10 +656,14 @@ if (!function_exists('service_profile_seed_defaults')) {
             $defaults['habilita_personal_recurrente'] = 0;
         }
 
-        $fields = array_merge(['residencial_id', 'preset_servicio'], service_profile_all_flags());
+        $fields = array_merge(['residencial_id', 'preset_servicio', 'entitlement_enforcement'], service_profile_all_flags());
         $placeholders = array_map(static fn(string $field): string => ':' . $field, $fields);
 
-        $params = ['residencial_id' => $residencialId, 'preset_servicio' => $defaults['preset_servicio']];
+        $params = [
+            'residencial_id' => $residencialId,
+            'preset_servicio' => $defaults['preset_servicio'],
+            'entitlement_enforcement' => 'compat',
+        ];
         foreach (service_profile_all_flags() as $flag) {
             $params[$flag] = (int)($defaults[$flag] ?? 0);
         }
@@ -286,13 +678,42 @@ if (!function_exists('service_profile_seed_defaults')) {
     }
 }
 
+if (!function_exists('service_profile_set_entitlement_enforcement')) {
+    function service_profile_set_entitlement_enforcement(PDO $pdo, int $residencialId, string $mode): void
+    {
+        service_profile_schema_ensure($pdo);
+
+        $stmt = $pdo->prepare("
+            UPDATE residenciales_servicio_config
+            SET entitlement_enforcement = :mode,
+                updated_at = NOW()
+            WHERE residencial_id = :rid
+            LIMIT 1
+        ");
+        $stmt->execute([
+            'mode' => service_profile_entitlement_mode_normalize($mode),
+            'rid' => $residencialId,
+        ]);
+    }
+}
+
 if (!function_exists('service_profile_get')) {
     function service_profile_get(PDO $pdo, int $residencialId): array
     {
         service_profile_schema_ensure($pdo);
 
         $stmt = $pdo->prepare("
-            SELECT rsc.*, r.nombre AS residencial_nombre, r.modo_operacion
+            SELECT rsc.*,
+                   r.nombre AS residencial_nombre,
+                   r.modo_operacion,
+                   r.plan_id,
+                   r.estatus_plan,
+                   r.permite_qr,
+                   r.permite_trabajadores_recurrentes,
+                   r.max_casas,
+                   r.max_guardias,
+                   r.fecha_inicio_plan,
+                   r.fecha_fin_plan
             FROM residenciales_servicio_config rsc
             JOIN residenciales r ON r.id = rsc.residencial_id
             WHERE rsc.residencial_id = :rid
@@ -305,16 +726,100 @@ if (!function_exists('service_profile_get')) {
             return service_profile_seed_defaults($pdo, $residencialId);
         }
 
+        $preset = service_profile_normalize_preset((string)($row['preset_servicio'] ?? $row['modo_operacion'] ?? 'residencial'));
+        $enforcement = service_profile_entitlement_mode_normalize((string)($row['entitlement_enforcement'] ?? 'compat'));
+        $storedFlags = [];
+        foreach (service_profile_all_flags() as $flag) {
+            $storedFlags[$flag] = operational_bool_int($row[$flag] ?? 0);
+        }
+
+        $plan = service_profile_fetch_plan($pdo, (int)($row['plan_id'] ?? 0));
+        $hasValidPlan = !empty($plan['valid']);
+        $planAllowedFlags = $hasValidPlan
+            ? service_profile_plan_allowed_flags($plan, $preset, $row)
+            : service_profile_sanitize_flags(array_merge(['preset_servicio' => $preset], $storedFlags));
+
+        $effectiveFlags = $storedFlags;
+        if ($hasValidPlan && $enforcement === 'strict') {
+            foreach (service_profile_all_flags() as $flag) {
+                $effectiveFlags[$flag] = ((int)$storedFlags[$flag] === 1 && (int)($planAllowedFlags[$flag] ?? 0) === 1) ? 1 : 0;
+            }
+        }
+        $effectiveFlags = service_profile_sanitize_flags(array_merge(['preset_servicio' => $preset], $effectiveFlags));
+
+        $roleLabels = service_profile_labels()['roles'];
+        $moduleLabels = service_profile_labels()['modules'];
+        $outOfPlanFlags = [];
+        $manualOffFlags = [];
+
+        if ($hasValidPlan) {
+            foreach (service_profile_all_flags() as $flag) {
+                $storedEnabled = (int)($storedFlags[$flag] ?? 0) === 1;
+                $planAllowed = (int)($planAllowedFlags[$flag] ?? 0) === 1;
+                if ($storedEnabled && !$planAllowed) {
+                    $outOfPlanFlags[] = [
+                        'flag' => $flag,
+                        'label' => $roleLabels[$flag] ?? $moduleLabels[$flag] ?? $flag,
+                    ];
+                }
+                if (!$storedEnabled && $planAllowed) {
+                    $manualOffFlags[] = [
+                        'flag' => $flag,
+                        'label' => $roleLabels[$flag] ?? $moduleLabels[$flag] ?? $flag,
+                    ];
+                }
+            }
+        }
+
+        $alignmentCode = 'sin_plan_valido';
+        $alignmentLabel = 'Sin plan válido';
+        $alignmentMessage = 'Este servicio todavía no tiene un plan válido como fuente canónica de entitlements.';
+        if ($hasValidPlan) {
+            if ($outOfPlanFlags) {
+                $alignmentCode = 'con_capacidades_fuera_de_plan';
+                $alignmentLabel = 'Fuera de plan';
+                $alignmentMessage = 'Hay capacidades activas que ya no están incluidas en el plan actual. Se conservan temporalmente por compatibilidad.';
+            } elseif ($manualOffFlags) {
+                $alignmentCode = 'alineado_con_apagados_manuales';
+                $alignmentLabel = 'Alineado con apagados manuales';
+                $alignmentMessage = 'El servicio está dentro del plan, pero tiene capacidades apagadas manualmente.';
+            } else {
+                $alignmentCode = 'alineado';
+                $alignmentLabel = 'Alineado';
+                $alignmentMessage = 'El servicio ya está alineado por completo con su plan actual.';
+            }
+        }
+
         $profile = [
             'residencial_id' => (int)$row['residencial_id'],
-            'preset_servicio' => service_profile_normalize_preset((string)($row['preset_servicio'] ?? $row['modo_operacion'] ?? 'residencial')),
+            'preset_servicio' => $preset,
             'modo_operacion' => operational_normalize_mode((string)($row['modo_operacion'] ?? 'residencial')),
             'residencial_nombre' => (string)($row['residencial_nombre'] ?? ''),
+            'plan_id' => (int)($row['plan_id'] ?? 0),
+            'estatus_plan' => (string)($row['estatus_plan'] ?? 'activo'),
+            'fecha_inicio_plan' => (string)($row['fecha_inicio_plan'] ?? ''),
+            'fecha_fin_plan' => (string)($row['fecha_fin_plan'] ?? ''),
+            'max_casas' => isset($row['max_casas']) ? (int)$row['max_casas'] : null,
+            'max_guardias' => isset($row['max_guardias']) ? (int)$row['max_guardias'] : null,
+            'permite_qr' => (int)($row['permite_qr'] ?? 1),
+            'permite_trabajadores_recurrentes' => (int)($row['permite_trabajadores_recurrentes'] ?? 1),
+            'plan_operational' => service_profile_plan_status_operational((string)($row['estatus_plan'] ?? 'activo')),
+            'entitlement_enforcement' => $enforcement,
+            'plan' => $plan,
+            'plan_valid' => $hasValidPlan,
+            'plan_allowed_flags' => $planAllowedFlags,
+            'stored_flags' => $storedFlags,
+            'alignment' => [
+                'code' => $alignmentCode,
+                'label' => $alignmentLabel,
+                'message' => $alignmentMessage,
+                'out_of_plan_flags' => $outOfPlanFlags,
+                'manual_off_flags' => $manualOffFlags,
+            ],
         ];
         foreach (service_profile_all_flags() as $flag) {
-            $profile[$flag] = (int)($row[$flag] ?? 0);
+            $profile[$flag] = (int)($effectiveFlags[$flag] ?? 0);
         }
-        $profile = service_profile_sanitize_flags($profile);
         return $profile;
     }
 }
@@ -325,15 +830,31 @@ if (!function_exists('service_profile_save')) {
         service_profile_schema_ensure($pdo);
         $current = service_profile_get($pdo, $residencialId);
         $preset = service_profile_normalize_preset((string)($input['preset_servicio'] ?? $current['preset_servicio'] ?? $current['modo_operacion'] ?? 'residencial'));
-        $base = service_profile_defaults($preset);
-        $merged = $current;
+        $storedFlags = (array)($current['stored_flags'] ?? []);
+        $planAllowedFlags = (array)($current['plan_allowed_flags'] ?? []);
+        $enforcement = service_profile_entitlement_mode_normalize((string)($input['entitlement_enforcement'] ?? $current['entitlement_enforcement'] ?? 'compat'));
+        $merged = $storedFlags;
         $merged['preset_servicio'] = $preset;
 
         foreach (service_profile_all_flags() as $flag) {
             if (array_key_exists($flag, $input)) {
-                $merged[$flag] = operational_bool_int($input[$flag]);
-            } elseif (!array_key_exists($flag, $current)) {
-                $merged[$flag] = (int)($base[$flag] ?? 0);
+                $requested = operational_bool_int($input[$flag]);
+                $storedEnabled = (int)($storedFlags[$flag] ?? 0) === 1;
+                $planAllowed = (int)($planAllowedFlags[$flag] ?? 0) === 1;
+
+                if ($planAllowed) {
+                    $merged[$flag] = $requested;
+                    continue;
+                }
+
+                if ($storedEnabled && $enforcement === 'compat') {
+                    $merged[$flag] = 1;
+                    continue;
+                }
+
+                $merged[$flag] = 0;
+            } elseif (!array_key_exists($flag, $storedFlags)) {
+                $merged[$flag] = 0;
             }
         }
         $merged = service_profile_sanitize_flags($merged);
@@ -341,6 +862,7 @@ if (!function_exists('service_profile_save')) {
         $stmt = $pdo->prepare("
             UPDATE residenciales_servicio_config
             SET preset_servicio = :preset_servicio,
+                entitlement_enforcement = :entitlement_enforcement,
                 habilita_admin_operativo = :habilita_admin_operativo,
                 habilita_guardia = :habilita_guardia,
                 habilita_residente = :habilita_residente,
@@ -368,6 +890,7 @@ if (!function_exists('service_profile_save')) {
         $params = [
             'residencial_id' => $residencialId,
             'preset_servicio' => $preset,
+            'entitlement_enforcement' => $enforcement,
         ];
         foreach (service_profile_all_flags() as $flag) {
             $params[$flag] = (int)($merged[$flag] ?? 0);
@@ -579,6 +1102,46 @@ if (!function_exists('service_profile_assignable_roles')) {
     }
 }
 
+if (!function_exists('service_profile_plan_role_enabled')) {
+    function service_profile_plan_role_enabled(array $profile, string $role): bool
+    {
+        $role = service_profile_normalize_role_name($role);
+        $flag = service_profile_role_flag_map()[$role] ?? null;
+        if ($flag === null) {
+            return false;
+        }
+        $planAllowedFlags = (array)($profile['plan_allowed_flags'] ?? []);
+        if (empty($profile['plan_valid'])) {
+            return service_profile_role_enabled($profile, $role);
+        }
+        return (int)($planAllowedFlags[$flag] ?? 0) === 1;
+    }
+}
+
+if (!function_exists('service_profile_plan_module_enabled')) {
+    function service_profile_plan_module_enabled(array $profile, string $module): bool
+    {
+        $module = service_profile_normalize_module_name($module);
+        if (in_array($module, ['home', 'perfil', 'reglamento', 'contexto'], true)) {
+            return true;
+        }
+
+        if (empty($profile['plan_valid'])) {
+            return service_profile_module_enabled($profile, $module);
+        }
+
+        $planAllowedFlags = (array)($profile['plan_allowed_flags'] ?? []);
+        foreach (service_profile_module_catalog() as $flag => $meta) {
+            if (service_profile_normalize_module_name((string)($meta['module'] ?? '')) !== $module) {
+                continue;
+            }
+            return (int)($planAllowedFlags[$flag] ?? 0) === 1;
+        }
+
+        return false;
+    }
+}
+
 if (!function_exists('service_profile_sanitize_flags')) {
     function service_profile_sanitize_flags(array $flags): array
     {
@@ -631,11 +1194,11 @@ if (!function_exists('service_profile_role_assignable_to_service')) {
         if ($role === '' || $role === 'super_admin') {
             return false;
         }
-        if (!service_profile_role_enabled($profile, $role)) {
+        if (!service_profile_plan_role_enabled($profile, $role)) {
             return false;
         }
 
-        return !empty(service_profile_role_operable_views($profile, $role));
+        return !empty(service_profile_role_assignable_views($profile, $role));
     }
 }
 
@@ -647,18 +1210,18 @@ if (!function_exists('service_profile_role_pending_reason')) {
         $roleFlagMap = service_profile_role_flag_map();
         $roleLabel = $labels['roles'][$roleFlagMap[$role] ?? ''] ?? ucfirst(str_replace('_', ' ', $role));
 
-        if (!service_profile_role_enabled($profile, $role)) {
+        if (!service_profile_plan_role_enabled($profile, $role)) {
             return [
                 'code' => 'role_disabled',
-                'message' => sprintf('El rol %s no está habilitado para este servicio.', $roleLabel),
+                'message' => sprintf('El rol %s no está incluido en el plan actual de este servicio.', $roleLabel),
             ];
         }
 
-        $operableViews = service_profile_role_operable_views($profile, $role);
+        $operableViews = service_profile_role_assignable_views($profile, $role);
         if ($operableViews) {
             return [
                 'code' => 'ready',
-                'message' => sprintf('El rol %s ya tiene vistas operables para este servicio.', $roleLabel),
+                'message' => sprintf('El rol %s ya tiene vistas operables incluidas en el plan para este servicio.', $roleLabel),
             ];
         }
 
@@ -681,9 +1244,10 @@ if (!function_exists('service_profile_role_pending_reason')) {
             ];
         }
 
+        $planAllowedFlags = (array)($profile['plan_allowed_flags'] ?? []);
         $enabledModuleLabels = [];
         foreach ($configurableModules as $moduleMeta) {
-            if ((int)($profile[$moduleMeta['flag']] ?? 0) === 1) {
+            if ((int)($planAllowedFlags[$moduleMeta['flag']] ?? 0) === 1) {
                 $enabledModuleLabels[] = $moduleMeta['label'];
             }
         }
@@ -856,6 +1420,25 @@ if (!function_exists('service_profile_module_allowed_for_role_and_service')) {
     }
 }
 
+if (!function_exists('service_profile_assignable_module_allowed_for_role_and_service')) {
+    function service_profile_assignable_module_allowed_for_role_and_service(array $profile, string $role, string $module): bool
+    {
+        $role = service_profile_normalize_role_name($role);
+        $module = service_profile_normalize_module_name($module);
+
+        if (!service_profile_plan_role_enabled($profile, $role)) {
+            return false;
+        }
+
+        $roleModules = service_profile_role_module_matrix()[$role] ?? [];
+        if (!in_array($module, $roleModules, true)) {
+            return false;
+        }
+
+        return service_profile_plan_module_enabled($profile, $module);
+    }
+}
+
 if (!function_exists('service_profile_view_allowed_for_role_and_service')) {
     function service_profile_view_allowed_for_role_and_service(array $profile, string $role, string $view): bool
     {
@@ -883,6 +1466,21 @@ if (!function_exists('service_profile_allowed_views_raw')) {
     }
 }
 
+if (!function_exists('service_profile_assignable_views_raw')) {
+    function service_profile_assignable_views_raw(array $profile, string $role): array
+    {
+        $role = service_profile_normalize_role_name($role);
+        $views = service_profile_role_view_matrix()[$role] ?? [];
+        if (!$views) {
+            return [];
+        }
+
+        return array_values(array_keys(array_filter($views, static function (string $module, string $view) use ($profile, $role): bool {
+            return service_profile_assignable_module_allowed_for_role_and_service($profile, $role, $module);
+        }, ARRAY_FILTER_USE_BOTH)));
+    }
+}
+
 if (!function_exists('service_profile_role_operable_views')) {
     function service_profile_role_operable_views(array $profile, string $role): array
     {
@@ -894,6 +1492,83 @@ if (!function_exists('service_profile_role_operable_views')) {
         return array_values(array_filter($rawViews, static function (string $view): bool {
             return !in_array($view, service_profile_common_views(), true);
         }));
+    }
+}
+
+if (!function_exists('service_profile_role_assignable_views')) {
+    function service_profile_role_assignable_views(array $profile, string $role): array
+    {
+        $rawViews = service_profile_assignable_views_raw($profile, $role);
+        if (!$rawViews) {
+            return [];
+        }
+
+        return array_values(array_filter($rawViews, static function (string $view): bool {
+            return !in_array($view, service_profile_common_views(), true);
+        }));
+    }
+}
+
+if (!function_exists('service_profile_role_runtime_pending_reason')) {
+    function service_profile_role_runtime_pending_reason(array $profile, string $role): array
+    {
+        $role = service_profile_normalize_role_name($role);
+        $labels = service_profile_labels();
+        $roleFlagMap = service_profile_role_flag_map();
+        $roleLabel = $labels['roles'][$roleFlagMap[$role] ?? ''] ?? ucfirst(str_replace('_', ' ', $role));
+
+        if (!service_profile_plan_status_operational((string)($profile['estatus_plan'] ?? 'activo'))) {
+            return [
+                'code' => 'plan_not_operational',
+                'message' => 'El plan del servicio está suspendido o cancelado, así que este operador no puede usarlo por ahora.',
+            ];
+        }
+
+        if (!service_profile_role_enabled($profile, $role)) {
+            return [
+                'code' => 'role_disabled',
+                'message' => sprintf('El rol %s no está habilitado actualmente en este servicio.', $roleLabel),
+            ];
+        }
+
+        $operableViews = service_profile_role_operable_views($profile, $role);
+        if ($operableViews) {
+            return [
+                'code' => 'ready',
+                'message' => sprintf('El rol %s ya tiene vistas operables reales para este servicio.', $roleLabel),
+            ];
+        }
+
+        $roleModules = service_profile_role_module_matrix()[$role] ?? [];
+        $enabledModuleLabels = [];
+        foreach (service_profile_module_catalog() as $flag => $meta) {
+            $moduleName = service_profile_normalize_module_name((string)($meta['module'] ?? ''));
+            if ($moduleName === '' || !in_array($role, (array)($meta['roles'] ?? []), true)) {
+                continue;
+            }
+            if (!in_array($moduleName, $roleModules, true) || !empty($meta['support_only'])) {
+                continue;
+            }
+            if ((int)($profile[$flag] ?? 0) === 1) {
+                $enabledModuleLabels[] = $labels['modules'][$flag] ?? $flag;
+            }
+        }
+
+        if ($enabledModuleLabels) {
+            return [
+                'code' => 'no_operable_views',
+                'message' => sprintf(
+                    'El rol %s tiene módulos activos (%s), pero todavía no quedó con vistas operables reales.',
+                    $roleLabel,
+                    implode(', ', $enabledModuleLabels)
+                ),
+            ];
+        }
+
+        return [
+            'code' => 'missing_modules',
+            'message' => sprintf('Activa al menos un módulo operable para %s dentro del servicio.', $roleLabel),
+        ];
     }
 }
 
@@ -910,8 +1585,18 @@ if (!function_exists('service_profile_operator_status_for_service')) {
             ];
         }
 
-        if (!service_profile_role_assignable_to_service($profile, $role)) {
-            $reason = service_profile_role_pending_reason($profile, $role);
+        if (!service_profile_plan_status_operational((string)($profile['estatus_plan'] ?? 'activo'))) {
+            return [
+                'code' => 'suspendido_plan',
+                'label' => 'Suspendido por plan',
+                'ready' => false,
+                'reason_code' => 'plan_not_operational',
+                'reason_message' => 'El servicio está suspendido o cancelado por plan y no puede operar en este momento.',
+            ];
+        }
+
+        if (empty(service_profile_role_operable_views($profile, $role))) {
+            $reason = service_profile_role_runtime_pending_reason($profile, $role);
             return [
                 'code' => 'pendiente',
                 'label' => 'Pendiente',
@@ -935,7 +1620,7 @@ if (!function_exists('service_profile_allowed_views')) {
     function service_profile_allowed_views(array $profile, string $role): array
     {
         $role = service_profile_normalize_role_name($role);
-        if ($role === '' || !service_profile_role_enabled($profile, $role)) {
+        if ($role === '' || !service_profile_role_enabled($profile, $role) || !service_profile_plan_status_operational((string)($profile['estatus_plan'] ?? 'activo'))) {
             return [];
         }
 
@@ -966,6 +1651,13 @@ if (!function_exists('service_profile_require_role_enabled')) {
     function service_profile_require_role_enabled(PDO $pdo, int $residencialId, string $role, ?string $message = null): array
     {
         $profile = service_profile_get($pdo, $residencialId);
+        if (!service_profile_plan_status_operational((string)($profile['estatus_plan'] ?? 'activo'))) {
+            $title = 'Servicio suspendido por plan';
+            $msg = 'El plan de este servicio está suspendido o cancelado y no puede operar en este momento.';
+            app_abort(403, $title, $msg, [
+                ['label' => 'Cerrar sesión', 'href' => app_logout_url()],
+            ]);
+        }
         if (!service_profile_role_enabled($profile, $role)) {
             $title = 'Servicio no disponible para este cliente';
             $msg = $message ?: 'Este rol no está habilitado para el perfil de servicio configurado.';
@@ -1013,23 +1705,49 @@ if (!function_exists('service_profile_frontend_payload')) {
         return [
             'preset_servicio' => $profile['preset_servicio'],
             'modo_operacion' => $profile['modo_operacion'],
+            'plan_id' => $profile['plan_id'] ?? 0,
+            'estatus_plan' => $profile['estatus_plan'] ?? 'activo',
+            'plan_operational' => !empty($profile['plan_operational']),
+            'plan_valid' => !empty($profile['plan_valid']),
+            'plan' => $profile['plan'] ?? null,
+            'entitlement_enforcement' => $profile['entitlement_enforcement'] ?? 'compat',
+            'alignment' => $profile['alignment'] ?? null,
             'assignable_roles' => service_profile_assignable_roles($profile),
             'role_assignable' => service_profile_role_assignable_to_service($profile, $role),
             'roles' => array_reduce(service_profile_role_flags(), static function (array $carry, string $flag) use ($profile, $labels): array {
+                $storedFlags = (array)($profile['stored_flags'] ?? []);
+                $planAllowedFlags = (array)($profile['plan_allowed_flags'] ?? []);
                 $carry[$flag] = [
                     'enabled' => (int)($profile[$flag] ?? 0) === 1,
+                    'stored_enabled' => (int)($storedFlags[$flag] ?? 0) === 1,
+                    'plan_allowed' => empty($profile['plan_valid']) ? true : ((int)($planAllowedFlags[$flag] ?? 0) === 1),
+                    'source' => empty($profile['plan_valid'])
+                        ? 'sin_plan'
+                        : (((int)($planAllowedFlags[$flag] ?? 0) === 1)
+                            ? ((int)($storedFlags[$flag] ?? 0) === 1 ? 'plan' : 'apagado_manual')
+                            : ((int)($storedFlags[$flag] ?? 0) === 1 ? 'fuera_de_plan' : 'bloqueado_por_plan')),
                     'label' => $labels['roles'][$flag] ?? $flag,
                 ];
                 return $carry;
             }, []),
             'modules' => array_reduce(service_profile_module_flags(), static function (array $carry, string $flag) use ($profile, $labels): array {
+                $storedFlags = (array)($profile['stored_flags'] ?? []);
+                $planAllowedFlags = (array)($profile['plan_allowed_flags'] ?? []);
                 $carry[$flag] = [
                     'enabled' => (int)($profile[$flag] ?? 0) === 1,
+                    'stored_enabled' => (int)($storedFlags[$flag] ?? 0) === 1,
+                    'plan_allowed' => empty($profile['plan_valid']) ? true : ((int)($planAllowedFlags[$flag] ?? 0) === 1),
+                    'source' => empty($profile['plan_valid'])
+                        ? 'sin_plan'
+                        : (((int)($planAllowedFlags[$flag] ?? 0) === 1)
+                            ? ((int)($storedFlags[$flag] ?? 0) === 1 ? 'plan' : 'apagado_manual')
+                            : ((int)($storedFlags[$flag] ?? 0) === 1 ? 'fuera_de_plan' : 'bloqueado_por_plan')),
                     'label' => $labels['modules'][$flag] ?? $flag,
                 ];
                 return $carry;
             }, []),
             'operable_views' => service_profile_role_operable_views($profile, $role),
+            'assignable_views' => service_profile_role_assignable_views($profile, $role),
             'allowed_views' => service_profile_allowed_views($profile, $role),
             'matrix' => service_profile_frontend_matrix(),
         ];

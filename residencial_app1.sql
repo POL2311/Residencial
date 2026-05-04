@@ -410,6 +410,7 @@ CREATE TABLE `planes` (
   `precio_mensual` decimal(10,2) NOT NULL DEFAULT 0.00,
   `precio_anual` decimal(10,2) NOT NULL DEFAULT 0.00,
   `limites` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`limites`)),
+  `entitlements` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`entitlements`)),
   `activo` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -419,10 +420,10 @@ CREATE TABLE `planes` (
 -- Volcado de datos para la tabla `planes`
 --
 
-INSERT INTO `planes` (`id`, `nombre`, `codigo`, `descripcion`, `periodo`, `precio_mensual`, `precio_anual`, `limites`, `activo`, `created_at`, `updated_at`) VALUES
-(1, 'Básico', 'basic', 'Ideal para residenciales pequeños.', 'mensual', 499.00, 4990.00, '{\"max_casas\": 100, \"max_guardias\": 5, \"modulos_incluidos\": [\"accesos\", \"paqueteria\"]}', 1, '2025-11-28 22:01:36', '2025-11-28 22:01:36'),
-(2, 'Pro', 'pro', 'Incluye rondines e incidencias avanzadas.', 'mensual', 999.00, 9990.00, '{\"max_casas\": 300, \"max_guardias\": 15, \"modulos_incluidos\": [\"accesos\", \"paqueteria\", \"rondines\", \"incidencias\"]}', 1, '2025-11-28 22:01:36', '2025-11-28 22:01:36'),
-(3, 'Enterprise', 'enterprise', 'Para grupos residenciales grandes y personalización.', 'mensual', 1999.00, 19990.00, '{\"max_casas\": 1000, \"max_guardias\": 50, \"modulos_incluidos\": [\"accesos\", \"paqueteria\", \"rondines\", \"incidencias\", \"analytics\"]}', 1, '2025-11-28 22:01:36', '2025-11-28 22:01:36');
+INSERT INTO `planes` (`id`, `nombre`, `codigo`, `descripcion`, `periodo`, `precio_mensual`, `precio_anual`, `limites`, `entitlements`, `activo`, `created_at`, `updated_at`) VALUES
+(1, 'Básico', 'basic', 'Ideal para residenciales pequeños.', 'mensual', 499.00, 4990.00, '{\"max_casas\": 100, \"max_guardias\": 5}', '{\"roles_incluidos\":[\"admin_residencial\",\"guardia\",\"residente\"],\"modulos_incluidos\":[\"unidades\",\"residentes\",\"guardias\",\"guardias_admin_actions\",\"autos\",\"visitas\",\"paqueteria\",\"comunicados\",\"servicios\",\"accesos\",\"incidencias\"],\"acciones_incluidas\":[\"guardias_admin_actions\"],\"extras\":{\"permite_qr\":true,\"permite_trabajadores_recurrentes\":false}}', 1, '2025-11-28 22:01:36', '2025-11-28 22:01:36'),
+(2, 'Pro', 'pro', 'Incluye rondines e incidencias avanzadas.', 'mensual', 999.00, 9990.00, '{\"max_casas\": 300, \"max_guardias\": 15}', '{\"roles_incluidos\":[\"admin_residencial\",\"guardia\",\"residente\"],\"modulos_incluidos\":[\"unidades\",\"residentes\",\"guardias\",\"guardias_admin_actions\",\"autos\",\"visitas\",\"paqueteria\",\"pagos\",\"comunicados\",\"servicios\",\"accesos\",\"incidencias\",\"personal_recurrente\",\"visitantes_rapidos\",\"bitacora_operativa\"],\"acciones_incluidas\":[\"guardias_admin_actions\"],\"extras\":{\"permite_qr\":true,\"permite_trabajadores_recurrentes\":true}}', 1, '2025-11-28 22:01:36', '2025-11-28 22:01:36'),
+(3, 'Enterprise', 'enterprise', 'Para grupos residenciales grandes y personalización.', 'mensual', 1999.00, 19990.00, '{\"max_casas\": 1000, \"max_guardias\": 50}', '{\"roles_incluidos\":[\"admin_residencial\",\"guardia\",\"residente\"],\"modulos_incluidos\":[\"unidades\",\"residentes\",\"guardias\",\"guardias_admin_actions\",\"autos\",\"visitas\",\"paqueteria\",\"pagos\",\"comunicados\",\"servicios\",\"accesos\",\"incidencias\",\"personal_recurrente\",\"visitantes_rapidos\",\"bitacora_operativa\",\"materiales\",\"solicitudes_pendientes\"],\"acciones_incluidas\":[\"guardias_admin_actions\"],\"extras\":{\"permite_qr\":true,\"permite_trabajadores_recurrentes\":true}}', 1, '2025-11-28 22:01:36', '2025-11-28 22:01:36');
 
 -- --------------------------------------------------------
 
