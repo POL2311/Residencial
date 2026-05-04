@@ -357,6 +357,58 @@ try {
         ]);
     }
 
+    if ($action === 'remove_assignment') {
+        sa_require_csrf();
+
+        $userId = (int)($_POST['user_id'] ?? 0);
+        $residencialId = (int)($_POST['residencial_id'] ?? 0);
+
+        if ($userId <= 0 || $residencialId <= 0) {
+            sa_json_out(false, ['error' => 'Debes indicar un operador y un servicio válidos.'], 422);
+        }
+
+        $stmtAssignment = $pdo->prepare("
+            SELECT ur.id, ur.es_principal, u.name, u.email
+            FROM usuarios_residenciales ur
+            JOIN users u ON u.id = ur.user_id
+            WHERE ur.user_id = :user_id
+              AND ur.residencial_id = :residencial_id
+            LIMIT 1
+        ");
+        $stmtAssignment->execute([
+            'user_id' => $userId,
+            'residencial_id' => $residencialId,
+        ]);
+        $assignment = $stmtAssignment->fetch(PDO::FETCH_ASSOC);
+
+        if (!$assignment) {
+            sa_json_out(false, ['error' => 'No encontramos la asignación de ese operador en el servicio seleccionado.'], 404);
+        }
+
+        $delete = $pdo->prepare("
+            DELETE FROM usuarios_residenciales
+            WHERE user_id = :user_id
+              AND residencial_id = :residencial_id
+            LIMIT 1
+        ");
+        $delete->execute([
+            'user_id' => $userId,
+            'residencial_id' => $residencialId,
+        ]);
+
+        sa_json_out(true, [
+            'message' => 'Operador removido del servicio correctamente. La cuenta se conservó.',
+            'data' => [
+                'user' => [
+                    'id' => $userId,
+                    'name' => (string)($assignment['name'] ?? ''),
+                    'email' => (string)($assignment['email'] ?? ''),
+                ],
+                'residencial_id' => $residencialId,
+            ],
+        ]);
+    }
+
     if ($action === 'disable_user') {
         sa_require_csrf();
 

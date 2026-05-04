@@ -4,6 +4,7 @@
     root.dataset.bound = '1';
 
     const API = (window.SuperadminDashboard?.API || '/superadmin/php/api/') + 'residenciales.php';
+    const USERS_API = (window.SuperadminDashboard?.API || '/superadmin/php/api/') + 'usuarios.php';
     const PER_PAGE = 3;
     const els = {
         alert: document.getElementById('residencialesAlert'),
@@ -105,6 +106,107 @@
         if (!el) return;
         el.textContent = '';
         el.classList.add('hidden');
+    }
+
+    function usersApi(data) {
+        const fd = new FormData();
+        Object.entries(data || {}).forEach(([key, value]) => fd.append(key, value));
+        return fetch(USERS_API, {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json' },
+        }).then(async (res) => {
+            const json = await res.json().catch(() => null);
+            if (!res.ok || !json || !json.ok) throw new Error(json?.error || 'No se pudo procesar la solicitud.');
+            return json;
+        });
+    }
+
+    function ensureConfirmLayer() {
+        if (document.getElementById('superadminServiceConfirm')) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+            <div id="superadminServiceConfirm" class="hidden fixed inset-0 z-[10080] items-center justify-center bg-black/55 p-4">
+              <div class="w-full max-w-md overflow-hidden rounded-[1.75rem] bg-white shadow-2xl">
+                <div class="p-6">
+                  <div class="flex items-start gap-4">
+                    <div id="superadminServiceConfirmIcon" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-xl font-semibold text-rose-700">!</div>
+                    <div class="flex-1">
+                      <h3 id="superadminServiceConfirmTitle" class="text-xl font-semibold text-slate-900">Confirmar acción</h3>
+                      <p id="superadminServiceConfirmMessage" class="mt-2 text-sm leading-6 text-slate-600">¿Deseas continuar?</p>
+                    </div>
+                  </div>
+                  <div class="mt-6 flex justify-end gap-3">
+                    <button id="superadminServiceConfirmCancel" type="button" class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">Cancelar</button>
+                    <button id="superadminServiceConfirmAccept" type="button" class="rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">Eliminar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        `;
+        document.body.appendChild(wrapper.firstElementChild);
+    }
+
+    function showConfirm({
+        title = 'Confirmar acción',
+        message = '¿Deseas continuar?',
+        acceptText = 'Aceptar',
+        cancelText = 'Cancelar',
+    } = {}) {
+        ensureConfirmLayer();
+
+        return new Promise((resolve) => {
+            const modal = document.getElementById('superadminServiceConfirm');
+            const titleEl = document.getElementById('superadminServiceConfirmTitle');
+            const messageEl = document.getElementById('superadminServiceConfirmMessage');
+            const acceptBtn = document.getElementById('superadminServiceConfirmAccept');
+            const cancelBtn = document.getElementById('superadminServiceConfirmCancel');
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            acceptBtn.textContent = acceptText;
+            cancelBtn.textContent = cancelText;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                acceptBtn.onclick = null;
+                cancelBtn.onclick = null;
+                modal.onclick = null;
+                document.removeEventListener('keydown', onKeydown);
+            };
+
+            const onKeydown = (event) => {
+                if (event.key === 'Escape') {
+                    cleanup();
+                    resolve(false);
+                }
+            };
+
+            acceptBtn.onclick = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            cancelBtn.onclick = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            modal.onclick = (event) => {
+                if (event.target === modal) {
+                    cleanup();
+                    resolve(false);
+                }
+            };
+
+            document.addEventListener('keydown', onKeydown);
+        });
     }
 
     async function api(data) {
@@ -292,8 +394,9 @@
                           <dd class="mt-1 text-slate-700">${escapeHtml(modules)}</dd>
                         </div>
                       </dl>
-                      <div class="mt-4 flex justify-end">
+                      <div class="mt-4 flex justify-end gap-2">
                         <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Configurar</button>
+                        <button type="button" data-service-disable-id="${escapeHtml(item.id)}" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 hover:bg-rose-100">Eliminar</button>
                       </div>
                     </article>
                   `;
@@ -333,7 +436,10 @@
                         </div>
                         <div class="flex h-full min-h-[90px] flex-col items-end justify-between gap-4">
                           <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusClass(item.estatus_plan)}">${escapeHtml(item.estatus_label || item.estatus_plan || '—')}</span>
-                          <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Configurar</button>
+                          <div class="flex flex-wrap justify-end gap-2">
+                            <button type="button" data-service-profile-id="${escapeHtml(item.id)}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Configurar</button>
+                            <button type="button" data-service-disable-id="${escapeHtml(item.id)}" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700 hover:bg-rose-100">Eliminar</button>
+                          </div>
                         </div>
                       </div>
                     </article>
@@ -542,6 +648,9 @@
                 <div class="text-right">
                   <div class="text-xs uppercase tracking-wide text-slate-400">Rol</div>
                   <div class="mt-1 text-sm text-slate-700">${escapeHtml(operator.rol_nombre || '—')}</div>
+                  <button type="button" data-remove-service-operator="${escapeHtml(operator.user_id)}" class="mt-3 inline-flex rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-100">
+                    Eliminar operador
+                  </button>
                 </div>
               </div>
             </article>
@@ -582,6 +691,14 @@
         populateServiceModal(item);
         els.serviceModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+    }
+
+    async function refreshCurrentServiceModal() {
+        if (!state.serviceProfileItem?.id) return;
+        const json = await api({ action: 'get_service_profile', id: state.serviceProfileItem.id });
+        const item = json.data?.item || null;
+        if (!item) throw new Error('No pudimos refrescar el servicio seleccionado.');
+        populateServiceModal(item);
     }
 
     function closeServiceModal() {
@@ -740,6 +857,31 @@
     });
 
     els.tableWrap?.addEventListener('click', (e) => {
+        const disableButton = e.target.closest('[data-service-disable-id]');
+        if (disableButton) {
+            const serviceId = Number(disableButton.getAttribute('data-service-disable-id') || 0);
+            const item = state.items.find((row) => Number(row.id || 0) === serviceId);
+            if (!serviceId || !item) return;
+
+            showConfirm({
+                title: 'Desactivar servicio',
+                message: `El servicio ${item.nombre || 'seleccionado'} quedará fuera de operación normal, pero conservará su historial y relaciones. ¿Deseas continuar?`,
+                acceptText: 'Sí, desactivar',
+                cancelText: 'Cancelar',
+            }).then(async (confirmed) => {
+                if (!confirmed) return;
+                try {
+                    const json = await api({ action: 'disable_service', csrf_token: csrf, id: serviceId });
+                    await loadList(false);
+                    window.SuperadminDashboard?.loadContext?.();
+                    showAlert('ok', json.message || 'Servicio desactivado correctamente.');
+                } catch (err) {
+                    showAlert('error', err.message || 'No se pudo desactivar el servicio.');
+                }
+            });
+            return;
+        }
+
         const button = e.target.closest('[data-service-profile-id]');
         if (!button) return;
         openServiceModal(Number(button.getAttribute('data-service-profile-id') || 0)).catch((err) => {
@@ -797,6 +939,42 @@
         } catch (err) {
             showInlineError(els.serviceModalError, err.message || 'No se pudo abrir el flujo de asignación.');
         }
+    });
+
+    els.serviceOperatorsWrap?.addEventListener('click', (e) => {
+        const button = e.target.closest('[data-remove-service-operator]');
+        if (!button || !state.serviceProfileItem) return;
+        if (!requireSavedServiceProfile()) return;
+
+        const userId = Number(button.getAttribute('data-remove-service-operator') || 0);
+        const operator = (state.serviceProfileItem.operators || []).find((item) => Number(item.user_id || 0) === userId);
+        if (!userId || !operator) return;
+
+        showConfirm({
+            title: 'Quitar operador del servicio',
+            message: `Vamos a quitar a ${operator.name || 'este operador'} de ${state.serviceProfileItem.nombre || 'este servicio'}. La cuenta seguirá existiendo y podrá seguir asignada a otros servicios. ¿Deseas continuar?`,
+            acceptText: 'Sí, quitar',
+            cancelText: 'Cancelar',
+        }).then(async (confirmed) => {
+            if (!confirmed) return;
+            try {
+                const json = await usersApi({
+                    action: 'remove_assignment',
+                    csrf_token: csrf,
+                    user_id: userId,
+                    residencial_id: state.serviceProfileItem.id,
+                });
+                await refreshCurrentServiceModal();
+                await loadList(false);
+                const usersRefresh = window.SuperadminUsuarios?.refreshAll?.();
+                if (usersRefresh && typeof usersRefresh.catch === 'function') {
+                    usersRefresh.catch(() => {});
+                }
+                showAlert('ok', json.message || 'Operador removido del servicio correctamente.');
+            } catch (err) {
+                showInlineError(els.serviceModalError, err.message || 'No se pudo quitar el operador de este servicio.');
+            }
+        });
     });
 
     els.form?.addEventListener('submit', async (e) => {

@@ -283,6 +283,55 @@ try {
         ]);
     }
 
+    if ($action === 'disable_service') {
+        sa_require_csrf();
+
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            sa_json_out(false, ['error' => 'Servicio inválido.'], 422);
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT id, nombre, activo, estatus_plan
+            FROM residenciales
+            WHERE id = :id
+            LIMIT 1
+        ");
+        $stmt->execute(['id' => $id]);
+        $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$item) {
+            sa_json_out(false, ['error' => 'Servicio no encontrado.'], 404);
+        }
+
+        if ((int)($item['activo'] ?? 0) === 0 && in_array((string)($item['estatus_plan'] ?? ''), ['suspendido', 'cancelado'], true)) {
+            sa_json_out(false, ['error' => 'Ese servicio ya se encuentra desactivado.'], 422);
+        }
+
+        $disable = $pdo->prepare("
+            UPDATE residenciales
+            SET activo = 0,
+                estatus_plan = 'suspendido',
+                updated_at = NOW()
+            WHERE id = :id
+            LIMIT 1
+        ");
+        $disable->execute(['id' => $id]);
+
+        sa_json_out(true, [
+            'message' => 'Servicio desactivado correctamente. Se conservó su historial y relaciones.',
+            'data' => [
+                'item' => [
+                    'id' => (int)$item['id'],
+                    'nombre' => (string)$item['nombre'],
+                    'activo' => 0,
+                    'estatus_plan' => 'suspendido',
+                    'estatus_label' => sa_residencial_status_badge('suspendido'),
+                ],
+            ],
+        ]);
+    }
+
     if ($action === 'create') {
         sa_require_csrf();
 
