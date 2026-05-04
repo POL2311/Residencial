@@ -47,9 +47,14 @@
     }
 
     function showAlert(type, msg) {
+        const normalizedType = type === 'ok' ? 'success' : type;
+        if (window.AppToast?.show) {
+            window.AppToast.show({ type: normalizedType, message: msg });
+            return;
+        }
         if (!els.alert) return;
         els.alert.classList.remove('hidden');
-        els.alert.className = `rounded-2xl px-4 py-3 text-sm ${type === 'ok' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
+        els.alert.className = `rounded-2xl px-4 py-3 text-sm ${normalizedType === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
         els.alert.textContent = msg;
     }
 

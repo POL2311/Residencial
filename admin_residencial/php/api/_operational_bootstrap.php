@@ -41,16 +41,16 @@ function admin_operational_required(string $message = 'Este módulo solo está d
 
 function admin_operational_context(): array
 {
-    global $pdo, $residencialId, $operationalMode;
+    global $pdo, $residencialId;
 
-    return operational_get_context($pdo, $residencialId, $operationalMode);
+    return operational_get_context($pdo, $residencialId);
 }
 
 function admin_module_required(string $module, string $message = 'Este módulo no está habilitado para este cliente.'): void
 {
     global $serviceProfile;
 
-    if (!service_profile_module_enabled($serviceProfile, $module)) {
+    if (!service_profile_module_allowed_for_role_and_service($serviceProfile, 'admin_residencial', $module)) {
         json_out(false, ['error' => $message], 403);
     }
 }

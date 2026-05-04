@@ -21,7 +21,7 @@
     const BASE = baseSuperadminPath();
     const API = BASE + 'php/api/';
     const VIEWS = BASE + 'templates/views/';
-    const inlineViews = new Set(['home', 'residenciales', 'usuarios', 'seguridad', 'reportes', 'configuracion']);
+    const inlineViews = new Set(['home', 'residenciales', 'usuarios', 'turnos_guardias', 'incidencias', 'comunicados', 'seguridad', 'reportes', 'configuracion']);
 
     let currentViewScript = null;
     let dashboardContext = null;
@@ -64,6 +64,9 @@
             home: BASE + 'js/home.js',
             residenciales: BASE + 'js/residenciales.js',
             usuarios: BASE + 'js/usuarios.js',
+            turnos_guardias: BASE + 'js/turnos_guardias.js',
+            incidencias: BASE + 'js/incidencias.js',
+            comunicados: BASE + 'js/comunicados.js',
             seguridad: BASE + 'js/seguridad.js',
             reportes: BASE + 'js/reportes.js',
             configuracion: BASE + 'js/configuracion.js',

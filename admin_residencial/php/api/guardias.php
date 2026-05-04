@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/guardia_schedule.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -23,7 +24,40 @@ $user = current_user();
 $adminId = (int)($user['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
 $serviceProfile = service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'guardias', 'La gestión de guardias no está habilitada para este cliente.');
-$canManageGuardias = (int)($serviceProfile['habilita_guardias_admin_actions'] ?? 1) === 1;
+$canManageGuardias = service_profile_module_allowed_for_role_and_service($serviceProfile, 'admin_residencial', 'guardias_admin_actions');
+$guardiaRoleEnabled = service_profile_role_enabled($serviceProfile, 'guardia');
+guardia_schedule_schema_ensure($pdo);
+
+function guardiaActivationStatus(array $serviceProfile, bool $isActive): array {
+    $status = service_profile_operator_status_for_service($serviceProfile, 'guardia', $isActive);
+
+    return match ($status['code']) {
+        'inactivo' => [
+            'code' => 'inactivo',
+            'label' => 'Cuenta inactiva',
+            'detail' => 'Activa la cuenta para permitir el acceso del guardia.',
+        ],
+        'pendiente' => [
+            'code' => 'pendiente',
+            'label' => 'Pendiente de activación',
+            'detail' => (string)($status['reason_message'] ?? 'La cuenta está asignada, pero este servicio aún no tiene módulos operables para Guardia.'),
+        ],
+        default => [
+            'code' => 'listo',
+            'label' => 'Listo para entrar',
+            'detail' => 'La cuenta puede iniciar sesión y cargar su servicio correctamente.',
+        ],
+    };
+}
+
+function guardiaStatusMessage(string $baseMessage, array $serviceProfile, bool $isActive): string {
+    $status = guardiaActivationStatus($serviceProfile, $isActive);
+    return match ($status['code']) {
+        'inactivo' => $baseMessage . ' La cuenta sigue inactiva; actívala cuando quieras permitir el acceso.',
+        'pendiente' => $baseMessage . ' La cuenta está creada, pero aún faltan módulos operables para Guardia en este servicio.',
+        default => $baseMessage . ' El guardia quedó listo para iniciar sesión.',
+    };
+}
 
 function hasColumn(PDO $pdo, string $table, string $column): bool {
     $stmt = $pdo->prepare("
@@ -76,11 +110,22 @@ try {
             ORDER BY u.name
         ");
         $stmt->execute([$residencialId]);
+        $guardias = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        foreach ($guardias as &$guardia) {
+            $activation = guardiaActivationStatus($serviceProfile, (int)($guardia['is_active'] ?? 0) === 1);
+            $guardia['activation_status'] = $activation;
+            $exceptionToday = guardia_schedule_find_current_exception($pdo, $residencialId, (int)($guardia['id'] ?? 0), null, (int)($guardia['turno_id'] ?? 0));
+            $guardia['absence_today'] = $exceptionToday ? 1 : 0;
+            $guardia['absence_today_reason'] = $exceptionToday['motivo'] ?? '';
+            $guardia['absence_today_until'] = $exceptionToday['fecha_fin'] ?? '';
+        }
+        unset($guardia);
 
         json_out(true, [
-            'guardias' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [],
+            'guardias' => $guardias,
             'supports_guardia_servicio' => $hasGuardiaServicio,
             'can_manage_guardias' => $canManageGuardias,
+            'service_guardia_enabled' => $guardiaRoleEnabled,
         ]);
     }
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_guardia') {
@@ -164,7 +209,7 @@ try {
 
         $pdo->commit();
 
-        json_out(true, ['message' => 'Guardia creado correctamente']);
+        json_out(true, ['message' => guardiaStatusMessage('Guardia creado correctamente.', $serviceProfile, $esActivo === 1)]);
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_servicio') {
@@ -285,7 +330,16 @@ try {
             $residencialId,
         ]);
 
-        json_out(true, ['message' => 'Guardia actualizado']);
+        $stmtStatus = $pdo->prepare("
+            SELECT is_active
+            FROM users
+            WHERE id = ?
+            LIMIT 1
+        ");
+        $stmtStatus->execute([$id]);
+        $isActive = (int)$stmtStatus->fetchColumn() === 1;
+
+        json_out(true, ['message' => guardiaStatusMessage('Guardia actualizado.', $serviceProfile, $isActive)]);
     }
 
     json_out(false, ['error' => 'Método no permitido']);

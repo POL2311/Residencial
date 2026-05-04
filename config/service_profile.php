@@ -132,10 +132,6 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_control_acceso' => 1,
                 'habilita_incidencias' => 1,
                 'habilita_personal_recurrente' => 1,
-                'habilita_visitantes_rapidos' => 1,
-                'habilita_materiales' => 1,
-                'habilita_solicitudes_pendientes' => 1,
-                'habilita_bitacora_operativa' => 1,
             ]),
             'obra' => array_merge($base, [
                 'habilita_admin_operativo' => 1,
@@ -145,10 +141,7 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_control_acceso' => 1,
                 'habilita_incidencias' => 1,
                 'habilita_personal_recurrente' => 1,
-                'habilita_visitantes_rapidos' => 1,
                 'habilita_materiales' => 1,
-                'habilita_solicitudes_pendientes' => 1,
-                'habilita_bitacora_operativa' => 1,
             ]),
             'comercio' => array_merge($base, [
                 'habilita_admin_operativo' => 1,
@@ -157,8 +150,6 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_guardias_admin_actions' => 1,
                 'habilita_control_acceso' => 1,
                 'habilita_incidencias' => 1,
-                'habilita_visitantes_rapidos' => 1,
-                'habilita_bitacora_operativa' => 1,
             ]),
             'servicio' => array_merge($base, [
                 'habilita_guardia' => 1,
@@ -323,6 +314,7 @@ if (!function_exists('service_profile_get')) {
         foreach (service_profile_all_flags() as $flag) {
             $profile[$flag] = (int)($row[$flag] ?? 0);
         }
+        $profile = service_profile_sanitize_flags($profile);
         return $profile;
     }
 }
@@ -344,6 +336,7 @@ if (!function_exists('service_profile_save')) {
                 $merged[$flag] = (int)($base[$flag] ?? 0);
             }
         }
+        $merged = service_profile_sanitize_flags($merged);
 
         $stmt = $pdo->prepare("
             UPDATE residenciales_servicio_config
@@ -388,6 +381,7 @@ if (!function_exists('service_profile_save')) {
 if (!function_exists('service_profile_role_enabled')) {
     function service_profile_role_enabled(array $profile, string $role): bool
     {
+        $role = service_profile_normalize_role_name($role);
         return match ($role) {
             'admin_residencial' => (int)($profile['habilita_admin_operativo'] ?? 0) === 1,
             'guardia' => (int)($profile['habilita_guardia'] ?? 0) === 1,
@@ -397,14 +391,417 @@ if (!function_exists('service_profile_role_enabled')) {
     }
 }
 
+if (!function_exists('service_profile_normalize_role_name')) {
+    function service_profile_normalize_role_name(?string $role): string
+    {
+        $raw = mb_strtolower(trim((string)($role ?? '')));
+        if ($raw === '') {
+            return '';
+        }
+
+        return match (true) {
+            str_contains($raw, 'super') => 'super_admin',
+            str_contains($raw, 'guard') => 'guardia',
+            str_contains($raw, 'resident') => 'residente',
+            str_contains($raw, 'admin_residencial'),
+            str_contains($raw, 'admin operativo'),
+            str_contains($raw, 'administr') => 'admin_residencial',
+            default => str_replace(' ', '_', $raw),
+        };
+    }
+}
+
+if (!function_exists('service_profile_role_flag_map')) {
+    function service_profile_role_flag_map(): array
+    {
+        return [
+            'admin_residencial' => 'habilita_admin_operativo',
+            'guardia' => 'habilita_guardia',
+            'residente' => 'habilita_residente',
+        ];
+    }
+}
+
+if (!function_exists('service_profile_module_catalog')) {
+    function service_profile_module_catalog(): array
+    {
+        return [
+            'habilita_unidades' => [
+                'module' => 'unidades',
+                'roles' => ['admin_residencial'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_residentes_catalogo' => [
+                'module' => 'residentes',
+                'roles' => ['admin_residencial'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_guardias_catalogo' => [
+                'module' => 'guardias',
+                'roles' => ['admin_residencial'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_guardias_admin_actions' => [
+                'module' => 'guardias_admin_actions',
+                'roles' => ['admin_residencial'],
+                'support_only' => true,
+                'depends_on' => ['habilita_guardias_catalogo'],
+            ],
+            'habilita_autos' => [
+                'module' => 'autos',
+                'roles' => ['admin_residencial', 'guardia', 'residente'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_visitas_residente' => [
+                'module' => 'visitas',
+                'roles' => ['residente'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_paqueteria' => [
+                'module' => 'paqueteria',
+                'roles' => ['guardia', 'residente'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_pagos' => [
+                'module' => 'pagos',
+                'roles' => ['residente'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_comunicados' => [
+                'module' => 'comunicados',
+                'roles' => ['admin_residencial', 'residente'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_servicios_directorio' => [
+                'module' => 'servicios',
+                'roles' => ['residente'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_control_acceso' => [
+                'module' => 'accesos',
+                'roles' => ['guardia'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_incidencias' => [
+                'module' => 'incidencias',
+                'roles' => ['admin_residencial', 'guardia', 'residente'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_personal_recurrente' => [
+                'module' => 'personal_recurrente',
+                'roles' => ['admin_residencial', 'guardia'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_visitantes_rapidos' => [
+                'module' => 'visitantes_rapidos',
+                'roles' => ['admin_residencial'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_materiales' => [
+                'module' => 'materiales',
+                'roles' => ['admin_residencial', 'guardia'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_solicitudes_pendientes' => [
+                'module' => 'solicitudes_pendientes',
+                'roles' => ['admin_residencial'],
+                'support_only' => false,
+                'depends_on' => ['habilita_materiales'],
+            ],
+            'habilita_bitacora_operativa' => [
+                'module' => 'bitacora_operativa',
+                'roles' => ['admin_residencial', 'guardia'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+        ];
+    }
+}
+
+if (!function_exists('service_profile_frontend_matrix')) {
+    function service_profile_frontend_matrix(): array
+    {
+        $labels = service_profile_labels();
+        $roleFlags = service_profile_role_flag_map();
+        $roles = [];
+        $modules = [];
+
+        foreach ($roleFlags as $role => $flag) {
+            $roles[] = [
+                'role' => $role,
+                'flag' => $flag,
+                'label' => $labels['roles'][$flag] ?? $role,
+            ];
+        }
+
+        foreach (service_profile_module_catalog() as $flag => $meta) {
+            $modules[$flag] = [
+                'flag' => $flag,
+                'label' => $labels['modules'][$flag] ?? $flag,
+                'module' => $meta['module'],
+                'roles' => $meta['roles'],
+                'support_only' => (bool)($meta['support_only'] ?? false),
+                'depends_on' => $meta['depends_on'] ?? [],
+            ];
+        }
+
+        return [
+            'roles' => $roles,
+            'modules' => $modules,
+        ];
+    }
+}
+
+if (!function_exists('service_profile_assignable_roles')) {
+    function service_profile_assignable_roles(array $profile): array
+    {
+        $roles = [];
+        foreach (['admin_residencial', 'guardia', 'residente'] as $role) {
+            if (service_profile_role_assignable_to_service($profile, $role)) {
+                $roles[] = $role;
+            }
+        }
+        return $roles;
+    }
+}
+
+if (!function_exists('service_profile_sanitize_flags')) {
+    function service_profile_sanitize_flags(array $flags): array
+    {
+        $roleFlags = service_profile_role_flag_map();
+        $moduleCatalog = service_profile_module_catalog();
+        $sanitized = $flags;
+
+        $enabledRoles = [];
+        foreach ($roleFlags as $role => $flag) {
+            $sanitized[$flag] = operational_bool_int($sanitized[$flag] ?? 0);
+            if ((int)$sanitized[$flag] === 1) {
+                $enabledRoles[] = $role;
+            }
+        }
+
+        foreach ($moduleCatalog as $flag => $meta) {
+            $sanitized[$flag] = operational_bool_int($sanitized[$flag] ?? 0);
+            if ((int)$sanitized[$flag] !== 1) {
+                $sanitized[$flag] = 0;
+                continue;
+            }
+
+            $supportedRoles = array_values(array_filter(array_map(
+                'service_profile_normalize_role_name',
+                (array)($meta['roles'] ?? [])
+            )));
+
+            if (!$supportedRoles || !array_intersect($enabledRoles, $supportedRoles)) {
+                $sanitized[$flag] = 0;
+                continue;
+            }
+
+            $dependencies = (array)($meta['depends_on'] ?? []);
+            foreach ($dependencies as $dependencyFlag) {
+                if ((int)($sanitized[$dependencyFlag] ?? 0) !== 1) {
+                    $sanitized[$flag] = 0;
+                    break;
+                }
+            }
+        }
+
+        return $sanitized;
+    }
+}
+
+if (!function_exists('service_profile_role_assignable_to_service')) {
+    function service_profile_role_assignable_to_service(array $profile, string $role): bool
+    {
+        $role = service_profile_normalize_role_name($role);
+        if ($role === '' || $role === 'super_admin') {
+            return false;
+        }
+        if (!service_profile_role_enabled($profile, $role)) {
+            return false;
+        }
+
+        return !empty(service_profile_role_operable_views($profile, $role));
+    }
+}
+
+if (!function_exists('service_profile_role_pending_reason')) {
+    function service_profile_role_pending_reason(array $profile, string $role): array
+    {
+        $role = service_profile_normalize_role_name($role);
+        $labels = service_profile_labels();
+        $roleFlagMap = service_profile_role_flag_map();
+        $roleLabel = $labels['roles'][$roleFlagMap[$role] ?? ''] ?? ucfirst(str_replace('_', ' ', $role));
+
+        if (!service_profile_role_enabled($profile, $role)) {
+            return [
+                'code' => 'role_disabled',
+                'message' => sprintf('El rol %s no está habilitado para este servicio.', $roleLabel),
+            ];
+        }
+
+        $operableViews = service_profile_role_operable_views($profile, $role);
+        if ($operableViews) {
+            return [
+                'code' => 'ready',
+                'message' => sprintf('El rol %s ya tiene vistas operables para este servicio.', $roleLabel),
+            ];
+        }
+
+        $roleModules = service_profile_role_module_matrix()[$role] ?? [];
+        $configurableModules = [];
+        foreach (service_profile_module_catalog() as $flag => $meta) {
+            $moduleName = service_profile_normalize_module_name((string)($meta['module'] ?? ''));
+            if ($moduleName === '' || !in_array($role, (array)($meta['roles'] ?? []), true)) {
+                continue;
+            }
+            if (!in_array($moduleName, $roleModules, true)) {
+                continue;
+            }
+            if (!empty($meta['support_only'])) {
+                continue;
+            }
+            $configurableModules[] = [
+                'flag' => $flag,
+                'label' => $labels['modules'][$flag] ?? $flag,
+            ];
+        }
+
+        $enabledModuleLabels = [];
+        foreach ($configurableModules as $moduleMeta) {
+            if ((int)($profile[$moduleMeta['flag']] ?? 0) === 1) {
+                $enabledModuleLabels[] = $moduleMeta['label'];
+            }
+        }
+
+        if ($enabledModuleLabels) {
+            return [
+                'code' => 'no_operable_views',
+                'message' => sprintf(
+                    'El rol %s tiene módulos activos (%s), pero todavía no quedó con vistas operables reales.',
+                    $roleLabel,
+                    implode(', ', $enabledModuleLabels)
+                ),
+            ];
+        }
+
+        $suggestedModuleLabels = array_values(array_unique(array_column($configurableModules, 'label')));
+        return [
+            'code' => 'missing_modules',
+            'message' => $suggestedModuleLabels
+                ? sprintf(
+                    'Activa al menos un módulo operable para %s, por ejemplo: %s.',
+                    $roleLabel,
+                    implode(', ', array_slice($suggestedModuleLabels, 0, 4))
+                )
+                : sprintf('Este servicio todavía no tiene módulos operables disponibles para %s.', $roleLabel),
+        ];
+    }
+}
+
+if (!function_exists('service_profile_common_views')) {
+    function service_profile_common_views(): array
+    {
+        return ['home', 'perfil', 'reglamento'];
+    }
+}
+
+if (!function_exists('service_profile_role_module_matrix')) {
+    function service_profile_role_module_matrix(): array
+    {
+        return [
+            'admin_residencial' => ['home', 'perfil', 'reglamento', 'contexto', 'unidades', 'residentes', 'guardias', 'guardias_admin_actions', 'incidencias', 'comunicados', 'autos', 'personal_recurrente', 'visitantes_rapidos', 'materiales', 'solicitudes_pendientes', 'bitacora_operativa'],
+            'guardia' => ['home', 'perfil', 'reglamento', 'contexto', 'accesos', 'autos', 'incidencias', 'paqueteria', 'personal_recurrente', 'materiales', 'bitacora_operativa'],
+            'residente' => ['home', 'perfil', 'reglamento', 'contexto', 'visitas', 'incidencias', 'paqueteria', 'autos', 'pagos', 'comunicados', 'servicios'],
+        ];
+    }
+}
+
+if (!function_exists('service_profile_role_view_matrix')) {
+    function service_profile_role_view_matrix(): array
+    {
+        return [
+            'admin_residencial' => [
+                'home' => 'home',
+                'perfil' => 'perfil',
+                'reglamento' => 'reglamento',
+                'unidades' => 'unidades',
+                'residentes' => 'residentes',
+                'guardias' => 'guardias',
+                'incidencias' => 'incidencias',
+                'comunicados' => 'comunicados',
+                'autos' => 'autos',
+                'personal_recurrente' => 'personal_recurrente',
+                'visitantes_rapidos' => 'visitantes_rapidos',
+                'materiales' => 'materiales',
+                'solicitudes_pendientes' => 'solicitudes_pendientes',
+                'bitacora_operativa' => 'bitacora_operativa',
+            ],
+            'guardia' => [
+                'home' => 'home',
+                'perfil' => 'perfil',
+                'reglamento' => 'reglamento',
+                'accesos' => 'accesos',
+                'autos' => 'autos',
+                'incidencias' => 'incidencias',
+                'paqueteria' => 'paqueteria',
+                'personas_dentro' => 'personal_recurrente',
+                'materiales_autorizados' => 'materiales',
+                'bitacora_hoy' => 'bitacora_operativa',
+            ],
+            'residente' => [
+                'home' => 'home',
+                'perfil' => 'perfil',
+                'reglamento' => 'reglamento',
+                'visitas' => 'visitas',
+                'incidencias' => 'incidencias',
+                'paqueteria' => 'paqueteria',
+                'autos' => 'autos',
+                'pagos' => 'pagos',
+                'comunicados' => 'comunicados',
+                'servicios' => 'servicios',
+            ],
+        ];
+    }
+}
+
+if (!function_exists('service_profile_normalize_module_name')) {
+    function service_profile_normalize_module_name(?string $module): string
+    {
+        $module = trim((string)($module ?? ''));
+        return match ($module) {
+            'personas_dentro' => 'personal_recurrente',
+            'materiales_autorizados' => 'materiales',
+            'bitacora_hoy' => 'bitacora_operativa',
+            default => $module,
+        };
+    }
+}
+
 if (!function_exists('service_profile_module_enabled')) {
     function service_profile_module_enabled(array $profile, string $module): bool
     {
-        return match ($module) {
+        $module = service_profile_normalize_module_name($module);
+        $enabled = match ($module) {
             'home', 'perfil', 'reglamento', 'contexto' => true,
             'unidades' => (int)($profile['habilita_unidades'] ?? 0) === 1,
             'residentes' => (int)($profile['habilita_residentes_catalogo'] ?? 0) === 1,
             'guardias' => (int)($profile['habilita_guardias_catalogo'] ?? 0) === 1,
+            'guardias_admin_actions' => (int)($profile['habilita_guardias_admin_actions'] ?? 0) === 1,
             'autos' => (int)($profile['habilita_autos'] ?? 0) === 1,
             'visitas' => (int)($profile['habilita_visitas_residente'] ?? 0) === 1,
             'paqueteria' => (int)($profile['habilita_paqueteria'] ?? 0) === 1,
@@ -420,26 +817,133 @@ if (!function_exists('service_profile_module_enabled')) {
             'bitacora_operativa', 'bitacora_hoy' => (int)($profile['habilita_bitacora_operativa'] ?? 0) === 1,
             default => true,
         };
+
+        if (!$enabled) {
+            return false;
+        }
+
+        foreach (service_profile_module_catalog() as $flag => $meta) {
+            if (service_profile_normalize_module_name((string)($meta['module'] ?? '')) !== $module) {
+                continue;
+            }
+            foreach ((array)($meta['depends_on'] ?? []) as $dependencyFlag) {
+                if ((int)($profile[$dependencyFlag] ?? 0) !== 1) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+}
+
+if (!function_exists('service_profile_module_allowed_for_role_and_service')) {
+    function service_profile_module_allowed_for_role_and_service(array $profile, string $role, string $module): bool
+    {
+        $role = service_profile_normalize_role_name($role);
+        $module = service_profile_normalize_module_name($module);
+
+        if (!service_profile_role_enabled($profile, $role)) {
+            return false;
+        }
+
+        $roleModules = service_profile_role_module_matrix()[$role] ?? [];
+        if (!in_array($module, $roleModules, true)) {
+            return false;
+        }
+
+        return service_profile_module_enabled($profile, $module);
+    }
+}
+
+if (!function_exists('service_profile_view_allowed_for_role_and_service')) {
+    function service_profile_view_allowed_for_role_and_service(array $profile, string $role, string $view): bool
+    {
+        $role = service_profile_normalize_role_name($role);
+        $module = service_profile_role_view_matrix()[$role][$view] ?? null;
+        if ($module === null) {
+            return false;
+        }
+        return service_profile_module_allowed_for_role_and_service($profile, $role, $module);
+    }
+}
+
+if (!function_exists('service_profile_allowed_views_raw')) {
+    function service_profile_allowed_views_raw(array $profile, string $role): array
+    {
+        $role = service_profile_normalize_role_name($role);
+        $views = service_profile_role_view_matrix()[$role] ?? [];
+        if (!$views) {
+            return [];
+        }
+
+        return array_values(array_keys(array_filter($views, static function (string $module, string $view) use ($profile, $role): bool {
+            return service_profile_view_allowed_for_role_and_service($profile, $role, $view);
+        }, ARRAY_FILTER_USE_BOTH)));
+    }
+}
+
+if (!function_exists('service_profile_role_operable_views')) {
+    function service_profile_role_operable_views(array $profile, string $role): array
+    {
+        $rawViews = service_profile_allowed_views_raw($profile, $role);
+        if (!$rawViews) {
+            return [];
+        }
+
+        return array_values(array_filter($rawViews, static function (string $view): bool {
+            return !in_array($view, service_profile_common_views(), true);
+        }));
+    }
+}
+
+if (!function_exists('service_profile_operator_status_for_service')) {
+    function service_profile_operator_status_for_service(array $profile, string $role, bool $isActive): array
+    {
+        $role = service_profile_normalize_role_name($role);
+
+        if (!$isActive) {
+            return [
+                'code' => 'inactivo',
+                'label' => 'Inactivo',
+                'ready' => false,
+            ];
+        }
+
+        if (!service_profile_role_assignable_to_service($profile, $role)) {
+            $reason = service_profile_role_pending_reason($profile, $role);
+            return [
+                'code' => 'pendiente',
+                'label' => 'Pendiente',
+                'ready' => false,
+                'reason_code' => $reason['code'] ?? 'pending',
+                'reason_message' => $reason['message'] ?? 'El operador sigue pendiente de activación para este servicio.',
+            ];
+        }
+
+        return [
+            'code' => 'listo',
+            'label' => 'Listo',
+            'ready' => true,
+            'reason_code' => 'ready',
+            'reason_message' => 'El operador ya puede entrar y operar este servicio.',
+        ];
     }
 }
 
 if (!function_exists('service_profile_allowed_views')) {
     function service_profile_allowed_views(array $profile, string $role): array
     {
-        $base = match ($role) {
-            'admin_residencial' => ['home', 'perfil', 'reglamento', 'unidades', 'residentes', 'guardias', 'incidencias', 'comunicados', 'autos', 'personal_recurrente', 'visitantes_rapidos', 'materiales', 'solicitudes_pendientes', 'bitacora_operativa'],
-            'guardia' => ['home', 'perfil', 'reglamento', 'accesos', 'autos', 'incidencias', 'paqueteria', 'personas_dentro', 'materiales_autorizados', 'bitacora_hoy'],
-            'residente' => ['home', 'perfil', 'reglamento', 'visitas', 'incidencias', 'paqueteria', 'autos', 'pagos', 'comunicados', 'servicios'],
-            default => [],
-        };
-
-        if (!service_profile_role_enabled($profile, $role)) {
+        $role = service_profile_normalize_role_name($role);
+        if ($role === '' || !service_profile_role_enabled($profile, $role)) {
             return [];
         }
 
-        return array_values(array_filter($base, static function (string $view) use ($profile): bool {
-            return service_profile_module_enabled($profile, $view);
-        }));
+        if (empty(service_profile_role_operable_views($profile, $role))) {
+            return [];
+        }
+
+        return service_profile_allowed_views_raw($profile, $role);
     }
 }
 
@@ -494,7 +998,7 @@ if (!function_exists('service_profile_api_require_module')) {
     function service_profile_api_require_module(PDO $pdo, int $residencialId, string $role, string $module, ?string $message = null): array
     {
         $profile = service_profile_require_role_enabled($pdo, $residencialId, $role);
-        if (!service_profile_module_enabled($profile, $module)) {
+        if (!service_profile_module_allowed_for_role_and_service($profile, $role, $module)) {
             app_abort(403, 'Módulo no disponible', $message ?: 'Este módulo no está habilitado para este cliente.');
         }
         return $profile;
@@ -509,6 +1013,8 @@ if (!function_exists('service_profile_frontend_payload')) {
         return [
             'preset_servicio' => $profile['preset_servicio'],
             'modo_operacion' => $profile['modo_operacion'],
+            'assignable_roles' => service_profile_assignable_roles($profile),
+            'role_assignable' => service_profile_role_assignable_to_service($profile, $role),
             'roles' => array_reduce(service_profile_role_flags(), static function (array $carry, string $flag) use ($profile, $labels): array {
                 $carry[$flag] = [
                     'enabled' => (int)($profile[$flag] ?? 0) === 1,
@@ -523,7 +1029,9 @@ if (!function_exists('service_profile_frontend_payload')) {
                 ];
                 return $carry;
             }, []),
+            'operable_views' => service_profile_role_operable_views($profile, $role),
             'allowed_views' => service_profile_allowed_views($profile, $role),
+            'matrix' => service_profile_frontend_matrix(),
         ];
     }
 }

@@ -1,0 +1,215 @@
+<div id="superadminIncidenciasView" class="space-y-4">
+  <div id="superadminIncidenciasAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div>
+      <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Superadmin</div>
+      <h2 class="text-3xl font-semibold text-slate-700">Incidencias</h2>
+      <p class="text-sm text-slate-500">Revisa incidencias de cualquier servicio y aplica seguimiento global.</p>
+    </div>
+    <button id="btnAddSaIncidencia" type="button" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">
+      + Nueva incidencia
+    </button>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Total</div>
+      <div id="saIncSummaryTotal" class="mt-2 text-3xl font-bold text-slate-900">0</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Abiertas</div>
+      <div id="saIncSummaryAbiertas" class="mt-2 text-3xl font-bold text-rose-600">0</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">En proceso</div>
+      <div id="saIncSummaryProceso" class="mt-2 text-3xl font-bold text-amber-600">0</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Cerradas</div>
+      <div id="saIncSummaryCerradas" class="mt-2 text-3xl font-bold text-emerald-600">0</div>
+    </div>
+  </div>
+
+  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+    <form id="saIncidenciasFilterForm" class="grid grid-cols-1 gap-3 md:grid-cols-5">
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Servicio</label>
+        <select id="saIncFilterServicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Estado</label>
+        <select id="saIncFilterEstado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <option value="">Todos</option>
+          <option value="abierta">Abierta</option>
+          <option value="en_proceso">En proceso</option>
+          <option value="cerrada">Cerrada</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
+        <select id="saIncFilterPrioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <option value="">Todas</option>
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Tipo</label>
+        <input id="saIncFilterTipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="seguridad, vecino, robo..." />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Buscar</label>
+        <input id="saIncFilterQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Título, servicio, unidad, guardia..." />
+      </div>
+      <div class="md:col-span-5 flex justify-end gap-2">
+        <button id="btnResetSaIncFilters" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Limpiar</button>
+        <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Filtrar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seguimiento</div>
+        <div class="mt-1 text-sm font-semibold text-slate-700">Incidencias registradas</div>
+        <div class="mt-1 text-xs text-slate-500">Vista global por servicio, contexto, prioridad y estado.</div>
+      </div>
+      <button id="btnRefreshSaIncidencias" type="button" class="rounded-lg border px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Refrescar</button>
+    </div>
+    <div id="saIncidenciasList" class="mt-4 space-y-3"></div>
+    <div id="saIncidenciasPagination" class="mt-4"></div>
+  </div>
+
+  <div id="saIncidenciaModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+    <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
+      <div class="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
+        <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
+          <div id="saIncidenciaModalTitle" class="text-sm font-semibold text-slate-800">Nueva incidencia</div>
+          <button id="btnCloseSaIncModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+        </div>
+        <form id="saIncidenciaForm" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div id="saIncidenciaFormError" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Servicio *</label>
+              <select name="residencial_id" id="saIncidenciaServiceSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></select>
+            </div>
+
+            <div id="saIncUnidadWrap">
+              <label class="mb-1 block text-xs text-slate-600">Unidad</label>
+              <select name="unidad_id" id="saIncUnidadSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+            </div>
+
+            <div id="saIncOperationalFields" class="hidden space-y-4">
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Área</label>
+                <select name="area_id" id="saIncAreaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              </div>
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Origen</label>
+                <select name="origen_tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <option value="">Evento general</option>
+                  <option value="persona_recurrente">Persona recurrente</option>
+                  <option value="visitante_rapido">Visitante rápido</option>
+                  <option value="permiso_material">Permiso material</option>
+                  <option value="area">Área</option>
+                </select>
+              </div>
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Persona recurrente</label>
+                <select name="persona_recurrente_id" id="saIncPersonaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              </div>
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Visitante rápido</label>
+                <select name="visitante_rapido_id" id="saIncVisitanteSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              </div>
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Permiso material</label>
+                <select name="permiso_material_id" id="saIncPermisoSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Tipo</label>
+              <select name="tipo" id="saIncTipoSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="seguridad">Seguridad</option>
+                <option value="servicio">Servicio</option>
+                <option value="vecino">Vecino</option>
+                <option value="infraestructura">Infraestructura</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Título *</label>
+              <input name="titulo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Descripción *</label>
+              <textarea name="descripcion" rows="4" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></textarea>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
+              <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="baja">Baja</option>
+                <option value="media" selected>Media</option>
+                <option value="alta">Alta</option>
+              </select>
+            </div>
+          </div>
+          <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button type="button" id="btnCancelSaIncModal" class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Registrar incidencia</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="saIncidenciaEditModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+    <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
+      <div class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
+        <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
+          <div class="text-sm font-semibold text-slate-800">Actualizar incidencia</div>
+          <button id="btnCloseSaIncEditModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+        </div>
+        <form id="saIncidenciaEditForm" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div id="saIncidenciaEditError" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
+            <input type="hidden" name="id" />
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Asignar guardia</label>
+              <select name="guardia_id" id="saIncEditGuardiaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="">-- Sin asignar --</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Estado</label>
+              <select name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="abierta">Abierta</option>
+                <option value="en_proceso">En proceso</option>
+                <option value="cerrada">Cerrada</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
+              <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+              </select>
+            </div>
+          </div>
+          <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button type="button" id="btnCancelSaIncEditModal" class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -34,7 +34,8 @@
   }
 
   async function fetchJSON(url, options = {}) {
-    const res = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...options });
+    const { headers = {}, ...rest } = options;
+    const res = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...rest, headers: { Accept: 'application/json', ...headers } });
     const json = await res.json().catch(() => ({}));
     if (!res.ok || json.ok === false) throw new Error(json.error || 'Error');
     return json;

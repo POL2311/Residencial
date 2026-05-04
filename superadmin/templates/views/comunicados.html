@@ -1,0 +1,151 @@
+<div id="superadminComunicadosView" class="space-y-4">
+  <div id="superadminComunicadosAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div>
+      <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Superadmin</div>
+      <h2 class="text-3xl font-semibold text-slate-700">Comunicados</h2>
+      <p class="text-sm text-slate-500">Administra comunicados personalizados de todos los servicios, incluyendo archivo y borrado definitivo.</p>
+    </div>
+    <button id="btnAddSaComunicado" type="button" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">
+      + Nuevo comunicado
+    </button>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Total</div>
+      <div id="saComSummaryTotal" class="mt-2 text-3xl font-bold text-slate-900">0</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Publicados</div>
+      <div id="saComSummaryPublicados" class="mt-2 text-3xl font-bold text-emerald-600">0</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Borradores</div>
+      <div id="saComSummaryBorradores" class="mt-2 text-3xl font-bold text-amber-600">0</div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="text-sm text-slate-500">Archivados</div>
+      <div id="saComSummaryArchivados" class="mt-2 text-3xl font-bold text-slate-600">0</div>
+    </div>
+  </div>
+
+  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+    <form id="saComunicadosFilterForm" class="grid grid-cols-1 gap-3 md:grid-cols-4">
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Servicio</label>
+        <select id="saComFilterServicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Estado</label>
+        <select id="saComFilterEstado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <option value="">Todos</option>
+          <option value="publicado">Publicado</option>
+          <option value="borrador">Borrador</option>
+          <option value="archivado">Archivado</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
+        <select id="saComFilterPrioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <option value="">Todas</option>
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Buscar</label>
+        <input id="saComFilterQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Título, mensaje o servicio..." />
+      </div>
+      <div class="md:col-span-4 flex justify-end gap-2">
+        <button id="btnResetSaComFilters" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Limpiar</button>
+        <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Filtrar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Comunicación</div>
+        <div class="mt-1 text-sm font-semibold text-slate-700">Comunicados registrados</div>
+        <div class="mt-1 text-xs text-slate-500">Control global por servicio, estado, vigencia y prioridad.</div>
+      </div>
+      <button id="btnRefreshSaComunicados" type="button" class="rounded-lg border px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Refrescar</button>
+    </div>
+    <div id="saComunicadosList" class="mt-4 space-y-3"></div>
+    <div id="saComunicadosPagination" class="mt-4"></div>
+  </div>
+
+  <div id="saComunicadoModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+    <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
+      <div class="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
+        <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
+          <div id="saComunicadoModalTitle" class="text-sm font-semibold text-slate-800">Nuevo comunicado</div>
+          <button id="btnCloseSaComModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+        </div>
+        <form id="saComunicadoForm" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div id="saComunicadoFormError" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
+            <input type="hidden" name="id" />
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Servicio *</label>
+              <select name="residencial_id" id="saComunicadoServiceSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Título *</label>
+              <input name="titulo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Mensaje *</label>
+              <textarea name="mensaje" rows="5" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></textarea>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Tipo</label>
+                <select name="tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <option value="general">General</option>
+                  <option value="mantenimiento">Mantenimiento</option>
+                  <option value="seguridad">Seguridad</option>
+                  <option value="pagos">Pagos</option>
+                </select>
+              </div>
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
+                <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <option value="baja">Baja</option>
+                  <option value="media">Media</option>
+                  <option value="alta">Alta</option>
+                </select>
+              </div>
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Publicación</label>
+                <input type="date" name="fecha_publicacion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Expiración</label>
+                <input type="date" name="fecha_expiracion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+              </div>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Estado</label>
+              <select name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="publicado">Publicado</option>
+                <option value="borrador">Borrador</option>
+                <option value="archivado">Archivado</option>
+              </select>
+            </div>
+          </div>
+          <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button type="button" id="btnCancelSaComModal" class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">Guardar comunicado</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

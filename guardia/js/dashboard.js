@@ -50,6 +50,9 @@
     serviceProfile: null,
     enabledViews: new Set(),
     notifications: null,
+    canOperate: true,
+    activationPending: false,
+    contextDiagnostic: null,
     navToken: 0,
     isNavigating: false,
   };
@@ -74,11 +77,18 @@
     document.querySelectorAll('[data-view]').forEach((el) => {
       const view = el.getAttribute('data-view') || '';
       if (!view) return;
-      const allow = !state.enabledViews.size || state.enabledViews.has(view);
+      const allow = state.canOperate && state.enabledViews.has(view);
       if (el.classList.contains('dashBtn')) {
         el.classList.toggle('hidden', !allow);
+      } else {
+        el.classList.toggle('hidden', !state.canOperate);
       }
     });
+
+    if (els.notificationsButton) {
+      els.notificationsButton.classList.toggle('hidden', !state.canOperate);
+    }
+
     if (els.modeBadge) {
       const label = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial');
       els.modeBadge.textContent = `Servicio: ${label}`;
@@ -91,9 +101,10 @@
   }
 
   function firstEnabledView() {
+    if (!state.enabledViews.size) return '';
     if (state.enabledViews.has('home')) return 'home';
     const [first] = state.enabledViews;
-    return first || 'home';
+    return first || '';
   }
 
   function guardNotificationsStorageKey() {
@@ -258,6 +269,50 @@
     `;
   }
 
+  function renderActivationPending() {
+    const wrap = getWrap();
+    if (!wrap) return;
+
+    const diagnostic = state.contextDiagnostic || {};
+    const title = diagnostic.reason_code === 'guard_role_disabled'
+      ? 'Guardia deshabilitado para este servicio'
+      : diagnostic.reason_code === 'guard_absence_exception'
+        ? 'Ausencia programada'
+      : diagnostic.reason_code === 'missing_assignment'
+        ? 'Activacion pendiente'
+        : 'No pudimos cargar tu servicio';
+    const message = diagnostic.reason_message || 'Tu cuenta necesita configuracion adicional antes de operar.';
+    const steps = Array.isArray(diagnostic.help_steps) ? diagnostic.help_steps : [];
+    const note = diagnostic.reason_code === 'guard_absence_exception'
+      ? 'Tu cuenta sigue activa, pero hoy quedó marcada con una ausencia programada y por eso no puede operar.'
+      : 'Tu cuenta puede iniciar sesion, pero todavia no tiene un contexto operativo listo para trabajar.';
+
+    wrap.innerHTML = `
+      <div class="space-y-4">
+        <section class="rounded-[1.75rem] border border-amber-200 bg-white p-5 shadow-sm">
+          <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-500">Guardia</div>
+          <h2 class="mt-2 text-2xl font-semibold text-slate-900">${escapeHtml(title)}</h2>
+          <p class="mt-2 text-sm leading-6 text-slate-600">${escapeHtml(message)}</p>
+          <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            ${escapeHtml(note)}
+          </div>
+        </section>
+
+        <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="text-lg font-semibold text-slate-900">${escapeHtml(diagnostic.help_title || 'Como activarlo')}</div>
+          <ol class="mt-4 space-y-3 text-sm text-slate-700">
+            ${(steps.length ? steps : ['Confirma que la cuenta del guardia este activa.', 'Verifica que tenga un servicio asignado.', 'Revisa que el rol Guardia este habilitado para ese servicio.']).map((step, index) => `
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2E5D73] text-xs font-semibold text-white">${index + 1}</span>
+                <span class="leading-6">${escapeHtml(step)}</span>
+              </li>
+            `).join('')}
+          </ol>
+        </section>
+      </div>
+    `;
+  }
+
   function setActiveButtons(view) {
     document.querySelectorAll('.dashBtn').forEach((btn) => {
       const isActive = btn.dataset.view === view;
@@ -390,14 +445,20 @@
 
   function initialView() {
     const h = (window.location.hash || '').replace('#', '').trim();
+    if (!state.enabledViews.size) return '';
     if (!h) return firstEnabledView();
-    return state.enabledViews.size && !state.enabledViews.has(h) ? firstEnabledView() : h;
+    return !state.enabledViews.has(h) ? firstEnabledView() : h;
   }
 
   async function navigateTo(view, opts = {}) {
     const { force = false } = opts;
     if (!view) view = firstEnabledView();
-    if (state.enabledViews.size && !state.enabledViews.has(view)) {
+    if (state.canOperate && !state.enabledViews.size) {
+      renderViewError('guardia', 'Este servicio no tiene vistas operables para Guardia.');
+      state.isNavigating = false;
+      return;
+    }
+    if (state.canOperate && !state.enabledViews.has(view)) {
       view = firstEnabledView();
     }
 
@@ -411,6 +472,16 @@
     state.targetView = view;
     state.currentView = view;
     showShellHeader();
+
+    if (!state.canOperate) {
+      unloadCurrentView();
+      setActiveButtons('');
+      renderActivationPending();
+      state.currentView = 'activation';
+      state.targetView = 'activation';
+      state.isNavigating = false;
+      return;
+    }
 
     setActiveButtons(view);
     unloadCurrentView();
@@ -469,26 +540,70 @@
 
   async function loadContext() {
     try {
-      const json = await fetchJSON(`${API}contexto.php`);
+      const res = await fetch(`${API}contexto.php`, {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.ok === false) {
+        throw Object.assign(new Error(json.error || 'No se pudo cargar el contexto del guardia.'), {
+          reason_code: json.reason_code || 'context_load_error',
+          reason_message: json.reason_message || json.error || 'Hubo un error al cargar tu servicio de guardia.',
+          help_title: json.help_title || 'Como activarlo',
+          help_steps: Array.isArray(json.help_steps) ? json.help_steps : [],
+        });
+      }
+
       state.context = json.data || {};
       state.operationalMode = String(state.context?.modo_operacion || 'residencial').trim() || 'residencial';
       state.serviceProfile = state.context?.service_profile || null;
       state.notifications = state.context?.notifications || null;
-      state.enabledViews = buildEnabledViews();
+      state.canOperate = state.context?.can_operate !== false;
+      state.activationPending = state.context?.activation_pending === true;
+      state.contextDiagnostic = state.activationPending ? {
+        reason_code: state.context?.reason_code || 'context_load_error',
+        reason_message: state.context?.reason_message || 'Tu cuenta necesita configuracion adicional antes de operar.',
+        help_title: state.context?.help_title || 'Como activarlo',
+        help_steps: Array.isArray(state.context?.help_steps) ? state.context.help_steps : [],
+      } : null;
+      state.enabledViews = state.canOperate ? buildEnabledViews() : new Set();
       updateHeaderContext(state.context);
+      if (!state.canOperate) {
+        if (els.ctx) els.ctx.textContent = 'Activacion pendiente';
+        if (els.hint) {
+          els.hint.textContent = state.contextDiagnostic?.reason_message || '';
+          els.hint.classList.remove('hidden');
+        }
+      }
       toggleOperationalButtons();
       updateNotificationsBadge();
       return state.context;
     } catch (e) {
       console.warn('loadContext fallo:', e);
-      state.context = null;
+      state.context = {
+        user: state.context?.user || null,
+        can_operate: false,
+      };
       state.operationalMode = 'residencial';
       state.serviceProfile = null;
       state.notifications = null;
-      state.enabledViews = new Set(['home', 'perfil', 'reglamento']);
+      state.canOperate = false;
+      state.activationPending = true;
+      state.contextDiagnostic = {
+        reason_code: e.reason_code || 'context_load_error',
+        reason_message: e.reason_message || e.message || 'Hubo un error al cargar tu servicio de guardia.',
+        help_title: e.help_title || 'Como activarlo',
+        help_steps: Array.isArray(e.help_steps) ? e.help_steps : [],
+      };
+      state.enabledViews = new Set();
 
-      if (els.name) els.name.textContent = 'Guardia';
-      if (els.ctx) els.ctx.textContent = '—';
+      if (els.name) els.name.textContent = state.context?.user?.name || 'Guardia';
+      if (els.ctx) els.ctx.textContent = 'Activacion pendiente';
+      if (els.hint) {
+        els.hint.textContent = state.contextDiagnostic.reason_message || '';
+        els.hint.classList.remove('hidden');
+      }
       toggleOperationalButtons();
       updateNotificationsBadge();
 
@@ -618,6 +733,14 @@
     initShellHeader();
     bindStaticEvents();
     await loadContext();
+    if (!state.canOperate) {
+      await navigateTo('', { force: true });
+      return;
+    }
+    if (!state.enabledViews.size) {
+      renderViewError('guardia', 'Este servicio no tiene vistas operables para Guardia.');
+      return;
+    }
     await navigateTo(initialView(), { force: true });
   });
 })();

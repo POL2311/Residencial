@@ -127,3 +127,35 @@ if (!function_exists('sa_fetch_config_seguridad')) {
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 }
+
+if (!function_exists('sa_fetch_services')) {
+    function sa_fetch_services(PDO $pdo): array
+    {
+        $stmt = $pdo->query("
+            SELECT
+                id,
+                nombre,
+                codigo,
+                modo_operacion
+            FROM residenciales
+            ORDER BY nombre ASC, id ASC
+        ");
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        return array_map(static function (array $row): array {
+            $modo = trim((string)($row['modo_operacion'] ?? 'residencial'));
+            return [
+                'id' => (int)($row['id'] ?? 0),
+                'nombre' => (string)($row['nombre'] ?? ''),
+                'codigo' => (string)($row['codigo'] ?? ''),
+                'modo_operacion' => $modo !== '' ? $modo : 'residencial',
+                'label' => trim(sprintf(
+                    '%s%s',
+                    (string)($row['nombre'] ?? ''),
+                    !empty($row['codigo']) ? ' (' . (string)$row['codigo'] . ')' : ''
+                )),
+            ];
+        }, $rows);
+    }
+}

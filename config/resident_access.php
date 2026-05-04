@@ -310,7 +310,7 @@ if (!function_exists('resident_access_notifications')) {
         $stmtCount = $pdo->prepare("
             SELECT
                 COUNT(*) AS total,
-                MAX(id) AS latest_id,
+                MAX(ru.id) AS latest_id,
                 MAX(acceso_estado_actualizado_at) AS latest_updated_at
             FROM residentes_unidades ru
             JOIN unidades un ON un.id = ru.unidad_id

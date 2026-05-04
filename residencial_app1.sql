@@ -210,6 +210,26 @@ INSERT INTO `guardias_turnos` (`id`, `user_id`, `residencial_id`, `nombre_turno`
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `guardias_turnos_excepciones`
+--
+
+CREATE TABLE `guardias_turnos_excepciones` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `turno_id` int(11) DEFAULT NULL,
+  `fecha_inicio` date NOT NULL,
+  `fecha_fin` date NOT NULL,
+  `motivo` varchar(120) NOT NULL,
+  `notas` text DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `home_banners_residenciales`
 --
 
@@ -711,6 +731,14 @@ ALTER TABLE `guardias_turnos`
   ADD KEY `fk_guardias_turnos_residencial` (`residencial_id`);
 
 --
+-- Indices de la tabla `guardias_turnos_excepciones`
+--
+ALTER TABLE `guardias_turnos_excepciones`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_guardias_turnos_ex_user_service_dates` (`user_id`,`residencial_id`,`fecha_inicio`,`fecha_fin`),
+  ADD KEY `idx_guardias_turnos_ex_turno` (`turno_id`);
+
+--
 -- Indices de la tabla `home_banners_residenciales`
 --
 ALTER TABLE `home_banners_residenciales`
@@ -883,6 +911,12 @@ ALTER TABLE `guardias_turnos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de la tabla `guardias_turnos_excepciones`
+--
+ALTER TABLE `guardias_turnos_excepciones`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `home_banners_residenciales`
 --
 ALTER TABLE `home_banners_residenciales`
@@ -995,6 +1029,14 @@ ALTER TABLE `contactos_emergencia`
 ALTER TABLE `guardias_turnos`
   ADD CONSTRAINT `fk_guardias_turnos_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_guardias_turnos_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `guardias_turnos_excepciones`
+--
+ALTER TABLE `guardias_turnos_excepciones`
+  ADD CONSTRAINT `fk_guardias_turnos_ex_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_guardias_turnos_ex_turno` FOREIGN KEY (`turno_id`) REFERENCES `guardias_turnos` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_guardias_turnos_ex_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `home_banners_residenciales`

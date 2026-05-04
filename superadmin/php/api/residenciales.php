@@ -18,6 +18,83 @@ function sa_residencial_status_badge(string $status): string
     };
 }
 
+function sa_service_operator_meta(array $profile, array $operator): array
+{
+    $status = service_profile_operator_status_for_service(
+        $profile,
+        (string)($operator['rol_nombre'] ?? ''),
+        (int)($operator['is_active'] ?? 0) === 1
+    );
+
+    return [
+        'id' => (int)($operator['id'] ?? 0),
+        'user_id' => (int)($operator['user_id'] ?? 0),
+        'name' => (string)($operator['name'] ?? ''),
+        'email' => (string)($operator['email'] ?? ''),
+        'is_active' => (int)($operator['is_active'] ?? 0),
+        'rol_nombre' => (string)($operator['rol_nombre'] ?? ''),
+        'rol_key' => service_profile_normalize_role_name((string)($operator['rol_nombre'] ?? '')),
+        'es_principal' => (int)($operator['es_principal'] ?? 0),
+        'created_at' => (string)($operator['created_at'] ?? ''),
+        'operator_status' => $status,
+    ];
+}
+
+function sa_service_operator_summary(array $operators): array
+{
+    $summary = [
+        'total' => 0,
+        'active' => 0,
+        'ready' => 0,
+        'inactive' => 0,
+        'pending' => 0,
+    ];
+
+    foreach ($operators as $operator) {
+        $summary['total']++;
+        if ((int)($operator['is_active'] ?? 0) === 1) {
+            $summary['active']++;
+        }
+        $code = (string)($operator['operator_status']['code'] ?? '');
+        if ($code === 'listo') {
+            $summary['ready']++;
+            continue;
+        }
+        if ($code === 'inactivo') {
+            $summary['inactive']++;
+            continue;
+        }
+        if ($code === 'pendiente') {
+            $summary['pending']++;
+        }
+    }
+
+    return $summary;
+}
+
+function sa_fetch_service_operators(PDO $pdo, int $residencialId, array $profile): array
+{
+    $stmtOperators = $pdo->prepare("
+        SELECT ur.id,
+               ur.es_principal,
+               ur.created_at,
+               u.id AS user_id,
+               u.name,
+               u.email,
+               u.is_active,
+               t.nombre AS rol_nombre
+        FROM usuarios_residenciales ur
+        JOIN users u ON u.id = ur.user_id
+        JOIN tipos_usuario t ON t.id = u.tipo_usuario_id
+        WHERE ur.residencial_id = :id
+        ORDER BY ur.es_principal DESC, u.is_active DESC, u.name ASC
+    ");
+    $stmtOperators->execute(['id' => $residencialId]);
+    $operators = $stmtOperators->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    return array_map(static fn(array $operator): array => sa_service_operator_meta($profile, $operator), $operators);
+}
+
 try {
     operational_schema_ensure($pdo);
     service_profile_schema_ensure($pdo);
@@ -34,6 +111,7 @@ try {
             'data' => [
                 'planes' => $planes,
                 'service_labels' => service_profile_labels(),
+                'service_matrix' => service_profile_frontend_matrix(),
                 'service_presets' => array_map(static function (string $preset): array {
                     $defaults = service_profile_defaults($preset);
                     return [
@@ -55,7 +133,19 @@ try {
         $modoRaw = trim((string)($_POST['modo_operacion'] ?? $_GET['modo_operacion'] ?? ''));
 
         $sql = "
-            SELECT r.*, p.nombre AS nombre_plan, p.codigo AS codigo_plan, sc.preset_servicio
+            SELECT r.*, p.nombre AS nombre_plan, p.codigo AS codigo_plan, sc.preset_servicio,
+                   (
+                     SELECT COUNT(*)
+                     FROM usuarios_residenciales ur
+                     WHERE ur.residencial_id = r.id
+                   ) AS usuarios_asignados,
+                   (
+                     SELECT COUNT(*)
+                     FROM usuarios_residenciales ur
+                     JOIN users u ON u.id = ur.user_id
+                     WHERE ur.residencial_id = r.id
+                       AND u.is_active = 1
+                   ) AS usuarios_activos_asignados
             FROM residenciales r
             LEFT JOIN planes p ON p.id = r.plan_id
             LEFT JOIN residenciales_servicio_config sc ON sc.residencial_id = r.id
@@ -106,9 +196,11 @@ try {
                 'items' => array_map(static function (array $item) use ($pdo): array {
                     $item['modo_operacion'] = operational_normalize_mode((string)($item['modo_operacion'] ?? 'residencial'));
                     $profile = service_profile_get($pdo, (int)$item['id']);
+                    $operators = sa_fetch_service_operators($pdo, (int)$item['id'], $profile);
                     $item['service_profile'] = service_profile_frontend_payload($pdo, (int)$item['id'], 'admin_residencial');
                     $item['preset_servicio'] = $profile['preset_servicio'];
                     $item['estatus_label'] = sa_residencial_status_badge((string)($item['estatus_plan'] ?? ''));
+                    $item['operators_summary'] = sa_service_operator_summary($operators);
                     return $item;
                 }, $items),
                 'summary' => $summary,
@@ -129,6 +221,10 @@ try {
             sa_json_out(false, ['error' => 'Cliente no encontrado.'], 404);
         }
 
+        $profile = service_profile_get($pdo, $id);
+        $operators = sa_fetch_service_operators($pdo, $id, $profile);
+        $operatorsSummary = sa_service_operator_summary($operators);
+
         sa_json_out(true, [
             'data' => [
                 'item' => [
@@ -136,6 +232,8 @@ try {
                     'nombre' => (string)$residencial['nombre'],
                     'modo_operacion' => operational_normalize_mode((string)$residencial['modo_operacion']),
                     'service_profile' => service_profile_frontend_payload($pdo, (int)$residencial['id'], 'admin_residencial'),
+                    'operators' => $operators,
+                    'operators_summary' => $operatorsSummary,
                 ],
             ],
         ]);
@@ -316,7 +414,16 @@ try {
         ]);
         service_profile_save($pdo, $residencialId, $serviceInput);
 
-        sa_json_out(true, ['message' => 'Residencial creado correctamente.']);
+        sa_json_out(true, [
+            'message' => 'Servicio creado correctamente.',
+            'data' => [
+                'item' => [
+                    'id' => $residencialId,
+                    'nombre' => $form['nombre'],
+                    'preset_servicio' => $serviceInput['preset_servicio'],
+                ],
+            ],
+        ]);
     }
 
     sa_json_out(false, ['error' => 'Acción no soportada.'], 400);

@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/guardia_schedule.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -20,57 +21,7 @@ $adminId = (int)($user['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
 $serviceProfile = service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'guardias', 'La gestión de guardias no está habilitada para este cliente.');
 $canManageGuardias = (int)($serviceProfile['habilita_guardias_admin_actions'] ?? 1) === 1;
-
-function normalize_dias_semana(string $dias): string {
-    $dias = strtoupper(trim($dias));
-    $dias = preg_replace('/\s+/', '', $dias);
-    return $dias;
-}
-
-function valid_time_hhmm(string $value): bool {
-    return (bool)preg_match('/^\d{2}:\d{2}$/', $value);
-}
-
-function current_day_code(): string {
-    $map = [
-        1 => 'LUN',
-        2 => 'MAR',
-        3 => 'MIE',
-        4 => 'JUE',
-        5 => 'VIE',
-        6 => 'SAB',
-        7 => 'DOM',
-    ];
-    $n = (int)date('N');
-    return $map[$n] ?? 'LUN';
-}
-
-function time_to_minutes(string $hhmm): int {
-    [$h, $m] = array_map('intval', explode(':', $hhmm));
-    return ($h * 60) + $m;
-}
-
-function is_guardia_in_shift(string $horaInicio, string $horaFin, string $diasSemana): bool {
-    $diaActual = current_day_code();
-    $dias = array_filter(explode(',', normalize_dias_semana($diasSemana)));
-
-    if (!in_array($diaActual, $dias, true)) {
-        return false;
-    }
-
-    $now = date('H:i');
-    $nowMin = time_to_minutes($now);
-    $iniMin = time_to_minutes(substr($horaInicio, 0, 5));
-    $finMin = time_to_minutes(substr($horaFin, 0, 5));
-
-    // turno normal: 08:00 -> 16:00
-    if ($iniMin < $finMin) {
-        return $nowMin >= $iniMin && $nowMin < $finMin;
-    }
-
-    // turno nocturno: 22:00 -> 06:00
-    return $nowMin >= $iniMin || $nowMin < $finMin;
-}
+guardia_schedule_schema_ensure($pdo);
 
 function list_turnos(PDO $pdo, int $residencialId, int $guardiaId): array {
     $stmt = $pdo->prepare("
@@ -97,13 +48,15 @@ function list_turnos(PDO $pdo, int $residencialId, int $guardiaId): array {
 
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-    return array_map(function ($r) {
+    return array_map(function ($r) use ($pdo) {
         $inicio = substr((string)$r['hora_inicio'], 0, 5);
         $fin = substr((string)$r['hora_fin'], 0, 5);
         $dias = (string)($r['dias_semana'] ?? '');
+        $turnoId = (int)$r['id'];
+        $exceptionToday = guardia_schedule_find_current_exception($pdo, (int)$r['residencial_id'], (int)$r['user_id'], null, $turnoId);
 
         return [
-            'id' => (int)$r['id'],
+            'id' => $turnoId,
             'user_id' => (int)$r['user_id'],
             'residencial_id' => (int)$r['residencial_id'],
             'nombre_turno' => (string)$r['nombre_turno'],
@@ -111,7 +64,10 @@ function list_turnos(PDO $pdo, int $residencialId, int $guardiaId): array {
             'hora_fin' => $fin,
             'dias_semana' => $dias,
             'activo' => (int)$r['activo'],
-            'en_servicio_horario' => is_guardia_in_shift($inicio, $fin, $dias) ? 1 : 0,
+            'en_servicio_horario' => $exceptionToday ? 0 : (guardia_schedule_is_in_shift($inicio, $fin, $dias) ? 1 : 0),
+            'exception_today' => $exceptionToday ? 1 : 0,
+            'exception_today_reason' => $exceptionToday['motivo'] ?? '',
+            'exception_today_id' => $exceptionToday['id'] ?? 0,
         ];
     }, $rows);
 }
@@ -137,6 +93,10 @@ function validate_guardia_belongs(PDO $pdo, int $guardiaId, int $residencialId):
     }
 }
 
+function list_exceptions(PDO $pdo, int $residencialId, int $guardiaId, array $filters = []): array {
+    return guardia_schedule_list_exceptions($pdo, $residencialId, $guardiaId, $filters);
+}
+
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 
@@ -158,12 +118,28 @@ try {
         json_out(true, ['turnos' => $turnos]);
     }
 
+    if ($method === 'GET' && $action === 'list_exceptions') {
+        $guardiaId = (int)($_GET['guardia_id'] ?? 0);
+        if ($guardiaId <= 0) {
+            json_out(false, ['error' => 'guardia_id es obligatorio.']);
+        }
+
+        validate_guardia_belongs($pdo, $guardiaId, $residencialId);
+
+        $exceptions = list_exceptions($pdo, $residencialId, $guardiaId, [
+            'period' => (string)($_GET['period'] ?? ''),
+            'only_active' => (string)($_GET['only_active'] ?? ''),
+        ]);
+
+        json_out(true, ['exceptions' => $exceptions]);
+    }
+
     if ($method === 'POST' && $action === 'create') {
         $guardiaId = (int)($_POST['guardia_id'] ?? 0);
         $nombreTurno = trim((string)($_POST['nombre_turno'] ?? ''));
         $horaInicio = trim((string)($_POST['hora_inicio'] ?? ''));
         $horaFin = trim((string)($_POST['hora_fin'] ?? ''));
-        $diasSemana = normalize_dias_semana((string)($_POST['dias_semana'] ?? ''));
+        $diasSemana = guardia_schedule_normalize_days((string)($_POST['dias_semana'] ?? ''));
         $activo = isset($_POST['activo']) ? 1 : 0;
 
         if ($guardiaId <= 0) {
@@ -172,7 +148,7 @@ try {
         if ($nombreTurno === '') {
             json_out(false, ['error' => 'El nombre del turno es obligatorio.']);
         }
-        if (!valid_time_hhmm($horaInicio) || !valid_time_hhmm($horaFin)) {
+        if (!guardia_schedule_valid_time($horaInicio) || !guardia_schedule_valid_time($horaFin)) {
             json_out(false, ['error' => 'La hora de inicio y fin deben tener formato HH:MM.']);
         }
         if ($diasSemana === '') {
@@ -242,7 +218,7 @@ try {
         $nombreTurno = trim((string)($_POST['nombre_turno'] ?? ''));
         $horaInicio = trim((string)($_POST['hora_inicio'] ?? ''));
         $horaFin = trim((string)($_POST['hora_fin'] ?? ''));
-        $diasSemana = normalize_dias_semana((string)($_POST['dias_semana'] ?? ''));
+        $diasSemana = guardia_schedule_normalize_days((string)($_POST['dias_semana'] ?? ''));
         $activo = isset($_POST['activo']) ? 1 : 0;
 
         if ($turnoId <= 0 || $guardiaId <= 0) {
@@ -251,7 +227,7 @@ try {
         if ($nombreTurno === '') {
             json_out(false, ['error' => 'El nombre del turno es obligatorio.']);
         }
-        if (!valid_time_hhmm($horaInicio) || !valid_time_hhmm($horaFin)) {
+        if (!guardia_schedule_valid_time($horaInicio) || !guardia_schedule_valid_time($horaFin)) {
             json_out(false, ['error' => 'La hora de inicio y fin deben tener formato HH:MM.']);
         }
         if ($diasSemana === '') {
@@ -348,6 +324,302 @@ try {
 
         json_out(true, [
             'message' => 'Turno eliminado correctamente.',
+            'turnos' => list_turnos($pdo, $residencialId, $guardiaId),
+        ]);
+    }
+
+    if ($method === 'POST' && $action === 'create_exception') {
+        $guardiaId = (int)($_POST['guardia_id'] ?? 0);
+        $turnoId = (int)($_POST['turno_id'] ?? 0);
+        $fechaInicio = trim((string)($_POST['fecha_inicio'] ?? ''));
+        $fechaFin = trim((string)($_POST['fecha_fin'] ?? ''));
+        $motivo = trim((string)($_POST['motivo'] ?? ''));
+        $notas = trim((string)($_POST['notas'] ?? ''));
+        $activo = isset($_POST['activo']) ? 1 : 0;
+
+        if ($guardiaId <= 0) {
+            json_out(false, ['error' => 'guardia_id inválido.']);
+        }
+        if (!guardia_schedule_valid_date($fechaInicio) || !guardia_schedule_valid_date($fechaFin)) {
+            json_out(false, ['error' => 'Debes indicar una fecha inicial y final válidas.']);
+        }
+        if ($fechaFin < $fechaInicio) {
+            json_out(false, ['error' => 'La fecha final no puede ser menor a la fecha inicial.']);
+        }
+        if ($motivo === '') {
+            json_out(false, ['error' => 'El motivo de la excepción es obligatorio.']);
+        }
+        if (mb_strlen($motivo) > 120) {
+            json_out(false, ['error' => 'El motivo no puede exceder 120 caracteres.']);
+        }
+
+        validate_guardia_belongs($pdo, $guardiaId, $residencialId);
+
+        if ($turnoId > 0) {
+            $stmtTurno = $pdo->prepare("
+                SELECT id
+                FROM guardias_turnos
+                WHERE id = :id
+                  AND user_id = :uid
+                  AND residencial_id = :rid
+                LIMIT 1
+            ");
+            $stmtTurno->execute([
+                'id' => $turnoId,
+                'uid' => $guardiaId,
+                'rid' => $residencialId,
+            ]);
+            if (!$stmtTurno->fetchColumn()) {
+                json_out(false, ['error' => 'No encontramos el turno asociado a esta excepción.']);
+            }
+        }
+
+        if ($activo === 1) {
+            $overlap = guardia_schedule_validate_exception_overlap($pdo, $residencialId, $guardiaId, $fechaInicio, $fechaFin);
+            if ($overlap) {
+                json_out(false, ['error' => 'Ya existe una excepción activa que se cruza con ese rango de fechas.']);
+            }
+        }
+
+        $stmt = $pdo->prepare("
+            INSERT INTO guardias_turnos_excepciones (
+                user_id,
+                residencial_id,
+                turno_id,
+                fecha_inicio,
+                fecha_fin,
+                motivo,
+                notas,
+                activo,
+                created_at,
+                updated_at
+            ) VALUES (
+                :uid,
+                :rid,
+                :tid,
+                :ini,
+                :fin,
+                :motivo,
+                :notas,
+                :activo,
+                NOW(),
+                NOW()
+            )
+        ");
+        $stmt->execute([
+            'uid' => $guardiaId,
+            'rid' => $residencialId,
+            'tid' => $turnoId > 0 ? $turnoId : null,
+            'ini' => $fechaInicio,
+            'fin' => $fechaFin,
+            'motivo' => $motivo,
+            'notas' => $notas !== '' ? $notas : null,
+            'activo' => $activo,
+        ]);
+
+        json_out(true, [
+            'message' => 'Excepción guardada correctamente.',
+            'exceptions' => list_exceptions($pdo, $residencialId, $guardiaId),
+            'turnos' => list_turnos($pdo, $residencialId, $guardiaId),
+        ]);
+    }
+
+    if ($method === 'POST' && $action === 'update_exception') {
+        $exceptionId = (int)($_POST['exception_id'] ?? 0);
+        $guardiaId = (int)($_POST['guardia_id'] ?? 0);
+        $turnoId = (int)($_POST['turno_id'] ?? 0);
+        $fechaInicio = trim((string)($_POST['fecha_inicio'] ?? ''));
+        $fechaFin = trim((string)($_POST['fecha_fin'] ?? ''));
+        $motivo = trim((string)($_POST['motivo'] ?? ''));
+        $notas = trim((string)($_POST['notas'] ?? ''));
+        $activo = isset($_POST['activo']) ? 1 : 0;
+
+        if ($exceptionId <= 0 || $guardiaId <= 0) {
+            json_out(false, ['error' => 'Datos inválidos para actualizar la excepción.']);
+        }
+        if (!guardia_schedule_valid_date($fechaInicio) || !guardia_schedule_valid_date($fechaFin)) {
+            json_out(false, ['error' => 'Debes indicar una fecha inicial y final válidas.']);
+        }
+        if ($fechaFin < $fechaInicio) {
+            json_out(false, ['error' => 'La fecha final no puede ser menor a la fecha inicial.']);
+        }
+        if ($motivo === '') {
+            json_out(false, ['error' => 'El motivo de la excepción es obligatorio.']);
+        }
+        if (mb_strlen($motivo) > 120) {
+            json_out(false, ['error' => 'El motivo no puede exceder 120 caracteres.']);
+        }
+
+        validate_guardia_belongs($pdo, $guardiaId, $residencialId);
+
+        $stmtCheck = $pdo->prepare("
+            SELECT id
+            FROM guardias_turnos_excepciones
+            WHERE id = :id
+              AND user_id = :uid
+              AND residencial_id = :rid
+            LIMIT 1
+        ");
+        $stmtCheck->execute([
+            'id' => $exceptionId,
+            'uid' => $guardiaId,
+            'rid' => $residencialId,
+        ]);
+        if (!$stmtCheck->fetchColumn()) {
+            json_out(false, ['error' => 'No encontramos la excepción a editar.']);
+        }
+
+        if ($turnoId > 0) {
+            $stmtTurno = $pdo->prepare("
+                SELECT id
+                FROM guardias_turnos
+                WHERE id = :id
+                  AND user_id = :uid
+                  AND residencial_id = :rid
+                LIMIT 1
+            ");
+            $stmtTurno->execute([
+                'id' => $turnoId,
+                'uid' => $guardiaId,
+                'rid' => $residencialId,
+            ]);
+            if (!$stmtTurno->fetchColumn()) {
+                json_out(false, ['error' => 'No encontramos el turno asociado a esta excepción.']);
+            }
+        }
+
+        if ($activo === 1) {
+            $overlap = guardia_schedule_validate_exception_overlap($pdo, $residencialId, $guardiaId, $fechaInicio, $fechaFin, $exceptionId);
+            if ($overlap) {
+                json_out(false, ['error' => 'Ya existe otra excepción activa que se cruza con ese rango de fechas.']);
+            }
+        }
+
+        $stmt = $pdo->prepare("
+            UPDATE guardias_turnos_excepciones
+            SET turno_id = :tid,
+                fecha_inicio = :ini,
+                fecha_fin = :fin,
+                motivo = :motivo,
+                notas = :notas,
+                activo = :activo,
+                updated_at = NOW()
+            WHERE id = :id
+              AND user_id = :uid
+              AND residencial_id = :rid
+        ");
+        $stmt->execute([
+            'tid' => $turnoId > 0 ? $turnoId : null,
+            'ini' => $fechaInicio,
+            'fin' => $fechaFin,
+            'motivo' => $motivo,
+            'notas' => $notas !== '' ? $notas : null,
+            'activo' => $activo,
+            'id' => $exceptionId,
+            'uid' => $guardiaId,
+            'rid' => $residencialId,
+        ]);
+
+        json_out(true, [
+            'message' => 'Excepción actualizada correctamente.',
+            'exceptions' => list_exceptions($pdo, $residencialId, $guardiaId),
+            'turnos' => list_turnos($pdo, $residencialId, $guardiaId),
+        ]);
+    }
+
+    if ($method === 'POST' && $action === 'toggle_exception') {
+        $exceptionId = (int)($_POST['exception_id'] ?? 0);
+        $guardiaId = (int)($_POST['guardia_id'] ?? 0);
+
+        if ($exceptionId <= 0 || $guardiaId <= 0) {
+            json_out(false, ['error' => 'Datos inválidos para cambiar la excepción.']);
+        }
+
+        validate_guardia_belongs($pdo, $guardiaId, $residencialId);
+
+        $stmt = $pdo->prepare("
+            SELECT *
+            FROM guardias_turnos_excepciones
+            WHERE id = :id
+              AND user_id = :uid
+              AND residencial_id = :rid
+            LIMIT 1
+        ");
+        $stmt->execute([
+            'id' => $exceptionId,
+            'uid' => $guardiaId,
+            'rid' => $residencialId,
+        ]);
+        $exception = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$exception) {
+            json_out(false, ['error' => 'No encontramos la excepción indicada.']);
+        }
+
+        $newActive = (int)($exception['activo'] ?? 0) === 1 ? 0 : 1;
+        if ($newActive === 1) {
+            $overlap = guardia_schedule_validate_exception_overlap(
+                $pdo,
+                $residencialId,
+                $guardiaId,
+                (string)$exception['fecha_inicio'],
+                (string)$exception['fecha_fin'],
+                $exceptionId
+            );
+            if ($overlap) {
+                json_out(false, ['error' => 'No pudimos activarla porque se cruza con otra excepción activa del mismo guardia.']);
+            }
+        }
+
+        $pdo->prepare("
+            UPDATE guardias_turnos_excepciones
+            SET activo = :activo,
+                updated_at = NOW()
+            WHERE id = :id
+              AND user_id = :uid
+              AND residencial_id = :rid
+        ")->execute([
+            'activo' => $newActive,
+            'id' => $exceptionId,
+            'uid' => $guardiaId,
+            'rid' => $residencialId,
+        ]);
+
+        json_out(true, [
+            'message' => $newActive === 1 ? 'Excepción activada correctamente.' : 'Excepción desactivada correctamente.',
+            'exceptions' => list_exceptions($pdo, $residencialId, $guardiaId),
+            'turnos' => list_turnos($pdo, $residencialId, $guardiaId),
+        ]);
+    }
+
+    if ($method === 'POST' && $action === 'delete_exception') {
+        $exceptionId = (int)($_POST['exception_id'] ?? 0);
+        $guardiaId = (int)($_POST['guardia_id'] ?? 0);
+
+        if ($exceptionId <= 0 || $guardiaId <= 0) {
+            json_out(false, ['error' => 'Datos inválidos para eliminar la excepción.']);
+        }
+
+        validate_guardia_belongs($pdo, $guardiaId, $residencialId);
+
+        $stmt = $pdo->prepare("
+            DELETE FROM guardias_turnos_excepciones
+            WHERE id = :id
+              AND user_id = :uid
+              AND residencial_id = :rid
+        ");
+        $stmt->execute([
+            'id' => $exceptionId,
+            'uid' => $guardiaId,
+            'rid' => $residencialId,
+        ]);
+
+        if ($stmt->rowCount() <= 0) {
+            json_out(false, ['error' => 'No encontramos la excepción a eliminar.']);
+        }
+
+        json_out(true, [
+            'message' => 'Excepción eliminada correctamente.',
+            'exceptions' => list_exceptions($pdo, $residencialId, $guardiaId),
             'turnos' => list_turnos($pdo, $residencialId, $guardiaId),
         ]);
     }

@@ -98,13 +98,33 @@
         }
     }
 
+    function renderAccessBlocked(message = '') {
+        const wrap = els.body?.querySelector('.max-w-6xl') || els.body;
+        if (!wrap) return;
+
+        wrap.innerHTML = `
+        <div class="rounded-[1.75rem] border border-amber-200 bg-white p-5 shadow-sm">
+          <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-500">Residente</div>
+          <h2 class="mt-2 text-2xl font-semibold text-slate-900">Acceso no disponible</h2>
+          <p class="mt-2 text-sm leading-6 text-slate-600">${escapeHtml(message || 'Tu cuenta está asignada, pero este servicio ya no tiene módulos compatibles para el portal de residente.')}</p>
+          <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            Pide a la administración o a Superadmin que habiliten módulos reales para el rol Residente.
+          </div>
+        </div>
+      `;
+    }
+
     async function navigateTo(view, opts = {}) {
         const { force = false } = opts;
         showShellHeader();
+        if (!state.enabledViews.size) {
+            renderAccessBlocked();
+            return;
+        }
         if (!inlineViews.has(view)) {
             view = firstEnabledView();
         }
-        if (state.enabledViews.size && !state.enabledViews.has(view)) {
+        if (!state.enabledViews.has(view)) {
             view = firstEnabledView();
         }
         if (!force && (state.targetView === view || state.currentView === view) && state.isNavigating === false) {
@@ -162,22 +182,24 @@
 
     function initialView() {
         const h = (window.location.hash || '').replace('#', '').trim();
+        if (!state.enabledViews.size) return '';
         if (!h) return firstEnabledView();
         if (!inlineViews.has(h)) return firstEnabledView();
-        return state.enabledViews.size && !state.enabledViews.has(h) ? firstEnabledView() : h;
+        return !state.enabledViews.has(h) ? firstEnabledView() : h;
     }
 
     function firstEnabledView() {
+        if (!state.enabledViews.size) return '';
         if (state.enabledViews.has('home')) return 'home';
         const [first] = state.enabledViews;
-        return first || 'home';
+        return first || '';
     }
 
     function applyViewVisibility() {
         document.querySelectorAll('[data-view]').forEach((el) => {
             const view = (el.getAttribute('data-view') || '').trim();
             if (!view) return;
-            const allow = !state.enabledViews.size || state.enabledViews.has(view);
+            const allow = state.enabledViews.has(view);
             if (el.classList.contains('dashBtn') || el.id === 'btnReglamento' || el.id === 'btnEditAddress' || el.id === 'residentNotificationsButton') {
                 el.classList.toggle('hidden', !allow);
             }
@@ -215,6 +237,8 @@
             if (data.setup_incomplete) {
                 els.addr.textContent = data.setup_message || 'Configuración pendiente';
                 renderCars([]);
+                updateNotificationsUI();
+                applyViewVisibility();
                 return;
             }
 
@@ -239,7 +263,7 @@
             els.cars.innerHTML = `<span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/80">Sin autos registrados</span>`;
             currentNotificationMeta = null;
             state.serviceProfile = null;
-            state.enabledViews = new Set(['home', 'perfil', 'reglamento']);
+            state.enabledViews = new Set();
             updateNotificationsUI();
             applyViewVisibility();
         }
@@ -391,11 +415,16 @@
         });
 
         loadContext().then(() => {
+            if (!state.enabledViews.size) {
+                renderAccessBlocked();
+                return;
+            }
             navigateTo(initialView(), { force: true });
         });
     });
 
     window.addEventListener('hashchange', () => {
+        if (!state.enabledViews.size) return;
         const next = (window.location.hash || '').replace('#', '').trim();
         const current = state.targetView || state.currentView;
         if (next && next !== current && inlineViews.has(next)) {

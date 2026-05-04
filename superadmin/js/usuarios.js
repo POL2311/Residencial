@@ -45,6 +45,14 @@
         btnCloseDeleteUserModal: document.getElementById('btnCloseDeleteUserModal'),
         btnCancelDeleteUserModal: document.getElementById('btnCancelDeleteUserModal'),
         btnConfirmDeleteUser: document.getElementById('btnConfirmDeleteUser'),
+        userModalError: document.getElementById('userModalError'),
+        assignmentModalError: document.getElementById('assignmentModalError'),
+        userWizardResidencialId: document.getElementById('userWizardResidencialId'),
+        userWizardServiceWrap: document.getElementById('userWizardServiceWrap'),
+        userWizardServiceName: document.getElementById('userWizardServiceName'),
+        userAssignAutoWrap: document.getElementById('userAssignAutoWrap'),
+        userAssignPrimaryWrap: document.getElementById('userAssignPrimaryWrap'),
+        assignmentPresetWrap: document.getElementById('assignmentPresetWrap'),
     };
 
     let csrf = '';
@@ -57,6 +65,7 @@
         assignments: [],
         assignmentsPage: 1,
         deleteUser: null,
+        onboardingService: null,
     };
 
     function escapeHtml(value) {
@@ -69,10 +78,30 @@
     }
 
     function showAlert(type, msg) {
+        const normalizedType = type === 'ok' ? 'success' : type;
+        if (window.AppToast?.show) {
+            window.AppToast.show({ type: normalizedType, message: msg });
+            return;
+        }
         if (!els.alert) return;
         els.alert.classList.remove('hidden');
-        els.alert.className = `rounded-2xl px-4 py-3 text-sm ${type === 'ok' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
+        els.alert.className = `rounded-2xl px-4 py-3 text-sm ${normalizedType === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
         els.alert.textContent = msg;
+    }
+
+    function showInlineError(el, msg) {
+        if (!el) {
+            showAlert('error', msg);
+            return;
+        }
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
+
+    function clearInlineError(el) {
+        if (!el) return;
+        el.textContent = '';
+        el.classList.add('hidden');
     }
 
     async function api(data) {
@@ -89,22 +118,105 @@
             tipos.map((tipo) => `<option value="${escapeHtml(tipo.id)}">${escapeHtml(tipo.nombre)}</option>`)
         ).join('');
 
-        els.userTipoSelect.innerHTML = ['<option value="">Selecciona un rol</option>'].concat(
-            tipos.map((tipo) => `<option value="${escapeHtml(tipo.id)}">${escapeHtml(tipo.nombre)}</option>`)
-        ).join('');
-
-        els.assignUserSelect.innerHTML = ['<option value="">Selecciona usuario</option>'].concat(
-            usuariosMeta.map((user) => `<option value="${escapeHtml(user.id)}">${escapeHtml(user.name)} (${escapeHtml(user.email)})</option>`)
-        ).join('');
-
         const resOptions = ['<option value="">Todos</option>'].concat(
             residencialesMeta.map((res) => `<option value="${escapeHtml(res.id)}">${escapeHtml(res.nombre)} (${escapeHtml(res.codigo)})</option>`)
         ).join('');
         els.assignRes.innerHTML = resOptions;
 
-        els.assignResidencialSelect.innerHTML = ['<option value="">Selecciona residencial</option>'].concat(
+        els.assignResidencialSelect.innerHTML = ['<option value="">Selecciona cliente o servicio</option>'].concat(
             residencialesMeta.map((res) => `<option value="${escapeHtml(res.id)}">${escapeHtml(res.nombre)} (${escapeHtml(res.codigo)})</option>`)
         ).join('');
+
+        renderRoleOptions(state.onboardingService?.id || '');
+        renderAssignableUsers(els.assignResidencialSelect?.value || '');
+    }
+
+    function normalizeRoleName(value) {
+        const raw = String(value || '').trim().toLowerCase();
+        if (raw === '') return '';
+        if (raw.includes('super')) return 'super_admin';
+        if (raw.includes('guard')) return 'guardia';
+        if (raw.includes('resident')) return 'residente';
+        if (raw.includes('admin_residencial') || raw.includes('admin operativo') || raw.includes('administr')) return 'admin_residencial';
+        return raw.replace(/\s+/g, '_');
+    }
+
+    function getAllowedRoleKeysForService(serviceId) {
+        const service = residencialesMeta.find((item) => String(item.id) === String(serviceId));
+        const explicit = Array.isArray(service?.service_profile?.assignable_roles) ? service.service_profile.assignable_roles : [];
+        return new Set(explicit.map((role) => normalizeRoleName(role)).filter(Boolean));
+    }
+
+    function compatibleUsersForService(serviceId) {
+        const allowedRoles = getAllowedRoleKeysForService(serviceId);
+        if (!allowedRoles.size) return [];
+        return usuariosMeta.filter((user) => allowedRoles.has(normalizeRoleName(user.rol_nombre)));
+    }
+
+    function compatibleTiposForService(serviceId) {
+        const allowedRoles = getAllowedRoleKeysForService(serviceId);
+        if (!allowedRoles.size) return [];
+        return tipos.filter((tipo) => allowedRoles.has(normalizeRoleName(tipo.nombre)));
+    }
+
+    function renderRoleOptions(serviceId = '') {
+        const options = serviceId ? compatibleTiposForService(serviceId) : tipos;
+        const placeholder = serviceId
+            ? (options.length ? 'Selecciona un rol compatible' : 'No hay roles compatibles para este servicio')
+            : 'Selecciona un rol';
+        els.userTipoSelect.innerHTML = [`<option value="">${placeholder}</option>`].concat(
+            options.map((tipo) => `<option value="${escapeHtml(tipo.id)}">${escapeHtml(tipo.nombre)}</option>`)
+        ).join('');
+        els.userTipoSelect.disabled = serviceId ? !options.length : false;
+    }
+
+    function renderAssignableUsers(serviceId = '') {
+        if (!els.assignUserSelect) return;
+
+        if (!serviceId) {
+            els.assignUserSelect.innerHTML = '<option value="">Selecciona primero un servicio</option>';
+            els.assignUserSelect.disabled = true;
+            return;
+        }
+
+        const users = compatibleUsersForService(serviceId);
+        if (!users.length) {
+            els.assignUserSelect.innerHTML = '<option value="">No hay usuarios compatibles para este servicio</option>';
+            els.assignUserSelect.disabled = true;
+            return;
+        }
+
+        els.assignUserSelect.disabled = false;
+        els.assignUserSelect.innerHTML = ['<option value="">Selecciona usuario compatible</option>'].concat(
+            users.map((user) => {
+                const inactiveLabel = Number(user.is_active || 0) === 1 ? '' : ' · inactivo';
+                return `<option value="${escapeHtml(user.id)}">${escapeHtml(user.name)} (${escapeHtml(user.email)})${inactiveLabel}</option>`;
+            })
+        ).join('');
+    }
+
+    function updateAssignmentHelper(serviceId = '', fromGuided = false) {
+        if (!els.assignmentPresetWrap) return;
+        if (!serviceId) {
+            els.assignmentPresetWrap.classList.add('hidden');
+            return;
+        }
+
+        const service = residencialesMeta.find((item) => String(item.id) === String(serviceId));
+        const compatibleCount = compatibleUsersForService(serviceId).length;
+        const baseMessage = fromGuided
+            ? 'Estás asignando un usuario al servicio seleccionado desde el flujo guiado.'
+            : 'Solo se muestran usuarios compatibles con los roles habilitados para este servicio.';
+        const followup = compatibleCount > 0
+            ? `${compatibleCount} usuario${compatibleCount === 1 ? '' : 's'} compatible${compatibleCount === 1 ? '' : 's'} disponible${compatibleCount === 1 ? '' : 's'}.`
+            : 'No hay usuarios compatibles todavía; te conviene crear uno nuevo para este servicio.';
+
+        els.assignmentPresetWrap.innerHTML = `
+            <div class="font-medium text-sky-900">${escapeHtml(service?.nombre || 'Servicio')}</div>
+            <div class="mt-1">${escapeHtml(baseMessage)}</div>
+            <div class="mt-1 text-sky-700">${escapeHtml(followup)}</div>
+        `;
+        els.assignmentPresetWrap.classList.remove('hidden');
     }
 
     function getPageInfo(items, page) {
@@ -309,23 +421,72 @@
 
     function openUserModal() {
         els.userForm.reset();
+        clearInlineError(els.userModalError);
+        state.onboardingService = null;
+        if (els.userWizardResidencialId) els.userWizardResidencialId.value = '';
+        if (els.userWizardServiceWrap) els.userWizardServiceWrap.classList.add('hidden');
+        if (els.userAssignAutoWrap) els.userAssignAutoWrap.classList.add('hidden');
+        if (els.userAssignPrimaryWrap) els.userAssignPrimaryWrap.classList.add('hidden');
+        if (els.userWizardServiceName) els.userWizardServiceName.value = '';
+        renderRoleOptions('');
+        const title = els.userModal?.querySelector('.text-sm.font-semibold.text-slate-800');
+        if (title) title.textContent = 'Nuevo usuario';
         els.userModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
+    function openUserModalForService(service) {
+        openUserModal();
+        state.onboardingService = service || null;
+        if (els.userWizardResidencialId) els.userWizardResidencialId.value = String(service?.id || '');
+        if (els.userWizardServiceName) {
+            const type = service?.preset_servicio ? String(service.preset_servicio) : 'servicio';
+            els.userWizardServiceName.value = `${service?.nombre || 'Servicio'} · ${type}`;
+        }
+        if (els.userWizardServiceWrap) els.userWizardServiceWrap.classList.remove('hidden');
+        if (els.userAssignAutoWrap) els.userAssignAutoWrap.classList.remove('hidden');
+        if (els.userAssignPrimaryWrap) els.userAssignPrimaryWrap.classList.remove('hidden');
+        renderRoleOptions(service?.id || '');
+        const assignField = els.userForm?.querySelector('[name="assign_to_service"]');
+        const principalField = els.userForm?.querySelector('[name="assign_as_principal"]');
+        if (assignField) assignField.checked = true;
+        if (principalField) principalField.checked = true;
+        const title = els.userModal?.querySelector('.text-sm.font-semibold.text-slate-800');
+        if (title) title.textContent = 'Crear usuario y asignarlo';
+    }
+
     function closeUserModal() {
         els.userModal.classList.add('hidden');
+        clearInlineError(els.userModalError);
+        state.onboardingService = null;
         if (els.assignmentModal?.classList.contains('hidden')) document.body.style.overflow = '';
     }
 
     function openAssignmentModal() {
         els.assignmentForm.reset();
+        clearInlineError(els.assignmentModalError);
+        updateAssignmentHelper('', false);
+        renderAssignableUsers('');
+        const title = els.assignmentModal?.querySelector('.text-sm.font-semibold.text-slate-800');
+        if (title) title.textContent = 'Asignar usuario a cliente / servicio';
         els.assignmentModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
+    function openAssignmentModalForService(service) {
+        openAssignmentModal();
+        if (els.assignResidencialSelect) {
+            els.assignResidencialSelect.value = String(service?.id || '');
+        }
+        renderAssignableUsers(service?.id || '');
+        updateAssignmentHelper(service?.id || '', true);
+        const title = els.assignmentModal?.querySelector('.text-sm.font-semibold.text-slate-800');
+        if (title) title.textContent = 'Asignar usuario existente a este servicio';
+    }
+
     function closeAssignmentModal() {
         els.assignmentModal.classList.add('hidden');
+        clearInlineError(els.assignmentModalError);
         if (els.userModal?.classList.contains('hidden')) document.body.style.overflow = '';
     }
 
@@ -418,34 +579,54 @@
     els.btnCloseDeleteUserModal?.addEventListener('click', closeDeleteUserModal);
     els.btnCancelDeleteUserModal?.addEventListener('click', closeDeleteUserModal);
     els.deleteUserModal?.addEventListener('click', (e) => { if (e.target === els.deleteUserModal) closeDeleteUserModal(); });
+    els.assignResidencialSelect?.addEventListener('change', () => {
+        const serviceId = els.assignResidencialSelect.value || '';
+        renderAssignableUsers(serviceId);
+        updateAssignmentHelper(serviceId, false);
+    });
 
     els.userForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearInlineError(els.userModalError);
         const fd = new FormData(els.userForm);
-        const payload = { action: 'create_user', csrf_token: csrf };
+        const assignToService = String(fd.get('assign_to_service') || '') === '1';
+        const wizardResidencialId = String(fd.get('wizard_residencial_id') || '');
+        const payload = { action: assignToService && wizardResidencialId ? 'create_user_with_assignment' : 'create_user', csrf_token: csrf };
         fd.forEach((value, key) => {
-            if (key === 'is_active') {
+            if (key === 'is_active' || key === 'assign_to_service' || key === 'assign_as_principal') {
                 payload[key] = '1';
+            } else if (key === 'wizard_residencial_id') {
+                if (String(value || '').trim() !== '') {
+                    payload.residencial_id = value;
+                }
             } else {
                 payload[key] = value;
             }
         });
         if (!Object.prototype.hasOwnProperty.call(payload, 'is_active')) payload.is_active = '0';
+        if (payload.action === 'create_user_with_assignment') {
+            payload.es_principal = Object.prototype.hasOwnProperty.call(payload, 'assign_as_principal') ? '1' : '0';
+        }
+        delete payload.assign_to_service;
+        delete payload.assign_as_principal;
+        delete payload.wizard_residencial_id;
 
         try {
-            await api(payload);
+            const json = await api(payload);
             closeUserModal();
             await loadMeta();
             await loadUsers(true);
-            showAlert('ok', 'Usuario creado correctamente.');
+            await loadAssignments(true);
+            showAlert('ok', json.message || 'Usuario creado correctamente.');
             window.SuperadminDashboard?.loadContext?.();
         } catch (err) {
-            showAlert('error', err.message || 'No se pudo crear el usuario.');
+            showInlineError(els.userModalError, err.message || 'No se pudo crear el usuario.');
         }
     });
 
     els.assignmentForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearInlineError(els.assignmentModalError);
         const fd = new FormData(els.assignmentForm);
         const payload = { action: 'assign_residencial', csrf_token: csrf };
         fd.forEach((value, key) => {
@@ -464,7 +645,7 @@
             await loadAssignments(true);
             showAlert('ok', 'Asignación creada correctamente.');
         } catch (err) {
-            showAlert('error', err.message || 'No se pudo crear la asignación.');
+            showInlineError(els.assignmentModalError, err.message || 'No se pudo crear la asignación.');
         }
     });
 
@@ -491,6 +672,16 @@
             showAlert('error', err.message || 'No se pudo desactivar el usuario.');
         }
     });
+
+    window.SuperadminUsuarios = {
+        openUserModalForService,
+        openAssignmentModalForService,
+        refreshAll: async () => {
+            await loadMeta();
+            await loadUsers(false);
+            await loadAssignments(false);
+        },
+    };
 
     Promise.all([loadMeta(), loadUsers(true), loadAssignments(true)]).catch((err) => showAlert('error', err.message || 'No se pudo cargar el módulo de usuarios.'));
 })();

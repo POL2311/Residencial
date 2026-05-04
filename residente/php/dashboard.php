@@ -27,6 +27,7 @@ $pageTitle = 'Portal del residente';
 <body class="min-h-screen bg-[#F2F3F5] text-slate-900">
   <?php include __DIR__ . '/../templates/dashboard.html'; ?>
 
+  <script src="../../assets/js/app-toast.js" defer></script>
   <script src="../js/dashboard.js" defer></script>
 </body>
 </html>

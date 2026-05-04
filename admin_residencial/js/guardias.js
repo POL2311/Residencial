@@ -27,6 +27,7 @@
     editingId: null,
     supportsGuardiaServicio: true,
     canManageGuardias: true,
+    serviceGuardiaEnabled: true,
     selectedTurnosGuardiaId: null,
   };
 
@@ -70,9 +71,11 @@
   }
 
   async function fetchJSON(url, options = {}) {
+    const { headers = {}, ...rest } = options;
     const res = await fetch(url, {
       credentials: 'same-origin',
-      ...options,
+      ...rest,
+      headers: { Accept: 'application/json', ...headers },
     });
 
     const text = await res.text();
@@ -137,6 +140,14 @@
   }
 
   function servicioSummaryHTML(g) {
+    const absenceHTML = Number(g.absence_today || 0) === 1
+      ? `
+        <div class="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+          Ausente hoy${g.absence_today_reason ? ` · ${escapeHtml(g.absence_today_reason)}` : ''}
+        </div>
+      `
+      : '';
+
     if (!state.canManageGuardias) {
       return `
         <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -144,21 +155,25 @@
             ${Number(g.guardia_en_servicio || 0) === 1 ? 'En servicio' : 'Descanso'}
           </div>
           <div class="mt-1 text-[11px] text-slate-500">Superadmin deshabilitó la operación de guardias para este cliente.</div>
+          ${absenceHTML}
         </div>
       `;
     }
 
     const btnLabel = g.nombre_turno ? 'Ver más' : 'Asignar';
     return `
-      <div class="flex items-center gap-3">
-        ${toggleHTML({ id: g.id, enServicio: Number(g.guardia_en_servicio || 0) === 1 })}
-        <button
-          type="button"
-          class="js-turno inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          data-id="${g.id}"
-        >
-          ${btnLabel}
-        </button>
+      <div>
+        <div class="flex items-center gap-3">
+          ${toggleHTML({ id: g.id, enServicio: Number(g.guardia_en_servicio || 0) === 1 })}
+          <button
+            type="button"
+            class="js-turno inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            data-id="${g.id}"
+          >
+            ${btnLabel}
+          </button>
+        </div>
+        ${absenceHTML}
       </div>
     `;
   }
@@ -259,8 +274,12 @@
       state.guardias = json.guardias || [];
       state.supportsGuardiaServicio = !!json.supports_guardia_servicio;
       state.canManageGuardias = json.can_manage_guardias !== false;
+      state.serviceGuardiaEnabled = json.service_guardia_enabled !== false;
       if (els.btnAdd) {
         els.btnAdd.classList.toggle('hidden', !state.canManageGuardias);
+      }
+      if (!state.serviceGuardiaEnabled) {
+        showAlert('El rol Guardia está deshabilitado para este servicio desde Superadmin. Los guardias no podrán cargar su panel hasta habilitarlo.', true);
       }
       render(state.guardias);
     } catch (e) {
@@ -271,12 +290,20 @@
   function render(guardias) {
     els.list.innerHTML = '';
 
+    if (!state.serviceGuardiaEnabled) {
+      const warning = document.createElement('div');
+      warning.className = 'rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800';
+      warning.textContent = 'El rol Guardia está deshabilitado para este servicio desde Superadmin. Las cuentas activas no podrán entrar al panel hasta habilitarlo.';
+      els.list.appendChild(warning);
+    }
+
     if (!guardias.length) {
-      els.list.innerHTML = `
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+      const empty = document.createElement('div');
+      empty.className = 'rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600';
+      empty.innerHTML = `
           No hay guardias registrados.
-        </div>
       `;
+      els.list.appendChild(empty);
       return;
     }
 
@@ -635,6 +662,10 @@
     return fetchJSON(`${TURNOS_API}?action=list&guardia_id=${encodeURIComponent(guardiaId)}`);
   }
 
+  async function fetchExceptions(guardiaId) {
+    return fetchJSON(`${TURNOS_API}?action=list_exceptions&guardia_id=${encodeURIComponent(guardiaId)}`);
+  }
+
   function renderTurnosList(turnos, guardiaId) {
     if (!turnos.length) {
       return `<div class="text-sm text-slate-500">No hay turnos registrados.</div>`;
@@ -649,6 +680,7 @@
                 <div class="font-semibold text-slate-800">${escapeHtml(t.nombre_turno)}</div>
                 <div class="text-sm text-slate-500">${escapeHtml(t.hora_inicio)} - ${escapeHtml(t.hora_fin)}</div>
                 <div class="text-xs text-slate-400">${escapeHtml(t.dias_semana || '')}</div>
+                ${Number(t.exception_today || 0) === 1 ? `<div class="mt-2 inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[11px] text-amber-800">Ausente hoy${t.exception_today_reason ? ` · ${escapeHtml(t.exception_today_reason)}` : ''}</div>` : ''}
               </div>
               <div class="flex gap-2">
                 <button class="js-edit-turno px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs"
@@ -663,6 +695,56 @@
                 </button>
                 <button class="js-delete-turno px-3 py-2 rounded-xl bg-rose-100 text-rose-700 text-xs"
                   data-turno-id="${t.id}"
+                  data-guardia-id="${guardiaId}">
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderExceptionsList(exceptions, guardiaId) {
+    if (!exceptions.length) {
+      return `<div class="text-sm text-slate-500">No hay excepciones registradas.</div>`;
+    }
+
+    return `
+      <div class="space-y-3">
+        ${exceptions.map(ex => `
+          <div class="rounded-2xl border border-slate-200 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="font-semibold text-slate-800">${escapeHtml(ex.motivo || 'Excepción')}</div>
+                  <span class="rounded-full px-2.5 py-1 text-[11px] ${Number(ex.activo || 0) === 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">
+                    ${Number(ex.activo || 0) === 1 ? 'Activa' : 'Inactiva'}
+                  </span>
+                  ${String(ex.period_status || '') === 'today' && Number(ex.activo || 0) === 1 ? '<span class="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] text-amber-800">Ausente hoy</span>' : ''}
+                </div>
+                <div class="mt-1 text-sm text-slate-500">${escapeHtml(ex.fecha_inicio)} → ${escapeHtml(ex.fecha_fin)}</div>
+                ${ex.notas ? `<div class="mt-2 text-xs text-slate-500">${escapeHtml(ex.notas)}</div>` : ''}
+              </div>
+              <div class="flex flex-wrap justify-end gap-2">
+                <button class="js-toggle-exception px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs"
+                  data-exception-id="${ex.id}"
+                  data-guardia-id="${guardiaId}">
+                  ${Number(ex.activo || 0) === 1 ? 'Desactivar' : 'Activar'}
+                </button>
+                <button class="js-edit-exception px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs"
+                  data-exception-id="${ex.id}"
+                  data-guardia-id="${guardiaId}"
+                  data-fecha-inicio="${escapeHtml(ex.fecha_inicio)}"
+                  data-fecha-fin="${escapeHtml(ex.fecha_fin)}"
+                  data-motivo="${escapeHtml(ex.motivo || '')}"
+                  data-notas="${escapeHtml(ex.notas || '')}"
+                  data-activo="${Number(ex.activo || 0)}">
+                  Editar
+                </button>
+                <button class="js-delete-exception px-3 py-2 rounded-xl bg-rose-100 text-rose-700 text-xs"
+                  data-exception-id="${ex.id}"
                   data-guardia-id="${guardiaId}">
                   Eliminar
                 </button>
@@ -702,6 +784,25 @@
     }
   }
 
+  function validateExceptionForm(fd) {
+    const fechaInicio = String(fd.get('fecha_inicio') || '').trim();
+    const fechaFin = String(fd.get('fecha_fin') || '').trim();
+    const motivo = String(fd.get('motivo') || '').trim();
+
+    if (!fechaInicio || !fechaFin) {
+      throw new Error('Debes capturar la fecha inicial y final de la excepción.');
+    }
+    if (fechaFin < fechaInicio) {
+      throw new Error('La fecha final no puede ser menor a la fecha inicial.');
+    }
+    if (!motivo) {
+      throw new Error('El motivo de la excepción es obligatorio.');
+    }
+    if (motivo.length > 120) {
+      throw new Error('El motivo no puede exceder 120 caracteres.');
+    }
+  }
+
   async function handleDeleteTurno({ turnoId, guardiaId, guardia, listWrap }) {
     const ok = await showConfirmGuardia({
       title: 'Eliminar turno',
@@ -731,11 +832,43 @@
     }
   }
 
-  function openTurnoModal(guardia, turnos = []) {
+  async function handleDeleteException({ exceptionId, guardiaId, guardia, exceptionsWrap, turnosWrap }) {
+    const ok = await showConfirmGuardia({
+      title: 'Eliminar excepción',
+      message: 'Esta acción eliminará la excepción seleccionada. ¿Deseas continuar?',
+      acceptText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+    });
+
+    if (!ok) return;
+
+    const fd = new FormData();
+    fd.append('action', 'delete_exception');
+    fd.append('exception_id', exceptionId);
+    fd.append('guardia_id', guardiaId);
+
+    try {
+      const json = await fetchJSON(TURNOS_API, {
+        method: 'POST',
+        body: fd,
+      });
+
+      showAlert(json.message || 'Excepción eliminada correctamente.');
+      exceptionsWrap.innerHTML = renderExceptionsList(json.exceptions || [], guardia.id);
+      if (turnosWrap) {
+        turnosWrap.innerHTML = renderTurnosList(json.turnos || [], guardia.id);
+      }
+      await load();
+    } catch (err) {
+      showAlert(err.message || 'Error al eliminar excepción', true);
+    }
+  }
+
+  function openTurnoModal(guardia, turnos = [], exceptions = []) {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[10020] p-4';
     modal.innerHTML = `
-      <div class="w-full max-w-2xl rounded-3xl bg-white shadow-2xl overflow-hidden">
+      <div class="w-full max-w-5xl rounded-3xl bg-white shadow-2xl overflow-hidden">
         <div class="flex items-center justify-between border-b px-5 py-4">
           <div>
             <h3 class="text-lg font-semibold text-slate-900">Turnos de guardia</h3>
@@ -744,7 +877,7 @@
           <button class="js-close-turno-modal h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200">✕</button>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-6 p-5">
+        <div class="grid lg:grid-cols-2 gap-6 p-5 max-h-[82vh] overflow-y-auto">
           <div>
             <form id="guardiaTurnoForm" class="space-y-3">
               <input type="hidden" name="turno_id">
@@ -790,6 +923,46 @@
             <div id="guardiaTurnosList">
               ${renderTurnosList(turnos, guardia.id)}
             </div>
+            <div class="mt-6 border-t border-slate-200 pt-6">
+              <div class="mb-3 text-sm font-semibold text-slate-700">Excepciones por fecha</div>
+              <form id="guardiaExceptionForm" class="space-y-3">
+                <input type="hidden" name="exception_id">
+                <input type="hidden" name="guardia_id" value="${guardia.id}">
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-sm font-medium mb-1">Fecha inicio</label>
+                    <input type="date" name="fecha_inicio" class="w-full rounded-xl border px-3 py-2" required>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1">Fecha fin</label>
+                    <input type="date" name="fecha_fin" class="w-full rounded-xl border px-3 py-2" required>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1">Motivo</label>
+                  <input name="motivo" class="w-full rounded-xl border px-3 py-2" placeholder="Ej. Permiso, incapacidad, ausencia" required maxlength="120">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1">Notas</label>
+                  <textarea name="notas" rows="2" class="w-full rounded-xl border px-3 py-2" placeholder="Opcional"></textarea>
+                </div>
+                <label class="flex items-center gap-2 text-sm">
+                  <input type="checkbox" name="activo" checked>
+                  Dejar esta excepción como activa
+                </label>
+                <div class="flex justify-end gap-2 pt-2">
+                  <button type="button" class="js-reset-exception-form px-4 py-2 rounded-xl border">Limpiar</button>
+                  <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 text-white">Guardar excepción</button>
+                </div>
+              </form>
+
+              <div class="mt-4">
+                <div class="mb-2 text-sm font-semibold text-slate-700">Excepciones registradas</div>
+                <div id="guardiaExceptionsList">
+                  ${renderExceptionsList(exceptions, guardia.id)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -806,11 +979,19 @@
 
     const form = modal.querySelector('#guardiaTurnoForm');
     const listWrap = modal.querySelector('#guardiaTurnosList');
+    const exceptionForm = modal.querySelector('#guardiaExceptionForm');
+    const exceptionsWrap = modal.querySelector('#guardiaExceptionsList');
 
     modal.querySelector('.js-reset-turno-form')?.addEventListener('click', () => {
       form.reset();
       form.querySelector('[name="turno_id"]').value = '';
       form.querySelector('[name="activo"]').checked = true;
+    });
+
+    modal.querySelector('.js-reset-exception-form')?.addEventListener('click', () => {
+      exceptionForm.reset();
+      exceptionForm.querySelector('[name="exception_id"]').value = '';
+      exceptionForm.querySelector('[name="activo"]').checked = true;
     });
 
     form.addEventListener('submit', async (e) => {
@@ -839,6 +1020,33 @@
       }
     });
 
+    exceptionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const fd = new FormData(exceptionForm);
+      const isUpdate = !!fd.get('exception_id');
+      fd.append('action', isUpdate ? 'update_exception' : 'create_exception');
+
+      try {
+        validateExceptionForm(fd);
+
+        const json = await fetchJSON(TURNOS_API, {
+          method: 'POST',
+          body: fd,
+        });
+
+        showAlert(json.message || 'Excepción guardada correctamente.');
+        exceptionForm.reset();
+        exceptionForm.querySelector('[name="exception_id"]').value = '';
+        exceptionForm.querySelector('[name="activo"]').checked = true;
+        exceptionsWrap.innerHTML = renderExceptionsList(json.exceptions || [], guardia.id);
+        listWrap.innerHTML = renderTurnosList(json.turnos || [], guardia.id);
+        await load();
+      } catch (err) {
+        showAlert(err.message || 'Error al guardar excepción', true);
+      }
+    });
+
     listWrap.addEventListener('click', async (e) => {
       const editBtn = e.target.closest('.js-edit-turno');
       const deleteBtn = e.target.closest('.js-delete-turno');
@@ -862,6 +1070,53 @@
         });
       }
     });
+
+    exceptionsWrap.addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('.js-edit-exception');
+      const deleteBtn = e.target.closest('.js-delete-exception');
+      const toggleBtn = e.target.closest('.js-toggle-exception');
+
+      if (editBtn) {
+        exceptionForm.querySelector('[name="exception_id"]').value = editBtn.dataset.exceptionId || '';
+        exceptionForm.querySelector('[name="fecha_inicio"]').value = editBtn.dataset.fechaInicio || '';
+        exceptionForm.querySelector('[name="fecha_fin"]').value = editBtn.dataset.fechaFin || '';
+        exceptionForm.querySelector('[name="motivo"]').value = editBtn.dataset.motivo || '';
+        exceptionForm.querySelector('[name="notas"]').value = editBtn.dataset.notas || '';
+        exceptionForm.querySelector('[name="activo"]').checked = Number(editBtn.dataset.activo || 0) === 1;
+        return;
+      }
+
+      if (toggleBtn) {
+        const fd = new FormData();
+        fd.append('action', 'toggle_exception');
+        fd.append('exception_id', toggleBtn.dataset.exceptionId || '');
+        fd.append('guardia_id', toggleBtn.dataset.guardiaId || '');
+
+        try {
+          const json = await fetchJSON(TURNOS_API, {
+            method: 'POST',
+            body: fd,
+          });
+          showAlert(json.message || 'Excepción actualizada correctamente.');
+          exceptionsWrap.innerHTML = renderExceptionsList(json.exceptions || [], guardia.id);
+          listWrap.innerHTML = renderTurnosList(json.turnos || [], guardia.id);
+          await load();
+        } catch (err) {
+          showAlert(err.message || 'Error al actualizar excepción', true);
+        }
+        return;
+      }
+
+      if (deleteBtn) {
+        await handleDeleteException({
+          exceptionId: deleteBtn.dataset.exceptionId,
+          guardiaId: deleteBtn.dataset.guardiaId,
+          guardia,
+          exceptionsWrap,
+          turnosWrap: listWrap,
+        });
+      }
+    });
   }
 
   async function handleTurno(guardiaId) {
@@ -873,8 +1128,11 @@
     if (!guardia) return;
 
     try {
-      const json = await fetchTurnos(guardiaId);
-      openTurnoModal(guardia, json.turnos || []);
+      const [turnosJson, exceptionsJson] = await Promise.all([
+        fetchTurnos(guardiaId),
+        fetchExceptions(guardiaId),
+      ]);
+      openTurnoModal(guardia, turnosJson.turnos || [], exceptionsJson.exceptions || []);
     } catch (err) {
       showAlert(err.message || 'Error al cargar turnos', true);
     }

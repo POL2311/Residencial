@@ -2,14 +2,76 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_bootstrap.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 $action = sa_post_action('meta');
 
 try {
+    service_profile_schema_ensure($pdo);
+
+    $resolveTipoRol = static function (int $tipoId) use ($pdo): string {
+        if ($tipoId <= 0) {
+            return '';
+        }
+        $stmtTipo = $pdo->prepare("SELECT nombre FROM tipos_usuario WHERE id = :id LIMIT 1");
+        $stmtTipo->execute(['id' => $tipoId]);
+        return service_profile_normalize_role_name((string)($stmtTipo->fetchColumn() ?: ''));
+    };
+
+    $resolveUserRol = static function (int $userId) use ($pdo): string {
+        if ($userId <= 0) {
+            return '';
+        }
+        $stmtUserRole = $pdo->prepare("
+            SELECT t.nombre
+            FROM users u
+            JOIN tipos_usuario t ON t.id = u.tipo_usuario_id
+            WHERE u.id = :id
+            LIMIT 1
+        ");
+        $stmtUserRole->execute(['id' => $userId]);
+        return service_profile_normalize_role_name((string)($stmtUserRole->fetchColumn() ?: ''));
+    };
+
+    $operatorStatusForAssignment = static function (int $residencialId, string $roleKey, bool $isActive) use ($pdo): array {
+        if ($residencialId <= 0 || $roleKey === '') {
+            return [
+                'code' => $isActive ? 'pendiente' : 'inactivo',
+                'label' => $isActive ? 'Pendiente' : 'Inactivo',
+                'ready' => false,
+            ];
+        }
+
+        $profile = service_profile_get($pdo, $residencialId);
+        return service_profile_operator_status_for_service($profile, $roleKey, $isActive);
+    };
+
+    $operatorStatusMessage = static function (array $status): string {
+        return match ((string)($status['code'] ?? '')) {
+            'listo' => 'El operador quedó listo para entrar.',
+            'pendiente' => 'El operador quedó asignado, pero sigue pendiente de activación para este servicio.',
+            default => 'El operador quedó creado, pero su cuenta sigue inactiva.',
+        };
+    };
+
     if ($action === 'meta') {
         $tipos = $pdo->query("SELECT id, nombre, descripcion FROM tipos_usuario ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $usuarios = $pdo->query("SELECT id, name, email FROM users ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $residenciales = $pdo->query("SELECT id, nombre, codigo FROM residenciales ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $usuarios = $pdo->query("
+            SELECT u.id, u.name, u.email, u.is_active, t.nombre AS rol_nombre
+            FROM users u
+            JOIN tipos_usuario t ON t.id = u.tipo_usuario_id
+            ORDER BY u.name ASC
+        ")->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $residenciales = $pdo->query("
+            SELECT r.id, r.nombre, r.codigo
+            FROM residenciales r
+            ORDER BY r.nombre ASC
+        ")->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        foreach ($residenciales as &$residencial) {
+            $residencial['service_profile'] = service_profile_frontend_payload($pdo, (int)$residencial['id'], 'admin_residencial');
+        }
+        unset($residencial);
 
         sa_json_out(true, [
             'data' => [
@@ -108,7 +170,7 @@ try {
         ]);
     }
 
-    if ($action === 'create_user') {
+    if ($action === 'create_user' || $action === 'create_user_with_assignment') {
         sa_require_csrf();
 
         $nombre = sa_clean_str($_POST['nombre'] ?? '', 100);
@@ -118,6 +180,9 @@ try {
         $passwordConfirm = (string)($_POST['password_confirm'] ?? '');
         $tipoId = (int)($_POST['tipo_usuario_id'] ?? 0);
         $isActive = isset($_POST['is_active']) && (string)$_POST['is_active'] === '1' ? 1 : 0;
+        $withAssignment = $action === 'create_user_with_assignment';
+        $residencialId = (int)($_POST['residencial_id'] ?? 0);
+        $esPrincipal = isset($_POST['es_principal']) && (string)$_POST['es_principal'] === '1' ? 1 : 0;
 
         $errors = [];
         if ($nombre === '') $errors[] = 'El nombre del usuario es obligatorio.';
@@ -131,6 +196,9 @@ try {
             $errors[] = 'La contraseña debe tener al menos 6 caracteres.';
         }
         if ($tipoId <= 0) $errors[] = 'Debes seleccionar un tipo de usuario.';
+        if ($withAssignment && $residencialId <= 0) {
+            $errors[] = 'Debes indicar el servicio al que se asignará este usuario.';
+        }
 
         $stmtCheck = $pdo->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
         $stmtCheck->execute(['email' => $email]);
@@ -138,24 +206,92 @@ try {
             $errors[] = 'Ya existe un usuario con ese correo.';
         }
 
+        if ($withAssignment && $residencialId > 0) {
+            $stmtRes = $pdo->prepare("SELECT id FROM residenciales WHERE id = :id LIMIT 1");
+            $stmtRes->execute(['id' => $residencialId]);
+            if (!$stmtRes->fetch(PDO::FETCH_ASSOC)) {
+                $errors[] = 'El servicio seleccionado ya no existe.';
+            } else {
+                $profile = service_profile_get($pdo, $residencialId);
+                $roleKey = $resolveTipoRol($tipoId);
+                if ($roleKey === '' || !service_profile_role_assignable_to_service($profile, $roleKey)) {
+                    $errors[] = 'El rol seleccionado no es compatible con este servicio.';
+                }
+            }
+        }
+
         if ($errors) {
             sa_json_out(false, ['error' => implode(' ', $errors)], 422);
         }
 
-        $stmt = $pdo->prepare("
-            INSERT INTO users (tipo_usuario_id, name, email, telefono, password_hash, is_active)
-            VALUES (:tipo, :name, :email, :telefono, :hash, :active)
-        ");
-        $stmt->execute([
-            'tipo' => $tipoId,
-            'name' => $nombre,
-            'email' => $email,
-            'telefono' => ($telefono !== '' ? $telefono : null),
-            'hash' => password_hash($password, PASSWORD_DEFAULT),
-            'active' => $isActive,
-        ]);
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO users (tipo_usuario_id, name, email, telefono, password_hash, is_active)
+                VALUES (:tipo, :name, :email, :telefono, :hash, :active)
+            ");
+            $stmt->execute([
+                'tipo' => $tipoId,
+                'name' => $nombre,
+                'email' => $email,
+                'telefono' => ($telefono !== '' ? $telefono : null),
+                'hash' => password_hash($password, PASSWORD_DEFAULT),
+                'active' => $isActive,
+            ]);
 
-        sa_json_out(true, ['message' => 'Usuario creado correctamente.']);
+            $userId = (int)$pdo->lastInsertId();
+
+            if ($withAssignment) {
+                if ($esPrincipal === 1) {
+                    $stmtReset = $pdo->prepare("
+                        UPDATE usuarios_residenciales
+                        SET es_principal = 0
+                        WHERE user_id = :user_id
+                    ");
+                    $stmtReset->execute(['user_id' => $userId]);
+                }
+
+                $stmtAssign = $pdo->prepare("
+                    INSERT INTO usuarios_residenciales (user_id, residencial_id, es_principal)
+                    VALUES (:user_id, :residencial_id, :es_principal)
+                ");
+                $stmtAssign->execute([
+                    'user_id' => $userId,
+                    'residencial_id' => $residencialId,
+                    'es_principal' => $esPrincipal,
+                ]);
+            }
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+
+        $roleKey = $resolveTipoRol($tipoId);
+        $assignmentStatus = $withAssignment
+            ? $operatorStatusForAssignment($residencialId, $roleKey, $isActive === 1)
+            : null;
+
+        sa_json_out(true, [
+            'message' => $withAssignment
+                ? 'Usuario creado y asignado correctamente. ' . $operatorStatusMessage($assignmentStatus ?? [])
+                : 'Usuario creado correctamente.',
+            'data' => [
+                'user' => [
+                    'id' => $userId,
+                    'name' => $nombre,
+                    'email' => $email,
+                ],
+                'assignment' => $withAssignment ? [
+                    'residencial_id' => $residencialId,
+                    'es_principal' => $esPrincipal,
+                    'operator_status' => $assignmentStatus,
+                ] : null,
+            ],
+        ]);
     }
 
     if ($action === 'assign_residencial') {
@@ -167,6 +303,12 @@ try {
 
         if ($userId <= 0 || $residencialId <= 0) {
             sa_json_out(false, ['error' => 'Debes seleccionar un usuario y un residencial válidos.'], 422);
+        }
+
+        $profile = service_profile_get($pdo, $residencialId);
+        $roleKey = $resolveUserRol($userId);
+        if ($roleKey === '' || !service_profile_role_assignable_to_service($profile, $roleKey)) {
+            sa_json_out(false, ['error' => 'Ese usuario no es compatible con los roles habilitados para este servicio.'], 422);
         }
 
         $stmtCheck = $pdo->prepare("
@@ -202,7 +344,17 @@ try {
             'es_principal' => $esPrincipal,
         ]);
 
-        sa_json_out(true, ['message' => 'Asignación creada correctamente.']);
+        $stmtUser = $pdo->prepare("SELECT is_active FROM users WHERE id = :id LIMIT 1");
+        $stmtUser->execute(['id' => $userId]);
+        $isActive = (int)($stmtUser->fetchColumn() ?: 0) === 1;
+        $status = $operatorStatusForAssignment($residencialId, $roleKey, $isActive);
+
+        sa_json_out(true, [
+            'message' => 'Asignación creada correctamente. ' . $operatorStatusMessage($status),
+            'data' => [
+                'operator_status' => $status,
+            ],
+        ]);
     }
 
     if ($action === 'disable_user') {

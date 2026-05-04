@@ -79,7 +79,7 @@
 
   function normalizeView(view) {
     const normalized = ALLOWED_VIEWS.has(view) ? view : 'home';
-    if (!state.enabledViews.size) return normalized;
+    if (!state.enabledViews.size) return firstEnabledView();
     return state.enabledViews.has(normalized) ? normalized : firstEnabledView();
   }
 
@@ -100,9 +100,10 @@
   }
 
   function firstEnabledView() {
+    if (!state.enabledViews.size) return '';
     if (state.enabledViews.has('home')) return 'home';
     const [first] = state.enabledViews;
-    return first || 'home';
+    return first || '';
   }
 
   function buildEnabledViews(profile) {
@@ -150,6 +151,22 @@
     });
   }
 
+  function renderAccessBlocked(message = '') {
+    const wrap = els.mount || els.body;
+    if (!wrap) return;
+
+    wrap.innerHTML = `
+      <div class="rounded-[1.75rem] border border-amber-200 bg-white p-5 shadow-sm">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-500">Admin residencial</div>
+        <h2 class="mt-2 text-2xl font-semibold text-slate-900">Acceso operativo no disponible</h2>
+        <p class="mt-2 text-sm leading-6 text-slate-600">${escapeHtml(message || 'Tu cuenta está asignada, pero este servicio ya no tiene módulos compatibles para tu rol.')}</p>
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          Revisa el perfil del servicio en Superadmin para habilitar módulos compatibles con Admin operativo.
+        </div>
+      </div>
+    `;
+  }
+
   function setActiveButtons(view) {
     document.querySelectorAll('.dashBtn').forEach(btn => {
       const isActive = btn.dataset.view === view;
@@ -179,6 +196,10 @@
   async function navigateTo(view, opts = {}) {
     const { force = false } = opts;
     showShellHeader();
+    if (!state.enabledViews.size) {
+      renderAccessBlocked();
+      return;
+    }
     view = normalizeView(view || 'home');
 
     if (!force && (state.pendingView === view || state.currentView === view) && state.isNavigating === false) {
@@ -246,6 +267,7 @@
 
   function initialView() {
     const h = (window.location.hash || '').replace('#', '').trim();
+    if (!state.enabledViews.size) return '';
     return normalizeView(h || 'home');
   }
 
@@ -300,7 +322,7 @@
       state.context = null;
       state.operationalMode = 'residencial';
       state.serviceProfile = null;
-      state.enabledViews = new Set(['home', 'perfil', 'reglamento']);
+      state.enabledViews = new Set();
       toggleOperationalButtons();
     }
   }
@@ -310,7 +332,7 @@
     document.querySelectorAll('[data-view]').forEach((el) => {
       const view = el.getAttribute('data-view') || '';
       if (!view) return;
-      const allow = !state.enabledViews.size || state.enabledViews.has(view);
+      const allow = state.enabledViews.has(view);
       if (el.classList.contains('dashBtn')) {
         el.classList.toggle('hidden', !allow);
       } else if (el.id === 'btnReglamento' || el.id === 'btnEditAddress') {
@@ -442,11 +464,16 @@
 
     initShellHeader();
     loadContext().then(() => {
+      if (!state.enabledViews.size) {
+        renderAccessBlocked();
+        return;
+      }
       navigateTo(initialView(), { force: true });
     });
   });
 
   window.addEventListener('hashchange', () => {
+    if (!state.enabledViews.size) return;
     const next = normalizeView((window.location.hash || '').replace('#', '').trim());
     const current = state.pendingView || state.currentView;
     if (next && next !== current) {

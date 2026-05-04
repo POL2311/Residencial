@@ -25,19 +25,17 @@ $activeMenu = 'security';
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
-    <audio id="soundOk" src="/assets/sounds/ok.mp3" preload="auto"></audio>
-    <audio id="soundNo" src="/assets/sounds/no.mp3" preload="auto"></audio>
-
-  <!-- Tailwind CDN (si ya lo cargas global, puedes quitarlo) -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<?php
-ob_start();
-?>
+<body class="min-h-screen bg-[#F2F3F5] text-slate-900">
+  <audio id="soundOk" src="/assets/sounds/ok.mp3" preload="auto"></audio>
+  <audio id="soundNo" src="/assets/sounds/no.mp3" preload="auto"></audio>
 
-<div id="guardiaApp">
-  <?php include __DIR__ . '/../templates/dashboard.html'; ?>
-</div>
+  <div id="guardiaApp">
+    <?php include __DIR__ . '/../templates/dashboard.html'; ?>
+  </div>
 
-<script src="../js/dashboard.js" defer></script>
-<?php
+  <script src="../../assets/js/app-toast.js" defer></script>
+  <script src="../js/dashboard.js" defer></script>
+</body>
+</html>

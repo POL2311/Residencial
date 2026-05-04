@@ -94,7 +94,8 @@
   }
 
   async function fetchJSON(url, options = {}) {
-    const res = await fetch(url, { credentials: 'same-origin', ...options });
+    const { headers = {}, ...rest } = options;
+    const res = await fetch(url, { credentials: 'same-origin', ...rest, headers: { Accept: 'application/json', ...headers } });
     const text = await res.text();
 
     let json;

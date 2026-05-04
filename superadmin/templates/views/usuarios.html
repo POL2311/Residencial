@@ -9,7 +9,7 @@
     </div>
     <div class="flex gap-2">
       <button id="btnNuevoUsuario" type="button" class="rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white shadow hover:opacity-95">+ Nuevo usuario</button>
-      <button id="btnNuevaAsignacion" type="button" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm text-white shadow hover:opacity-95">+ Asignar cliente</button>
+      <button id="btnNuevaAsignacion" type="button" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm text-white shadow hover:opacity-95">+ Asignar servicio</button>
     </div>
   </div>
 
@@ -27,7 +27,7 @@
       <div id="usersSummaryAssignments" class="mt-2 text-3xl font-bold text-indigo-600">0</div>
     </div>
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div class="text-sm text-slate-500">Residenciales ligados</div>
+      <div class="text-sm text-slate-500">Servicios ligados</div>
       <div id="usersSummaryResidenciales" class="mt-2 text-3xl font-bold text-sky-600">0</div>
     </div>
   </div>
@@ -114,6 +114,8 @@
         </div>
         <form id="userForm" class="flex min-h-0 flex-1 flex-col">
           <div class="flex-1 overflow-y-auto p-4 space-y-5">
+            <div id="userModalError" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
+            <input type="hidden" name="wizard_residencial_id" id="userWizardResidencialId" />
             <section class="space-y-4">
               <div>
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Perfil</div>
@@ -138,6 +140,10 @@
                     <option value="">Selecciona un rol</option>
                   </select>
                 </div>
+                <div class="md:col-span-2 hidden" id="userWizardServiceWrap">
+                  <label class="mb-1 block text-xs text-slate-600">Servicio asignado</label>
+                  <input id="userWizardServiceName" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600" readonly />
+                </div>
               </div>
             </section>
 
@@ -156,6 +162,8 @@
                   <input name="password_confirm" type="password" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
                 </div>
                 <label class="md:col-span-2 flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" name="is_active" value="1" checked> Usuario activo</label>
+                <label id="userAssignAutoWrap" class="md:col-span-2 hidden flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" name="assign_to_service" value="1" checked> Asignar automáticamente este usuario al servicio actual</label>
+                <label id="userAssignPrimaryWrap" class="md:col-span-2 hidden flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" name="assign_as_principal" value="1" checked> Marcar la asignación como principal</label>
               </div>
             </section>
           </div>
@@ -180,6 +188,7 @@
         </div>
         <form id="assignmentForm" class="flex min-h-0 flex-1 flex-col">
           <div class="flex-1 overflow-y-auto p-4 space-y-5">
+            <div id="assignmentModalError" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
             <section class="space-y-4">
               <div>
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Asignación</div>
@@ -197,6 +206,9 @@
                   <select id="assignResidencialSelect" name="residencial_id" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required>
                     <option value="">Selecciona cliente o servicio</option>
                   </select>
+                </div>
+                <div id="assignmentPresetWrap" class="md:col-span-2 hidden rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                  Estás asignando un usuario al servicio seleccionado desde el flujo guiado.
                 </div>
                 <label class="md:col-span-2 flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" name="es_principal" value="1" checked> Marcar como principal</label>
               </div>

@@ -406,7 +406,7 @@ function guardia_require_module_access(array $profile, bool $isSuperAdmin, strin
     if ($isSuperAdmin) {
         return;
     }
-    if (!service_profile_module_enabled($profile, $module)) {
+    if (!service_profile_module_allowed_for_role_and_service($profile, 'guardia', $module)) {
         out(false, ['error' => $message], 403);
     }
 }
@@ -436,7 +436,7 @@ try {
                 'permiso_material' => 'materiales',
             ];
             $requiredModule = $moduleByType[$scan['type']] ?? '';
-            if ($requiredModule === '' || $isSuperAdmin || service_profile_module_enabled($serviceProfile, $requiredModule)) {
+            if ($requiredModule === '' || $isSuperAdmin || service_profile_module_allowed_for_role_and_service($serviceProfile, 'guardia', $requiredModule)) {
                 $payload = ['kind' => $scan['type']];
                 if ($scan['type'] === 'persona_recurrente') {
                     $payload['persona'] = normalize_persona_scan($scan['item']);

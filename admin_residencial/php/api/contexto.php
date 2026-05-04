@@ -50,7 +50,8 @@ try {
     json_out(false, ['error' => 'Usuario no encontrado.']);
   }
 
-  // 2) Contexto: residencial + unidad (+ campos de dirección general)
+  // 2) Contexto: servicio asignado del admin.
+  // Para admin_residencial la unidad es opcional; no debe bloquear el panel.
   $stmtRU = $pdo->prepare("
     SELECT
       r.id     AS residencial_id,
@@ -72,10 +73,10 @@ try {
 
     FROM usuarios_residenciales ur
     JOIN residenciales r        ON r.id = ur.residencial_id
-    JOIN residentes_unidades ru ON ru.user_id = ur.user_id
-    JOIN unidades u             ON u.id = ru.unidad_id
+    LEFT JOIN residentes_unidades ru ON ru.user_id = ur.user_id
+    LEFT JOIN unidades u             ON u.id = ru.unidad_id
     WHERE ur.user_id = :user_id
-    ORDER BY ur.es_principal DESC, ur.created_at ASC
+    ORDER BY ur.es_principal DESC, ur.created_at ASC, ru.id ASC
     LIMIT 1
   ");
   $stmtRU->execute(['user_id' => $uid]);
