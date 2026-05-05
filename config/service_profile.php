@@ -407,13 +407,35 @@ if (!function_exists('service_profile_plan_status_operational')) {
     }
 }
 
-if (!function_exists('service_profile_plan_allowed_flags')) {
-    function service_profile_plan_allowed_flags(?array $plan, string $preset, array $residencial = []): array
+if (!function_exists('service_profile_core_flags')) {
+    function service_profile_core_flags(string $preset, array $residencial = []): array
     {
-        if (!$plan || empty($plan['valid'])) {
-            return service_profile_defaults($preset);
+        $core = service_profile_defaults($preset);
+
+        if (array_key_exists('permite_qr', $residencial) && (int)$residencial['permite_qr'] === 0) {
+            $core['habilita_control_acceso'] = 0;
+        }
+        if (array_key_exists('permite_trabajadores_recurrentes', $residencial) && (int)$residencial['permite_trabajadores_recurrentes'] === 0) {
+            $core['habilita_personal_recurrente'] = 0;
         }
 
+        return service_profile_sanitize_flags($core);
+    }
+}
+
+if (!function_exists('service_profile_plan_extra_flags')) {
+    function service_profile_plan_extra_flags(?array $plan, string $preset, array $residencial = []): array
+    {
+        $extra = ['preset_servicio' => service_profile_normalize_preset($preset)];
+        foreach (service_profile_all_flags() as $flag) {
+            $extra[$flag] = 0;
+        }
+
+        if (!$plan || empty($plan['valid'])) {
+            return service_profile_sanitize_flags($extra);
+        }
+
+        $core = service_profile_core_flags($preset, $residencial);
         $roles = array_values(array_unique(array_map(
             'service_profile_normalize_role_name',
             (array)($plan['roles'] ?? [])
@@ -423,23 +445,26 @@ if (!function_exists('service_profile_plan_allowed_flags')) {
             array_merge((array)($plan['modules'] ?? []), (array)($plan['actions'] ?? []))
         )));
 
-        $allowed = ['preset_servicio' => service_profile_normalize_preset($preset)];
-        foreach (service_profile_all_flags() as $flag) {
-            $allowed[$flag] = 0;
-        }
-
-        $roleFlags = service_profile_role_flag_map();
-        foreach ($roleFlags as $role => $flag) {
-            $allowed[$flag] = in_array($role, $roles, true) ? 1 : 0;
+        foreach (service_profile_role_flag_map() as $role => $flag) {
+            if (in_array($role, $roles, true) && (int)($core[$flag] ?? 0) !== 1) {
+                $extra[$flag] = 1;
+            }
         }
 
         foreach (service_profile_module_catalog() as $flag => $meta) {
             $moduleName = service_profile_plan_normalize_feature_name((string)($meta['module'] ?? ''));
-            $allowed[$flag] = in_array($moduleName, $modules, true) ? 1 : 0;
+            if (in_array($moduleName, $modules, true) && (int)($core[$flag] ?? 0) !== 1) {
+                $extra[$flag] = 1;
+            }
+        }
+
+        $entitledRoleFlags = [];
+        foreach (service_profile_role_flag_map() as $role => $flag) {
+            $entitledRoleFlags[$flag] = ((int)($core[$flag] ?? 0) === 1 || (int)($extra[$flag] ?? 0) === 1) ? 1 : 0;
         }
 
         foreach (service_profile_module_catalog() as $flag => $meta) {
-            if ((int)($allowed[$flag] ?? 0) !== 1) {
+            if ((int)($extra[$flag] ?? 0) !== 1) {
                 continue;
             }
 
@@ -448,17 +473,46 @@ if (!function_exists('service_profile_plan_allowed_flags')) {
                 (array)($meta['roles'] ?? [])
             )));
 
-            if ($supportedRoles && !array_intersect($supportedRoles, $roles)) {
-                $allowed[$flag] = 0;
+            $hasEntitledRole = false;
+            foreach ($supportedRoles as $role) {
+                $roleFlag = service_profile_role_flag_map()[$role] ?? null;
+                if ($roleFlag && (int)($entitledRoleFlags[$roleFlag] ?? 0) === 1) {
+                    $hasEntitledRole = true;
+                    break;
+                }
+            }
+
+            if ($supportedRoles && !$hasEntitledRole) {
+                $extra[$flag] = 0;
                 continue;
             }
 
             foreach ((array)($meta['depends_on'] ?? []) as $dependencyFlag) {
-                if ((int)($allowed[$dependencyFlag] ?? 0) !== 1) {
-                    $allowed[$flag] = 0;
+                $dependencyEntitled = (int)($core[$dependencyFlag] ?? 0) === 1 || (int)($extra[$dependencyFlag] ?? 0) === 1;
+                if (!$dependencyEntitled) {
+                    $extra[$flag] = 0;
                     break;
                 }
             }
+        }
+
+        return service_profile_sanitize_flags($extra);
+    }
+}
+
+if (!function_exists('service_profile_plan_allowed_flags')) {
+    function service_profile_plan_allowed_flags(?array $plan, string $preset, array $residencial = []): array
+    {
+        if (!$plan || empty($plan['valid'])) {
+            return service_profile_core_flags($preset, $residencial);
+        }
+
+        $core = service_profile_core_flags($preset, $residencial);
+        $extra = service_profile_plan_extra_flags($plan, $preset, $residencial);
+        $allowed = ['preset_servicio' => service_profile_normalize_preset($preset)];
+
+        foreach (service_profile_all_flags() as $flag) {
+            $allowed[$flag] = ((int)($core[$flag] ?? 0) === 1 || (int)($extra[$flag] ?? 0) === 1) ? 1 : 0;
         }
 
         if (empty($plan['extras']['permite_qr']) || (int)($residencial['permite_qr'] ?? 1) !== 1) {
@@ -728,6 +782,7 @@ if (!function_exists('service_profile_get')) {
 
         $preset = service_profile_normalize_preset((string)($row['preset_servicio'] ?? $row['modo_operacion'] ?? 'residencial'));
         $enforcement = service_profile_entitlement_mode_normalize((string)($row['entitlement_enforcement'] ?? 'compat'));
+        $coreFlags = service_profile_core_flags($preset, $row);
         $storedFlags = [];
         foreach (service_profile_all_flags() as $flag) {
             $storedFlags[$flag] = operational_bool_int($row[$flag] ?? 0);
@@ -735,9 +790,12 @@ if (!function_exists('service_profile_get')) {
 
         $plan = service_profile_fetch_plan($pdo, (int)($row['plan_id'] ?? 0));
         $hasValidPlan = !empty($plan['valid']);
+        $planExtraFlags = $hasValidPlan
+            ? service_profile_plan_extra_flags($plan, $preset, $row)
+            : service_profile_sanitize_flags(['preset_servicio' => $preset]);
         $planAllowedFlags = $hasValidPlan
             ? service_profile_plan_allowed_flags($plan, $preset, $row)
-            : service_profile_sanitize_flags(array_merge(['preset_servicio' => $preset], $storedFlags));
+            : $coreFlags;
 
         $effectiveFlags = $storedFlags;
         if ($hasValidPlan && $enforcement === 'strict') {
@@ -755,14 +813,14 @@ if (!function_exists('service_profile_get')) {
         if ($hasValidPlan) {
             foreach (service_profile_all_flags() as $flag) {
                 $storedEnabled = (int)($storedFlags[$flag] ?? 0) === 1;
-                $planAllowed = (int)($planAllowedFlags[$flag] ?? 0) === 1;
-                if ($storedEnabled && !$planAllowed) {
+                $entitled = (int)($planAllowedFlags[$flag] ?? 0) === 1;
+                if ($storedEnabled && !$entitled) {
                     $outOfPlanFlags[] = [
                         'flag' => $flag,
                         'label' => $roleLabels[$flag] ?? $moduleLabels[$flag] ?? $flag,
                     ];
                 }
-                if (!$storedEnabled && $planAllowed) {
+                if (!$storedEnabled && $entitled) {
                     $manualOffFlags[] = [
                         'flag' => $flag,
                         'label' => $roleLabels[$flag] ?? $moduleLabels[$flag] ?? $flag,
@@ -807,6 +865,8 @@ if (!function_exists('service_profile_get')) {
             'entitlement_enforcement' => $enforcement,
             'plan' => $plan,
             'plan_valid' => $hasValidPlan,
+            'core_flags' => $coreFlags,
+            'plan_extra_flags' => $planExtraFlags,
             'plan_allowed_flags' => $planAllowedFlags,
             'stored_flags' => $storedFlags,
             'alignment' => [
@@ -831,8 +891,11 @@ if (!function_exists('service_profile_save')) {
         $current = service_profile_get($pdo, $residencialId);
         $preset = service_profile_normalize_preset((string)($input['preset_servicio'] ?? $current['preset_servicio'] ?? $current['modo_operacion'] ?? 'residencial'));
         $storedFlags = (array)($current['stored_flags'] ?? []);
-        $planAllowedFlags = (array)($current['plan_allowed_flags'] ?? []);
         $enforcement = service_profile_entitlement_mode_normalize((string)($input['entitlement_enforcement'] ?? $current['entitlement_enforcement'] ?? 'compat'));
+        $plan = !empty($current['plan_valid']) ? ($current['plan'] ?? null) : null;
+        $planAllowedFlags = $plan
+            ? service_profile_plan_allowed_flags($plan, $preset, $current)
+            : service_profile_core_flags($preset, $current);
         $merged = $storedFlags;
         $merged['preset_servicio'] = $preset;
 
@@ -1717,15 +1780,27 @@ if (!function_exists('service_profile_frontend_payload')) {
             'roles' => array_reduce(service_profile_role_flags(), static function (array $carry, string $flag) use ($profile, $labels): array {
                 $storedFlags = (array)($profile['stored_flags'] ?? []);
                 $planAllowedFlags = (array)($profile['plan_allowed_flags'] ?? []);
+                $coreFlags = (array)($profile['core_flags'] ?? []);
+                $planExtraFlags = (array)($profile['plan_extra_flags'] ?? []);
+                $storedEnabled = (int)($storedFlags[$flag] ?? 0) === 1;
+                $entitled = empty($profile['plan_valid']) ? true : ((int)($planAllowedFlags[$flag] ?? 0) === 1);
+                $isCore = (int)($coreFlags[$flag] ?? 0) === 1;
+                $isPlanExtra = !$isCore && (int)($planExtraFlags[$flag] ?? 0) === 1;
                 $carry[$flag] = [
                     'enabled' => (int)($profile[$flag] ?? 0) === 1,
-                    'stored_enabled' => (int)($storedFlags[$flag] ?? 0) === 1,
-                    'plan_allowed' => empty($profile['plan_valid']) ? true : ((int)($planAllowedFlags[$flag] ?? 0) === 1),
+                    'stored_enabled' => $storedEnabled,
+                    'plan_allowed' => $entitled,
+                    'entitled' => $entitled,
+                    'is_core' => $isCore,
+                    'is_plan_extra' => $isPlanExtra,
+                    'out_of_plan' => !$entitled && $storedEnabled,
                     'source' => empty($profile['plan_valid'])
                         ? 'sin_plan'
-                        : (((int)($planAllowedFlags[$flag] ?? 0) === 1)
-                            ? ((int)($storedFlags[$flag] ?? 0) === 1 ? 'plan' : 'apagado_manual')
-                            : ((int)($storedFlags[$flag] ?? 0) === 1 ? 'fuera_de_plan' : 'bloqueado_por_plan')),
+                        : ($entitled
+                            ? ($storedEnabled
+                                ? ($isCore ? 'core' : 'plan_extra')
+                                : 'apagado_manual')
+                            : 'premium_no_incluido'),
                     'label' => $labels['roles'][$flag] ?? $flag,
                 ];
                 return $carry;
@@ -1733,15 +1808,27 @@ if (!function_exists('service_profile_frontend_payload')) {
             'modules' => array_reduce(service_profile_module_flags(), static function (array $carry, string $flag) use ($profile, $labels): array {
                 $storedFlags = (array)($profile['stored_flags'] ?? []);
                 $planAllowedFlags = (array)($profile['plan_allowed_flags'] ?? []);
+                $coreFlags = (array)($profile['core_flags'] ?? []);
+                $planExtraFlags = (array)($profile['plan_extra_flags'] ?? []);
+                $storedEnabled = (int)($storedFlags[$flag] ?? 0) === 1;
+                $entitled = empty($profile['plan_valid']) ? true : ((int)($planAllowedFlags[$flag] ?? 0) === 1);
+                $isCore = (int)($coreFlags[$flag] ?? 0) === 1;
+                $isPlanExtra = !$isCore && (int)($planExtraFlags[$flag] ?? 0) === 1;
                 $carry[$flag] = [
                     'enabled' => (int)($profile[$flag] ?? 0) === 1,
-                    'stored_enabled' => (int)($storedFlags[$flag] ?? 0) === 1,
-                    'plan_allowed' => empty($profile['plan_valid']) ? true : ((int)($planAllowedFlags[$flag] ?? 0) === 1),
+                    'stored_enabled' => $storedEnabled,
+                    'plan_allowed' => $entitled,
+                    'entitled' => $entitled,
+                    'is_core' => $isCore,
+                    'is_plan_extra' => $isPlanExtra,
+                    'out_of_plan' => !$entitled && $storedEnabled,
                     'source' => empty($profile['plan_valid'])
                         ? 'sin_plan'
-                        : (((int)($planAllowedFlags[$flag] ?? 0) === 1)
-                            ? ((int)($storedFlags[$flag] ?? 0) === 1 ? 'plan' : 'apagado_manual')
-                            : ((int)($storedFlags[$flag] ?? 0) === 1 ? 'fuera_de_plan' : 'bloqueado_por_plan')),
+                        : ($entitled
+                            ? ($storedEnabled
+                                ? ($isCore ? 'core' : 'plan_extra')
+                                : 'apagado_manual')
+                            : 'premium_no_incluido'),
                     'label' => $labels['modules'][$flag] ?? $flag,
                 ];
                 return $carry;

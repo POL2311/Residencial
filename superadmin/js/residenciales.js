@@ -246,21 +246,30 @@
         const plan = getPlanMeta(planId);
         if (!plan?.valid) return null;
 
-        const allowed = {};
+        const defaults = getPresetDefaults(presetKey);
+        const allowed = { ...defaults };
         const allowedRoles = new Set((plan.roles || []).map((role) => String(role || '').trim()));
         const allowedModules = new Set([...(plan.modules || []), ...(plan.actions || [])].map((module) => String(module || '').trim()));
 
         (serviceMatrix.roles || []).forEach((meta) => {
-            allowed[meta.flag] = allowedRoles.has(String(meta.role || '')) ? 1 : 0;
+            if (allowedRoles.has(String(meta.role || ''))) {
+                allowed[meta.flag] = 1;
+            }
         });
 
         Object.entries(serviceMatrix.modules || {}).forEach(([flag, meta]) => {
             const supportedRoles = Array.isArray(meta.roles) ? meta.roles.map((role) => String(role || '')) : [];
-            const roleCompatible = supportedRoles.some((role) => allowedRoles.has(role));
+            const roleCompatible = supportedRoles.some((role) => {
+                const roleMeta = (serviceMatrix.roles || []).find((item) => String(item.role || '') === role);
+                if (!roleMeta) return false;
+                return Number(allowed[roleMeta.flag] || 0) === 1;
+            });
             const dependencies = Array.isArray(meta.depends_on) ? meta.depends_on : [];
             const dependencyCompatible = dependencies.every((dependencyFlag) => Number(allowed[dependencyFlag] || 0) === 1);
 
-            allowed[flag] = allowedModules.has(String(meta.module || '')) && roleCompatible && dependencyCompatible ? 1 : 0;
+            if (allowedModules.has(String(meta.module || '')) && roleCompatible && dependencyCompatible) {
+                allowed[flag] = 1;
+            }
         });
 
         if (plan.extras?.permite_qr === false) {
@@ -287,8 +296,10 @@
             return;
         }
 
-        const rolesCount = Array.isArray(plan.roles) ? plan.roles.length : 0;
-        const modulesCount = Array.isArray(plan.modules) ? plan.modules.length : 0;
+        const defaults = getPresetDefaults(presetKey);
+        const rolesCount = Object.keys(serviceLabels.roles || {}).filter((flag) => Number(defaults?.[flag] || 0) === 1).length;
+        const modulesCount = Object.keys(serviceLabels.modules || {}).filter((flag) => Number(defaults?.[flag] || 0) === 1).length;
+        const planExtrasCount = Object.entries(serviceLabels.modules || {}).filter(([flag]) => Number(defaults?.[flag] || 0) !== 1 && Number(getPlanAllowedFlags(planId, presetKey)?.[flag] || 0) === 1).length;
         const limits = [];
         if (plan.limits?.max_casas) limits.push(`${plan.limits.max_casas} casas`);
         if (plan.limits?.max_guardias) limits.push(`${plan.limits.max_guardias} guardias`);
@@ -296,7 +307,7 @@
         target.className = 'rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900';
         target.innerHTML = `
             <div class="font-medium">${escapeHtml(plan.nombre || 'Plan')} · ${escapeHtml((plan.codigo || '').toUpperCase())}</div>
-            <div class="mt-1">Este plan permite ${rolesCount} rol${rolesCount === 1 ? '' : 'es'} y ${modulesCount} módulo${modulesCount === 1 ? '' : 's'} base para un servicio tipo ${escapeHtml(presetLabel(presetKey))}.</div>
+            <div class="mt-1">El tipo ${escapeHtml(presetLabel(presetKey))} trae ${rolesCount} rol${rolesCount === 1 ? '' : 'es'} y ${modulesCount} módulo${modulesCount === 1 ? '' : 's'} core. Este plan ${planExtrasCount > 0 ? `agrega ${planExtrasCount} extra${planExtrasCount === 1 ? '' : 's'} premium` : 'no agrega extras premium para este tipo'}.</div>
             <div class="mt-1 text-sky-700">${escapeHtml(limits.length ? `Límites: ${limits.join(' · ')}.` : 'Los límites se controlan desde la configuración del plan.')}</div>
             ${alignment?.message ? `<div class="mt-2 text-sky-700">${escapeHtml(alignment.message)}</div>` : ''}
         `;
@@ -618,7 +629,7 @@
 
         let visibleCount = 0;
         let optionalHiddenCount = 0;
-        let hiddenByPlanCount = 0;
+        let premiumHiddenCount = 0;
 
         Object.keys(serviceLabels.roles || {}).forEach((flag) => {
             const wrapper = form.querySelector(`[data-service-role-flag="${flag}"]`);
@@ -629,7 +640,7 @@
             if (!planAllowed) {
                 field.checked = false;
                 wrapper.classList.add('hidden');
-                hiddenByPlanCount += 1;
+                premiumHiddenCount += 1;
                 return;
             }
 
@@ -646,7 +657,7 @@
             if (!planAllowed) {
                 field.checked = false;
                 wrapper.classList.add('hidden');
-                hiddenByPlanCount += 1;
+                premiumHiddenCount += 1;
                 return;
             }
 
@@ -679,8 +690,8 @@
         if (hintEl) {
             if (!selectedRoles.size) {
                 hintEl.textContent = 'Activa al menos un rol para ver módulos compatibles.';
-            } else if (hiddenByPlanCount > 0 && !advanced) {
-                hintEl.textContent = `El plan actual oculta ${hiddenByPlanCount} capacidad${hiddenByPlanCount === 1 ? '' : 'es'} fuera de entitlement para este servicio.`;
+            } else if (premiumHiddenCount > 0 && !advanced) {
+                hintEl.textContent = `Se muestran ${visibleCount} capacidades del core. Activa "Mostrar avanzados" para revisar ${premiumHiddenCount} extra${premiumHiddenCount === 1 ? '' : 's'} que requieren plan superior o habilitación adicional.`;
             } else if (optionalHiddenCount > 0 && !advanced) {
                 hintEl.textContent = `Se muestran ${visibleCount} módulos compatibles por default. Activa "Mostrar avanzados" para ver ${optionalHiddenCount} opcionales.`;
             } else {
