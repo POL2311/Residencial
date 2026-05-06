@@ -4,17 +4,9 @@ declare(strict_types=1);
 if (!function_exists('operational_public_upload_base')) {
     function operational_public_upload_base(): string
     {
-        // When the app is served from a subfolder (e.g. /residencial),
-        // the public URL must include that base prefix.
-        if (!function_exists('app_url')) {
-            $sec = __DIR__ . '/app_security.php';
-            if (is_file($sec)) {
-                require_once $sec;
-            }
-        }
-        if (function_exists('app_url')) {
-            return app_url('assets/uploads/operativo');
-        }
+        // Return a portable public path (no app base prefix). Frontends are
+        // responsible for resolving `/assets/...` when the app is hosted under
+        // a subfolder (e.g. `/residencial`).
         return '/assets/uploads/operativo';
     }
 }
@@ -426,6 +418,9 @@ if (!function_exists('operational_process_image_upload')) {
             'width' => $newWidth,
             'height' => $newHeight,
             'quality' => $chosenQuality,
+            // Backwards-compatible aliases (some endpoints still reference disk/path).
+            'disk' => 'local_public',
+            'path' => 'assets/uploads/operativo/' . $relativeDir . '/' . $filename,
         ];
     }
 }

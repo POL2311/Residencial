@@ -17,6 +17,24 @@
     return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
+  function appRootBase() {
+    try {
+      const p = window.location.pathname || '';
+      const idx = p.indexOf('/admin_residencial/');
+      if (idx === -1) return '';
+      return p.slice(0, idx);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function resolvePublicUrl(url) {
+    const u = String(url || '').trim();
+    if (!u) return '';
+    if (u.startsWith('/assets/')) return appRootBase() + u;
+    return u;
+  }
+
   async function fetchJSON(url, options = {}) {
     const { headers = {}, ...rest } = options;
     const res = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...rest, headers: { Accept: 'application/json', ...headers } });
@@ -71,8 +89,8 @@
             ${Array.isArray(item.evidencias) && item.evidencias.length ? `
               <div class="mt-3 flex flex-wrap gap-2">
                 ${item.evidencias.slice(0, 3).map((url) => `
-                  <a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="block h-16 w-16 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-                    <img src="${escapeHtml(url)}" alt="Evidencia" class="h-full w-full object-cover" loading="lazy" />
+                  <a href="${escapeHtml(resolvePublicUrl(url))}" target="_blank" rel="noopener" class="block h-16 w-16 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                    <img src="${escapeHtml(resolvePublicUrl(url))}" alt="Evidencia" class="h-full w-full object-cover" loading="lazy" />
                   </a>
                 `).join('')}
               </div>

@@ -116,9 +116,18 @@ try {
 
     guardia_require_module_access($profile, $isSuperAdmin, 'bitacora_operativa', 'La bitácora operativa no está habilitada para este cliente.');
 
-    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $method = strtoupper(trim((string)($_SERVER['REQUEST_METHOD'] ?? 'GET')));
+    if ($method === 'OPTIONS') {
+        http_response_code(204);
+        exit;
+    }
     if ($method !== 'POST') {
-        out(false, ['error' => 'Método no permitido.'], 405);
+        out(false, [
+            'error' => 'Método no permitido.',
+            'method_seen' => $method,
+            'content_type' => (string)($_SERVER['CONTENT_TYPE'] ?? ''),
+            'content_length' => (string)($_SERVER['CONTENT_LENGTH'] ?? ''),
+        ], 405);
     }
 
     $action = (string)($_POST['action'] ?? '');
@@ -228,4 +237,3 @@ try {
     }
     out(false, ['error' => 'No pudimos registrar el reporte de bitácora.'], 500);
 }
-

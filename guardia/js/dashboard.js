@@ -211,16 +211,36 @@
   }
 
   async function fetchJSON(url, opts = {}) {
+    const { headers = {}, ...rest } = opts || {};
     const r = await fetch(url, {
-      headers: { Accept: 'application/json' },
+      headers: { Accept: 'application/json', ...headers },
       credentials: 'same-origin',
       cache: 'no-store',
-      ...opts,
+      ...rest,
     });
 
-    const json = await r.json().catch(() => ({}));
-    if (!r.ok || json.ok === false) {
-      throw new Error(json.error || 'Error API');
+    const text = await r.text().catch(() => '');
+    let json = {};
+    let parsedJson = false;
+    if (text) {
+      try {
+        json = JSON.parse(text);
+        parsedJson = true;
+      } catch (_) {
+        json = {};
+      }
+    }
+
+    const isOk = r.ok && (json?.ok !== false);
+    if (!isOk) {
+      const statusPart = `HTTP ${r.status}${r.redirected ? ' (redirect)' : ''}`;
+      const debugPart = json?.debug_id ? ` Debug: ${json.debug_id}` : '';
+      if (json?.error) {
+        throw new Error(`${json.error} (${statusPart}).${debugPart}`.trim());
+      }
+      const snippet = parsedJson ? '' : String(text || '').replace(/\s+/g, ' ').slice(0, 200);
+      const bodyPart = snippet ? ` Respuesta: ${snippet}` : '';
+      throw new Error(`${statusPart}: Respuesta no JSON o sin mensaje.${debugPart}${bodyPart}`.trim());
     }
     return json;
   }
@@ -456,8 +476,25 @@
       state.isNavigating = false;
       return;
     }
+    const requestedView = view;
     if (state.canOperate && !state.enabledViews.has(view)) {
       view = firstEnabledView();
+      // Keep URL hash consistent with the actual view we're going to render.
+      try {
+        if (window.location.hash.replace('#', '') !== view) {
+          window.location.hash = view;
+        }
+      } catch (_) {}
+      try {
+        if (window.AppToast?.show && requestedView) {
+          window.AppToast.show({
+            type: 'info',
+            title: 'Sección no disponible',
+            message: 'Esta sección no está habilitada para este servicio.',
+            duration: 4500,
+          });
+        }
+      } catch (_) {}
     }
 
     // Si ya estás en la misma vista pero quieres recargarla, se permite con force
