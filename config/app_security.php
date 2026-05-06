@@ -142,8 +142,13 @@ if (!function_exists('app_json_out')) {
 if (!function_exists('app_json_exception')) {
     function app_json_exception(Throwable $e, string $publicMessage = 'Ocurrió un error interno. Inténtalo de nuevo en un momento.', int $status = 500): void
     {
-        app_log_exception($e, 'api');
-        app_json_out(false, ['error' => $publicMessage], $status);
+        $debugId = 'api-' . date('Ymd-His') . '-' . bin2hex(random_bytes(4));
+
+        // Log full diagnostic for server-side troubleshooting.
+        error_log('[api][' . $debugId . '] ' . get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+        error_log('[api][' . $debugId . '] trace=' . $e->getTraceAsString());
+
+        app_json_out(false, ['error' => $publicMessage, 'debug_id' => $debugId], $status);
     }
 }
 

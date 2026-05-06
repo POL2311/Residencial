@@ -68,6 +68,15 @@
               ${escapeHtml(item.persona_nombre || item.nombre_visitante || item.permiso_tipo_movimiento || 'Evento general')}
             </div>
             <div class="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">${escapeHtml(item.observaciones || 'Sin observaciones')}</div>
+            ${Array.isArray(item.evidencias) && item.evidencias.length ? `
+              <div class="mt-3 flex flex-wrap gap-2">
+                ${item.evidencias.slice(0, 3).map((url) => `
+                  <a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="block h-16 w-16 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                    <img src="${escapeHtml(url)}" alt="Evidencia" class="h-full w-full object-cover" loading="lazy" />
+                  </a>
+                `).join('')}
+              </div>
+            ` : ''}
           </div>
           <div class="text-xs text-slate-400">${escapeHtml(item.fecha_hora)}</div>
         </div>

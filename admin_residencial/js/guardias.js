@@ -149,15 +149,10 @@
       : '';
 
     if (!state.canManageGuardias) {
-      return `
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <div class="text-xs font-medium text-slate-700">
-            ${Number(g.guardia_en_servicio || 0) === 1 ? 'En servicio' : 'Descanso'}
-          </div>
-          <div class="mt-1 text-[11px] text-slate-500">Superadmin deshabilitó la operación de guardias para este cliente.</div>
-          ${absenceHTML}
-        </div>
-      `;
+      // Solo lectura: omitimos el bloque de "Servicio" para mantener la lista limpia.
+      return absenceHTML
+        ? `<div>${absenceHTML}</div>`
+        : '';
     }
 
     const btnLabel = g.nombre_turno ? 'Ver más' : 'Asignar';
@@ -345,9 +340,13 @@
                     : `<span class="text-[11px] text-slate-400">Sin teléfono</span>`
                 }
               </div>
-                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                ${state.canManageGuardias ? `
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    ${servicioSummaryHTML(g)}
+                  </div>
+                ` : `
                   ${servicioSummaryHTML(g)}
-                </div>
+                `}
               </div>
             ${state.canManageGuardias ? `
               <div class="mt-4 flex flex-wrap gap-2">
@@ -364,18 +363,23 @@
                   Eliminar
                 </button>
               </div>
-            ` : `
-              <div class="mt-4 text-xs text-slate-400">Solo lectura</div>
-            `}
+            ` : ``}
           </div>
 
           <div class="hidden md:grid md:grid-cols-12 md:gap-4 md:items-center">
-            <div class="col-span-3 min-w-0">
+            <div class="col-span-4 min-w-0">
               <div class="font-semibold text-slate-900 truncate">${escapeHtml(g.name || '—')}</div>
               <div class="text-xs text-slate-500 truncate">${escapeHtml(g.email || '')}</div>
+              ${state.canManageGuardias ? `
+                <div class="mt-2">
+                  ${servicioSummaryHTML(g)}
+                </div>
+              ` : `
+                ${servicioSummaryHTML(g)}
+              `}
             </div>
 
-            <div class="col-span-3">
+            <div class="col-span-5">
               ${
                 telDigits
                   ? `
@@ -394,32 +398,25 @@
               }
             </div>
 
-            <div class="col-span-3">
-              ${servicioSummaryHTML(g)}
-            </div>
-
-            <div class="col-span-1">
-              ${badgeCuenta(Number(g.is_active) === 1)}
-            </div>
-
-            <div class="col-span-2 flex justify-end gap-2 flex-wrap">
+            <div class="col-span-3 flex flex-col items-end gap-2">
+              <div>${badgeCuenta(Number(g.is_active) === 1)}</div>
               ${state.canManageGuardias ? `
-                <button
-                  type="button"
-                  class="js-edit inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
-                  data-id="${g.id}">
-                  Editar
-                </button>
+                <div class="flex justify-end gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    class="js-edit inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+                    data-id="${g.id}">
+                    Editar
+                  </button>
 
-                <button
-                  type="button"
-                  class="js-delete inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-200"
-                  data-id="${g.id}">
-                  Eliminar
-                </button>
-              ` : `
-                <div class="text-xs text-slate-400">Solo lectura</div>
-              `}
+                  <button
+                    type="button"
+                    class="js-delete inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-200"
+                    data-id="${g.id}">
+                    Eliminar
+                  </button>
+                </div>
+              ` : ``}
             </div>
           </div>
         </div>

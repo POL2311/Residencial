@@ -378,6 +378,97 @@ if (!function_exists('operational_schema_ensure')) {
             ");
         }
 
+        if (!operational_table_exists($pdo, 'catalogo_herramientas')) {
+            $pdo->exec("
+                CREATE TABLE catalogo_herramientas (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    residencial_id INT(11) NOT NULL,
+                    nombre VARCHAR(150) NOT NULL,
+                    descripcion TEXT DEFAULT NULL,
+                    activo TINYINT(1) NOT NULL DEFAULT 1,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_catalogo_herramientas_residencial (residencial_id),
+                    KEY idx_catalogo_herramientas_activo (activo)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'catalogo_herramientas', 'fk_catalogo_herramientas_residencial')) {
+            $pdo->exec("
+                ALTER TABLE catalogo_herramientas
+                ADD CONSTRAINT fk_catalogo_herramientas_residencial
+                FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
+                ON DELETE CASCADE
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'prestamos_herramientas')) {
+            $pdo->exec("
+                CREATE TABLE prestamos_herramientas (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    residencial_id INT(11) NOT NULL,
+                    herramienta_id INT(11) NOT NULL,
+                    guardia_id INT(11) NOT NULL,
+                    unidad_id INT(11) NOT NULL,
+                    residente_id INT(11) DEFAULT NULL,
+                    estado VARCHAR(20) NOT NULL DEFAULT 'prestado',
+                    notas TEXT DEFAULT NULL,
+                    prestado_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    devuelto_at DATETIME DEFAULT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_prestamos_herramientas_residencial (residencial_id),
+                    KEY idx_prestamos_herramientas_estado (estado),
+                    KEY idx_prestamos_herramientas_guardia (guardia_id),
+                    KEY idx_prestamos_herramientas_herramienta (herramienta_id),
+                    KEY idx_prestamos_herramientas_unidad (unidad_id),
+                    KEY idx_prestamos_herramientas_residente (residente_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'prestamos_herramientas', 'fk_prestamos_herramientas_residencial')) {
+            $pdo->exec("
+                ALTER TABLE prestamos_herramientas
+                ADD CONSTRAINT fk_prestamos_herramientas_residencial
+                FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'prestamos_herramientas', 'fk_prestamos_herramientas_herramienta')) {
+            $pdo->exec("
+                ALTER TABLE prestamos_herramientas
+                ADD CONSTRAINT fk_prestamos_herramientas_herramienta
+                FOREIGN KEY (herramienta_id) REFERENCES catalogo_herramientas(id)
+                ON DELETE RESTRICT
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'prestamos_herramientas', 'fk_prestamos_herramientas_guardia')) {
+            $pdo->exec("
+                ALTER TABLE prestamos_herramientas
+                ADD CONSTRAINT fk_prestamos_herramientas_guardia
+                FOREIGN KEY (guardia_id) REFERENCES users(id)
+                ON DELETE RESTRICT
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'prestamos_herramientas', 'fk_prestamos_herramientas_unidad')) {
+            $pdo->exec("
+                ALTER TABLE prestamos_herramientas
+                ADD CONSTRAINT fk_prestamos_herramientas_unidad
+                FOREIGN KEY (unidad_id) REFERENCES unidades(id)
+                ON DELETE RESTRICT
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'prestamos_herramientas', 'fk_prestamos_herramientas_residente')) {
+            $pdo->exec("
+                ALTER TABLE prestamos_herramientas
+                ADD CONSTRAINT fk_prestamos_herramientas_residente
+                FOREIGN KEY (residente_id) REFERENCES users(id)
+                ON DELETE SET NULL
+            ");
+        }
+
         if (!operational_table_exists($pdo, 'archivos_operativos')) {
             $pdo->exec("
                 CREATE TABLE archivos_operativos (

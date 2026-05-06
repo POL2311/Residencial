@@ -20,6 +20,7 @@
     btnClose: document.getElementById('btnCloseComModal'),
     btnCancel: document.getElementById('btnCancelComModal'),
     formError: document.getElementById('comunicadoFormError'),
+    imagePreview: document.getElementById('comunicadoImagePreview'),
 
     search: document.getElementById('comunicadoSearch'),
     filterEstado: document.getElementById('comunicadoFilterEstado'),
@@ -41,7 +42,7 @@
     estado: 'todos',
     prioridad: 'todas',
     page: 1,
-    perPage: 4,
+    perPage: 3,
   };
 
   function escapeHtml(value = '') {
@@ -51,6 +52,36 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  function appRootBase() {
+    const p = location.pathname || '';
+    const i = p.indexOf('/admin_residencial/');
+    if (i !== -1) return p.slice(0, i);
+    const parts = p.split('/').filter(Boolean);
+    return parts.length ? '/' + parts[0] : '';
+  }
+
+  function resolvePublicUrl(url) {
+    const u = String(url || '').trim();
+    if (!u) return '';
+    if (u.startsWith('data:')) return u;
+    if (/^https?:\/\//i.test(u)) {
+      try {
+        const parsed = new URL(u);
+        const base = appRootBase();
+        if (base && parsed.pathname.startsWith('/assets/') && !parsed.pathname.startsWith(base + '/assets/')) {
+          parsed.pathname = base + parsed.pathname;
+          return parsed.toString();
+        }
+      } catch (_) {
+        // ignore parse errors
+      }
+      return u;
+    }
+    // Legacy stored URLs may start with /assets/... even when app is hosted under /residencial.
+    if (u.startsWith('/assets/')) return appRootBase() + u;
+    return u;
   }
 
   function showAlert(msg, error = false) {
@@ -93,6 +124,44 @@
       : 'bg-slate-100 text-slate-700';
   }
 
+  function homeBadge(c) {
+    const today = new Date().toISOString().slice(0, 10);
+    const estado = String(c?.estado || '');
+    const pub = String(c?.fecha_publicacion || '');
+    const exp = String(c?.fecha_expiracion || '');
+
+    if (estado !== 'publicado') {
+      return { label: 'Borrador', cls: 'bg-slate-100 text-slate-700' };
+    }
+    if (pub && pub > today) {
+      return { label: 'Programado', cls: 'bg-sky-100 text-sky-700' };
+    }
+    if (exp && exp < today) {
+      return { label: 'Expirado', cls: 'bg-rose-100 text-rose-700' };
+    }
+    return { label: 'Vigente', cls: 'bg-emerald-100 text-emerald-700' };
+  }
+
+  function showHomeVisibilityHintFromForm(fd) {
+    const today = new Date().toISOString().slice(0, 10);
+    const estado = String(fd.get('estado') || '');
+    const pub = String(fd.get('fecha_publicacion') || '').trim();
+    const exp = String(fd.get('fecha_expiracion') || '').trim();
+
+    if (estado !== 'publicado') {
+      showAlert('Borrador: este comunicado no se mostrará en Home hasta publicarlo.');
+      return;
+    }
+    if (pub && pub > today) {
+      showAlert(`Programado: aparecerá en Home a partir de ${pub}.`);
+      return;
+    }
+    if (exp && exp < today) {
+      showAlert(`Expirado: no se mostrará en Home (expiró el ${exp}).`);
+      return;
+    }
+  }
+
   async function fetchJSON(url, options = {}) {
     const res = await fetch(url, {
       credentials: 'same-origin',
@@ -105,11 +174,18 @@
     try {
       json = JSON.parse(text);
     } catch (e) {
-      throw new Error(text || 'Respuesta inválida del servidor');
+      const preview = (text || '').slice(0, 220).replace(/\s+/g, ' ').trim();
+      const status = res.status || 0;
+      throw new Error(
+        `HTTP ${status}: Respuesta no JSON del servidor.` + (preview ? ` (${preview}...)` : '')
+      );
     }
 
     if (!json || !json.ok) {
-      throw new Error((json && json.error) || 'Error');
+      const status = res.status || 0;
+      const msg = (json && json.error) || 'Error';
+      const dbg = json && json.debug_id ? ` Debug: ${json.debug_id}` : '';
+      throw new Error(`HTTP ${status}: ${msg}.${dbg}`.trim());
     }
 
     return json;
@@ -244,6 +320,11 @@
     clearFormError();
     els.form?.reset();
     if (els.modalTitle) els.modalTitle.textContent = 'Nuevo comunicado';
+    if (els.form?.imagen_url) els.form.imagen_url.value = '';
+    if (els.imagePreview) {
+      els.imagePreview.src = '';
+      els.imagePreview.classList.add('hidden');
+    }
 
     const fechaPub = els.form?.querySelector('[name="fecha_publicacion"]');
     if (fechaPub && !fechaPub.value) {
@@ -260,10 +341,23 @@
     if (els.modalTitle) els.modalTitle.textContent = 'Editar comunicado';
 
     Object.keys(c).forEach((k) => {
+      // Los inputs file no se pueden setear programáticamente; solo guardamos el URL actual.
+      if (k === 'imagen') return;
       if (els.form && els.form[k]) {
         els.form[k].value = c[k] ?? '';
       }
     });
+
+    if (els.imagePreview) {
+      const url = resolvePublicUrl(c.imagen_url);
+      if (url) {
+        els.imagePreview.src = url;
+        els.imagePreview.classList.remove('hidden');
+      } else {
+        els.imagePreview.src = '';
+        els.imagePreview.classList.add('hidden');
+      }
+    }
 
     els.modal?.classList.remove('hidden');
   }
@@ -273,6 +367,10 @@
     clearFormError();
     state.editingId = null;
     els.form?.reset();
+    if (els.imagePreview) {
+      els.imagePreview.src = '';
+      els.imagePreview.classList.add('hidden');
+    }
   }
 
   function validateForm(fd) {
@@ -408,9 +506,22 @@
       const card = document.createElement('div');
       card.className = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm';
 
+      const imageUrl = resolvePublicUrl(c.imagen_url);
+      const imageHtml = imageUrl
+        ? `
+            <div class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+              <img src="${escapeHtml(imageUrl)}" alt=""
+                   class="h-44 w-full object-cover" loading="lazy" />
+            </div>
+          `
+        : '';
+
+      const hb = homeBadge(c);
+
       card.innerHTML = `
         <div class="flex flex-col md:flex-row md:justify-between gap-4">
           <div class="flex-1 min-w-0">
+            ${imageHtml}
             <h3 class="font-semibold text-2xl text-slate-900">${escapeHtml(c.titulo || '—')}</h3>
 
             <div class="text-sm text-slate-500 mt-2">
@@ -427,6 +538,9 @@
               </span>
               <span class="inline-block px-3 py-1 text-xs rounded-full ${badgeEstado(c.estado)}">
                 ${escapeHtml(c.estado || '')}
+              </span>
+              <span class="inline-block px-3 py-1 text-xs rounded-full ${hb.cls}">
+                ${escapeHtml(hb.label)}
               </span>
             </div>
           </div>
@@ -543,6 +657,7 @@
 
       const j = await api.comunicados.save(fd);
       showAlert(j.message || 'Guardado');
+      showHomeVisibilityHintFromForm(fd);
       closeModal();
       await load();
     } catch (err) {

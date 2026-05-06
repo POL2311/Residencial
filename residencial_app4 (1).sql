@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 28-04-2026 a las 22:45:35
+-- Tiempo de generación: 02-05-2026 a las 03:57:05
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -50,6 +50,47 @@ INSERT INTO `accesos_guardia` (`id`, `visita_id`, `guardia_id`, `fecha_hora`, `t
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `archivos_operativos`
+--
+
+CREATE TABLE `archivos_operativos` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `entidad_tipo` varchar(50) NOT NULL,
+  `entidad_id` int(11) NOT NULL,
+  `subtipo` varchar(50) DEFAULT NULL,
+  `storage_disk` varchar(40) NOT NULL DEFAULT 'local_public',
+  `storage_path` varchar(255) NOT NULL,
+  `public_url` varchar(255) NOT NULL,
+  `mime_type` varchar(80) NOT NULL,
+  `size_bytes` int(11) NOT NULL DEFAULT 0,
+  `width` int(11) DEFAULT NULL,
+  `height` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `areas_operativas`
+--
+
+CREATE TABLE `areas_operativas` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `codigo` varchar(50) DEFAULT NULL,
+  `tipo` varchar(50) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `autos`
 --
 
@@ -78,6 +119,46 @@ INSERT INTO `autos` (`id`, `propietario_user_id`, `residencial_id`, `unidad_id`,
 (7, 10, 1, 2, 'ABC0123333', 'rojo', 'Blanco', 1, '2026-04-06 03:07:15', '2026-04-06 03:07:15', 'oo'),
 (8, 3, 1, 2, '444', '4444', '444', 1, '2026-04-06 03:07:26', '2026-04-06 03:07:26', '444'),
 (9, 3, 1, 1, '5125125', '41241', '124124', 1, '2026-04-06 03:07:34', '2026-04-06 03:07:34', '4124');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `bitacora_operativa`
+--
+
+CREATE TABLE `bitacora_operativa` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `guardia_id` int(11) DEFAULT NULL,
+  `tipo_origen` varchar(50) NOT NULL,
+  `origen_id` int(11) DEFAULT NULL,
+  `tipo_evento` varchar(50) NOT NULL,
+  `resultado` varchar(30) NOT NULL DEFAULT 'permitido',
+  `persona_recurrente_id` int(11) DEFAULT NULL,
+  `visitante_rapido_id` int(11) DEFAULT NULL,
+  `permiso_material_id` int(11) DEFAULT NULL,
+  `area_id` int(11) DEFAULT NULL,
+  `observaciones` text DEFAULT NULL,
+  `metadata_json` longtext DEFAULT NULL,
+  `fecha_hora` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `catalogo_materiales`
+--
+
+CREATE TABLE `catalogo_materiales` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `categoria` varchar(80) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -141,7 +222,7 @@ CREATE TABLE `config_general` (
 --
 
 INSERT INTO `config_general` (`id`, `nombre_sistema`, `empresa`, `email_soporte`, `logo_url`, `color_primario`, `color_secundario`, `smtp_host`, `smtp_port`, `smtp_username`, `smtp_password`, `smtp_encryption`, `smtp_from_email`, `smtp_from_name`, `created_at`, `updated_at`) VALUES
-(1, 'Sistema Residencial', 'Tu Empresa', 'soporte@tuempresa.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'tls', NULL, NULL, '2025-11-29 23:39:44', '2025-11-29 23:39:44');
+(1, 'Sistema Residencial', 'Tu Empresa', 'soporte@tuempresa.com', NULL, NULL, NULL, 'smtp.gmail.com', 587, 'alatorrekevalat@gmail.com', 'dkhlryyjmtfynfhj', 'tls', 'alatorrekevalat@gmail.com', 'Sistema residencial', '2025-11-29 23:39:44', '2026-05-01 19:33:19');
 
 -- --------------------------------------------------------
 
@@ -206,26 +287,6 @@ CREATE TABLE `guardias_turnos` (
 
 INSERT INTO `guardias_turnos` (`id`, `user_id`, `residencial_id`, `nombre_turno`, `hora_inicio`, `hora_fin`, `dias_semana`, `activo`, `created_at`, `updated_at`) VALUES
 (1, 3, 1, 'Vespertino', '10:00:00', '14:00:00', 'LUN,MAR,MIE,JUE,VIE', 1, '2026-04-03 21:16:41', '2026-04-03 21:17:08');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `guardias_turnos_excepciones`
---
-
-CREATE TABLE `guardias_turnos_excepciones` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `residencial_id` int(11) NOT NULL,
-  `turno_id` int(11) DEFAULT NULL,
-  `fecha_inicio` date NOT NULL,
-  `fecha_fin` date NOT NULL,
-  `motivo` varchar(120) NOT NULL,
-  `notas` text DEFAULT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -317,10 +378,15 @@ INSERT INTO `home_servicios_residenciales` (`id`, `residencial_id`, `nombre`, `d
 CREATE TABLE `incidencias` (
   `id` int(11) NOT NULL,
   `residencial_id` int(11) NOT NULL,
-  `unidad_id` int(11) NOT NULL,
-  `residente_id` int(11) NOT NULL,
+  `unidad_id` int(11) DEFAULT NULL,
+  `residente_id` int(11) DEFAULT NULL,
   `guardia_id` int(11) DEFAULT NULL,
-  `tipo` enum('seguridad','ruido','mantenimiento','otros') NOT NULL DEFAULT 'seguridad',
+  `area_id` int(11) DEFAULT NULL,
+  `persona_recurrente_id` int(11) DEFAULT NULL,
+  `visitante_rapido_id` int(11) DEFAULT NULL,
+  `permiso_material_id` int(11) DEFAULT NULL,
+  `origen_tipo` varchar(50) DEFAULT NULL,
+  `tipo` varchar(50) NOT NULL DEFAULT 'seguridad',
   `titulo` varchar(150) NOT NULL,
   `descripcion` text NOT NULL,
   `prioridad` enum('baja','media','alta') NOT NULL DEFAULT 'media',
@@ -333,8 +399,8 @@ CREATE TABLE `incidencias` (
 -- Volcado de datos para la tabla `incidencias`
 --
 
-INSERT INTO `incidencias` (`id`, `residencial_id`, `unidad_id`, `residente_id`, `guardia_id`, `tipo`, `titulo`, `descripcion`, `prioridad`, `estado`, `created_at`, `updated_at`) VALUES
-(2, 1, 1, 4, 3, 'seguridad', 'OLa', '123', 'alta', 'en_proceso', '2026-04-07 21:59:21', '2026-04-07 23:39:38');
+INSERT INTO `incidencias` (`id`, `residencial_id`, `unidad_id`, `residente_id`, `guardia_id`, `area_id`, `persona_recurrente_id`, `visitante_rapido_id`, `permiso_material_id`, `origen_tipo`, `tipo`, `titulo`, `descripcion`, `prioridad`, `estado`, `created_at`, `updated_at`) VALUES
+(2, 1, 1, 4, 3, NULL, NULL, NULL, NULL, NULL, 'seguridad', 'OLa', '123', 'alta', 'en_proceso', '2026-04-07 21:59:21', '2026-04-07 23:39:38');
 
 -- --------------------------------------------------------
 
@@ -394,6 +460,103 @@ CREATE TABLE `paqueteria` (
 INSERT INTO `paqueteria` (`id`, `residencial_id`, `unidad_id`, `residente_id`, `guardia_id`, `empresa`, `descripcion`, `codigo_rastreo`, `estado`, `notas`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, NULL, 3, 'amazon', 'ogoag', '102401042', 'entregado', NULL, '2026-04-05 19:23:15', '2026-04-07 23:26:14'),
 (2, 1, 1, 4, 3, 'Amazon', 'Amazon', '10203040124', 'entregado', 'qkrkqwkrqwr', '2026-04-07 23:26:39', '2026-04-22 15:14:31');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `password_reset_codes`
+--
+
+CREATE TABLE `password_reset_codes` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `codigo_hash` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `attempt_count` int(11) NOT NULL DEFAULT 0,
+  `last_attempt_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `password_reset_codes`
+--
+
+INSERT INTO `password_reset_codes` (`id`, `user_id`, `email`, `codigo_hash`, `expires_at`, `used_at`, `created_at`, `attempt_count`, `last_attempt_at`) VALUES
+(1, 4, 'residente@gmail.com', '$2y$10$P.8/V3ZYMeHmpDM8EIyWd..xOOAXMetA5Ecf9NizxciDDfj2oe2.G', '2026-05-01 19:18:10', NULL, '2026-05-01 19:03:10', 0, NULL),
+(2, 2, 'residencial@gmail.com', '$2y$10$aix/V9C8IJsiio9Gdu9MTOAgxEQ2ZMV4LNM0YpZyNP2rCnESO0a1q', '2026-05-01 19:48:27', NULL, '2026-05-01 19:33:27', 0, NULL),
+(3, 15, 'alatorrekevalat@gmail.com', '$2y$10$z1GmTWr2x931Ee4iTWjz0OJiKw7x.GGZcLS8OEVAZKqJY2kP27ct.', '2026-05-01 19:57:58', '2026-05-01 19:46:10', '2026-05-01 19:42:58', 0, NULL),
+(4, 15, 'alatorrekevalat@gmail.com', '$2y$10$qOAJXm76scEYlNvDT2fiUu3MWWHwTOhqZGWO1kIk.WQg6TQOJFQ8a', '2026-05-01 20:06:15', '2026-05-01 19:51:23', '2026-05-01 19:51:15', 0, NULL),
+(5, 15, 'alatorrekevalat@gmail.com', '$2y$10$/5o/ZubVG7MN4ppcSPR9YuzG8I7zmq36fB9CTrP8eVP7QIaZCcF4m', '2026-05-01 20:06:23', '2026-05-01 19:52:16', '2026-05-01 19:51:23', 0, '2026-05-01 19:52:16');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `permisos_materiales`
+--
+
+CREATE TABLE `permisos_materiales` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `area_id` int(11) DEFAULT NULL,
+  `responsable_user_id` int(11) NOT NULL,
+  `tipo_movimiento` varchar(20) NOT NULL DEFAULT 'entrada',
+  `qr_token` varchar(80) NOT NULL,
+  `estado` varchar(30) NOT NULL DEFAULT 'pendiente',
+  `solicitado_por_user_id` int(11) DEFAULT NULL,
+  `aprobado_por_user_id` int(11) DEFAULT NULL,
+  `aprobado_at` datetime DEFAULT NULL,
+  `notas` text DEFAULT NULL,
+  `fecha_desde` datetime DEFAULT NULL,
+  `fecha_hasta` datetime DEFAULT NULL,
+  `ejecutado_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `permisos_materiales_items`
+--
+
+CREATE TABLE `permisos_materiales_items` (
+  `id` int(11) NOT NULL,
+  `permiso_id` int(11) NOT NULL,
+  `material_id` int(11) DEFAULT NULL,
+  `material_nombre` varchar(150) NOT NULL,
+  `cantidad_texto` varchar(120) NOT NULL,
+  `agregar_a_catalogo` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `personas_recurrentes`
+--
+
+CREATE TABLE `personas_recurrentes` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `area_id` int(11) DEFAULT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `foto_url` varchar(255) DEFAULT NULL,
+  `telefono` varchar(30) DEFAULT NULL,
+  `empresa` varchar(120) DEFAULT NULL,
+  `puesto` varchar(120) DEFAULT NULL,
+  `notas` text DEFAULT NULL,
+  `qr_token` varchar(80) NOT NULL,
+  `pin_hash` varchar(255) NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `esta_dentro` tinyint(1) NOT NULL DEFAULT 0,
+  `ultima_entrada_at` datetime DEFAULT NULL,
+  `ultima_salida_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -458,6 +621,7 @@ CREATE TABLE `residenciales` (
   `nombre` varchar(150) NOT NULL,
   `codigo` varchar(50) NOT NULL,
   `tipo` enum('fraccionamiento','torre','mixto','privado','otro') NOT NULL DEFAULT 'fraccionamiento',
+  `modo_operacion` varchar(20) NOT NULL DEFAULT 'residencial',
   `max_casas` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `max_guardias` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `pais` varchar(80) NOT NULL,
@@ -489,8 +653,48 @@ CREATE TABLE `residenciales` (
 -- Volcado de datos para la tabla `residenciales`
 --
 
-INSERT INTO `residenciales` (`id`, `nombre`, `codigo`, `tipo`, `max_casas`, `max_guardias`, `pais`, `estado`, `ciudad`, `colonia`, `calle`, `numero_exterior`, `numero_interior`, `codigo_postal`, `nombre_contacto`, `telefono_contacto`, `email_contacto`, `plan_id`, `fecha_inicio_plan`, `fecha_fin_plan`, `estatus_plan`, `zona_horaria`, `permite_qr`, `permite_trabajadores_recurrentes`, `requiere_placa_vehiculo`, `requiere_identificacion_visita`, `activo`, `created_at`, `updated_at`) VALUES
-(1, 'san pablo garza', '10', 'fraccionamiento', 100, 100, 'México', 'mexico', 'mexico', 'san pedro', 'san pedro', '10', '0', '10542', 'jamas lo hemos visto', 'contacto', 'alatorrekevalat@gmail.com', NULL, NULL, NULL, 'activo', 'America/Mexico_City', 1, 1, 0, 0, 1, '2025-11-28 22:08:53', '2025-11-28 22:08:53');
+INSERT INTO `residenciales` (`id`, `nombre`, `codigo`, `tipo`, `modo_operacion`, `max_casas`, `max_guardias`, `pais`, `estado`, `ciudad`, `colonia`, `calle`, `numero_exterior`, `numero_interior`, `codigo_postal`, `nombre_contacto`, `telefono_contacto`, `email_contacto`, `plan_id`, `fecha_inicio_plan`, `fecha_fin_plan`, `estatus_plan`, `zona_horaria`, `permite_qr`, `permite_trabajadores_recurrentes`, `requiere_placa_vehiculo`, `requiere_identificacion_visita`, `activo`, `created_at`, `updated_at`) VALUES
+(1, 'san pablo garza', '10', 'fraccionamiento', 'residencial', 100, 100, 'México', 'mexico', 'mexico', 'san pedro', 'san pedro', '10', '0', '10542', 'jamas lo hemos visto', 'contacto', 'alatorrekevalat@gmail.com', NULL, NULL, NULL, 'activo', 'America/Mexico_City', 1, 1, 0, 0, 1, '2025-11-28 22:08:53', '2026-04-29 09:32:34');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `residenciales_servicio_config`
+--
+
+CREATE TABLE `residenciales_servicio_config` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `preset_servicio` varchar(30) NOT NULL DEFAULT 'residencial',
+  `habilita_admin_operativo` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_guardia` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_residente` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_unidades` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_residentes_catalogo` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_guardias_catalogo` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_autos` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_visitas_residente` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_paqueteria` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_pagos` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_comunicados` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_servicios_directorio` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_control_acceso` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_incidencias` tinyint(1) NOT NULL DEFAULT 1,
+  `habilita_personal_recurrente` tinyint(1) NOT NULL DEFAULT 0,
+  `habilita_visitantes_rapidos` tinyint(1) NOT NULL DEFAULT 0,
+  `habilita_materiales` tinyint(1) NOT NULL DEFAULT 0,
+  `habilita_solicitudes_pendientes` tinyint(1) NOT NULL DEFAULT 0,
+  `habilita_bitacora_operativa` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `residenciales_servicio_config`
+--
+
+INSERT INTO `residenciales_servicio_config` (`id`, `residencial_id`, `preset_servicio`, `habilita_admin_operativo`, `habilita_guardia`, `habilita_residente`, `habilita_unidades`, `habilita_residentes_catalogo`, `habilita_guardias_catalogo`, `habilita_autos`, `habilita_visitas_residente`, `habilita_paqueteria`, `habilita_pagos`, `habilita_comunicados`, `habilita_servicios_directorio`, `habilita_control_acceso`, `habilita_incidencias`, `habilita_personal_recurrente`, `habilita_visitantes_rapidos`, `habilita_materiales`, `habilita_solicitudes_pendientes`, `habilita_bitacora_operativa`, `created_at`, `updated_at`) VALUES
+(1, 1, 'residencial', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, '2026-04-30 00:24:09', '2026-04-30 00:24:09');
 
 -- --------------------------------------------------------
 
@@ -597,10 +801,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `tipo_usuario_id`, `name`, `email`, `telefono`, `password_hash`, `is_active`, `guardia_en_servicio`, `created_at`) VALUES
-(1, 1, 'Kevin Super', 'superadmin@example.com', NULL, '$2y$10$O68qZw61ruSGCJxsU1fZSehxL2hFW175EMReLGAlJK9BFLNMfSQUe', 1, 0, '2025-11-28 18:08:43'),
+(1, 1, 'Kevin Super', 'superadmin@example.com', NULL, '123456', 1, 0, '2025-11-28 18:08:43'),
 (2, 3, 'juan perez', 'residencial@gmail.com', NULL, '$2y$10$.JI/jVK7gAFeg5oLngXwv.NM6Bp1RuwRXOhge0fLaTDgyb5Lht3tW', 1, 0, '2025-11-29 23:52:25'),
 (3, 4, 'Guardia3', 'guardia2@gmail.com', '5646950032', '$2y$10$U/1mjFF2Msw3wn.RHVO4bOn9EcJchZtq651Gh47r6.KF.UTe/WQU2', 1, 1, '2025-12-02 19:25:27'),
-(4, 5, 'Ana guzman', 'residente@gmail.com', '564695003211', '$2y$10$7vL9O.4mIXG4oFI7bd71megYGPXownPvC3KDmfQho3Ep07z04jhpW', 1, 0, '2025-12-02 20:36:19'),
+(4, 1, 'Ana guzman', 'residente@gmail.com', '564695003211', '$2y$10$7vL9O.4mIXG4oFI7bd71megYGPXownPvC3KDmfQho3Ep07z04jhpW', 1, 0, '2025-12-02 20:36:19'),
 (5, 5, 'Juan gArcia', 'issac_issac18@live.com', '5646950032', '123456', 1, 0, '2026-04-02 18:20:11'),
 (6, 5, 'Ana guzman', '41243@gmail.com', '12413', '$2y$10$rKy1JcnLfyQdF4dBB0o5F.lkpTd1baR7tZKBhQ/QssB9o1BzXHCbu', 1, 0, '2026-04-02 18:34:33'),
 (7, 5, 'otro', 'otororqo@gmail.com', '421043021', '$2y$10$IHGwW2YN0vB8ziY6eg3H6uBWmQY1GatDrVvM0PudP3yu2V1D5iVl2', 1, 0, '2026-04-02 19:22:10'),
@@ -609,7 +813,9 @@ INSERT INTO `users` (`id`, `tipo_usuario_id`, `name`, `email`, `telefono`, `pass
 (10, 5, 'Juan gArcia', 'resident4444@gmail.com', '56469500321', '$2y$10$Vrc/6GyrFbTd1BgcubhK5ef9Z1BHPvdlouqPMfFXoBpSPCaaBeY0m', 1, 0, '2026-04-02 19:45:17'),
 (11, 5, 'Juan gArcia', 'issac_issac184@live.com', '14241412414', '123456', 1, 0, '2026-04-02 19:45:29'),
 (12, 5, 'otro1', 'otro1@gmail.com', NULL, '$2y$10$JoTDLPOPaApcRBOcb9SfM.S.lrTMPpDHyxWOvG65njr2hkooCctoq', 1, 0, '2026-04-07 23:47:45'),
-(13, 4, '12355', 'issac_issac184214@live.com', '5646950032', '$2y$10$u87w3X0LGfxk02Or4Dihc.DDwoUrqQf9CdAUZzAt0QHBD.0KkocjS', 0, 0, '2026-04-22 00:25:26');
+(13, 4, '12355', 'issac_issac184214@live.com', '5646950032', '$2y$10$u87w3X0LGfxk02Or4Dihc.DDwoUrqQf9CdAUZzAt0QHBD.0KkocjS', 0, 0, '2026-04-22 00:25:26'),
+(14, 1, 'kevin', 'superadmin1@gmail.com', '5646950032', '123456', 1, 0, '2026-04-28 16:44:12'),
+(15, 1, 'kevin', 'alatorrekevalat@gmail.com', '5646950032', '$2y$10$eetEY3vltixyMYFnZjr2i.lobr80vjmugiEt7TjGOgHgn56UkDG.2', 1, 0, '2026-05-01 19:42:42');
 
 -- --------------------------------------------------------
 
@@ -639,6 +845,32 @@ INSERT INTO `usuarios_residenciales` (`id`, `user_id`, `residencial_id`, `es_pri
 (11, 10, 1, 1, '2026-04-02 19:45:17'),
 (12, 11, 1, 1, '2026-04-02 19:45:29'),
 (13, 13, 1, 1, '2026-04-22 00:25:26');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `visitantes_rapidos`
+--
+
+CREATE TABLE `visitantes_rapidos` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `responsable_user_id` int(11) NOT NULL,
+  `area_id` int(11) DEFAULT NULL,
+  `nombre_visitante` varchar(150) NOT NULL,
+  `empresa` varchar(120) DEFAULT NULL,
+  `placa_vehiculo` varchar(20) DEFAULT NULL,
+  `motivo` varchar(255) DEFAULT NULL,
+  `qr_token` varchar(80) NOT NULL,
+  `estado` varchar(30) NOT NULL DEFAULT 'activo',
+  `notas_admin` text DEFAULT NULL,
+  `fecha_desde` datetime DEFAULT NULL,
+  `fecha_hasta` datetime DEFAULT NULL,
+  `esta_dentro` tinyint(1) NOT NULL DEFAULT 0,
+  `ultimo_evento_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -688,6 +920,22 @@ ALTER TABLE `accesos_guardia`
   ADD KEY `fk_ag_guardia` (`guardia_id`);
 
 --
+-- Indices de la tabla `archivos_operativos`
+--
+ALTER TABLE `archivos_operativos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_archivos_operativos_residencial` (`residencial_id`),
+  ADD KEY `idx_archivos_operativos_entidad` (`entidad_tipo`,`entidad_id`);
+
+--
+-- Indices de la tabla `areas_operativas`
+--
+ALTER TABLE `areas_operativas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_areas_operativas_residencial` (`residencial_id`),
+  ADD KEY `idx_areas_operativas_activo` (`activo`);
+
+--
 -- Indices de la tabla `autos`
 --
 ALTER TABLE `autos`
@@ -696,6 +944,28 @@ ALTER TABLE `autos`
   ADD KEY `idx_user` (`propietario_user_id`),
   ADD KEY `idx_residencial` (`residencial_id`),
   ADD KEY `idx_unidad` (`unidad_id`);
+
+--
+-- Indices de la tabla `bitacora_operativa`
+--
+ALTER TABLE `bitacora_operativa`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_bitacora_operativa_residencial` (`residencial_id`),
+  ADD KEY `idx_bitacora_operativa_guardia` (`guardia_id`),
+  ADD KEY `idx_bitacora_operativa_fecha` (`fecha_hora`),
+  ADD KEY `idx_bitacora_operativa_area` (`area_id`),
+  ADD KEY `idx_bitacora_operativa_tipo` (`tipo_origen`,`tipo_evento`),
+  ADD KEY `fk_bitacora_operativa_persona` (`persona_recurrente_id`),
+  ADD KEY `fk_bitacora_operativa_visitante` (`visitante_rapido_id`),
+  ADD KEY `fk_bitacora_operativa_permiso` (`permiso_material_id`);
+
+--
+-- Indices de la tabla `catalogo_materiales`
+--
+ALTER TABLE `catalogo_materiales`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_catalogo_materiales_residencial` (`residencial_id`),
+  ADD KEY `idx_catalogo_materiales_activo` (`activo`);
 
 --
 -- Indices de la tabla `comunicados_residenciales`
@@ -731,14 +1001,6 @@ ALTER TABLE `guardias_turnos`
   ADD KEY `fk_guardias_turnos_residencial` (`residencial_id`);
 
 --
--- Indices de la tabla `guardias_turnos_excepciones`
---
-ALTER TABLE `guardias_turnos_excepciones`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_guardias_turnos_ex_user_service_dates` (`user_id`,`residencial_id`,`fecha_inicio`,`fecha_fin`),
-  ADD KEY `idx_guardias_turnos_ex_turno` (`turno_id`);
-
---
 -- Indices de la tabla `home_banners_residenciales`
 --
 ALTER TABLE `home_banners_residenciales`
@@ -772,7 +1034,11 @@ ALTER TABLE `incidencias`
   ADD KEY `fk_inc_residencial` (`residencial_id`),
   ADD KEY `fk_inc_unidad` (`unidad_id`),
   ADD KEY `fk_inc_residente` (`residente_id`),
-  ADD KEY `fk_incidencias_guardia` (`guardia_id`);
+  ADD KEY `fk_incidencias_guardia` (`guardia_id`),
+  ADD KEY `idx_incidencias_area` (`area_id`),
+  ADD KEY `idx_incidencias_persona` (`persona_recurrente_id`),
+  ADD KEY `idx_incidencias_visitante` (`visitante_rapido_id`),
+  ADD KEY `idx_incidencias_permiso` (`permiso_material_id`);
 
 --
 -- Indices de la tabla `pagos`
@@ -795,6 +1061,47 @@ ALTER TABLE `paqueteria`
   ADD KEY `guardia_id` (`guardia_id`);
 
 --
+-- Indices de la tabla `password_reset_codes`
+--
+ALTER TABLE `password_reset_codes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_password_reset_codes_email` (`email`),
+  ADD KEY `idx_password_reset_codes_user` (`user_id`),
+  ADD KEY `idx_password_reset_codes_expires` (`expires_at`);
+
+--
+-- Indices de la tabla `permisos_materiales`
+--
+ALTER TABLE `permisos_materiales`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_permisos_materiales_qr_token` (`qr_token`),
+  ADD KEY `idx_permisos_materiales_residencial` (`residencial_id`),
+  ADD KEY `idx_permisos_materiales_area` (`area_id`),
+  ADD KEY `idx_permisos_materiales_responsable` (`responsable_user_id`),
+  ADD KEY `idx_permisos_materiales_estado` (`estado`),
+  ADD KEY `fk_permisos_materiales_solicitado` (`solicitado_por_user_id`),
+  ADD KEY `fk_permisos_materiales_aprobado` (`aprobado_por_user_id`);
+
+--
+-- Indices de la tabla `permisos_materiales_items`
+--
+ALTER TABLE `permisos_materiales_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_permisos_materiales_items_permiso` (`permiso_id`),
+  ADD KEY `idx_permisos_materiales_items_material` (`material_id`);
+
+--
+-- Indices de la tabla `personas_recurrentes`
+--
+ALTER TABLE `personas_recurrentes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_personas_recurrentes_qr_token` (`qr_token`),
+  ADD KEY `idx_personas_recurrentes_residencial` (`residencial_id`),
+  ADD KEY `idx_personas_recurrentes_area` (`area_id`),
+  ADD KEY `idx_personas_recurrentes_activo` (`activo`),
+  ADD KEY `idx_personas_recurrentes_dentro` (`esta_dentro`);
+
+--
 -- Indices de la tabla `planes`
 --
 ALTER TABLE `planes`
@@ -815,6 +1122,13 @@ ALTER TABLE `residenciales`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `codigo` (`codigo`),
   ADD KEY `fk_residenciales_plan` (`plan_id`);
+
+--
+-- Indices de la tabla `residenciales_servicio_config`
+--
+ALTER TABLE `residenciales_servicio_config`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_residenciales_servicio_config_rid` (`residencial_id`);
 
 --
 -- Indices de la tabla `residentes_unidades`
@@ -855,6 +1169,17 @@ ALTER TABLE `usuarios_residenciales`
   ADD KEY `fk_ur_residencial` (`residencial_id`);
 
 --
+-- Indices de la tabla `visitantes_rapidos`
+--
+ALTER TABLE `visitantes_rapidos`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_visitantes_rapidos_qr_token` (`qr_token`),
+  ADD KEY `idx_visitantes_rapidos_residencial` (`residencial_id`),
+  ADD KEY `idx_visitantes_rapidos_responsable` (`responsable_user_id`),
+  ADD KEY `idx_visitantes_rapidos_area` (`area_id`),
+  ADD KEY `idx_visitantes_rapidos_estado` (`estado`);
+
+--
 -- Indices de la tabla `visitas`
 --
 ALTER TABLE `visitas`
@@ -875,10 +1200,34 @@ ALTER TABLE `accesos_guardia`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de la tabla `archivos_operativos`
+--
+ALTER TABLE `archivos_operativos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `areas_operativas`
+--
+ALTER TABLE `areas_operativas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `autos`
 --
 ALTER TABLE `autos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT de la tabla `bitacora_operativa`
+--
+ALTER TABLE `bitacora_operativa`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `catalogo_materiales`
+--
+ALTER TABLE `catalogo_materiales`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `comunicados_residenciales`
@@ -909,12 +1258,6 @@ ALTER TABLE `contactos_emergencia`
 --
 ALTER TABLE `guardias_turnos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT de la tabla `guardias_turnos_excepciones`
---
-ALTER TABLE `guardias_turnos_excepciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `home_banners_residenciales`
@@ -953,6 +1296,30 @@ ALTER TABLE `paqueteria`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT de la tabla `password_reset_codes`
+--
+ALTER TABLE `password_reset_codes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de la tabla `permisos_materiales`
+--
+ALTER TABLE `permisos_materiales`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `permisos_materiales_items`
+--
+ALTER TABLE `permisos_materiales_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `personas_recurrentes`
+--
+ALTER TABLE `personas_recurrentes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `planes`
 --
 ALTER TABLE `planes`
@@ -968,6 +1335,12 @@ ALTER TABLE `reglamentos_residenciales`
 -- AUTO_INCREMENT de la tabla `residenciales`
 --
 ALTER TABLE `residenciales`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `residenciales_servicio_config`
+--
+ALTER TABLE `residenciales_servicio_config`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
@@ -992,13 +1365,19 @@ ALTER TABLE `unidades`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios_residenciales`
 --
 ALTER TABLE `usuarios_residenciales`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT de la tabla `visitantes_rapidos`
+--
+ALTER TABLE `visitantes_rapidos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `visitas`
@@ -1018,6 +1397,35 @@ ALTER TABLE `accesos_guardia`
   ADD CONSTRAINT `fk_ag_visita` FOREIGN KEY (`visita_id`) REFERENCES `visitas` (`id`);
 
 --
+-- Filtros para la tabla `archivos_operativos`
+--
+ALTER TABLE `archivos_operativos`
+  ADD CONSTRAINT `fk_archivos_operativos_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `areas_operativas`
+--
+ALTER TABLE `areas_operativas`
+  ADD CONSTRAINT `fk_areas_operativas_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `bitacora_operativa`
+--
+ALTER TABLE `bitacora_operativa`
+  ADD CONSTRAINT `fk_bitacora_operativa_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_bitacora_operativa_guardia` FOREIGN KEY (`guardia_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_bitacora_operativa_permiso` FOREIGN KEY (`permiso_material_id`) REFERENCES `permisos_materiales` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_bitacora_operativa_persona` FOREIGN KEY (`persona_recurrente_id`) REFERENCES `personas_recurrentes` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_bitacora_operativa_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_bitacora_operativa_visitante` FOREIGN KEY (`visitante_rapido_id`) REFERENCES `visitantes_rapidos` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `catalogo_materiales`
+--
+ALTER TABLE `catalogo_materiales`
+  ADD CONSTRAINT `fk_catalogo_materiales_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `contactos_emergencia`
 --
 ALTER TABLE `contactos_emergencia`
@@ -1029,14 +1437,6 @@ ALTER TABLE `contactos_emergencia`
 ALTER TABLE `guardias_turnos`
   ADD CONSTRAINT `fk_guardias_turnos_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_guardias_turnos_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `guardias_turnos_excepciones`
---
-ALTER TABLE `guardias_turnos_excepciones`
-  ADD CONSTRAINT `fk_guardias_turnos_ex_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_guardias_turnos_ex_turno` FOREIGN KEY (`turno_id`) REFERENCES `guardias_turnos` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `fk_guardias_turnos_ex_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `home_banners_residenciales`
@@ -1057,7 +1457,11 @@ ALTER TABLE `incidencias`
   ADD CONSTRAINT `fk_inc_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`),
   ADD CONSTRAINT `fk_inc_residente` FOREIGN KEY (`residente_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `fk_inc_unidad` FOREIGN KEY (`unidad_id`) REFERENCES `unidades` (`id`),
-  ADD CONSTRAINT `fk_incidencias_guardia` FOREIGN KEY (`guardia_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `fk_incidencias_area_operativa` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_incidencias_guardia` FOREIGN KEY (`guardia_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_incidencias_permiso_operativa` FOREIGN KEY (`permiso_material_id`) REFERENCES `permisos_materiales` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_incidencias_persona_operativa` FOREIGN KEY (`persona_recurrente_id`) REFERENCES `personas_recurrentes` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_incidencias_visitante_operativa` FOREIGN KEY (`visitante_rapido_id`) REFERENCES `visitantes_rapidos` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `paqueteria`
@@ -1067,6 +1471,36 @@ ALTER TABLE `paqueteria`
   ADD CONSTRAINT `paqueteria_ibfk_2` FOREIGN KEY (`unidad_id`) REFERENCES `unidades` (`id`),
   ADD CONSTRAINT `paqueteria_ibfk_3` FOREIGN KEY (`residente_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `paqueteria_ibfk_4` FOREIGN KEY (`guardia_id`) REFERENCES `users` (`id`);
+
+--
+-- Filtros para la tabla `password_reset_codes`
+--
+ALTER TABLE `password_reset_codes`
+  ADD CONSTRAINT `fk_password_reset_codes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `permisos_materiales`
+--
+ALTER TABLE `permisos_materiales`
+  ADD CONSTRAINT `fk_permisos_materiales_aprobado` FOREIGN KEY (`aprobado_por_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_permisos_materiales_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_permisos_materiales_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_permisos_materiales_responsable` FOREIGN KEY (`responsable_user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_permisos_materiales_solicitado` FOREIGN KEY (`solicitado_por_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `permisos_materiales_items`
+--
+ALTER TABLE `permisos_materiales_items`
+  ADD CONSTRAINT `fk_permisos_materiales_items_material` FOREIGN KEY (`material_id`) REFERENCES `catalogo_materiales` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_permisos_materiales_items_permiso` FOREIGN KEY (`permiso_id`) REFERENCES `permisos_materiales` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `personas_recurrentes`
+--
+ALTER TABLE `personas_recurrentes`
+  ADD CONSTRAINT `fk_personas_recurrentes_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_personas_recurrentes_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `reglamentos_residenciales`
@@ -1079,6 +1513,12 @@ ALTER TABLE `reglamentos_residenciales`
 --
 ALTER TABLE `residenciales`
   ADD CONSTRAINT `fk_residenciales_plan` FOREIGN KEY (`plan_id`) REFERENCES `planes` (`id`);
+
+--
+-- Filtros para la tabla `residenciales_servicio_config`
+--
+ALTER TABLE `residenciales_servicio_config`
+  ADD CONSTRAINT `fk_residenciales_servicio_config_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `residentes_unidades`
@@ -1107,258 +1547,20 @@ ALTER TABLE `usuarios_residenciales`
   ADD CONSTRAINT `fk_ur_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
+-- Filtros para la tabla `visitantes_rapidos`
+--
+ALTER TABLE `visitantes_rapidos`
+  ADD CONSTRAINT `fk_visitantes_rapidos_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_visitantes_rapidos_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_visitantes_rapidos_responsable` FOREIGN KEY (`responsable_user_id`) REFERENCES `users` (`id`);
+
+--
 -- Filtros para la tabla `visitas`
 --
 ALTER TABLE `visitas`
   ADD CONSTRAINT `fk_visitas_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`),
   ADD CONSTRAINT `fk_visitas_residente` FOREIGN KEY (`residente_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `fk_visitas_unidad` FOREIGN KEY (`unidad_id`) REFERENCES `unidades` (`id`);
-
---
--- Extensión operativa multi-industria
---
-ALTER TABLE `residenciales`
-  ADD COLUMN `modo_operacion` ENUM('residencial','empresa','obra','comercio','servicio') NOT NULL DEFAULT 'residencial' AFTER `tipo`;
-
-CREATE TABLE `residenciales_servicio_config` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `residencial_id` int(11) NOT NULL,
-  `preset_servicio` varchar(30) NOT NULL DEFAULT 'residencial',
-  `habilita_admin_operativo` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_guardia` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_residente` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_unidades` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_residentes_catalogo` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_guardias_catalogo` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_autos` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_visitas_residente` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_paqueteria` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_pagos` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_comunicados` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_servicios_directorio` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_control_acceso` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_incidencias` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_personal_recurrente` tinyint(1) NOT NULL DEFAULT 0,
-  `habilita_visitantes_rapidos` tinyint(1) NOT NULL DEFAULT 0,
-  `habilita_materiales` tinyint(1) NOT NULL DEFAULT 0,
-  `habilita_solicitudes_pendientes` tinyint(1) NOT NULL DEFAULT 0,
-  `habilita_bitacora_operativa` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_residenciales_servicio_config_rid` (`residencial_id`),
-  CONSTRAINT `fk_residenciales_servicio_config_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `areas_operativas` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `residencial_id` int(11) NOT NULL,
-  `nombre` varchar(120) NOT NULL,
-  `codigo` varchar(40) NOT NULL,
-  `tipo` varchar(50) DEFAULT 'general',
-  `descripcion` text DEFAULT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `idx_areas_operativas_residencial` (`residencial_id`),
-  CONSTRAINT `fk_areas_operativas_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `personas_recurrentes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `residencial_id` int(11) NOT NULL,
-  `area_id` int(11) DEFAULT NULL,
-  `nombre` varchar(150) NOT NULL,
-  `foto_url` varchar(255) DEFAULT NULL,
-  `telefono` varchar(40) DEFAULT NULL,
-  `empresa` varchar(150) DEFAULT NULL,
-  `puesto` varchar(120) DEFAULT NULL,
-  `notas` text DEFAULT NULL,
-  `qr_token` varchar(100) NOT NULL,
-  `pin_hash` varchar(255) NOT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `esta_dentro` tinyint(1) NOT NULL DEFAULT 0,
-  `ultima_entrada_at` datetime DEFAULT NULL,
-  `ultima_salida_at` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_personas_recurrentes_qr` (`qr_token`),
-  KEY `idx_personas_recurrentes_residencial` (`residencial_id`),
-  KEY `idx_personas_recurrentes_area` (`area_id`),
-  CONSTRAINT `fk_personas_recurrentes_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_personas_recurrentes_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `visitantes_rapidos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `residencial_id` int(11) NOT NULL,
-  `responsable_user_id` int(11) DEFAULT NULL,
-  `area_id` int(11) DEFAULT NULL,
-  `nombre_visitante` varchar(150) NOT NULL,
-  `empresa` varchar(150) DEFAULT NULL,
-  `placa_vehiculo` varchar(30) DEFAULT NULL,
-  `motivo` text NOT NULL,
-  `qr_token` varchar(100) NOT NULL,
-  `estado` varchar(30) NOT NULL DEFAULT 'pendiente',
-  `notas_admin` text DEFAULT NULL,
-  `fecha_desde` date NOT NULL,
-  `fecha_hasta` date NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_visitantes_rapidos_qr` (`qr_token`),
-  KEY `idx_visitantes_rapidos_residencial` (`residencial_id`),
-  KEY `idx_visitantes_rapidos_area` (`area_id`),
-  KEY `idx_visitantes_rapidos_responsable` (`responsable_user_id`),
-  CONSTRAINT `fk_visitantes_rapidos_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_visitantes_rapidos_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_visitantes_rapidos_responsable` FOREIGN KEY (`responsable_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `catalogo_materiales` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `residencial_id` int(11) NOT NULL,
-  `nombre` varchar(150) NOT NULL,
-  `categoria` varchar(80) DEFAULT NULL,
-  `descripcion` text DEFAULT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `idx_catalogo_materiales_residencial` (`residencial_id`),
-  CONSTRAINT `fk_catalogo_materiales_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `permisos_materiales` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `residencial_id` int(11) NOT NULL,
-  `area_id` int(11) DEFAULT NULL,
-  `responsable_user_id` int(11) DEFAULT NULL,
-  `tipo_movimiento` enum('entrada','salida') NOT NULL DEFAULT 'entrada',
-  `qr_token` varchar(100) NOT NULL,
-  `estado` varchar(30) NOT NULL DEFAULT 'pendiente',
-  `solicitado_por_user_id` int(11) DEFAULT NULL,
-  `aprobado_por_user_id` int(11) DEFAULT NULL,
-  `aprobado_at` datetime DEFAULT NULL,
-  `notas` text DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_permisos_materiales_qr` (`qr_token`),
-  KEY `idx_permisos_materiales_residencial` (`residencial_id`),
-  KEY `idx_permisos_materiales_area` (`area_id`),
-  KEY `idx_permisos_materiales_responsable` (`responsable_user_id`),
-  KEY `idx_permisos_materiales_solicitado` (`solicitado_por_user_id`),
-  KEY `idx_permisos_materiales_aprobado` (`aprobado_por_user_id`),
-  CONSTRAINT `fk_permisos_materiales_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_permisos_materiales_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_permisos_materiales_responsable` FOREIGN KEY (`responsable_user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_permisos_materiales_solicitado` FOREIGN KEY (`solicitado_por_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_permisos_materiales_aprobado` FOREIGN KEY (`aprobado_por_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `permisos_materiales_items` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `permiso_id` int(11) NOT NULL,
-  `material_id` int(11) DEFAULT NULL,
-  `material_nombre` varchar(150) NOT NULL,
-  `cantidad_texto` varchar(120) NOT NULL,
-  `agregar_a_catalogo` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `idx_permisos_materiales_items_permiso` (`permiso_id`),
-  KEY `idx_permisos_materiales_items_material` (`material_id`),
-  CONSTRAINT `fk_permisos_materiales_items_permiso` FOREIGN KEY (`permiso_id`) REFERENCES `permisos_materiales` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_permisos_materiales_items_material` FOREIGN KEY (`material_id`) REFERENCES `catalogo_materiales` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `archivos_operativos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `residencial_id` int(11) NOT NULL,
-  `entidad_tipo` varchar(50) NOT NULL,
-  `entidad_id` int(11) NOT NULL,
-  `subtipo` varchar(50) DEFAULT NULL,
-  `storage_disk` varchar(40) NOT NULL DEFAULT 'local_public',
-  `storage_path` varchar(255) NOT NULL,
-  `public_url` varchar(255) NOT NULL,
-  `mime_type` varchar(80) NOT NULL,
-  `size_bytes` int(11) NOT NULL DEFAULT 0,
-  `width` int(11) DEFAULT NULL,
-  `height` int(11) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `idx_archivos_operativos_residencial` (`residencial_id`),
-  KEY `idx_archivos_operativos_entidad` (`entidad_tipo`,`entidad_id`),
-  CONSTRAINT `fk_archivos_operativos_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `bitacora_operativa` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `residencial_id` int(11) NOT NULL,
-  `guardia_id` int(11) DEFAULT NULL,
-  `tipo_origen` varchar(50) NOT NULL,
-  `origen_id` int(11) DEFAULT NULL,
-  `tipo_evento` varchar(50) NOT NULL,
-  `resultado` varchar(30) NOT NULL DEFAULT 'permitido',
-  `persona_recurrente_id` int(11) DEFAULT NULL,
-  `visitante_rapido_id` int(11) DEFAULT NULL,
-  `permiso_material_id` int(11) DEFAULT NULL,
-  `area_id` int(11) DEFAULT NULL,
-  `observaciones` text DEFAULT NULL,
-  `metadata_json` longtext DEFAULT NULL,
-  `fecha_hora` datetime NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `idx_bitacora_operativa_residencial` (`residencial_id`),
-  KEY `idx_bitacora_operativa_guardia` (`guardia_id`),
-  KEY `idx_bitacora_operativa_fecha` (`fecha_hora`),
-  KEY `idx_bitacora_operativa_area` (`area_id`),
-  KEY `idx_bitacora_operativa_tipo` (`tipo_origen`,`tipo_evento`),
-  CONSTRAINT `fk_bitacora_operativa_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_bitacora_operativa_guardia` FOREIGN KEY (`guardia_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_bitacora_operativa_persona` FOREIGN KEY (`persona_recurrente_id`) REFERENCES `personas_recurrentes` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_bitacora_operativa_visitante` FOREIGN KEY (`visitante_rapido_id`) REFERENCES `visitantes_rapidos` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_bitacora_operativa_permiso` FOREIGN KEY (`permiso_material_id`) REFERENCES `permisos_materiales` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_bitacora_operativa_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `password_reset_codes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `email` varchar(150) NOT NULL,
-  `codigo_hash` varchar(255) NOT NULL,
-  `expires_at` datetime NOT NULL,
-  `used_at` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `attempt_count` int(11) NOT NULL DEFAULT 0,
-  `last_attempt_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_password_reset_codes_email` (`email`),
-  KEY `idx_password_reset_codes_user` (`user_id`),
-  KEY `idx_password_reset_codes_expires` (`expires_at`),
-  CONSTRAINT `fk_password_reset_codes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-ALTER TABLE `incidencias`
-  MODIFY COLUMN `unidad_id` int(11) DEFAULT NULL,
-  MODIFY COLUMN `residente_id` int(11) DEFAULT NULL,
-  MODIFY COLUMN `tipo` varchar(50) NOT NULL DEFAULT 'seguridad',
-  ADD COLUMN `area_id` int(11) DEFAULT NULL AFTER `guardia_id`,
-  ADD COLUMN `persona_recurrente_id` int(11) DEFAULT NULL AFTER `area_id`,
-  ADD COLUMN `visitante_rapido_id` int(11) DEFAULT NULL AFTER `persona_recurrente_id`,
-  ADD COLUMN `permiso_material_id` int(11) DEFAULT NULL AFTER `visitante_rapido_id`,
-  ADD COLUMN `origen_tipo` varchar(50) DEFAULT NULL AFTER `permiso_material_id`,
-  ADD KEY `idx_incidencias_area` (`area_id`),
-  ADD KEY `idx_incidencias_persona` (`persona_recurrente_id`),
-  ADD KEY `idx_incidencias_visitante` (`visitante_rapido_id`),
-  ADD KEY `idx_incidencias_permiso` (`permiso_material_id`),
-  ADD CONSTRAINT `fk_incidencias_area_operativa` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `fk_incidencias_persona_operativa` FOREIGN KEY (`persona_recurrente_id`) REFERENCES `personas_recurrentes` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `fk_incidencias_visitante_operativa` FOREIGN KEY (`visitante_rapido_id`) REFERENCES `visitantes_rapidos` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `fk_incidencias_permiso_operativa` FOREIGN KEY (`permiso_material_id`) REFERENCES `permisos_materiales` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

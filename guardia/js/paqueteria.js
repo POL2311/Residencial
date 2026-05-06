@@ -22,7 +22,7 @@
       items: [],
       filteredItems: [],
       page: 1,
-      perPage: 5,
+      perPage: 3,
       loading: false,
       actionToken: 0,
     };

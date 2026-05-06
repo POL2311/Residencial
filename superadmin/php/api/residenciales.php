@@ -239,8 +239,8 @@ try {
         ]);
     }
 
-    if ($action === 'update_service_profile') {
-        sa_require_csrf();
+	    if ($action === 'update_service_profile') {
+	        sa_require_csrf();
 
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
@@ -267,21 +267,42 @@ try {
             WHERE id = :id
             LIMIT 1
         ");
-        $stmtUpdateMode->execute([
-            'modo_operacion' => $input['preset_servicio'],
-            'id' => $id,
-        ]);
+	        $stmtUpdateMode->execute([
+	            'modo_operacion' => $input['preset_servicio'],
+	            'id' => $id,
+	        ]);
 
-        $saved = service_profile_save($pdo, $id, $input);
+	        // Save and then diff requested vs saved flags so the UI can explain when something
+	        // was automatically turned off due to role compatibility or missing dependencies.
+	        $saved = service_profile_save($pdo, $id, $input);
+	        $sanitizedOff = [];
+	        foreach (service_profile_all_flags() as $flag) {
+	            if ((int)($input[$flag] ?? 0) === 1 && (int)($saved[$flag] ?? 0) !== 1) {
+	                $sanitizedOff[] = $flag;
+	            }
+	        }
+	        $savedSnapshot = [
+	            'roles_enabled' => [],
+	            'modules_enabled' => [],
+	        ];
+	        foreach (service_profile_role_flags() as $flag) {
+	            $savedSnapshot['roles_enabled'][$flag] = (int)($saved[$flag] ?? 0);
+	        }
+	        foreach (service_profile_module_flags() as $flag) {
+	            $savedSnapshot['modules_enabled'][$flag] = (int)($saved[$flag] ?? 0);
+	        }
+	        $payload = service_profile_frontend_payload($pdo, $id, 'admin_residencial');
 
-        sa_json_out(true, [
-            'message' => 'Perfil de servicio actualizado correctamente.',
-            'data' => [
-                'service_profile' => service_profile_frontend_payload($pdo, $id, 'admin_residencial'),
-                'preset_servicio' => $saved['preset_servicio'],
-            ],
-        ]);
-    }
+	        sa_json_out(true, [
+	            'message' => 'Perfil de servicio actualizado correctamente.',
+	            'data' => [
+	                'service_profile' => $payload,
+	                'preset_servicio' => $saved['preset_servicio'],
+	                'saved_flags_snapshot' => $savedSnapshot,
+	                'sanitized_off' => $sanitizedOff,
+	            ],
+	        ]);
+	    }
 
     if ($action === 'disable_service') {
         sa_require_csrf();

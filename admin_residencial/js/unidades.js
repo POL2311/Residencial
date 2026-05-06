@@ -39,7 +39,7 @@ console.log('[UNIDADES] JS ACTIVO');
     selected: null
   };
 
-  const PER_PAGE = 5;
+  const PER_PAGE = 3;
 
   /* =========================
      HELPERS

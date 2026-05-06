@@ -503,6 +503,13 @@
         const selectedRoles = selectedRoleKeys(form);
         const moduleValues = currentModuleValues(form);
 
+        // Some operational modules must be discoverable even when "Mostrar avanzados" is off,
+        // otherwise users can't enable them and assume they're unavailable.
+        const ALWAYS_VISIBLE_MODULE_FLAGS = new Set([
+            'habilita_bitacora_operativa',
+            'habilita_herramientas',
+        ]);
+
         let visibleCount = 0;
         let optionalHiddenCount = 0;
 
@@ -527,7 +534,7 @@
 
             const isDefault = Number(defaults?.[flag] || 0) === 1;
             const isChecked = !!field.checked;
-            const shouldShow = advanced || isDefault || isChecked;
+            const shouldShow = advanced || isDefault || isChecked || ALWAYS_VISIBLE_MODULE_FLAGS.has(flag);
 
             if (shouldShow) {
                 visibleCount += 1;
@@ -1013,6 +1020,7 @@
     els.serviceForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearInlineError(els.serviceModalError);
+        const wantsBitacora = !!els.serviceForm?.querySelector('[name="habilita_bitacora_operativa"]')?.checked;
         const payload = {
             action: 'update_service_profile',
             csrf_token: csrf,
@@ -1021,10 +1029,30 @@
         };
 
         try {
-            await api(payload);
+            const json = await api(payload);
             closeServiceModal();
             await loadList(false);
-            showAlert('ok', 'Perfil de servicio actualizado correctamente.');
+            const enabled = !!json?.data?.service_profile?.modules?.habilita_bitacora_operativa?.enabled;
+            const sanitizedOff = Array.isArray(json?.data?.sanitized_off) ? json.data.sanitized_off : [];
+            const bitacoraSanitized = sanitizedOff.includes('habilita_bitacora_operativa');
+
+            if (wantsBitacora && enabled) {
+                showAlert('ok', 'Perfil guardado. Bitácora activada: ya debe aparecer en Admin y Guardia al recargar.');
+            } else if (wantsBitacora && !enabled && bitacoraSanitized) {
+                showAlert('ok', 'Perfil guardado, pero Bitácora quedó apagada automáticamente (por compatibilidad de roles o dependencias). Revisa roles/módulos y vuelve a intentar.');
+            } else if (!wantsBitacora || !enabled) {
+                showAlert('ok', 'Perfil guardado. Bitácora está apagada; no aparecerá en Admin/Guardia hasta activarla.');
+            } else {
+                showAlert('ok', 'Perfil de servicio actualizado correctamente.');
+            }
+
+            if (new URLSearchParams(window.location.search || '').get('debug') === '1') {
+                const snap = json?.data?.saved_flags_snapshot || {};
+                console.warn('[superadmin] service_profile saved snapshot', snap);
+                if (sanitizedOff.length) {
+                    console.warn('[superadmin] sanitized_off', sanitizedOff);
+                }
+            }
         } catch (err) {
             showInlineError(els.serviceModalError, err.message || 'No se pudo guardar el perfil de servicio.');
         }

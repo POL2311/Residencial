@@ -69,8 +69,36 @@ try {
             'permiso_tipo_movimiento' => (string)($row['permiso_tipo_movimiento'] ?? ''),
             'area_nombre' => (string)($row['area_nombre'] ?? ''),
             'metadata' => $meta,
+            'evidencias' => [],
         ];
     }, $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+
+    $ids = array_values(array_filter(array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $items)));
+    if ($ids) {
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $evStmt = $pdo->prepare("
+            SELECT entidad_id, public_url
+            FROM archivos_operativos
+            WHERE residencial_id = ?
+              AND entidad_tipo = 'bitacora_operativa'
+              AND entidad_id IN ($placeholders)
+            ORDER BY id ASC
+        ");
+        $evStmt->execute(array_merge([$residencialId], $ids));
+        $rows = $evStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $map = [];
+        foreach ($rows as $row) {
+            $eid = (int)($row['entidad_id'] ?? 0);
+            if ($eid <= 0) continue;
+            $map[$eid] = $map[$eid] ?? [];
+            $map[$eid][] = (string)($row['public_url'] ?? '');
+        }
+        foreach ($items as &$item) {
+            $bid = (int)($item['id'] ?? 0);
+            $item['evidencias'] = $map[$bid] ?? [];
+        }
+        unset($item);
+    }
 
     $summary = [
         'total' => count($items),

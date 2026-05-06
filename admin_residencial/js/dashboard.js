@@ -4,8 +4,6 @@
     name: document.getElementById('residentName'),
     addr: document.getElementById('residentAddress'),
     btnEdit: document.getElementById('btnEditAddress'),
-    cars: document.getElementById('carsContainer'),
-    modeSelect: document.getElementById('modeOperationSelect'),
     modeBadge: document.getElementById('operationalModeBadge'),
     modeHint: document.getElementById('operationalModeHint'),
 
@@ -63,6 +61,8 @@
     operationalMode: 'residencial',
     serviceProfile: null,
     enabledViews: new Set(),
+    contextLoad: 'idle', // 'idle' | 'ok' | 'error'
+    homeMinimalNotice: '',
   };
 
   function showShellHeader() {
@@ -165,6 +165,51 @@
         </div>
       </div>
     `;
+  }
+
+  function renderHomeMinimalNotice(message) {
+    const wrap = els.mount || els.body;
+    if (!wrap) return;
+    if (!message) return;
+    const notice = `
+      <div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        ${escapeHtml(message)}
+      </div>
+    `;
+    if (wrap.firstElementChild) {
+      wrap.insertAdjacentHTML('afterbegin', notice);
+    } else {
+      wrap.innerHTML = notice + wrap.innerHTML;
+    }
+  }
+
+  function minimalViewsSet() {
+    return new Set(['home', 'perfil', 'reglamento']);
+  }
+
+  function debugEnabled() {
+    try {
+      return new URLSearchParams(window.location.search || '').get('debug') === '1';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function debugLogContext(allowedViews, enabledViews) {
+    const msg = {
+      base: BASE,
+      contexto_url: `${API}contexto.php`,
+      contextLoad: state.contextLoad,
+      allowed_views: allowedViews,
+      enabledViews: Array.from(enabledViews || []),
+      operationalMode: state.operationalMode,
+      preset: state.serviceProfile?.preset_servicio || null,
+    };
+    console.warn('[admin_residencial] contexto/allowed_views', msg);
+    if (debugEnabled() && els.modeHint) {
+      els.modeHint.classList.remove('hidden');
+      els.modeHint.textContent = `Debug: contextLoad=${state.contextLoad} enabled=${(enabledViews?.size || 0)} allowed=${(allowedViews?.length || 0)}`;
+    }
   }
 
   function setActiveButtons(view) {
@@ -274,9 +319,8 @@
   async function loadContext() {
     els.name = els.name || document.getElementById('residentName');
     els.addr = els.addr || document.getElementById('residentAddress');
-    els.cars = els.cars || document.getElementById('carsContainer');
-
-    if (!els.name || !els.addr || !els.cars) return;
+    // Header chips ("carsContainer") were removed for a cleaner UI.
+    if (!els.name || !els.addr) return;
 
     try {
       const res = await fetch(`${API}contexto.php`, {
@@ -293,7 +337,12 @@
       state.context = data;
       state.operationalMode = String(data.modo_operacion || ctx.modo_operacion || 'residencial').trim() || 'residencial';
       state.serviceProfile = data.service_profile || null;
-      state.enabledViews = buildEnabledViews(state.serviceProfile);
+      state.contextLoad = state.serviceProfile ? 'ok' : 'error';
+      state.enabledViews = state.serviceProfile ? buildEnabledViews(state.serviceProfile) : new Set();
+      state.homeMinimalNotice = '';
+
+      const allowed = Array.isArray(state.serviceProfile?.allowed_views) ? state.serviceProfile.allowed_views : [];
+      debugLogContext(allowed, state.enabledViews);
 
       // Nombre
       els.name.textContent = data.user?.name || 'Admin residencial';
@@ -310,19 +359,18 @@
             : (resName ? `Residencial: ${resName}` : '—');
       }
 
-      // Autos preview (si tu API lo manda)
-      const autos = Array.isArray(data.autos) ? data.autos : [];
-      renderCars(autos);
       toggleOperationalButtons();
     } catch (e) {
       console.warn('loadContext() falló:', e);
       els.name.textContent = 'Admin residencial';
       els.addr.textContent = '—';
-      els.cars.innerHTML = `<span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/80">Sin autos registrados</span>`;
       state.context = null;
       state.operationalMode = 'residencial';
       state.serviceProfile = null;
       state.enabledViews = new Set();
+      state.contextLoad = 'error';
+      state.homeMinimalNotice = '';
+      debugLogContext([], state.enabledViews);
       toggleOperationalButtons();
     }
   }
@@ -346,13 +394,11 @@
     if (els.modeHint) {
       els.modeHint.classList.toggle('hidden', isOperational || !!state.serviceProfile);
     }
-    if (els.modeSelect) {
-      const preset = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial');
-      els.modeSelect.textContent = modeLabel(preset);
-    }
+    // modeOperationSelect chip removed from UI.
   }
 
   function renderCars(autos) {
+    // Deprecated: we removed header autos chips for a cleaner UI.
     if (!els.cars) return;
 
     if (!autos || autos.length === 0) {
@@ -464,16 +510,32 @@
 
     initShellHeader();
     loadContext().then(() => {
-      if (!state.enabledViews.size) {
-        renderAccessBlocked();
+      // If context failed, we show the big blocked card.
+      if (!state.enabledViews.size && state.contextLoad === 'error') {
+        renderAccessBlocked('No pudimos cargar tu contexto operativo. Intenta recargar la página; si el problema continúa, revisa el perfil del servicio en Superadmin.');
         return;
       }
-      navigateTo(initialView(), { force: true });
+
+      // If context loaded but there are no operable modules, fall back to a minimal Home/Perfil/Reglamento experience.
+      if (!state.enabledViews.size && state.contextLoad === 'ok') {
+        state.enabledViews = minimalViewsSet();
+        state.homeMinimalNotice = 'Este servicio aún no tiene módulos habilitados para Admin operativo. Puedes ver Home/Perfil/Reglamento mientras se habilitan módulos desde Superadmin.';
+        toggleOperationalButtons();
+      }
+
+      navigateTo(initialView() || 'home', { force: true }).then(() => {
+        if (state.homeMinimalNotice) renderHomeMinimalNotice(state.homeMinimalNotice);
+      });
     });
   });
 
   window.addEventListener('hashchange', () => {
-    if (!state.enabledViews.size) return;
+    if (!state.enabledViews.size) {
+      // If context failed, keep the blocked state; if minimal mode, ignore hash changes to disallowed views.
+      if (state.contextLoad === 'error') return;
+      state.enabledViews = minimalViewsSet();
+      toggleOperationalButtons();
+    }
     const next = normalizeView((window.location.hash || '').replace('#', '').trim());
     const current = state.pendingView || state.currentView;
     if (next && next !== current) {

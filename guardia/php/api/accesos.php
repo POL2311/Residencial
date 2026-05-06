@@ -607,7 +607,39 @@ try {
             LIMIT 150
         ");
         $stmt->execute(['rid' => $residencialId]);
-        out(true, ['data' => ['items' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []]]);
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $ids = array_values(array_filter(array_map(static fn(array $row): int => (int)($row['id'] ?? 0), $items)));
+        $evidenceMap = [];
+        if ($ids) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $evStmt = $pdo->prepare("
+                SELECT entidad_id, public_url
+                FROM archivos_operativos
+                WHERE residencial_id = ?
+                  AND entidad_tipo = 'bitacora_operativa'
+                  AND entidad_id IN ($placeholders)
+                ORDER BY id ASC
+            ");
+            $evStmt->execute(array_merge([$residencialId], $ids));
+            $rows = $evStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            foreach ($rows as $row) {
+                $eid = (int)($row['entidad_id'] ?? 0);
+                if ($eid <= 0) {
+                    continue;
+                }
+                $evidenceMap[$eid] = $evidenceMap[$eid] ?? [];
+                $evidenceMap[$eid][] = (string)($row['public_url'] ?? '');
+            }
+        }
+
+        foreach ($items as &$item) {
+            $bid = (int)($item['id'] ?? 0);
+            $item['evidencias'] = $evidenceMap[$bid] ?? [];
+        }
+        unset($item);
+
+        out(true, ['data' => ['items' => $items]]);
     }
 
     if ($method === 'POST' && $action === 'scan') {

@@ -62,7 +62,7 @@
       loadingRegister: false,
       histItems: [],
       histPage: 1,
-      histPerPage: 5,
+      histPerPage: 3,
       rafId: null,
       searchToken: 0,
       registerToken: 0,

@@ -2,8 +2,11 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_bootstrap.php';
+require_once __DIR__ . '/../../../config/image_uploads.php';
+require_once __DIR__ . '/../../../config/comunicados_helpers.php';
 
 $action = sa_post_action('list');
+comunicados_schema_ensure($pdo);
 
 function sa_comunicado_normalize(array $row): array
 {
@@ -14,6 +17,7 @@ function sa_comunicado_normalize(array $row): array
         'residencial_codigo' => (string)($row['residencial_codigo'] ?? ''),
         'titulo' => (string)($row['titulo'] ?? ''),
         'mensaje' => (string)($row['mensaje'] ?? ''),
+        'imagen_url' => (string)($row['imagen_url'] ?? ''),
         'tipo' => (string)($row['tipo'] ?? 'general'),
         'prioridad' => (string)($row['prioridad'] ?? 'media'),
         'fecha_publicacion' => (string)($row['fecha_publicacion'] ?? ''),
@@ -155,6 +159,16 @@ try {
             $fechaExp = sa_clean_str($_POST['fecha_expiracion'] ?? '', 20);
             $estado = sa_clean_str($_POST['estado'] ?? 'publicado', 20);
             $userId = (int)(current_user()['id'] ?? 0);
+            $imagenUrl = null;
+
+            if (!empty($_FILES['imagen']['name'] ?? '')) {
+                $processed = operational_process_image_upload($_FILES['imagen'], [
+                    'filename_prefix' => 'comunicado',
+                    'max_side' => 1200,
+                    'preserve_text' => true,
+                ]);
+                $imagenUrl = (string)($processed['public_url'] ?? '');
+            }
 
             if ($residencialId <= 0) {
                 sa_json_out(false, ['error' => 'Debes seleccionar un servicio.'], 422);
@@ -188,11 +202,18 @@ try {
             }
 
             if ($id > 0) {
+                if ($imagenUrl === null) {
+                    $stmtImg = $pdo->prepare("SELECT imagen_url FROM comunicados_residenciales WHERE id = :id LIMIT 1");
+                    $stmtImg->execute(['id' => $id]);
+                    $imagenUrl = (string)($stmtImg->fetchColumn() ?: '');
+                }
+
                 $stmt = $pdo->prepare("
                     UPDATE comunicados_residenciales
                     SET residencial_id = :rid,
                         titulo = :titulo,
                         mensaje = :mensaje,
+                        imagen_url = :imagen_url,
                         tipo = :tipo,
                         prioridad = :prioridad,
                         fecha_publicacion = :fecha_pub,
@@ -206,6 +227,7 @@ try {
                     'rid' => $residencialId,
                     'titulo' => $titulo,
                     'mensaje' => $mensaje,
+                    'imagen_url' => ($imagenUrl !== '' ? $imagenUrl : null),
                     'tipo' => $tipo,
                     'prioridad' => $prioridad,
                     'fecha_pub' => $fechaPub,
@@ -223,6 +245,7 @@ try {
                     residencial_id,
                     titulo,
                     mensaje,
+                    imagen_url,
                     tipo,
                     prioridad,
                     fecha_publicacion,
@@ -236,6 +259,7 @@ try {
                     :rid,
                     :titulo,
                     :mensaje,
+                    :imagen_url,
                     :tipo,
                     :prioridad,
                     :fecha_pub,
@@ -251,6 +275,7 @@ try {
                 'rid' => $residencialId,
                 'titulo' => $titulo,
                 'mensaje' => $mensaje,
+                'imagen_url' => ($imagenUrl !== null && $imagenUrl !== '' ? $imagenUrl : null),
                 'tipo' => $tipo,
                 'prioridad' => $prioridad,
                 'fecha_pub' => $fechaPub,

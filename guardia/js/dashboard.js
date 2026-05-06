@@ -78,11 +78,9 @@
       const view = el.getAttribute('data-view') || '';
       if (!view) return;
       const allow = state.canOperate && state.enabledViews.has(view);
-      if (el.classList.contains('dashBtn')) {
-        el.classList.toggle('hidden', !allow);
-      } else {
-        el.classList.toggle('hidden', !state.canOperate);
-      }
+      // Any navigation entry point (tile, header button, etc.) must match allowed_views.
+      // Otherwise users can click it and get redirected to home, which feels like a bug.
+      el.classList.toggle('hidden', !allow);
     });
 
     if (els.notificationsButton) {

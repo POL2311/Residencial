@@ -36,6 +36,7 @@ if (!function_exists('service_profile_module_flags')) {
             'habilita_materiales',
             'habilita_solicitudes_pendientes',
             'habilita_bitacora_operativa',
+            'habilita_herramientas',
         ];
     }
 }
@@ -89,6 +90,7 @@ if (!function_exists('service_profile_labels')) {
                 'habilita_materiales' => 'Materiales / equipos',
                 'habilita_solicitudes_pendientes' => 'Solicitudes pendientes',
                 'habilita_bitacora_operativa' => 'Bitácora operativa',
+                'habilita_herramientas' => 'Herramientas',
             ],
         ];
     }
@@ -121,6 +123,7 @@ if (!function_exists('service_profile_defaults')) {
             'habilita_materiales' => 0,
             'habilita_solicitudes_pendientes' => 0,
             'habilita_bitacora_operativa' => 0,
+            'habilita_herramientas' => 0,
         ];
 
         return match ($preset) {
@@ -214,6 +217,7 @@ if (!function_exists('service_profile_schema_ensure')) {
                     habilita_materiales TINYINT(1) NOT NULL DEFAULT 0,
                     habilita_solicitudes_pendientes TINYINT(1) NOT NULL DEFAULT 0,
                     habilita_bitacora_operativa TINYINT(1) NOT NULL DEFAULT 0,
+                    habilita_herramientas TINYINT(1) NOT NULL DEFAULT 0,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     PRIMARY KEY (id),
@@ -236,6 +240,14 @@ if (!function_exists('service_profile_schema_ensure')) {
                 ALTER TABLE residenciales_servicio_config
                 ADD COLUMN habilita_guardias_admin_actions TINYINT(1) NOT NULL DEFAULT 1
                 AFTER habilita_guardias_catalogo
+            ");
+        }
+
+        if (!operational_column_exists($pdo, 'residenciales_servicio_config', 'habilita_herramientas')) {
+            $pdo->exec("
+                ALTER TABLE residenciales_servicio_config
+                ADD COLUMN habilita_herramientas TINYINT(1) NOT NULL DEFAULT 0
+                AFTER habilita_bitacora_operativa
             ");
         }
 
@@ -338,30 +350,16 @@ if (!function_exists('service_profile_save')) {
         }
         $merged = service_profile_sanitize_flags($merged);
 
+        // Build SET clause dynamically from the canonical flag list to avoid placeholder mismatches.
+        $setParts = ['preset_servicio = :preset_servicio'];
+        foreach (service_profile_all_flags() as $flag) {
+            $setParts[] = $flag . ' = :' . $flag;
+        }
+        $setParts[] = 'updated_at = NOW()';
+
         $stmt = $pdo->prepare("
             UPDATE residenciales_servicio_config
-            SET preset_servicio = :preset_servicio,
-                habilita_admin_operativo = :habilita_admin_operativo,
-                habilita_guardia = :habilita_guardia,
-                habilita_residente = :habilita_residente,
-                habilita_unidades = :habilita_unidades,
-                habilita_residentes_catalogo = :habilita_residentes_catalogo,
-                habilita_guardias_catalogo = :habilita_guardias_catalogo,
-                habilita_guardias_admin_actions = :habilita_guardias_admin_actions,
-                habilita_autos = :habilita_autos,
-                habilita_visitas_residente = :habilita_visitas_residente,
-                habilita_paqueteria = :habilita_paqueteria,
-                habilita_pagos = :habilita_pagos,
-                habilita_comunicados = :habilita_comunicados,
-                habilita_servicios_directorio = :habilita_servicios_directorio,
-                habilita_control_acceso = :habilita_control_acceso,
-                habilita_incidencias = :habilita_incidencias,
-                habilita_personal_recurrente = :habilita_personal_recurrente,
-                habilita_visitantes_rapidos = :habilita_visitantes_rapidos,
-                habilita_materiales = :habilita_materiales,
-                habilita_solicitudes_pendientes = :habilita_solicitudes_pendientes,
-                habilita_bitacora_operativa = :habilita_bitacora_operativa,
-                updated_at = NOW()
+            SET " . implode(",\n                ", $setParts) . "
             WHERE residencial_id = :residencial_id
             LIMIT 1
         ");
@@ -524,6 +522,12 @@ if (!function_exists('service_profile_module_catalog')) {
             ],
             'habilita_bitacora_operativa' => [
                 'module' => 'bitacora_operativa',
+                'roles' => ['admin_residencial', 'guardia'],
+                'support_only' => false,
+                'depends_on' => [],
+            ],
+            'habilita_herramientas' => [
+                'module' => 'herramientas',
                 'roles' => ['admin_residencial', 'guardia'],
                 'support_only' => false,
                 'depends_on' => [],
@@ -724,8 +728,8 @@ if (!function_exists('service_profile_role_module_matrix')) {
     function service_profile_role_module_matrix(): array
     {
         return [
-            'admin_residencial' => ['home', 'perfil', 'reglamento', 'contexto', 'unidades', 'residentes', 'guardias', 'guardias_admin_actions', 'incidencias', 'comunicados', 'autos', 'personal_recurrente', 'visitantes_rapidos', 'materiales', 'solicitudes_pendientes', 'bitacora_operativa'],
-            'guardia' => ['home', 'perfil', 'reglamento', 'contexto', 'accesos', 'autos', 'incidencias', 'paqueteria', 'personal_recurrente', 'materiales', 'bitacora_operativa'],
+            'admin_residencial' => ['home', 'perfil', 'reglamento', 'contexto', 'unidades', 'residentes', 'guardias', 'guardias_admin_actions', 'incidencias', 'comunicados', 'autos', 'personal_recurrente', 'visitantes_rapidos', 'materiales', 'solicitudes_pendientes', 'bitacora_operativa', 'herramientas'],
+            'guardia' => ['home', 'perfil', 'reglamento', 'contexto', 'accesos', 'autos', 'incidencias', 'paqueteria', 'personal_recurrente', 'materiales', 'bitacora_operativa', 'herramientas'],
             'residente' => ['home', 'perfil', 'reglamento', 'contexto', 'visitas', 'incidencias', 'paqueteria', 'autos', 'pagos', 'comunicados', 'servicios'],
         ];
     }
@@ -741,6 +745,7 @@ if (!function_exists('service_profile_role_view_matrix')) {
                 'reglamento' => 'reglamento',
                 'unidades' => 'unidades',
                 'residentes' => 'residentes',
+                // Guardias stays visible if the catalog is enabled; admin actions are controlled separately.
                 'guardias' => 'guardias',
                 'incidencias' => 'incidencias',
                 'comunicados' => 'comunicados',
@@ -750,6 +755,7 @@ if (!function_exists('service_profile_role_view_matrix')) {
                 'materiales' => 'materiales',
                 'solicitudes_pendientes' => 'solicitudes_pendientes',
                 'bitacora_operativa' => 'bitacora_operativa',
+                'herramientas' => 'herramientas',
             ],
             'guardia' => [
                 'home' => 'home',
@@ -762,6 +768,7 @@ if (!function_exists('service_profile_role_view_matrix')) {
                 'personas_dentro' => 'personal_recurrente',
                 'materiales_autorizados' => 'materiales',
                 'bitacora_hoy' => 'bitacora_operativa',
+                'herramientas' => 'herramientas',
             ],
             'residente' => [
                 'home' => 'home',
@@ -815,6 +822,7 @@ if (!function_exists('service_profile_module_enabled')) {
             'materiales', 'materiales_autorizados' => (int)($profile['habilita_materiales'] ?? 0) === 1,
             'solicitudes_pendientes' => (int)($profile['habilita_solicitudes_pendientes'] ?? 0) === 1,
             'bitacora_operativa', 'bitacora_hoy' => (int)($profile['habilita_bitacora_operativa'] ?? 0) === 1,
+            'herramientas' => (int)($profile['habilita_herramientas'] ?? 0) === 1,
             default => true,
         };
 

@@ -11,6 +11,8 @@ require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/image_uploads.php';
+require_once __DIR__ . '/../../../config/comunicados_helpers.php';
 
 require_login();
 require_role(['admin_residencial']);
@@ -23,12 +25,14 @@ $user = current_user();
 $adminId = (int)($user['id'] ?? 0);
 $residencialId = require_residencial_id($pdo, $adminId);
 service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'comunicados', 'Los comunicados no están habilitados para este cliente.');
+comunicados_schema_ensure($pdo);
 
 function normalize_comunicado(array $r): array {
     return [
         'id' => (int)($r['id'] ?? 0),
         'titulo' => (string)($r['titulo'] ?? ''),
         'mensaje' => (string)($r['mensaje'] ?? ''),
+        'imagen_url' => (string)($r['imagen_url'] ?? ''),
         'tipo' => (string)($r['tipo'] ?? 'general'),
         'prioridad' => (string)($r['prioridad'] ?? 'media'),
         'fecha_publicacion' => (string)($r['fecha_publicacion'] ?? ''),
@@ -46,6 +50,7 @@ try {
                 id,
                 titulo,
                 mensaje,
+                imagen_url,
                 tipo,
                 prioridad,
                 fecha_publicacion,
@@ -101,6 +106,16 @@ try {
         $fechaPub = clean_str($_POST['fecha_publicacion'] ?? '') ?: date('Y-m-d');
         $fechaExp = clean_str($_POST['fecha_expiracion'] ?? '');
         $estado = clean_str($_POST['estado'] ?? 'publicado');
+        $imagenUrl = null;
+
+        if (!empty($_FILES['imagen']['name'] ?? '')) {
+            $processed = operational_process_image_upload($_FILES['imagen'], [
+                'filename_prefix' => 'comunicado',
+                'max_side' => 1200,
+                'preserve_text' => true,
+            ]);
+            $imagenUrl = (string)($processed['public_url'] ?? '');
+        }
 
         if ($titulo === '' || $mensaje === '') {
             json_out(false, ['error' => 'Título y mensaje son requeridos.']);
@@ -131,10 +146,30 @@ try {
         }
 
         if ($id > 0) {
+            if ($imagenUrl === null) {
+                $stmtImg = $pdo->prepare("
+                    SELECT imagen_url
+                    FROM comunicados_residenciales
+                    WHERE id = :id
+                      AND residencial_id = :rid
+                    LIMIT 1
+                ");
+                $stmtImg->execute([
+                    'id' => $id,
+                    'rid' => $residencialId,
+                ]);
+                $row = $stmtImg->fetch(PDO::FETCH_ASSOC) ?: null;
+                if (!$row) {
+                    json_out(false, ['error' => 'No encontramos el comunicado.']);
+                }
+                $imagenUrl = (string)($row['imagen_url'] ?? '');
+            }
+
             $stmtUp = $pdo->prepare("
                 UPDATE comunicados_residenciales
                 SET titulo = :titulo,
                     mensaje = :mensaje,
+                    imagen_url = :imagen_url,
                     tipo = :tipo,
                     prioridad = :prioridad,
                     fecha_publicacion = :fecha_pub,
@@ -147,6 +182,7 @@ try {
             $stmtUp->execute([
                 'titulo' => $titulo,
                 'mensaje' => $mensaje,
+                'imagen_url' => ($imagenUrl !== '' ? $imagenUrl : null),
                 'tipo' => $tipo,
                 'prioridad' => $prioridad,
                 'fecha_pub' => $fechaPub,
@@ -160,44 +196,49 @@ try {
             json_out(true, ['message' => 'Comunicado actualizado.']);
         }
 
-        $stmtIns = $pdo->prepare("
-            INSERT INTO comunicados_residenciales (
-                residencial_id,
-                titulo,
-                mensaje,
-                tipo,
-                prioridad,
-                fecha_publicacion,
-                fecha_expiracion,
-                visible_para_residentes,
-                estado,
-                creado_por,
-                creado_at
-            ) VALUES (
-                :resid,
-                :titulo,
-                :mensaje,
-                :tipo,
-                :prioridad,
-                :fecha_pub,
-                :fecha_exp,
-                1,
-                :estado,
-                :userId,
-                NOW()
-            )
-        ");
-        $stmtIns->execute([
-            'resid' => $residencialId,
-            'titulo' => $titulo,
-            'mensaje' => $mensaje,
-            'tipo' => $tipo,
-            'prioridad' => $prioridad,
-            'fecha_pub' => $fechaPub,
-            'fecha_exp' => ($fechaExp !== '' ? $fechaExp : null),
-            'estado' => $estado,
-            'userId' => $adminId,
-        ]);
+	        $stmtIns = $pdo->prepare("
+	            INSERT INTO comunicados_residenciales (
+	                residencial_id,
+	                titulo,
+	                mensaje,
+	                imagen_url,
+	                tipo,
+	                prioridad,
+	                fecha_publicacion,
+	                fecha_expiracion,
+	                visible_para_residentes,
+	                estado,
+	                creado_por,
+	                creado_at,
+	                reglamentos_residenciales
+	            ) VALUES (
+	                :resid,
+	                :titulo,
+	                :mensaje,
+	                :imagen_url,
+	                :tipo,
+	                :prioridad,
+	                :fecha_pub,
+	                :fecha_exp,
+	                1,
+	                :estado,
+	                :userId,
+	                NOW(),
+	                ''
+	            )
+	        ");
+	        $stmtIns->execute([
+	            'resid' => $residencialId,
+	            'titulo' => $titulo,
+	            'mensaje' => $mensaje,
+	            'imagen_url' => ($imagenUrl !== null && $imagenUrl !== '' ? $imagenUrl : null),
+	            'tipo' => $tipo,
+	            'prioridad' => $prioridad,
+	            'fecha_pub' => $fechaPub,
+	            'fecha_exp' => ($fechaExp !== '' ? $fechaExp : null),
+	            'estado' => $estado,
+	            'userId' => $adminId,
+	        ]);
 
         json_out(true, ['message' => 'Comunicado creado.']);
     }

@@ -26,7 +26,7 @@
       filteredItems: [],
       meta: { modo_operacion: 'residencial', areas: [], personas: [], visitantes: [], permisos: [] },
       page: 1,
-      perPage: 5,
+      perPage: 3,
       loading: false,
     };
 

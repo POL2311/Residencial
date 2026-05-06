@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/comunicados_helpers.php';
 
 require_login();
 
@@ -17,6 +18,8 @@ $user = current_user();
 $userId = (int)($user['id'] ?? 0);
 
 try {
+    comunicados_schema_ensure($pdo);
+
     $stmt = $pdo->prepare("
         SELECT residencial_id
         FROM usuarios_residenciales
@@ -31,22 +34,55 @@ try {
         json_out(false, ['error' => 'No tienes un residencial asignado.']);
     }
 
-    $stmtBanners = $pdo->prepare("
-        SELECT
-            id,
-            titulo,
-            subtitulo,
-            imagen_url,
-            categoria,
-            link_url,
-            orden
-        FROM home_banners_residenciales
-        WHERE residencial_id = :rid
-          AND activo = 1
-        ORDER BY orden ASC, id DESC
-    ");
-    $stmtBanners->execute(['rid' => $residencialId]);
-    $banners = $stmtBanners->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    // 1) Preferimos comunicados publicados reales para alimentar el carrusel.
+    $banners = [];
+    if (tableExists($pdo, 'comunicados_residenciales')) {
+        $stmtCom = $pdo->prepare("
+            SELECT
+                id,
+                titulo,
+                mensaje,
+                imagen_url,
+                tipo,
+                prioridad,
+                fecha_publicacion,
+                fecha_expiracion
+            FROM comunicados_residenciales
+            WHERE residencial_id = :rid
+              AND estado = 'publicado'
+              AND fecha_publicacion <= CURDATE()
+              AND (fecha_expiracion IS NULL OR fecha_expiracion >= CURDATE())
+            ORDER BY
+              CASE prioridad
+                WHEN 'alta' THEN 3
+                WHEN 'media' THEN 2
+                ELSE 1
+              END DESC,
+              fecha_publicacion DESC,
+              id DESC
+            LIMIT 5
+        ");
+        $stmtCom->execute(['rid' => $residencialId]);
+        $comRows = $stmtCom->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        foreach ($comRows as $row) {
+            $raw = (string)($row['mensaje'] ?? '');
+            $raw = preg_replace('/\\s+/u', ' ', trim($raw)) ?: '';
+            $sub = function_exists('mb_substr') ? mb_substr($raw, 0, 110) : substr($raw, 0, 110);
+            if (strlen($raw) > 110) {
+                $sub .= '…';
+            }
+            $banners[] = [
+                'id' => (int)($row['id'] ?? 0),
+                'titulo' => (string)($row['titulo'] ?? ''),
+                'subtitulo' => $sub,
+                'imagen_url' => (string)($row['imagen_url'] ?? ''),
+                'categoria' => (string)($row['tipo'] ?? 'general'),
+                'link_url' => '#comunicados',
+                'orden' => 0,
+            ];
+        }
+    }
 
     $stmtServicios = $pdo->prepare("
         SELECT

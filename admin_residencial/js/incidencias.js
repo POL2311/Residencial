@@ -13,6 +13,9 @@
     filterEstado: document.getElementById('filterEstado'),
     btnAdd: document.getElementById('btnAddIncidencia'),
     search: document.getElementById('searchIncidencias'),
+    chartCard: document.getElementById('incidenciasChartCard'),
+    chartBars: document.getElementById('incidenciasChartBars'),
+    chartTotals: document.getElementById('incidenciasChartTotals'),
 
     modalAdd: document.getElementById('incidenciaModal'),
     modalEdit: document.getElementById('incidenciaEditModal'),
@@ -160,6 +163,59 @@
 
   function paginate(arr, page, per) {
     return arr.slice((page - 1) * per, page * per);
+  }
+
+  function computeStatusCounts(items) {
+    const counts = { abierta: 0, en_proceso: 0, cerrada: 0 };
+    (items || []).forEach((i) => {
+      const k = String(i.estado || '').trim();
+      if (k === 'abierta' || k === 'en_proceso' || k === 'cerrada') counts[k] += 1;
+    });
+    return counts;
+  }
+
+  function renderStatusChart(counts) {
+    if (!els.chartCard || !els.chartBars || !els.chartTotals) return;
+
+    const abierta = Number(counts?.abierta || 0);
+    const enProceso = Number(counts?.en_proceso || 0);
+    const cerrada = Number(counts?.cerrada || 0);
+    const total = abierta + enProceso + cerrada;
+
+    els.chartTotals.textContent = total ? `${total} total` : 'Sin datos';
+    els.chartBars.innerHTML = '';
+
+    if (!total) {
+      els.chartBars.innerHTML = `
+        <div class="sm:col-span-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          Sin datos para graficar con los filtros actuales.
+        </div>
+      `;
+      return;
+    }
+
+    const max = Math.max(abierta, enProceso, cerrada, 1);
+    const items = [
+      { key: 'abierta', label: 'Abiertas', value: abierta, cls: 'bg-rose-100 text-rose-700', bar: 'bg-rose-500' },
+      { key: 'en_proceso', label: 'En proceso', value: enProceso, cls: 'bg-amber-100 text-amber-700', bar: 'bg-amber-500' },
+      { key: 'cerrada', label: 'Cerradas', value: cerrada, cls: 'bg-emerald-100 text-emerald-700', bar: 'bg-emerald-500' },
+    ];
+
+    items.forEach((it) => {
+      const pct = Math.round((it.value / max) * 100);
+      const card = document.createElement('div');
+      card.className = 'rounded-2xl border border-slate-200 bg-white p-4';
+      card.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-semibold text-slate-800">${escapeHtml(it.label)}</div>
+          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs ${it.cls}">${it.value}</span>
+        </div>
+        <div class="mt-3 h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+          <div class="h-full ${it.bar}" style="width:${pct}%"></div>
+        </div>
+      `;
+      els.chartBars.appendChild(card);
+    });
   }
 
   function ensureUiHelpers() {
@@ -432,6 +488,8 @@
 
       return byEstado && bySearch;
     });
+
+    renderStatusChart(computeStatusCounts(filtradas));
 
     const totalPages = Math.max(1, Math.ceil(filtradas.length / state.perPage));
     if (state.page > totalPages) state.page = 1;

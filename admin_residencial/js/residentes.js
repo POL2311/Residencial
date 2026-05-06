@@ -55,8 +55,8 @@
   // CONSTANTES
   // =========================
   const PAGOS_PER_PAGE = 3;
-  const AUTOS_PER_PAGE = 4;
-  const RESIDENTES_PER_PAGE = 5;
+  const AUTOS_PER_PAGE = 3;
+  const RESIDENTES_PER_PAGE = 3;
   const API_BASE = '/admin_residencial/php/api';
 
   const MESSAGES = {
@@ -248,6 +248,163 @@
 
       document.addEventListener('keydown', onKeydown);
     });
+  }
+
+  function showPrompt({
+    title = 'Motivo',
+    message = 'Escribe un motivo (opcional):',
+    placeholder = 'Opcional',
+    defaultValue = '',
+    acceptText = 'Guardar',
+    cancelText = 'Cancelar',
+    tone = 'danger',
+  } = {}) {
+    ensureUiHelpers();
+
+    if (!document.getElementById('friendlyPrompt')) {
+      const layer = document.getElementById('residentesUiLayer');
+      if (layer) {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = `
+          <div id="friendlyPrompt"
+               class="hidden fixed inset-0 z-[10005] items-center justify-center bg-black/50 p-4">
+            <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
+              <div class="p-6">
+                <div class="flex items-start gap-4">
+                  <div id="friendlyPromptIcon"
+                       class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
+                    !
+                  </div>
+                  <div class="flex-1">
+                    <h3 id="friendlyPromptTitle" class="text-xl font-semibold text-slate-900">
+                      ${escapeHtml(title)}
+                    </h3>
+                    <p id="friendlyPromptMessage" class="mt-2 text-sm leading-6 text-slate-600">
+                      ${escapeHtml(message)}
+                    </p>
+                    <textarea id="friendlyPromptInput"
+                              rows="3"
+                              class="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"
+                              placeholder="${escapeHtml(placeholder)}"></textarea>
+                  </div>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3">
+                  <button id="friendlyPromptCancel"
+                          type="button"
+                          class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+                    ${escapeHtml(cancelText)}
+                  </button>
+                  <button id="friendlyPromptAccept"
+                          type="button"
+                          class="rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+                    ${escapeHtml(acceptText)}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        layer.appendChild(wrap);
+      }
+    }
+
+    return new Promise((resolve) => {
+      const modal = document.getElementById('friendlyPrompt');
+      const titleEl = document.getElementById('friendlyPromptTitle');
+      const messageEl = document.getElementById('friendlyPromptMessage');
+      const acceptBtn = document.getElementById('friendlyPromptAccept');
+      const cancelBtn = document.getElementById('friendlyPromptCancel');
+      const iconEl = document.getElementById('friendlyPromptIcon');
+      const inputEl = document.getElementById('friendlyPromptInput');
+
+      if (!modal || !titleEl || !messageEl || !acceptBtn || !cancelBtn || !iconEl || !inputEl) {
+        resolve(null);
+        return;
+      }
+
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      acceptBtn.textContent = acceptText;
+      cancelBtn.textContent = cancelText;
+      inputEl.value = String(defaultValue || '');
+      inputEl.placeholder = placeholder;
+
+      if (tone === 'danger') {
+        iconEl.className =
+          'flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold';
+        acceptBtn.className =
+          'rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700';
+        iconEl.textContent = '!';
+      } else {
+        iconEl.className =
+          'flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xl font-bold';
+        acceptBtn.className =
+          'rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700';
+        iconEl.textContent = '✓';
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => inputEl.focus(), 0);
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        acceptBtn.onclick = null;
+        cancelBtn.onclick = null;
+        modal.onclick = null;
+        document.removeEventListener('keydown', onKeydown);
+      };
+
+      const onKeydown = (e) => {
+        if (e.key === 'Escape') {
+          cleanup();
+          resolve(null);
+        }
+      };
+
+      acceptBtn.onclick = () => {
+        const value = String(inputEl.value || '');
+        cleanup();
+        resolve(value);
+      };
+
+      cancelBtn.onclick = () => {
+        cleanup();
+        resolve(null);
+      };
+
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          cleanup();
+          resolve(null);
+        }
+      };
+
+      document.addEventListener('keydown', onKeydown);
+    });
+  }
+
+  function updateResidentInState(updated) {
+    if (!updated) return;
+    const userId = String(updated.user_id || '');
+    const residUnidId = String(updated.resid_unid_id || '');
+    if (!userId && !residUnidId) return;
+
+    const merge = (r) => {
+      if (!r) return r;
+      if (userId && String(r.user_id || '') === userId) return { ...r, ...updated };
+      if (residUnidId && String(r.resid_unid_id || '') === residUnidId) return { ...r, ...updated };
+      return r;
+    };
+
+    state.residentes = state.residentes.map(merge);
+    state.filteredResidentes = state.filteredResidentes.map(merge);
+
+    if (state.selected && (String(state.selected.user_id || '') === userId || String(state.selected.resid_unid_id || '') === residUnidId)) {
+      state.selected = { ...state.selected, ...updated };
+    }
   }
 
   function bindModalClose(modal, selectors = []) {
@@ -1043,6 +1200,11 @@
 
         modal.remove();
         await refreshCurrentDetail({ resetPagos: true });
+        const updated = resp?.data?.residente_actualizado || null;
+        if (updated) {
+          updateResidentInState(updated);
+          renderResidentes();
+        }
         showToast(resp.message || MESSAGES.pagoCreado, 'success');
       } catch (err) {
         showToast(err.message || 'No se pudo registrar el pago.', 'error');
@@ -1290,7 +1452,17 @@
     try {
       let motivo = '';
       if (!currentlyBanned) {
-        motivo = window.prompt('Motivo del baneo manual (opcional):', '') || '';
+        const value = await showPrompt({
+          title: 'Banear acceso',
+          message: 'Escribe el motivo del baneo (opcional).',
+          placeholder: 'Ej. Adeudo pendiente o instrucción de administración',
+          defaultValue: '',
+          acceptText: 'Banear',
+          cancelText: 'Cancelar',
+          tone: 'danger',
+        });
+        if (value === null) return;
+        motivo = value;
       }
 
       const resp = await api.residentes.toggleManualBan(id, !currentlyBanned, motivo);
@@ -1454,76 +1626,80 @@
     }
   });
 
-  els.modalForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  if (!els.modalForm) {
+    console.error('[RESIDENTES] No se encontró #modalForm. La vista pudo no haberse montado correctamente.');
+  } else {
+    els.modalForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-    const isEditing = !!state.editingId;
+      try {
+        const isEditing = !!state.editingId;
 
-    const fd = new FormData(els.modalForm);
-    fd.append('action', isEditing ? 'update' : 'create');
-    if (isEditing) fd.append('id', state.editingId);
+        const fd = new FormData(els.modalForm);
+        fd.append('action', isEditing ? 'update' : 'create');
+        if (isEditing) fd.append('id', state.editingId);
 
-    const nombre = String(fd.get('nombre') || '').trim();
-    const telefono = normalizePhoneDigits(fd.get('telefono') || '');
-    const email = String(fd.get('email') || '').trim();
-    const unidadId = String(fd.get('unidad_id') || '').trim();
-    const password = String(fd.get('password') || '').trim();
-    const passwordConfirm = String(fd.get('password_confirm') || '').trim();
+        const nombre = String(fd.get('nombre') || '').trim();
+        const telefono = normalizePhoneDigits(fd.get('telefono') || '');
+        const email = String(fd.get('email') || '').trim();
+        const unidadId = String(fd.get('unidad_id') || '').trim();
+        const password = String(fd.get('password') || '').trim();
+        const passwordConfirm = String(fd.get('password_confirm') || '').trim();
 
-    fd.set('telefono', telefono);
+        fd.set('telefono', telefono);
 
-    if (nombre.length < 3 || nombre.length > 120) {
-      showToast('El nombre debe tener entre 3 y 120 caracteres.', 'error');
-      return;
-    }
+        if (nombre.length < 3 || nombre.length > 120) {
+          showToast('El nombre debe tener entre 3 y 120 caracteres.', 'error');
+          return;
+        }
 
-    if (telefono && (telefono.length < 10 || telefono.length > 15)) {
-      showToast('El teléfono debe tener entre 10 y 15 dígitos.', 'error');
-      return;
-    }
+        if (telefono && (telefono.length < 10 || telefono.length > 15)) {
+          showToast('El teléfono debe tener entre 10 y 15 dígitos.', 'error');
+          return;
+        }
 
-    if (!email) {
-      showToast('El correo es obligatorio.', 'error');
-      return;
-    }
+        if (!email) {
+          showToast('El correo es obligatorio.', 'error');
+          return;
+        }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      showToast('El correo no es válido.', 'error');
-      return;
-    }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showToast('El correo no es válido.', 'error');
+          return;
+        }
 
-    if (!unidadId) {
-      showToast('Debes seleccionar una unidad.', 'error');
-      return;
-    }
+        if (!unidadId) {
+          showToast('Debes seleccionar una unidad.', 'error');
+          return;
+        }
 
-    if (password || passwordConfirm) {
-      if (password.length < 8) {
-        showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
-        return;
+        if (password || passwordConfirm) {
+          if (password.length < 8) {
+            showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
+            return;
+          }
+
+          if (password !== passwordConfirm) {
+            showToast('Las contraseñas no coinciden.', 'error');
+            return;
+          }
+        }
+
+        const resp = await api.residentes.save(fd);
+
+        closeModal();
+        await loadData();
+
+        showToast(
+          resp.message || (isEditing ? MESSAGES.residenteActualizado : MESSAGES.residenteCreado),
+          'success'
+        );
+      } catch (err) {
+        showToast(err?.message || 'No se pudo guardar el residente.', 'error');
       }
-
-      if (password !== passwordConfirm) {
-        showToast('Las contraseñas no coinciden.', 'error');
-        return;
-      }
-    }
-
-    try {
-      const resp = await api.residentes.save(fd);
-
-      closeModal();
-      await loadData();
-
-      showToast(
-        resp.message || (isEditing ? MESSAGES.residenteActualizado : MESSAGES.residenteCreado),
-        'success'
-      );
-    } catch (e) {
-      showToast(e.message || 'No se pudo guardar el residente.', 'error');
-    }
-  });
+    });
+  }
 
   // =========================
   // INIT

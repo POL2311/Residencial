@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/comunicados_helpers.php';
 
 require_login();
 require_role(['residente']);
@@ -37,12 +38,13 @@ function get_context(PDO $pdo, int $uid): array {
 
 try {
   service_profile_schema_ensure($pdo);
+  comunicados_schema_ensure($pdo);
   $ctx = get_context($pdo, $uid);
   $rid = (int)$ctx['residencial_id'];
   service_profile_api_require_module($pdo, $rid, 'residente', 'comunicados', 'Los comunicados no están habilitados para este cliente.');
 
   $stmt = $pdo->prepare("
-    SELECT id, titulo, mensaje, tipo, prioridad, fecha_publicacion, fecha_expiracion, estado, updated_at
+    SELECT id, titulo, mensaje, imagen_url, tipo, prioridad, fecha_publicacion, fecha_expiracion, estado, updated_at
     FROM comunicados_residenciales
     WHERE residencial_id = :rid
       AND visible_para_residentes = 1

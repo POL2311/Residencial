@@ -6,6 +6,34 @@
         return p.slice(0, idx) + '/residente/';
     }
 
+    function appRootBase() {
+        const p = window.location.pathname || '';
+        const idx = p.indexOf('/residente/');
+        if (idx === -1) return '';
+        return p.slice(0, idx);
+    }
+
+    function resolvePublicUrl(url) {
+        const u = String(url ?? '').trim();
+        if (!u) return '';
+        if (u.startsWith('data:')) return u;
+        if (/^https?:\/\//i.test(u)) {
+            try {
+                const parsed = new URL(u);
+                const base = appRootBase();
+                if (base && parsed.pathname.startsWith('/assets/') && !parsed.pathname.startsWith(base + '/assets/')) {
+                    parsed.pathname = base + parsed.pathname;
+                    return parsed.toString();
+                }
+            } catch (_) {
+                // ignore parse errors
+            }
+            return u;
+        }
+        if (u.startsWith('/assets/')) return appRootBase() + u;
+        return u;
+    }
+
     const root = document.getElementById('residentComunicadosView');
     if (!root || root.dataset.bound === '1') return;
     root.dataset.bound = '1';
@@ -39,7 +67,13 @@
         if (!json || !json.ok) throw new Error(json?.error || 'No se pudo cargar comunicados.');
         const items = json.data?.items || [];
         els.list.innerHTML = items.length ? items.map((item) => `
-          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm overflow-hidden">
+	            ${item.imagen_url ? `
+	              <div class="-mx-5 -mt-5 mb-4">
+	                <img src="${escapeHtml(resolvePublicUrl(item.imagen_url))}" alt=""
+	                     class="h-44 w-full object-cover border-b border-slate-200" loading="lazy" />
+	              </div>
+	            ` : ''}
             <div class="flex items-start justify-between gap-3">
               <div>
                 <div class="text-lg font-semibold text-slate-800">${escapeHtml(item.titulo)}</div>

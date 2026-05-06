@@ -29,10 +29,6 @@
                 <span class="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(110,231,183,0.18)]"></span>
                 <span class="font-medium text-white/85">Sistema activo</span>
               </div>
-              <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs text-white/90">
-                <span class="font-medium text-white/75">Servicio</span>
-                <span id="modeOperationSelect" class="rounded-full border border-white/15 bg-slate-950/15 px-2 py-1 text-xs text-white/95">Residencial</span>
-              </div>
               <a id="btnEditAddress"
                       href="#perfil"
                       data-view="perfil"
@@ -48,18 +44,7 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-2 px-3 py-2.5 sm:px-4 sm:py-3 lg:flex-row lg:items-center lg:justify-between">
-          <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/58">
-            <span>Vista rápida</span>
-            <span class="h-1 w-1 rounded-full bg-white/35"></span>
-            <span>Autos registrados</span>
-            <span class="h-1 w-1 rounded-full bg-white/35"></span>
-            <span id="operationalModeBadge">Modo residencial</span>
-          </div>
-          <div id="carsContainer" class="flex flex-wrap items-center gap-2">
-            <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/82">Cargando…</span>
-          </div>
-        </div>
+        <!-- Limpieza UI: removimos la franja de "Vista rápida / Autos" para un header más limpio. -->
       </div>
     </div>
   </header>

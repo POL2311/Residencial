@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/resident_access.php';
 
 require_login();
 require_role(['residente', 'admin_residencial']);
@@ -118,6 +119,7 @@ if ($isAdmin) {
 $ctx = get_context_for_user($pdo, $requestUserId);
 $residencial_id = $ctx['residencial_id'];
 $unidad_id = $ctx['unidad_id'];
+resident_access_ensure_schema($pdo);
 
 $whereParts = ["$colUser = :uid"];
 $params = ['uid' => $requestUserId];
@@ -199,9 +201,24 @@ if ($method === 'POST' && $action === 'create') {
     }
 
     if ($colConcepto) {
-        $fields[] = $colConcepto;
-        $values[] = ':concepto';
-        $insP['concepto'] = $concepto !== '' ? $concepto : null;
+        $conceptMeta = $meta[$colConcepto] ?? ['nullable' => true, 'default' => null];
+        $conceptIsEmpty = ($concepto === '');
+
+        if (!$conceptIsEmpty) {
+            $fields[] = $colConcepto;
+            $values[] = ':concepto';
+            $insP['concepto'] = $concepto;
+        } elseif (!empty($conceptMeta['nullable'])) {
+            $fields[] = $colConcepto;
+            $values[] = ':concepto';
+            $insP['concepto'] = null;
+        } elseif (($conceptMeta['default'] ?? null) !== null) {
+            // No incluir la columna para que aplique el DEFAULT.
+        } else {
+            $fields[] = $colConcepto;
+            $values[] = ':concepto';
+            $insP['concepto'] = 'Pago registrado';
+        }
     }
 
     if ($colActivo) {
@@ -220,6 +237,29 @@ if ($method === 'POST' && $action === 'create') {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($insP);
 
+        $residentUnitId = 0;
+        if ($requestUserId > 0 && $residencial_id > 0) {
+            // Toca la relación residente↔unidad más reciente del servicio para recalcular whitelist en tiempo real.
+            $stmtResidentUnit = $pdo->prepare("
+                SELECT ru.id
+                FROM residentes_unidades ru
+                JOIN unidades un ON un.id = ru.unidad_id
+                WHERE ru.user_id = :uid
+                  AND un.residencial_id = :rid
+                ORDER BY ru.id DESC
+                LIMIT 1
+            ");
+            $stmtResidentUnit->execute([
+                'uid' => $requestUserId,
+                'rid' => $residencial_id,
+            ]);
+            $residentUnitId = (int)($stmtResidentUnit->fetchColumn() ?: 0);
+        }
+
+        if ($residentUnitId > 0) {
+            resident_access_touch($pdo, $residentUnitId);
+        }
+
         $pagos = listPagos(
             $pdo,
             $table,
@@ -232,9 +272,38 @@ if ($method === 'POST' && $action === 'create') {
             $colConcepto
         );
 
+        $residenteActualizado = null;
+        if ($requestUserId > 0 && $residencial_id > 0) {
+            $statusRow = resident_access_status_for_user($pdo, $requestUserId, (int)$residencial_id);
+            if ($statusRow) {
+                $access = (array)($statusRow['access'] ?? []);
+                $residenteActualizado = [
+                    'user_id' => (int)($statusRow['user_id'] ?? 0),
+                    'resid_unid_id' => (int)($statusRow['resid_unid_id'] ?? 0),
+                    'unidad_id' => (int)($statusRow['unidad_id'] ?? 0),
+                    'unidad_clave' => (string)($statusRow['unidad_clave'] ?? '—'),
+                    'activo_servicio' => (int)($statusRow['activo_servicio'] ?? 1),
+                    'acceso_baneado_manual' => (int)($statusRow['acceso_baneado_manual'] ?? 0),
+                    'acceso_baneo_motivo' => (string)($statusRow['acceso_baneo_motivo'] ?? ''),
+                    'is_active' => (int)($statusRow['is_active'] ?? 1),
+
+                    'access_status' => (string)($access['status'] ?? ''),
+                    'access_label' => (string)($access['label'] ?? ''),
+                    'access_reason' => (string)($access['reason'] ?? ''),
+                    'allow_direct_access' => (bool)($access['allow_direct_access'] ?? false),
+                    'payment_current' => (bool)($access['payment_current'] ?? false),
+                    'payment_latest_date' => $access['payment_latest_date'] ?? null,
+                    'payment_latest_amount' => $access['payment_latest_amount'] ?? null,
+                ];
+            }
+        }
+
         json_out(true, [
             'message' => 'Pago registrado.',
-            'data' => ['pagos' => $pagos],
+            'data' => [
+                'pagos' => $pagos,
+                'residente_actualizado' => $residenteActualizado,
+            ],
         ]);
     } catch (Throwable $e) {
         $msg = strpos($e->getMessage(), '1062') !== false

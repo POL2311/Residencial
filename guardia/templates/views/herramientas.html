@@ -1,0 +1,36 @@
+<div id="guardHerramientasView" class="space-y-4">
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <div class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Operación</div>
+        <h1 class="mt-1 text-2xl font-semibold text-slate-800">Herramientas</h1>
+        <p class="mt-1 text-sm text-slate-500">Registra préstamos y devoluciones con evidencia.</p>
+      </div>
+      <button id="btnNuevoPrestamoHerramienta" type="button" class="inline-flex items-center justify-center rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+        + Nuevo préstamo
+      </button>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="grid gap-3 sm:grid-cols-3">
+      <div>
+        <label class="mb-1 block text-xs text-slate-600">Estado</label>
+        <select id="herrEstado" class="w-full rounded-xl border px-3 py-2 text-sm">
+          <option value="">Todos</option>
+          <option value="prestado">Prestado</option>
+          <option value="devuelto">Devuelto</option>
+        </select>
+      </div>
+      <div class="sm:col-span-2 flex items-end justify-end gap-2">
+        <button id="herrPrev" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Anterior</button>
+        <div id="herrPageInfo" class="text-sm text-slate-500">Página 1</div>
+        <button id="herrNext" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="herrAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+  <div id="herrList" class="space-y-3"></div>
+</div>
+

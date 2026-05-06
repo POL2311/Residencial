@@ -4,7 +4,7 @@
     root.dataset.bound = '1';
 
     const API = (window.SuperadminDashboard?.API || '/superadmin/php/api/') + 'incidencias.php';
-    const PER_PAGE = 6;
+    const PER_PAGE = 3;
 
     const els = {
         alert: document.getElementById('superadminIncidenciasAlert'),
