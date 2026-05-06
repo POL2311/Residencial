@@ -65,11 +65,13 @@ function save_operational_file_record(PDO $pdo, int $rid, string $entityType, in
         return null;
     }
 
+    // Evidence uploads prioritize speed over maximum compression.
     $processed = operational_process_image_upload($file, [
-        'folder_prefix' => 'bitacora',
-        'quality' => 82,
-        'preserve_text' => true,
-        'max_long_side' => 1400,
+        'filename_prefix' => 'bitacora',
+        'max_side' => 1000,
+        'target_bytes' => 180000,
+        'preserve_text' => false,
+        'fast_encode' => true,
     ]);
 
     $stmt = $pdo->prepare("

@@ -178,6 +178,7 @@ if (!function_exists('operational_native_output_spec')) {
 if (!function_exists('operational_process_image_upload')) {
     function operational_process_image_upload(array $file, array $options = []): array
     {
+        $t0 = microtime(true);
         if (!extension_loaded('gd')) {
             throw new RuntimeException('La extensión GD es obligatoria para procesar imágenes.');
         }
@@ -229,6 +230,7 @@ if (!function_exists('operational_process_image_upload')) {
         }
 
         $preserveText = !empty($options['preserve_text']);
+        $fastEncode = !empty($options['fast_encode']);
         $targetBytes = max(120000, (int)($options['target_bytes'] ?? 250000));
         $qualityStart = $preserveText ? 80 : 78;
         $qualityMin = $preserveText ? 72 : 60;
@@ -241,6 +243,10 @@ if (!function_exists('operational_process_image_upload')) {
             $cwebpBin = operational_find_executable('cwebp');
         }
         $encoder = $canGdWebp ? 'gd_webp' : ($cwebpBin ? 'cwebp' : 'native');
+        // For fast operational evidence uploads, avoid cwebp (exec + temp + retries can be slow on XAMPP).
+        if ($fastEncode && $encoder === 'cwebp') {
+            $encoder = 'native';
+        }
 
         $relativeDir = date('Y/m');
         $baseDiskPath = operational_public_upload_disk_path();
@@ -270,6 +276,10 @@ if (!function_exists('operational_process_image_upload')) {
         $chosenQuality = $qualityStart;
 
         if ($encoder === 'gd_webp') {
+            if ($fastEncode) {
+                // Single-pass encode for speed.
+                $qualityMin = $qualityStart;
+            }
             for ($quality = $qualityStart; $quality >= $qualityMin; $quality -= $qualityStep) {
                 ob_start();
                 imagewebp($canvas, null, $quality);
@@ -408,6 +418,23 @@ if (!function_exists('operational_process_image_upload')) {
         }
 
         imagedestroy($canvas);
+
+        $dtMs = (int)round((microtime(true) - $t0) * 1000);
+        $debugUploads = (string)getenv('APP_DEBUG_UPLOADS');
+        if ($debugUploads === '1') {
+            error_log(sprintf(
+                '[uploads] encoder=%s fast=%s dt_ms=%d in_mime=%s out_mime=%s w=%d h=%d bytes=%d path=%s',
+                $encoder,
+                $fastEncode ? '1' : '0',
+                $dtMs,
+                $mime,
+                $outMime,
+                $newWidth,
+                $newHeight,
+                (int)$size,
+                $diskPath
+            ));
+        }
 
         return [
             'storage_disk' => 'local_public',

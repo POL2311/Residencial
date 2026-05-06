@@ -651,10 +651,36 @@
     e.preventDefault();
     clearFormError();
 
+    const submitBtn = els.form?.querySelector('button[type="submit"]');
+    const originalSubmitHtml = submitBtn ? submitBtn.innerHTML : '';
+    const originalCancelDisabled = els.btnCancel ? els.btnCancel.disabled : false;
+    const originalCloseDisabled = els.btnClose ? els.btnClose.disabled : false;
+
+    function setLoading(isLoading) {
+      if (submitBtn) {
+        submitBtn.disabled = !!isLoading;
+        submitBtn.classList.toggle('opacity-70', !!isLoading);
+        submitBtn.classList.toggle('cursor-not-allowed', !!isLoading);
+        if (isLoading) {
+          submitBtn.innerHTML = `
+            <span class="inline-flex items-center gap-2">
+              <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+              Guardando…
+            </span>
+          `;
+        } else {
+          submitBtn.innerHTML = originalSubmitHtml || 'Guardar';
+        }
+      }
+      if (els.btnCancel) els.btnCancel.disabled = !!isLoading || originalCancelDisabled;
+      if (els.btnClose) els.btnClose.disabled = !!isLoading || originalCloseDisabled;
+    }
+
     try {
       const fd = new FormData(els.form);
       validateForm(fd);
 
+      setLoading(true);
       const j = await api.comunicados.save(fd);
       showAlert(j.message || 'Guardado');
       showHomeVisibilityHintFromForm(fd);
@@ -662,6 +688,8 @@
       await load();
     } catch (err) {
       showFormError(err.message || 'Error al guardar comunicado.');
+    } finally {
+      setLoading(false);
     }
   });
 

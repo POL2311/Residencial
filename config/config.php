@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/app_security.php';
 
-#$DB_HOST = 'localhost';
+#+$DB_HOST = 'localhost';
 #$DB_NAME = 'residencial_app4'; 
 #$DB_USER = 'root';     
 #$DB_PASS = '';       

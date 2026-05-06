@@ -138,6 +138,32 @@
       const extra = document.getElementById('bitacoraReportExtraFields');
       const err = document.getElementById('bitacoraNewReportError');
       const cancel = document.getElementById('bitacoraNewReportCancel');
+      const submitBtn = form?.querySelector('button[type="submit"]');
+      const modalCloseBtn = document.getElementById('gModalClose');
+
+      const originalSubmitHtml = submitBtn ? submitBtn.innerHTML : '';
+      const originalCancelDisabled = cancel ? cancel.disabled : false;
+      const originalCloseDisabled = modalCloseBtn ? modalCloseBtn.disabled : false;
+
+      function setLoading(isLoading) {
+        if (submitBtn) {
+          submitBtn.disabled = !!isLoading;
+          submitBtn.classList.toggle('opacity-70', !!isLoading);
+          submitBtn.classList.toggle('cursor-not-allowed', !!isLoading);
+          if (isLoading) {
+            submitBtn.innerHTML = `
+              <span class="inline-flex items-center gap-2">
+                <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                Guardando…
+              </span>
+            `;
+          } else {
+            submitBtn.innerHTML = originalSubmitHtml || 'Guardar';
+          }
+        }
+        if (cancel) cancel.disabled = !!isLoading || originalCancelDisabled;
+        if (modalCloseBtn) modalCloseBtn.disabled = !!isLoading || originalCloseDisabled;
+      }
 
       function setError(msg) {
         if (!err) return;
@@ -164,6 +190,7 @@
       form?.addEventListener('submit', async (ev) => {
         ev.preventDefault();
         setError('');
+        setLoading(true);
         try {
           const fd = new FormData(form);
           fd.set('action', 'create');
@@ -176,6 +203,8 @@
           load();
         } catch (e) {
           setError(e.message || 'No se pudo guardar el reporte.');
+        } finally {
+          setLoading(false);
         }
       });
     }
