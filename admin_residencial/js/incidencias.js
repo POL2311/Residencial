@@ -99,6 +99,17 @@
     el.classList.add('hidden');
   }
 
+  function sanitizeUserMessage(message, fallback = 'No se pudo completar la solicitud.') {
+    let msg = String(message || '').trim();
+    if (!msg) return fallback;
+    msg = msg
+      .replace(/\s*\(HTTP\s+\d+(?:\s*\(redirect\))?\)\.?/gi, '')
+      .replace(/\bHTTP\s+\d+(?:\s*\(redirect\))?:\s*/gi, '')
+      .replace(/\s*Debug:\s*[^.]+\.?/gi, '')
+      .trim();
+    return msg || fallback;
+  }
+
   async function fetchJSON(url, options = {}) {
     const { headers = {}, ...rest } = options;
     const res = await fetch(url, { credentials: 'same-origin', ...rest, headers: { Accept: 'application/json', ...headers } });
@@ -108,10 +119,14 @@
     try {
       json = JSON.parse(text);
     } catch {
-      throw new Error(text || 'Respuesta inválida del servidor');
+      console.error('[admin_residencial/incidencias] Respuesta inválida', { url, status: res.status, text });
+      throw new Error(sanitizeUserMessage(text || 'Respuesta inválida del servidor'));
     }
 
-    if (!json.ok) throw new Error(json.error || 'Error');
+    if (!json.ok) {
+      console.error('[admin_residencial/incidencias] API error', { url, status: res.status, json });
+      throw new Error(sanitizeUserMessage(json.error || 'Error'));
+    }
     return json;
   }
 
@@ -218,6 +233,64 @@
         </div>
       `;
       els.chartBars.appendChild(card);
+    });
+  }
+
+  function openIncidenciaDetail(inc) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-[9998] bg-black/60 p-4 backdrop-blur-sm';
+    modal.innerHTML = `
+      <div class="flex min-h-full items-center justify-center">
+        <div class="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
+          <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div class="text-lg font-semibold text-slate-900">Detalle de incidencia</div>
+            <button type="button" class="js-inc-detail-close h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
+          </div>
+          <div class="space-y-4 p-5">
+            <div>
+              <div class="text-xs text-slate-500">Título</div>
+              <div class="text-xl font-semibold text-slate-900">${escapeHtml(inc.titulo || '—')}</div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(inc.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(inc.prioridad, '')}`.trim())}</span>
+              <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(inc.estado)}">${escapeHtml(`Estado: ${humanizeValue(inc.estado, '')}`.trim())}</span>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div><div class="text-xs text-slate-500">Tipo</div><div class="text-sm text-slate-700">${escapeHtml(humanizeValue(inc.tipo))}</div></div>
+              <div><div class="text-xs text-slate-500">Fecha</div><div class="text-sm text-slate-700">${escapeHtml(fmtDate(inc.created_at))}</div></div>
+              <div><div class="text-xs text-slate-500">Unidad</div><div class="text-sm text-slate-700">${escapeHtml(inc.unidad_clave || 'General')}</div></div>
+              <div><div class="text-xs text-slate-500">Contexto</div><div class="text-sm text-slate-700">${escapeHtml(inc.unidad_clave || inc.area_nombre || 'General')}</div></div>
+              <div><div class="text-xs text-slate-500">Relación</div><div class="text-sm text-slate-700">${escapeHtml(inc.residente_nombre || inc.persona_recurrente_nombre || inc.visitante_rapido_nombre || '—')}</div></div>
+              <div><div class="text-xs text-slate-500">Guardia</div><div class="text-sm text-slate-700">${escapeHtml(inc.guardia_nombre || '—')}</div></div>
+            </div>
+            <div>
+              <div class="text-xs text-slate-500">Descripción</div>
+              <div class="mt-1 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-700 whitespace-pre-wrap">${escapeHtml(inc.descripcion || 'Sin descripción')}</div>
+            </div>
+            <div class="flex flex-wrap justify-end gap-2">
+              <button type="button" class="js-inc-detail-edit rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700 hover:bg-slate-200">Editar</button>
+              <button type="button" class="js-inc-detail-delete rounded-full bg-rose-100 px-4 py-2 text-sm text-rose-700 hover:bg-rose-200">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    const close = () => {
+      document.body.style.overflow = '';
+      modal.remove();
+    };
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal || event.target.closest('.js-inc-detail-close')) close();
+    });
+    modal.querySelector('.js-inc-detail-edit')?.addEventListener('click', () => {
+      close();
+      openEditModal(inc);
+    });
+    modal.querySelector('.js-inc-detail-delete')?.addEventListener('click', () => {
+      close();
+      deleteIncidencia(inc.id);
     });
   }
 
@@ -567,13 +640,13 @@
             <div class="font-semibold">${escapeHtml(i.titulo || '—')}</div>
           </div>
 
-          <div><span class="text-xs text-slate-500">Descripción</span><div class="whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</div></div>
+          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Descripción</span><div class="whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</div></div>
           <div><span class="text-xs text-slate-500">Tipo</span><div>${escapeHtml(humanizeValue(i.tipo))}</div></div>
           <div><span class="text-xs text-slate-500">Fecha</span><div>${escapeHtml(fmtDate(i.created_at))}</div></div>
-          <div><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || 'General')}</div></div>
-          <div><span class="text-xs text-slate-500">Contexto</span><div>${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</div></div>
-          <div><span class="text-xs text-slate-500">Relación</span><div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div></div>
-          <div><span class="text-xs text-slate-500">Guardia</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
+          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || 'General')}</div></div>
+          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Contexto</span><div>${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</div></div>
+          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Relación</span><div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div></div>
+          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Guardia</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
 
           <div class="flex gap-2">
             <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}</span>
@@ -581,8 +654,9 @@
           </div>
 
           <div class="flex gap-2 pt-2">
-            <button data-edit="${i.id}" class="flex-1 rounded-full bg-slate-100 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200">Editar</button>
-            <button data-del="${i.id}" class="flex-1 rounded-full bg-rose-100 px-3 py-2 text-sm text-rose-700 hover:bg-rose-200">Eliminar</button>
+            <button data-edit="${i.id}" class="app-mobile-actions flex-1 rounded-full bg-slate-100 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200">Editar</button>
+            <button data-del="${i.id}" class="app-mobile-actions flex-1 rounded-full bg-rose-100 px-3 py-2 text-sm text-rose-700 hover:bg-rose-200">Eliminar</button>
+            <button data-more="${i.id}" class="app-mobile-more hidden flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Ver más</button>
           </div>
         </div>
 

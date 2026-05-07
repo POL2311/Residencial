@@ -206,10 +206,6 @@
       preset: state.serviceProfile?.preset_servicio || null,
     };
     console.warn('[admin_residencial] contexto/allowed_views', msg);
-    if (debugEnabled() && els.modeHint) {
-      els.modeHint.classList.remove('hidden');
-      els.modeHint.textContent = `Debug: contextLoad=${state.contextLoad} enabled=${(enabledViews?.size || 0)} allowed=${(allowedViews?.length || 0)}`;
-    }
   }
 
   function setActiveButtons(view) {

@@ -131,6 +131,58 @@
       paint();
     }
 
+    function openReportDetail(item) {
+      if (typeof openModal !== 'function' || !item) return;
+      openModal('Detalle del movimiento', `
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="text-lg font-semibold text-slate-800">${escapeHtml(tipoLabel(item.tipo_evento))} · ${escapeHtml(item.tipo_origen || '')}</div>
+              <span class="rounded-full px-2.5 py-1 text-xs ${item.resultado === 'permitido' ? 'bg-emerald-100 text-emerald-700' : item.resultado === 'denegado' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'}">${escapeHtml(item.resultado || '')}</span>
+            </div>
+            <div class="text-sm text-slate-600">${escapeHtml(item.persona_nombre || item.nombre_visitante || item.permiso_tipo_movimiento || 'Evento general')}</div>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Área</div>
+              <div class="text-sm text-slate-700">${escapeHtml(item.area_nombre || 'Sin área')}</div>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Guardia</div>
+              <div class="text-sm text-slate-700">${escapeHtml(item.guardia_nombre || '—')}</div>
+            </div>
+            <div class="sm:col-span-2">
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Fecha</div>
+              <div class="text-sm text-slate-700">${escapeHtml(item.fecha_hora || '—')}</div>
+            </div>
+          </div>
+          ${item.observaciones ? `<div class="rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-700 whitespace-pre-wrap">${escapeHtml(item.observaciones)}</div>` : ''}
+          ${Array.isArray(item.evidencias) && item.evidencias.length ? `
+            <div class="space-y-2">
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Evidencias</div>
+              <div class="flex flex-wrap gap-2">
+                ${item.evidencias.slice(0, 6).map((url, index) => `
+                  <button
+                    type="button"
+                    class="js-detail-evidence block h-20 w-20 overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
+                    data-index="${index}">
+                    <img src="${escapeHtml(resolvePublicUrl(url))}" alt="Evidencia" class="h-full w-full object-cover" loading="lazy" />
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `);
+
+      document.querySelectorAll('.js-detail-evidence').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const evidenceIndex = Number(btn.dataset.index || 0);
+          openEvidenceGallery(item.evidencias || [], evidenceIndex);
+        });
+      });
+    }
+
     function wireEvidenceInputs(form) {
       form.querySelectorAll('[data-evidence-slot]').forEach((slot) => {
         const input = slot.querySelector('input[type="file"]');
@@ -266,17 +318,26 @@
         list.innerHTML = state.items.map((item, itemIndex) => `
           <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-              <div>
+              <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
                   <div class="text-base font-semibold text-slate-800">${escapeHtml(tipoLabel(item.tipo_evento))} · ${escapeHtml(item.tipo_origen || '')}</div>
                   <span class="rounded-full px-2.5 py-1 text-xs ${item.resultado === 'permitido' ? 'bg-emerald-100 text-emerald-700' : item.resultado === 'denegado' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'}">${escapeHtml(item.resultado || '')}</span>
                 </div>
                 <div class="mt-1 text-sm text-slate-600">${escapeHtml(item.persona_nombre || item.nombre_visitante || item.permiso_tipo_movimiento || 'Evento general')}</div>
-                <div class="mt-1 text-sm text-slate-500">Area: ${escapeHtml(item.area_nombre || 'Sin area')} · Guardia: ${escapeHtml(item.guardia_nombre || '—')}</div>
-                ${item.observaciones ? `<div class="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">${escapeHtml(item.observaciones)}</div>` : ''}
-                ${renderEvidencias(item.evidencias || [], itemIndex)}
+                <div class="mt-1 text-xs text-slate-500 md:text-sm">Area: ${escapeHtml(item.area_nombre || 'Sin area')} · ${escapeHtml(item.fecha_hora || '')}</div>
+                <div class="app-mobile-secondary mt-1 text-sm text-slate-500">Guardia: ${escapeHtml(item.guardia_nombre || '—')}</div>
+                ${item.observaciones ? `<div class="app-mobile-secondary mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">${escapeHtml(item.observaciones)}</div>` : ''}
+                <div class="app-mobile-secondary">${renderEvidencias(item.evidencias || [], itemIndex)}</div>
               </div>
-              <div class="text-xs text-slate-400">${escapeHtml(item.fecha_hora || '')}</div>
+              <div class="flex flex-col items-end gap-2">
+                <div class="app-mobile-secondary text-xs text-slate-400">${escapeHtml(item.fecha_hora || '')}</div>
+                <button
+                  type="button"
+                  class="app-mobile-more hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  data-more-report="${itemIndex}">
+                  Ver más
+                </button>
+              </div>
             </div>
           </div>
         `).join('');
@@ -286,6 +347,13 @@
     }
 
     list?.addEventListener('click', (event) => {
+      const moreBtn = event.target.closest('[data-more-report]');
+      if (moreBtn) {
+        const itemIndex = Number(moreBtn.dataset.moreReport || -1);
+        const item = state.items[itemIndex];
+        if (item) openReportDetail(item);
+        return;
+      }
       const btn = event.target.closest('.js-bitacora-evidence');
       if (!btn) return;
       const itemIndex = Number(btn.dataset.itemIndex || -1);

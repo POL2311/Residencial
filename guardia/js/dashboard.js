@@ -66,6 +66,18 @@
       .replaceAll("'", '&#039;');
   }
 
+  function sanitizeUserMessage(message, fallback = 'No se pudo completar la solicitud.') {
+    let msg = String(message || '').trim();
+    if (!msg) return fallback;
+    msg = msg
+      .replace(/\s*\(HTTP\s+\d+(?:\s*\(redirect\))?\)\.?/gi, '')
+      .replace(/\bHTTP\s+\d+(?:\s*\(redirect\))?:\s*/gi, '')
+      .replace(/\s*Debug:\s*[^.]+\.?/gi, '')
+      .replace(/\s*Respuesta:\s*.+$/gi, '')
+      .trim();
+    return msg || fallback;
+  }
+
   function showShellHeader() {
     if (!els.header) return;
     els.header.style.marginTop = '0px';
@@ -235,12 +247,19 @@
     if (!isOk) {
       const statusPart = `HTTP ${r.status}${r.redirected ? ' (redirect)' : ''}`;
       const debugPart = json?.debug_id ? ` Debug: ${json.debug_id}` : '';
-      if (json?.error) {
-        throw new Error(`${json.error} (${statusPart}).${debugPart}`.trim());
-      }
       const snippet = parsedJson ? '' : String(text || '').replace(/\s+/g, ' ').slice(0, 200);
-      const bodyPart = snippet ? ` Respuesta: ${snippet}` : '';
-      throw new Error(`${statusPart}: Respuesta no JSON o sin mensaje.${debugPart}${bodyPart}`.trim());
+      const rawMessage = json?.error
+        ? `${json.error} (${statusPart}).${debugPart}`
+        : `${statusPart}: Respuesta no JSON o sin mensaje.${debugPart}${snippet ? ` Respuesta: ${snippet}` : ''}`;
+      console.error('[guardia] fetchJSON error', {
+        url,
+        status: r.status,
+        redirected: r.redirected,
+        responseUrl: r.url,
+        json,
+        text: snippet || text,
+      });
+      throw new Error(sanitizeUserMessage(rawMessage));
     }
     return json;
   }

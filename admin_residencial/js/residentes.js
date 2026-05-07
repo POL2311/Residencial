@@ -57,7 +57,7 @@
   const PAGOS_PER_PAGE = 3;
   const AUTOS_PER_PAGE = 3;
   const RESIDENTES_PER_PAGE = 3;
-  const API_BASE = '/admin_residencial/php/api';
+  const API_BASE = '/Residencial/admin_residencial/php/api';
 
   const MESSAGES = {
     residenteCreado: 'Residente agregado correctamente.',
@@ -534,6 +534,18 @@
     `;
   }
 
+  function sanitizeUserMessage(message, fallback = 'No se pudo completar la solicitud.') {
+    let msg = String(message || '').trim();
+    if (!msg) return fallback;
+    msg = msg
+      .replace(/\s*\(HTTP\s+\d+(?:\s*\(redirect\))?\)\.?/gi, '')
+      .replace(/\bError HTTP\s+\d+\b/gi, '')
+      .replace(/\bHTTP\s+\d+(?:\s*\(redirect\))?:\s*/gi, '')
+      .replace(/\s*Debug:\s*[^.]+\.?/gi, '')
+      .trim();
+    return msg || fallback;
+  }
+
   // =========================
   // API
   // =========================
@@ -549,11 +561,13 @@
     try {
       json = JSON.parse(text);
     } catch (_) {
-      throw new Error(`Respuesta inválida del servidor (${res.status})`);
+      console.error('[admin_residencial/residentes] Respuesta inválida', { url, status: res.status, text });
+      throw new Error(sanitizeUserMessage(`Respuesta inválida del servidor (${res.status})`));
     }
 
     if (!res.ok || !json.ok) {
-      throw new Error(json.error || json.message || `Error HTTP ${res.status}`);
+      console.error('[admin_residencial/residentes] API error', { url, status: res.status, json });
+      throw new Error(sanitizeUserMessage(json.error || json.message || `Error HTTP ${res.status}`));
     }
 
     return json;
@@ -849,18 +863,18 @@
             </button>
 
             <button data-edit="${escapeHtml(r.resid_unid_id)}"
-              class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">
+              class="app-mobile-actions inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">
               Editar
             </button>
 
             <button data-ban-toggle="${escapeHtml(r.resid_unid_id)}"
               data-ban-active="${r.acceso_baneado_manual ? '1' : '0'}"
-              class="inline-flex items-center justify-center rounded-full ${r.acceso_baneado_manual ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'} px-3 py-1.5 text-xs">
+              class="app-mobile-actions inline-flex items-center justify-center rounded-full ${r.acceso_baneado_manual ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'} px-3 py-1.5 text-xs">
               ${r.acceso_baneado_manual ? 'Quitar baneo' : 'Banear'}
             </button>
 
             <button data-del="${escapeHtml(r.resid_unid_id)}"
-              class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-200">
+              class="app-mobile-actions inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-200">
               Eliminar
             </button>
           </div>

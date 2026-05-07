@@ -84,6 +84,19 @@
     return u;
   }
 
+  function sanitizeUserMessage(message, fallback = 'No se pudo completar la solicitud.') {
+    let msg = String(message || '').trim();
+    if (!msg) return fallback;
+    msg = msg
+      .replace(/\s*\(HTTP\s+\d+(?:\s*\(redirect\))?\)\.?/gi, '')
+      .replace(/\bHTTP\s+\d+(?:\s*\(redirect\))?:\s*/gi, '')
+      .replace(/\s*Debug:\s*[^.]+\.?/gi, '')
+      .replace(/\s*Respuesta no JSON del servidor\.?/gi, '')
+      .replace(/\s*\([^)]*\.{3}\)\s*$/gi, '')
+      .trim();
+    return msg || fallback;
+  }
+
   function showAlert(msg, error = false) {
     if (!els.alert) return;
     els.alert.textContent = msg;
@@ -176,16 +189,16 @@
     } catch (e) {
       const preview = (text || '').slice(0, 220).replace(/\s+/g, ' ').trim();
       const status = res.status || 0;
-      throw new Error(
-        `HTTP ${status}: Respuesta no JSON del servidor.` + (preview ? ` (${preview}...)` : '')
-      );
+      console.error('[admin_residencial/comunicados] Respuesta no JSON', { url, status, preview, text });
+      throw new Error(sanitizeUserMessage(`HTTP ${status}: Respuesta no JSON del servidor.` + (preview ? ` (${preview}...)` : '')));
     }
 
     if (!json || !json.ok) {
       const status = res.status || 0;
       const msg = (json && json.error) || 'Error';
       const dbg = json && json.debug_id ? ` Debug: ${json.debug_id}` : '';
-      throw new Error(`HTTP ${status}: ${msg}.${dbg}`.trim());
+      console.error('[admin_residencial/comunicados] API error', { url, status, json });
+      throw new Error(sanitizeUserMessage(`HTTP ${status}: ${msg}.${dbg}`.trim()));
     }
 
     return json;
@@ -509,7 +522,7 @@
       const imageUrl = resolvePublicUrl(c.imagen_url);
       const imageHtml = imageUrl
         ? `
-            <div class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+            <div class="mb-4 hidden overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 md:block">
               <img src="${escapeHtml(imageUrl)}" alt=""
                    class="h-44 w-full object-cover" loading="lazy" />
             </div>

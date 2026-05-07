@@ -38,6 +38,37 @@
       } catch (_) {}
     }
 
+    function openMaterialDetail(item) {
+      if (typeof openModal !== 'function' || !item) return;
+      openModal('Detalle del permiso', `
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="text-lg font-semibold text-slate-800">${escapeHtml(item.tipo_movimiento === 'salida' ? 'Salida autorizada' : 'Entrada autorizada')}</div>
+            <span class="rounded-full px-2.5 py-1 text-xs ${item.estado === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'}">${escapeHtml(item.estado || '')}</span>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Responsable</div>
+              <div class="text-sm text-slate-700">${escapeHtml(item.responsable_nombre || 'Sin responsable')}</div>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Área</div>
+              <div class="text-sm text-slate-700">${escapeHtml(item.area_nombre || 'Sin área')}</div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Materiales</div>
+            ${(item.items || []).map((row) => `
+              <div class="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                ${escapeHtml(row.material_nombre || '')} · ${escapeHtml(row.cantidad_texto || '')}
+              </div>
+            `).join('')}
+          </div>
+          <div class="text-xs text-slate-500">Aprobado: ${escapeHtml(item.aprobado_at || '—')}</div>
+        </div>
+      `);
+    }
+
     async function loadMeta() {
       if (state.metaLoaded) return;
       const json = await fetchJSON(`${API_MATERIALES}?action=meta`);
@@ -62,7 +93,7 @@
                 <span class="rounded-full px-2.5 py-1 text-xs ${item.estado === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'}">${escapeHtml(item.estado || '')}</span>
               </div>
               <div class="mt-1 text-sm text-slate-600">Responsable: ${escapeHtml(item.responsable_nombre || 'Sin responsable')} · Área: ${escapeHtml(item.area_nombre || 'Sin área')}</div>
-              <div class="mt-3 space-y-2">
+              <div class="app-mobile-secondary mt-3 space-y-2">
                 ${(item.items || []).map((row) => `
                   <div class="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
                     ${escapeHtml(row.material_nombre || '')} · ${escapeHtml(row.cantidad_texto || '')}
@@ -70,10 +101,25 @@
                 `).join('')}
               </div>
             </div>
-            <div class="text-xs text-slate-400">Aprobado: ${escapeHtml(item.aprobado_at || '—')}</div>
+            <div class="flex flex-col items-end gap-2">
+              <div class="app-mobile-secondary text-xs text-slate-400">Aprobado: ${escapeHtml(item.aprobado_at || '—')}</div>
+              <button
+                type="button"
+                class="app-mobile-more hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                data-material-more="${escapeHtml(String(item.id || ''))}">
+                Ver más
+              </button>
+            </div>
           </div>
         </div>
       `).join('');
+
+      els.list.querySelectorAll('[data-material-more]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const item = state.items.find((row) => String(row.id) === String(btn.dataset.materialMore || ''));
+          if (item) openMaterialDetail(item);
+        });
+      });
     }
 
     async function load() {

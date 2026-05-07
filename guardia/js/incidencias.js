@@ -151,6 +151,63 @@
       els.pagination.appendChild(next);
     }
 
+    function openIncidenciaDetail(item) {
+      if (typeof openModal !== 'function' || !item) return;
+      openModal('Detalle de incidencia', `
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Título</div>
+              <div class="text-lg font-semibold text-slate-800">${safeText(item.titulo)}</div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-[11px] px-2 py-0.5 rounded-full border ${badgePrioridad(item.prioridad)}">
+                ${escapeHtml(`Prioridad: ${humanizeValue(item.prioridad, '')}`.trim())}
+              </span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full border ${badgeEstado(item.estado)}">
+                ${escapeHtml(`Estado: ${humanizeValue(item.estado, '')}`.trim())}
+              </span>
+            </div>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Tipo</div>
+              <div class="text-sm text-slate-700">${escapeHtml(humanizeValue(item.tipo))}</div>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Fecha</div>
+              <div class="text-sm text-slate-700">${safeText(item.created_at, '—')}</div>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">${safeText(item.unidad_clave, '') ? 'Unidad' : 'Área'}</div>
+              <div class="text-sm text-slate-700">${safeText(item.unidad_clave || item.area_nombre || '—')}</div>
+            </div>
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Descripción</div>
+            <div class="mt-1 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-700 whitespace-pre-wrap">${safeText(item.descripcion, 'Sin descripción')}</div>
+          </div>
+          <div class="flex flex-wrap justify-end gap-2">
+            <button type="button" id="guardIncDetailEdit" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+              Editar
+            </button>
+            <button type="button" id="guardIncDetailDelete" class="rounded-xl bg-rose-600 px-4 py-2 text-sm text-white hover:bg-rose-700">
+              Eliminar
+            </button>
+          </div>
+        </div>
+      `);
+
+      document.getElementById('guardIncDetailEdit')?.addEventListener('click', () => {
+        closeModal?.();
+        openEditModal(item);
+      });
+      document.getElementById('guardIncDetailDelete')?.addEventListener('click', () => {
+        closeModal?.();
+        openDeleteConfirm(item.id, item.titulo);
+      });
+    }
+
     function renderList() {
       if (!els.list || !isAlive()) return;
 
@@ -189,7 +246,7 @@
                     </span>
                   </div>
 
-                  <div class="text-sm text-slate-600 mt-3 space-y-2">
+                  <div class="app-mobile-secondary text-sm text-slate-600 mt-3 space-y-2">
                     <div>
                       <span class="text-slate-500">Descripción:</span>
                       <span class="whitespace-pre-wrap font-medium text-slate-700">${safeText(i.descripcion, 'Sin descripción')}</span>
@@ -207,10 +264,13 @@
                       <span class="font-medium text-slate-700">${safeText(i.created_at, '—')}</span>
                     </div>
                   </div>
+                  <div class="mt-3 text-xs text-slate-500 md:hidden">
+                    ${escapeHtml(humanizeValue(i.tipo))} · ${safeText(i.created_at, '—')}
+                  </div>
                 </div>
 
                 <div class="shrink-0 flex flex-col items-end gap-2">
-                  <div class="flex gap-2">
+                  <div class="app-mobile-actions flex gap-2">
                     <button
                       type="button"
                       class="js-edit-inc rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs hover:bg-slate-50"
@@ -226,6 +286,12 @@
                       Eliminar
                     </button>
                   </div>
+                  <button
+                    type="button"
+                    class="app-mobile-more hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    data-more-inc='${escapeHtml(JSON.stringify(i))}'>
+                    Ver más
+                  </button>
                 </div>
               </div>
             </div>
@@ -243,6 +309,14 @@
         btn.addEventListener('click', () => {
           try {
             openEditModal(JSON.parse(btn.dataset.inc));
+          } catch (_) {}
+        });
+      });
+
+      els.list.querySelectorAll('[data-more-inc]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          try {
+            openIncidenciaDetail(JSON.parse(btn.dataset.moreInc));
           } catch (_) {}
         });
       });
