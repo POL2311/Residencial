@@ -57,7 +57,7 @@
   const PAGOS_PER_PAGE = 3;
   const AUTOS_PER_PAGE = 3;
   const RESIDENTES_PER_PAGE = 3;
-  const API_BASE = '/Residencial/admin_residencial/php/api';
+  const API_BASE = '/admin_residencial/php/api';
 
   const MESSAGES = {
     residenteCreado: 'Residente agregado correctamente.',
