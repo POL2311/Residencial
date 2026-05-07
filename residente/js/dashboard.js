@@ -141,6 +141,12 @@
         if (!wrap) return;
         setActiveButtons(view);
         syncHash(view);
+        wrap.innerHTML = `
+        <div class="rounded-2xl bg-white p-4 shadow">
+          <div class="text-sm font-semibold text-slate-700">Cargando sección…</div>
+          <div class="mt-1 text-xs text-slate-500">${escapeHtml(view)}</div>
+        </div>
+      `;
 
         try {
             const res = await fetch(url, { cache: 'no-store' });

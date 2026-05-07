@@ -135,7 +135,7 @@ try {
     $action = (string)($_POST['action'] ?? '');
     if ($action === 'create') {
         $tipoEvento = strv((string)($_POST['tipo_evento'] ?? ''), 40);
-        $allowedTipos = ['basura_ingreso', 'luces', 'rondin', 'nota'];
+        $allowedTipos = ['seguridad', 'rondin', 'mantenimiento', 'eventos', 'otros', 'basura_ingreso', 'luces', 'nota'];
         if (!in_array($tipoEvento, $allowedTipos, true)) {
             out(false, ['error' => 'Tipo de reporte inválido.'], 422);
         }

@@ -252,6 +252,7 @@ try {
     $visitanteId = isset($_POST['visitante_rapido_id']) && $_POST['visitante_rapido_id'] !== '' ? (int)$_POST['visitante_rapido_id'] : null;
     $permisoId = isset($_POST['permiso_material_id']) && $_POST['permiso_material_id'] !== '' ? (int)$_POST['permiso_material_id'] : null;
     $origenTipo = clean_str($_POST['origen_tipo'] ?? '');
+    $incidenciaScope = clean_str($_POST['incidencia_scope'] ?? 'unidad');
     $tipo = clean_str($_POST['tipo'] ?? 'otro');
     $titulo = clean_str($_POST['titulo'] ?? '');
     $descripcion = clean_str($_POST['descripcion'] ?? '');
@@ -305,6 +306,27 @@ try {
     }
     if (!in_array($tipo, ['seguridad', 'servicio', 'vecino', 'infraestructura', 'otro'], true)) {
         json_out(false, ['error' => 'Tipo inválido.']);
+    }
+
+    if ($incidenciaScope === 'general') {
+        $stmtIns = $pdo->prepare("
+            INSERT INTO incidencias (
+                residencial_id, unidad_id, residente_id, guardia_id, tipo, titulo, descripcion, prioridad,
+                estado, created_at, updated_at
+            ) VALUES (
+                :resid, NULL, NULL, NULL, :tipo, :titulo, :descripcion, :prioridad,
+                'abierta', NOW(), NOW()
+            )
+        ");
+        $stmtIns->execute([
+            'resid' => $residencialId,
+            'tipo' => $tipo,
+            'titulo' => $titulo,
+            'descripcion' => $descripcion,
+            'prioridad' => $prioridad,
+        ]);
+
+        json_out(true, ['message' => 'Incidencia general registrada exitosamente.']);
     }
 
     $stmtUnidad = $pdo->prepare("

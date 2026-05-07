@@ -1021,8 +1021,15 @@
     els.inlineUnidadAlert?.classList.add('hidden');
   }
 
+  function setInlineUnidadFieldsEnabled(enabled) {
+    els.inlineUnidadForm?.querySelectorAll('input, select').forEach((field) => {
+      field.disabled = !enabled;
+    });
+  }
+
   function openInlineUnidadPanel() {
     hideInlineUnidadAlert();
+    setInlineUnidadFieldsEnabled(true);
     els.inlineUnidadForm?.querySelectorAll('input, select').forEach((field) => {
       if (field instanceof HTMLSelectElement) {
         field.selectedIndex = 0;
@@ -1045,6 +1052,7 @@
         }
       });
     }
+    setInlineUnidadFieldsEnabled(false);
     els.inlineUnidadPanel?.classList.add('hidden');
   }
 

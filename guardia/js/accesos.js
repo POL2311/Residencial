@@ -69,9 +69,11 @@
       actionSource: null,
       currentEval: null,
       operationalMode: window.GuardiaDashboard?.getOperationalMode?.() || 'residencial',
+      autoScanIntent: '',
     };
 
     const SCAN_INTERVAL_MS = 240;
+    const AUTO_SCAN_KEY = 'guardia:accesos:auto_scan';
 
     function isAlive() {
       return !state.destroyed;
@@ -559,7 +561,7 @@
         state.currentKind = data.kind || 'visita_residencial';
         state.actionSource = 'code';
         state.currentEval = null;
-        openActionModal('Validación de acceso');
+        openActionModal(state.currentKind === 'persona_recurrente' ? 'Acceso de personal recurrente' : 'Validación de acceso');
 
         if (state.currentKind === 'persona_recurrente') {
           state.current = data.persona || null;
@@ -972,6 +974,34 @@
       // view se desmonta completa; no necesitamos granularidad adicional
     }
 
+    function consumeAutoScanIntent() {
+      let intent = '';
+      try {
+        intent = window.sessionStorage.getItem(AUTO_SCAN_KEY) || '';
+        if (intent) window.sessionStorage.removeItem(AUTO_SCAN_KEY);
+      } catch (_) {}
+      state.autoScanIntent = intent;
+      return intent;
+    }
+
+    function applyAutoScanIntent(intent) {
+      if (intent !== 'persona_recurrente' && intent !== 'permiso_material') return;
+      if (els.codigo) {
+        els.codigo.placeholder = intent === 'permiso_material'
+          ? 'Escanea o pega el QR del permiso de materiales'
+          : 'Escanea o pega el QR del personal recurrente';
+      }
+      alertMsg(
+        intent === 'permiso_material'
+          ? 'Escanea el QR del permiso de materiales para validar entrada o salida.'
+          : 'Escanea el QR del personal recurrente para registrar entrada o salida.',
+        'success',
+      );
+      window.setTimeout(() => {
+        if (isAlive()) openCamera();
+      }, 250);
+    }
+
     function init() {
       alertMsg('');
       resetResultArea();
@@ -982,6 +1012,7 @@
       }
       bindEvents();
       loadHist();
+      applyAutoScanIntent(consumeAutoScanIntent());
     }
 
     init();

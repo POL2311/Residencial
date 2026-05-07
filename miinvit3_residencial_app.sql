@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 02-05-2026 a las 03:57:05
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.2.4
+-- Servidor: localhost:3306
+-- Tiempo de generación: 06-05-2026 a las 22:39:21
+-- Versión del servidor: 5.7.44-48
+-- Versión de PHP: 8.3.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `residencial_app4`
+-- Base de datos: `miinvit3_residencial_app`
 --
 
 -- --------------------------------------------------------
@@ -31,14 +31,14 @@ CREATE TABLE `accesos_guardia` (
   `id` int(11) NOT NULL,
   `visita_id` int(11) NOT NULL,
   `guardia_id` int(11) NOT NULL,
-  `fecha_hora` datetime NOT NULL DEFAULT current_timestamp(),
+  `fecha_hora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tipo_evento` enum('entrada','salida','verificacion') NOT NULL DEFAULT 'entrada',
   `resultado` enum('permitido','denegado') NOT NULL DEFAULT 'permitido',
   `observaciones` varchar(255) DEFAULT NULL,
   `origen_acceso` enum('visita','residente_directo') NOT NULL DEFAULT 'visita',
   `residente_id` int(11) DEFAULT NULL,
   `unidad_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `accesos_guardia`
@@ -63,12 +63,27 @@ CREATE TABLE `archivos_operativos` (
   `storage_path` varchar(255) NOT NULL,
   `public_url` varchar(255) NOT NULL,
   `mime_type` varchar(80) NOT NULL,
-  `size_bytes` int(11) NOT NULL DEFAULT 0,
+  `size_bytes` int(11) NOT NULL DEFAULT '0',
   `width` int(11) DEFAULT NULL,
   `height` int(11) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `archivos_operativos`
+--
+
+INSERT INTO `archivos_operativos` (`id`, `residencial_id`, `entidad_tipo`, `entidad_id`, `subtipo`, `storage_disk`, `storage_path`, `public_url`, `mime_type`, `size_bytes`, `width`, `height`, `created_at`, `updated_at`) VALUES
+(1, 1, 'bitacora_operativa', 6, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-df568fa91138b63d5843.webp', '/assets/uploads/operativo/2026/05/operativo-df568fa91138b63d5843.webp', 'image/webp', 155056, 900, 1200, '2026-05-06 13:22:14', '2026-05-06 13:22:14'),
+(2, 1, 'bitacora_operativa', 6, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-98761137cf11f0a3d19f.webp', '/assets/uploads/operativo/2026/05/operativo-98761137cf11f0a3d19f.webp', 'image/webp', 6044, 1200, 1200, '2026-05-06 13:22:14', '2026-05-06 13:22:14'),
+(3, 1, 'bitacora_operativa', 6, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-216ef93d43c3d64bd4b9.webp', '/assets/uploads/operativo/2026/05/operativo-216ef93d43c3d64bd4b9.webp', 'image/webp', 107268, 800, 1200, '2026-05-06 13:22:14', '2026-05-06 13:22:14'),
+(4, 1, 'bitacora_operativa', 7, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-ee8f9d8f6cff12196850.webp', '/assets/uploads/operativo/2026/05/operativo-ee8f9d8f6cff12196850.webp', 'image/webp', 155056, 900, 1200, '2026-05-06 13:23:06', '2026-05-06 13:23:06'),
+(5, 1, 'bitacora_operativa', 7, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-eedf52064d4e6ba398f8.webp', '/assets/uploads/operativo/2026/05/operativo-eedf52064d4e6ba398f8.webp', 'image/webp', 6044, 1200, 1200, '2026-05-06 13:23:06', '2026-05-06 13:23:06'),
+(6, 1, 'bitacora_operativa', 7, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-588566d842de89084042.webp', '/assets/uploads/operativo/2026/05/operativo-588566d842de89084042.webp', 'image/webp', 107268, 800, 1200, '2026-05-06 13:23:06', '2026-05-06 13:23:06'),
+(7, 1, 'bitacora_operativa', 8, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-a61a4f507d7d40005e20.webp', '/assets/uploads/operativo/2026/05/operativo-a61a4f507d7d40005e20.webp', 'image/webp', 182914, 900, 1200, '2026-05-06 22:24:59', '2026-05-06 22:24:59'),
+(8, 1, 'bitacora_operativa', 8, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-c220454ae1511bc2794a.webp', '/assets/uploads/operativo/2026/05/operativo-c220454ae1511bc2794a.webp', 'image/webp', 36964, 900, 1200, '2026-05-06 22:24:59', '2026-05-06 22:24:59'),
+(9, 1, 'bitacora_operativa', 8, 'evidencia', 'local_public', 'assets/uploads/operativo/2026/05/operativo-ef0b622f957696418f4f.webp', '/assets/uploads/operativo/2026/05/operativo-ef0b622f957696418f4f.webp', 'image/webp', 63634, 900, 1200, '2026-05-06 22:24:59', '2026-05-06 22:24:59');
 
 -- --------------------------------------------------------
 
@@ -82,11 +97,11 @@ CREATE TABLE `areas_operativas` (
   `nombre` varchar(150) NOT NULL,
   `codigo` varchar(50) DEFAULT NULL,
   `tipo` varchar(50) DEFAULT NULL,
-  `descripcion` text DEFAULT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `descripcion` text,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -102,11 +117,11 @@ CREATE TABLE `autos` (
   `placas` varchar(20) NOT NULL,
   `modelo` varchar(100) DEFAULT NULL,
   `color` varchar(50) DEFAULT NULL,
-  `activo` tinyint(1) DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `activo` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `notas` varchar(200) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `autos`
@@ -138,10 +153,35 @@ CREATE TABLE `bitacora_operativa` (
   `visitante_rapido_id` int(11) DEFAULT NULL,
   `permiso_material_id` int(11) DEFAULT NULL,
   `area_id` int(11) DEFAULT NULL,
-  `observaciones` text DEFAULT NULL,
-  `metadata_json` longtext DEFAULT NULL,
-  `fecha_hora` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `observaciones` text,
+  `metadata_json` longtext,
+  `fecha_hora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `bitacora_operativa`
+--
+
+INSERT INTO `bitacora_operativa` (`id`, `residencial_id`, `guardia_id`, `tipo_origen`, `origen_id`, `tipo_evento`, `resultado`, `persona_recurrente_id`, `visitante_rapido_id`, `permiso_material_id`, `area_id`, `observaciones`, `metadata_json`, `fecha_hora`) VALUES
+(6, 1, 3, 'reporte_operativo', NULL, 'luces', 'informativo', NULL, NULL, NULL, NULL, '124124', '{\"accion\":\"encendido\",\"ubicacion\":\"124124124\"}', '2026-05-06 13:22:14'),
+(7, 1, 3, 'reporte_operativo', NULL, 'luces', 'informativo', NULL, NULL, NULL, NULL, '124124', '{\"accion\":\"encendido\",\"ubicacion\":\"124124124\"}', '2026-05-06 13:23:06'),
+(8, 1, 3, 'reporte_operativo', NULL, 'luces', 'informativo', NULL, NULL, NULL, NULL, '123123123', '{\"accion\":\"encendido\",\"ubicacion\":\"123123\"}', '2026-05-06 22:24:59');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `catalogo_herramientas`
+--
+
+CREATE TABLE `catalogo_herramientas` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `descripcion` text,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -154,11 +194,18 @@ CREATE TABLE `catalogo_materiales` (
   `residencial_id` int(11) NOT NULL,
   `nombre` varchar(150) NOT NULL,
   `categoria` varchar(80) DEFAULT NULL,
-  `descripcion` text DEFAULT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `descripcion` text,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `catalogo_materiales`
+--
+
+INSERT INTO `catalogo_materiales` (`id`, `residencial_id`, `nombre`, `categoria`, `descripcion`, `activo`, `created_at`, `updated_at`) VALUES
+(1, 1, 'LADRILLO', 'Material Construccion', 'Ladrillo rojo', 1, '2026-05-06 22:07:12', '2026-05-06 22:07:12');
 
 -- --------------------------------------------------------
 
@@ -171,26 +218,30 @@ CREATE TABLE `comunicados_residenciales` (
   `residencial_id` int(11) NOT NULL,
   `titulo` varchar(150) NOT NULL,
   `mensaje` text NOT NULL,
+  `imagen_url` varchar(255) DEFAULT NULL,
   `tipo` enum('general','mantenimiento','seguridad','pagos') NOT NULL DEFAULT 'general',
   `prioridad` enum('baja','media','alta') NOT NULL DEFAULT 'media',
   `fecha_publicacion` date NOT NULL,
   `fecha_expiracion` date DEFAULT NULL,
-  `visible_para_residentes` tinyint(1) NOT NULL DEFAULT 1,
+  `visible_para_residentes` tinyint(1) NOT NULL DEFAULT '1',
   `estado` enum('publicado','borrador','archivado') NOT NULL DEFAULT 'publicado',
   `creado_por` int(11) NOT NULL,
   `actualizado_por` int(11) DEFAULT NULL,
-  `creado_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `creado_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `reglamentos_residenciales` varchar(200) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `comunicados_residenciales`
 --
 
-INSERT INTO `comunicados_residenciales` (`id`, `residencial_id`, `titulo`, `mensaje`, `tipo`, `prioridad`, `fecha_publicacion`, `fecha_expiracion`, `visible_para_residentes`, `estado`, `creado_por`, `actualizado_por`, `creado_at`, `updated_at`, `reglamentos_residenciales`) VALUES
-(1, 1, 'llaves perdidas en casa', '123', 'seguridad', 'media', '2026-04-15', '2026-04-16', 1, 'archivado', 2, NULL, '2026-04-05 00:18:08', '2026-04-05 00:18:15', ''),
-(2, 1, 'llaves perdidas en casa', '1234567', 'general', 'media', '2026-04-02', '2026-04-30', 1, 'publicado', 2, 2, '2026-04-05 00:22:39', '2026-04-20 09:04:00', '');
+INSERT INTO `comunicados_residenciales` (`id`, `residencial_id`, `titulo`, `mensaje`, `imagen_url`, `tipo`, `prioridad`, `fecha_publicacion`, `fecha_expiracion`, `visible_para_residentes`, `estado`, `creado_por`, `actualizado_por`, `creado_at`, `updated_at`, `reglamentos_residenciales`) VALUES
+(1, 1, 'llaves perdidas en casa', '123', NULL, 'seguridad', 'media', '2026-04-15', '2026-04-16', 1, 'archivado', 2, NULL, '2026-04-05 00:18:08', '2026-04-05 00:18:15', ''),
+(2, 1, 'llaves perdidas en casa', '1234567', NULL, 'general', 'media', '2026-04-02', '2026-04-30', 1, 'publicado', 2, 2, '2026-04-05 00:22:39', '2026-04-20 09:04:00', ''),
+(3, 1, 'r21r12', 'r1243124', '/residencial/assets/uploads/operativo/2026/05/comunicado-30fb9eeec609040ff368.webp', 'general', 'baja', '2026-05-04', '2026-05-26', 1, 'publicado', 2, 2, '2026-05-05 21:43:47', '2026-05-05 22:30:03', ''),
+(4, 1, 'Venta', 'Cargando comunicado', '/assets/uploads/operativo/2026/05/comunicado-095697deff8089cb2fe9.webp', 'general', 'baja', '2026-05-07', NULL, 1, 'publicado', 2, NULL, '2026-05-06 19:01:55', '2026-05-06 19:01:55', ''),
+(5, 1, 'Venta', 'Cargando comunicado', '/assets/uploads/operativo/2026/05/comunicado-9673d993df9a297680cf.webp', 'general', 'baja', '2026-05-07', NULL, 1, 'publicado', 2, NULL, '2026-05-06 19:01:58', '2026-05-06 19:01:58', '');
 
 -- --------------------------------------------------------
 
@@ -213,9 +264,9 @@ CREATE TABLE `config_general` (
   `smtp_encryption` enum('none','tls','ssl') NOT NULL DEFAULT 'tls',
   `smtp_from_email` varchar(190) DEFAULT NULL,
   `smtp_from_name` varchar(190) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `config_general`
@@ -232,13 +283,13 @@ INSERT INTO `config_general` (`id`, `nombre_sistema`, `empresa`, `email_soporte`
 
 CREATE TABLE `config_seguridad` (
   `id` int(11) NOT NULL,
-  `max_intentos_login` int(11) NOT NULL DEFAULT 5,
-  `minutos_bloqueo_login` int(11) NOT NULL DEFAULT 15,
-  `tiempo_sesion_minutos` int(11) NOT NULL DEFAULT 60,
-  `registrar_logs_acceso` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `max_intentos_login` int(11) NOT NULL DEFAULT '5',
+  `minutos_bloqueo_login` int(11) NOT NULL DEFAULT '15',
+  `tiempo_sesion_minutos` int(11) NOT NULL DEFAULT '60',
+  `registrar_logs_acceso` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `config_seguridad`
@@ -259,8 +310,8 @@ CREATE TABLE `contactos_emergencia` (
   `nombre` varchar(120) NOT NULL,
   `telefono` varchar(40) NOT NULL,
   `relacion` varchar(80) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -276,10 +327,10 @@ CREATE TABLE `guardias_turnos` (
   `hora_inicio` time NOT NULL,
   `hora_fin` time NOT NULL,
   `dias_semana` varchar(50) DEFAULT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `guardias_turnos`
@@ -287,6 +338,26 @@ CREATE TABLE `guardias_turnos` (
 
 INSERT INTO `guardias_turnos` (`id`, `user_id`, `residencial_id`, `nombre_turno`, `hora_inicio`, `hora_fin`, `dias_semana`, `activo`, `created_at`, `updated_at`) VALUES
 (1, 3, 1, 'Vespertino', '10:00:00', '14:00:00', 'LUN,MAR,MIE,JUE,VIE', 1, '2026-04-03 21:16:41', '2026-04-03 21:17:08');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `guardias_turnos_excepciones`
+--
+
+CREATE TABLE `guardias_turnos_excepciones` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `turno_id` int(11) DEFAULT NULL,
+  `fecha_inicio` date NOT NULL,
+  `fecha_fin` date NOT NULL,
+  `motivo` varchar(120) NOT NULL,
+  `notas` text,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -302,11 +373,11 @@ CREATE TABLE `home_banners_residenciales` (
   `imagen_url` varchar(500) DEFAULT NULL,
   `categoria` varchar(80) NOT NULL DEFAULT 'general',
   `link_url` varchar(500) DEFAULT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `orden` int(11) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `orden` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `home_banners_residenciales`
@@ -332,11 +403,11 @@ CREATE TABLE `home_servicios_globales` (
   `whatsapp` varchar(30) DEFAULT NULL,
   `link_url` varchar(500) DEFAULT NULL,
   `categoria` varchar(80) NOT NULL DEFAULT 'servicio',
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `orden` int(11) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `orden` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -354,11 +425,11 @@ CREATE TABLE `home_servicios_residenciales` (
   `whatsapp` varchar(30) DEFAULT NULL,
   `link_url` varchar(500) DEFAULT NULL,
   `categoria` varchar(80) NOT NULL DEFAULT 'servicio',
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `orden` int(11) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `orden` int(11) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `home_servicios_residenciales`
@@ -391,9 +462,9 @@ CREATE TABLE `incidencias` (
   `descripcion` text NOT NULL,
   `prioridad` enum('baja','media','alta') NOT NULL DEFAULT 'media',
   `estado` enum('abierta','en_proceso','cerrada') NOT NULL DEFAULT 'abierta',
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `incidencias`
@@ -417,10 +488,10 @@ CREATE TABLE `pagos` (
   `fecha` date NOT NULL,
   `metodo` varchar(50) DEFAULT NULL,
   `concepto` varchar(255) DEFAULT NULL,
-  `activo` tinyint(1) DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `activo` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `pagos`
@@ -448,10 +519,10 @@ CREATE TABLE `paqueteria` (
   `descripcion` varchar(255) DEFAULT NULL,
   `codigo_rastreo` varchar(100) DEFAULT NULL,
   `estado` enum('registrado','entregado','devuelto') NOT NULL DEFAULT 'registrado',
-  `notas` text DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `notas` text,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `paqueteria`
@@ -474,10 +545,10 @@ CREATE TABLE `password_reset_codes` (
   `codigo_hash` varchar(255) NOT NULL,
   `expires_at` datetime NOT NULL,
   `used_at` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `attempt_count` int(11) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `attempt_count` int(11) NOT NULL DEFAULT '0',
   `last_attempt_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `password_reset_codes`
@@ -507,13 +578,13 @@ CREATE TABLE `permisos_materiales` (
   `solicitado_por_user_id` int(11) DEFAULT NULL,
   `aprobado_por_user_id` int(11) DEFAULT NULL,
   `aprobado_at` datetime DEFAULT NULL,
-  `notas` text DEFAULT NULL,
+  `notas` text,
   `fecha_desde` datetime DEFAULT NULL,
   `fecha_hasta` datetime DEFAULT NULL,
   `ejecutado_at` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -527,10 +598,10 @@ CREATE TABLE `permisos_materiales_items` (
   `material_id` int(11) DEFAULT NULL,
   `material_nombre` varchar(150) NOT NULL,
   `cantidad_texto` varchar(120) NOT NULL,
-  `agregar_a_catalogo` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `agregar_a_catalogo` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -547,16 +618,23 @@ CREATE TABLE `personas_recurrentes` (
   `telefono` varchar(30) DEFAULT NULL,
   `empresa` varchar(120) DEFAULT NULL,
   `puesto` varchar(120) DEFAULT NULL,
-  `notas` text DEFAULT NULL,
+  `notas` text,
   `qr_token` varchar(80) NOT NULL,
   `pin_hash` varchar(255) NOT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `esta_dentro` tinyint(1) NOT NULL DEFAULT 0,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `esta_dentro` tinyint(1) NOT NULL DEFAULT '0',
   `ultima_entrada_at` datetime DEFAULT NULL,
   `ultima_salida_at` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `personas_recurrentes`
+--
+
+INSERT INTO `personas_recurrentes` (`id`, `residencial_id`, `area_id`, `nombre`, `foto_url`, `telefono`, `empresa`, `puesto`, `notas`, `qr_token`, `pin_hash`, `activo`, `esta_dentro`, `ultima_entrada_at`, `ultima_salida_at`, `created_at`, `updated_at`) VALUES
+(1, 1, NULL, 'PATO 1', '/assets/uploads/operativo/2026/05/operativo-e75d61ea7e3a9bde2ed6.webp', '7221009870', 'DHL', 'sss', 'xs', '5199272b0767a85b6e9f7ba5d794b243320b77b52698cf536c3311c5939b9fa1', '$2y$10$.A0uuIHsz8kyrN3nTdiWY.5RIbyI6TqblfiFPPqwHrlJkh9JfT8Z6', 1, 0, NULL, NULL, '2026-05-06 22:18:50', '2026-05-06 22:18:50');
 
 -- --------------------------------------------------------
 
@@ -570,13 +648,13 @@ CREATE TABLE `planes` (
   `codigo` varchar(50) NOT NULL,
   `descripcion` varchar(255) DEFAULT NULL,
   `periodo` enum('mensual','anual') NOT NULL DEFAULT 'mensual',
-  `precio_mensual` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `precio_anual` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `limites` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`limites`)),
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `precio_mensual` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `precio_anual` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `limites` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `planes`
@@ -590,6 +668,27 @@ INSERT INTO `planes` (`id`, `nombre`, `codigo`, `descripcion`, `periodo`, `preci
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `prestamos_herramientas`
+--
+
+CREATE TABLE `prestamos_herramientas` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `herramienta_id` int(11) NOT NULL,
+  `guardia_id` int(11) NOT NULL,
+  `unidad_id` int(11) NOT NULL,
+  `residente_id` int(11) DEFAULT NULL,
+  `estado` varchar(20) NOT NULL DEFAULT 'prestado',
+  `notas` text,
+  `prestado_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `devuelto_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `reglamentos_residenciales`
 --
 
@@ -599,9 +698,9 @@ CREATE TABLE `reglamentos_residenciales` (
   `titulo` varchar(180) NOT NULL,
   `contenido` mediumtext NOT NULL,
   `version_label` varchar(50) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `reglamentos_residenciales`
@@ -622,8 +721,8 @@ CREATE TABLE `residenciales` (
   `codigo` varchar(50) NOT NULL,
   `tipo` enum('fraccionamiento','torre','mixto','privado','otro') NOT NULL DEFAULT 'fraccionamiento',
   `modo_operacion` varchar(20) NOT NULL DEFAULT 'residencial',
-  `max_casas` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `max_guardias` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `max_casas` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `max_guardias` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `pais` varchar(80) NOT NULL,
   `estado` varchar(100) NOT NULL,
   `ciudad` varchar(100) NOT NULL,
@@ -640,21 +739,23 @@ CREATE TABLE `residenciales` (
   `fecha_fin_plan` date DEFAULT NULL,
   `estatus_plan` enum('prueba','activo','suspendido','cancelado') NOT NULL DEFAULT 'activo',
   `zona_horaria` varchar(50) NOT NULL DEFAULT 'America/Mexico_City',
-  `permite_qr` tinyint(1) NOT NULL DEFAULT 1,
-  `permite_trabajadores_recurrentes` tinyint(1) NOT NULL DEFAULT 1,
-  `requiere_placa_vehiculo` tinyint(1) NOT NULL DEFAULT 0,
-  `requiere_identificacion_visita` tinyint(1) NOT NULL DEFAULT 0,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `permite_qr` tinyint(1) NOT NULL DEFAULT '1',
+  `permite_trabajadores_recurrentes` tinyint(1) NOT NULL DEFAULT '1',
+  `requiere_placa_vehiculo` tinyint(1) NOT NULL DEFAULT '0',
+  `requiere_identificacion_visita` tinyint(1) NOT NULL DEFAULT '0',
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `residenciales`
 --
 
 INSERT INTO `residenciales` (`id`, `nombre`, `codigo`, `tipo`, `modo_operacion`, `max_casas`, `max_guardias`, `pais`, `estado`, `ciudad`, `colonia`, `calle`, `numero_exterior`, `numero_interior`, `codigo_postal`, `nombre_contacto`, `telefono_contacto`, `email_contacto`, `plan_id`, `fecha_inicio_plan`, `fecha_fin_plan`, `estatus_plan`, `zona_horaria`, `permite_qr`, `permite_trabajadores_recurrentes`, `requiere_placa_vehiculo`, `requiere_identificacion_visita`, `activo`, `created_at`, `updated_at`) VALUES
-(1, 'san pablo garza', '10', 'fraccionamiento', 'residencial', 100, 100, 'México', 'mexico', 'mexico', 'san pedro', 'san pedro', '10', '0', '10542', 'jamas lo hemos visto', 'contacto', 'alatorrekevalat@gmail.com', NULL, NULL, NULL, 'activo', 'America/Mexico_City', 1, 1, 0, 0, 1, '2025-11-28 22:08:53', '2026-04-29 09:32:34');
+(1, 'san pablo garza', '10', 'fraccionamiento', 'residencial', 100, 100, 'México', 'mexico', 'mexico', 'san pedro', 'san pedro', '10', '0', '10542', 'jamas lo hemos visto', 'contacto', 'alatorrekevalat@gmail.com', NULL, NULL, NULL, 'activo', 'America/Mexico_City', 1, 1, 0, 0, 1, '2025-11-28 22:08:53', '2026-05-06 11:52:30'),
+(2, 'prueba', '1302301203', 'fraccionamiento', 'residencial', 123, 123, 'México', 'MEXICO', 'TULTEPEC', 'SAN MIGUEL DE OTLICA', 'FERNANDO MONTES DE OCA', 'S/N', 'S/N', '54964', 'kevin', '5646950032', 'alatorrekevalat123@gmail.com', 1, NULL, NULL, 'activo', 'America/Mexico_City', 1, 1, 0, 0, 1, '2026-05-05 16:58:08', '2026-05-06 11:17:46'),
+(3, '12312', '3123123', 'torre', 'comercio', 123123, 123, 'México', '123', '123', '123', '123', '123', '123', '123', '123', '123', '123@gmail.com', 2, '2026-05-06', '2026-08-20', 'activo', 'America/Mexico_City', 1, 1, 0, 0, 1, '2026-05-06 11:18:30', '2026-05-06 11:18:30');
 
 -- --------------------------------------------------------
 
@@ -666,35 +767,39 @@ CREATE TABLE `residenciales_servicio_config` (
   `id` int(11) NOT NULL,
   `residencial_id` int(11) NOT NULL,
   `preset_servicio` varchar(30) NOT NULL DEFAULT 'residencial',
-  `habilita_admin_operativo` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_guardia` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_residente` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_unidades` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_residentes_catalogo` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_guardias_catalogo` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_autos` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_visitas_residente` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_paqueteria` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_pagos` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_comunicados` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_servicios_directorio` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_control_acceso` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_incidencias` tinyint(1) NOT NULL DEFAULT 1,
-  `habilita_personal_recurrente` tinyint(1) NOT NULL DEFAULT 0,
-  `habilita_visitantes_rapidos` tinyint(1) NOT NULL DEFAULT 0,
-  `habilita_materiales` tinyint(1) NOT NULL DEFAULT 0,
-  `habilita_solicitudes_pendientes` tinyint(1) NOT NULL DEFAULT 0,
-  `habilita_bitacora_operativa` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `habilita_admin_operativo` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_guardia` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_residente` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_unidades` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_residentes_catalogo` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_guardias_catalogo` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_guardias_admin_actions` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_autos` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_visitas_residente` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_paqueteria` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_pagos` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_comunicados` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_servicios_directorio` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_control_acceso` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_incidencias` tinyint(1) NOT NULL DEFAULT '1',
+  `habilita_personal_recurrente` tinyint(1) NOT NULL DEFAULT '0',
+  `habilita_visitantes_rapidos` tinyint(1) NOT NULL DEFAULT '0',
+  `habilita_materiales` tinyint(1) NOT NULL DEFAULT '0',
+  `habilita_solicitudes_pendientes` tinyint(1) NOT NULL DEFAULT '0',
+  `habilita_bitacora_operativa` tinyint(1) NOT NULL DEFAULT '0',
+  `habilita_herramientas` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `residenciales_servicio_config`
 --
 
-INSERT INTO `residenciales_servicio_config` (`id`, `residencial_id`, `preset_servicio`, `habilita_admin_operativo`, `habilita_guardia`, `habilita_residente`, `habilita_unidades`, `habilita_residentes_catalogo`, `habilita_guardias_catalogo`, `habilita_autos`, `habilita_visitas_residente`, `habilita_paqueteria`, `habilita_pagos`, `habilita_comunicados`, `habilita_servicios_directorio`, `habilita_control_acceso`, `habilita_incidencias`, `habilita_personal_recurrente`, `habilita_visitantes_rapidos`, `habilita_materiales`, `habilita_solicitudes_pendientes`, `habilita_bitacora_operativa`, `created_at`, `updated_at`) VALUES
-(1, 1, 'residencial', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, '2026-04-30 00:24:09', '2026-04-30 00:24:09');
+INSERT INTO `residenciales_servicio_config` (`id`, `residencial_id`, `preset_servicio`, `habilita_admin_operativo`, `habilita_guardia`, `habilita_residente`, `habilita_unidades`, `habilita_residentes_catalogo`, `habilita_guardias_catalogo`, `habilita_guardias_admin_actions`, `habilita_autos`, `habilita_visitas_residente`, `habilita_paqueteria`, `habilita_pagos`, `habilita_comunicados`, `habilita_servicios_directorio`, `habilita_control_acceso`, `habilita_incidencias`, `habilita_personal_recurrente`, `habilita_visitantes_rapidos`, `habilita_materiales`, `habilita_solicitudes_pendientes`, `habilita_bitacora_operativa`, `habilita_herramientas`, `created_at`, `updated_at`) VALUES
+(1, 1, 'residencial', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2026-04-30 00:24:09', '2026-05-06 11:52:30'),
+(2, 2, 'residencial', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, '2026-05-05 16:58:08', '2026-05-06 11:17:46'),
+(3, 3, 'comercio', 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, '2026-05-06 11:18:30', '2026-05-06 11:18:30');
 
 -- --------------------------------------------------------
 
@@ -706,24 +811,24 @@ CREATE TABLE `residentes_unidades` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `unidad_id` int(11) NOT NULL,
-  `es_titular` tinyint(1) NOT NULL DEFAULT 1,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `acceso_baneado_manual` tinyint(1) NOT NULL DEFAULT 0,
+  `es_titular` tinyint(1) NOT NULL DEFAULT '1',
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `acceso_baneado_manual` tinyint(1) NOT NULL DEFAULT '0',
   `acceso_baneo_motivo` varchar(255) DEFAULT NULL,
-  `acceso_baneado_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `acceso_baneado_at` datetime DEFAULT NULL,
+  `acceso_estado_actualizado_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `residentes_unidades`
 --
 
-INSERT INTO `residentes_unidades` (`id`, `user_id`, `unidad_id`, `es_titular`, `activo`, `created_at`, `acceso_baneado_manual`, `acceso_baneo_motivo`, `acceso_baneado_at`) VALUES
-(1, 4, 1, 0, 1, '2025-12-02 20:36:19', 0, NULL, NULL),
-(5, 8, 1, 0, 1, '2026-04-02 19:22:55', 0, NULL, NULL),
-(6, 9, 1, 0, 1, '2026-04-02 19:45:04', 0, NULL, NULL),
-(7, 10, 1, 0, 1, '2026-04-02 19:45:17', 0, NULL, NULL),
-(8, 11, 1, 0, 1, '2026-04-02 19:45:29', 0, NULL, NULL);
+INSERT INTO `residentes_unidades` (`id`, `user_id`, `unidad_id`, `es_titular`, `activo`, `created_at`, `acceso_baneado_manual`, `acceso_baneo_motivo`, `acceso_baneado_at`, `acceso_estado_actualizado_at`) VALUES
+(1, 4, 1, 0, 1, '2025-12-02 20:36:19', 0, NULL, NULL, NULL),
+(5, 8, 1, 0, 1, '2026-04-02 19:22:55', 0, NULL, NULL, NULL),
+(6, 9, 1, 0, 1, '2026-04-02 19:45:04', 0, NULL, NULL, NULL),
+(7, 10, 1, 0, 1, '2026-04-02 19:45:17', 0, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -735,7 +840,7 @@ CREATE TABLE `tipos_usuario` (
   `id` int(11) NOT NULL,
   `nombre` varchar(50) NOT NULL,
   `descripcion` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `tipos_usuario`
@@ -764,11 +869,11 @@ CREATE TABLE `unidades` (
   `numero_interior` varchar(20) DEFAULT NULL,
   `torre` varchar(50) DEFAULT NULL,
   `nivel` varchar(20) DEFAULT NULL,
-  `notas` text DEFAULT NULL,
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `notas` text,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `unidades`
@@ -791,10 +896,10 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `telefono` varchar(30) DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `guardia_en_servicio` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `guardia_en_servicio` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `users`
@@ -815,7 +920,9 @@ INSERT INTO `users` (`id`, `tipo_usuario_id`, `name`, `email`, `telefono`, `pass
 (12, 5, 'otro1', 'otro1@gmail.com', NULL, '$2y$10$JoTDLPOPaApcRBOcb9SfM.S.lrTMPpDHyxWOvG65njr2hkooCctoq', 1, 0, '2026-04-07 23:47:45'),
 (13, 4, '12355', 'issac_issac184214@live.com', '5646950032', '$2y$10$u87w3X0LGfxk02Or4Dihc.DDwoUrqQf9CdAUZzAt0QHBD.0KkocjS', 0, 0, '2026-04-22 00:25:26'),
 (14, 1, 'kevin', 'superadmin1@gmail.com', '5646950032', '123456', 1, 0, '2026-04-28 16:44:12'),
-(15, 1, 'kevin', 'alatorrekevalat@gmail.com', '5646950032', '$2y$10$eetEY3vltixyMYFnZjr2i.lobr80vjmugiEt7TjGOgHgn56UkDG.2', 1, 0, '2026-05-01 19:42:42');
+(15, 1, 'kevin', 'alatorrekevalat@gmail.com', '5646950032', '$2y$10$eetEY3vltixyMYFnZjr2i.lobr80vjmugiEt7TjGOgHgn56UkDG.2', 1, 0, '2026-05-01 19:42:42'),
+(16, 3, 'prueba2', 'servicio2@gmail.com', '5646950032', '$2y$10$WFdI3clDS7c2LF1V8epSDenjWYs1DMsicyYxOZYHaWlgXNfl887ei', 1, 0, '2026-05-05 16:58:34'),
+(17, 4, 'servicio2', 'servicio3@gmail.com', '43545', '$2y$10$lVEYtGAzDq6NYhJI5aYqwu0x7394Csc.7ypMPfH2ukE/Bgdco/LpO', 1, 0, '2026-05-06 11:19:16');
 
 -- --------------------------------------------------------
 
@@ -827,24 +934,23 @@ CREATE TABLE `usuarios_residenciales` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `residencial_id` int(11) NOT NULL,
-  `es_principal` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `es_principal` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `usuarios_residenciales`
 --
 
 INSERT INTO `usuarios_residenciales` (`id`, `user_id`, `residencial_id`, `es_principal`, `created_at`) VALUES
-(1, 1, 1, 1, '2025-11-29 23:40:41'),
 (2, 2, 1, 1, '2025-11-29 23:57:06'),
 (3, 3, 1, 1, '2025-12-02 19:25:27'),
-(4, 4, 1, 1, '2025-12-02 20:36:19'),
 (8, 8, 1, 1, '2026-04-02 19:22:55'),
 (9, 9, 1, 1, '2026-04-02 19:45:04'),
 (11, 10, 1, 1, '2026-04-02 19:45:17'),
-(12, 11, 1, 1, '2026-04-02 19:45:29'),
-(13, 13, 1, 1, '2026-04-22 00:25:26');
+(13, 13, 1, 1, '2026-04-22 00:25:26'),
+(14, 16, 2, 1, '2026-05-05 16:58:34'),
+(15, 17, 3, 1, '2026-05-06 11:19:16');
 
 -- --------------------------------------------------------
 
@@ -863,14 +969,14 @@ CREATE TABLE `visitantes_rapidos` (
   `motivo` varchar(255) DEFAULT NULL,
   `qr_token` varchar(80) NOT NULL,
   `estado` varchar(30) NOT NULL DEFAULT 'activo',
-  `notas_admin` text DEFAULT NULL,
+  `notas_admin` text,
   `fecha_desde` datetime DEFAULT NULL,
   `fecha_hasta` datetime DEFAULT NULL,
-  `esta_dentro` tinyint(1) NOT NULL DEFAULT 0,
+  `esta_dentro` tinyint(1) NOT NULL DEFAULT '0',
   `ultimo_evento_at` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -891,13 +997,13 @@ CREATE TABLE `visitas` (
   `fecha_hasta` date NOT NULL,
   `hora_desde` time DEFAULT NULL,
   `hora_hasta` time DEFAULT NULL,
-  `uso_unico` tinyint(1) NOT NULL DEFAULT 1,
+  `uso_unico` tinyint(1) NOT NULL DEFAULT '1',
   `codigo_acceso` varchar(64) NOT NULL,
   `estado` enum('pendiente','usado','vencido','cancelado') NOT NULL DEFAULT 'pendiente',
-  `notas` text DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `notas` text,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `visitas`
@@ -960,6 +1066,14 @@ ALTER TABLE `bitacora_operativa`
   ADD KEY `fk_bitacora_operativa_permiso` (`permiso_material_id`);
 
 --
+-- Indices de la tabla `catalogo_herramientas`
+--
+ALTER TABLE `catalogo_herramientas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_catalogo_herramientas_residencial` (`residencial_id`),
+  ADD KEY `idx_catalogo_herramientas_activo` (`activo`);
+
+--
 -- Indices de la tabla `catalogo_materiales`
 --
 ALTER TABLE `catalogo_materiales`
@@ -999,6 +1113,15 @@ ALTER TABLE `guardias_turnos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_guardias_turnos_user` (`user_id`),
   ADD KEY `fk_guardias_turnos_residencial` (`residencial_id`);
+
+--
+-- Indices de la tabla `guardias_turnos_excepciones`
+--
+ALTER TABLE `guardias_turnos_excepciones`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_guardias_turnos_ex_user_service_dates` (`user_id`,`residencial_id`,`fecha_inicio`,`fecha_fin`),
+  ADD KEY `idx_guardias_turnos_ex_turno` (`turno_id`),
+  ADD KEY `fk_guardias_turnos_ex_residencial` (`residencial_id`);
 
 --
 -- Indices de la tabla `home_banners_residenciales`
@@ -1109,6 +1232,18 @@ ALTER TABLE `planes`
   ADD UNIQUE KEY `codigo` (`codigo`);
 
 --
+-- Indices de la tabla `prestamos_herramientas`
+--
+ALTER TABLE `prestamos_herramientas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_prestamos_herramientas_residencial` (`residencial_id`),
+  ADD KEY `idx_prestamos_herramientas_estado` (`estado`),
+  ADD KEY `idx_prestamos_herramientas_guardia` (`guardia_id`),
+  ADD KEY `idx_prestamos_herramientas_herramienta` (`herramienta_id`),
+  ADD KEY `idx_prestamos_herramientas_unidad` (`unidad_id`),
+  ADD KEY `idx_prestamos_herramientas_residente` (`residente_id`);
+
+--
 -- Indices de la tabla `reglamentos_residenciales`
 --
 ALTER TABLE `reglamentos_residenciales`
@@ -1203,7 +1338,7 @@ ALTER TABLE `accesos_guardia`
 -- AUTO_INCREMENT de la tabla `archivos_operativos`
 --
 ALTER TABLE `archivos_operativos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `areas_operativas`
@@ -1221,19 +1356,25 @@ ALTER TABLE `autos`
 -- AUTO_INCREMENT de la tabla `bitacora_operativa`
 --
 ALTER TABLE `bitacora_operativa`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT de la tabla `catalogo_herramientas`
+--
+ALTER TABLE `catalogo_herramientas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `catalogo_materiales`
 --
 ALTER TABLE `catalogo_materiales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `comunicados_residenciales`
 --
 ALTER TABLE `comunicados_residenciales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `config_general`
@@ -1258,6 +1399,12 @@ ALTER TABLE `contactos_emergencia`
 --
 ALTER TABLE `guardias_turnos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `guardias_turnos_excepciones`
+--
+ALTER TABLE `guardias_turnos_excepciones`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `home_banners_residenciales`
@@ -1305,7 +1452,7 @@ ALTER TABLE `password_reset_codes`
 -- AUTO_INCREMENT de la tabla `permisos_materiales`
 --
 ALTER TABLE `permisos_materiales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `permisos_materiales_items`
@@ -1317,13 +1464,19 @@ ALTER TABLE `permisos_materiales_items`
 -- AUTO_INCREMENT de la tabla `personas_recurrentes`
 --
 ALTER TABLE `personas_recurrentes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `planes`
 --
 ALTER TABLE `planes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `prestamos_herramientas`
+--
+ALTER TABLE `prestamos_herramientas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `reglamentos_residenciales`
@@ -1335,13 +1488,13 @@ ALTER TABLE `reglamentos_residenciales`
 -- AUTO_INCREMENT de la tabla `residenciales`
 --
 ALTER TABLE `residenciales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `residenciales_servicio_config`
 --
 ALTER TABLE `residenciales_servicio_config`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `residentes_unidades`
@@ -1365,13 +1518,13 @@ ALTER TABLE `unidades`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios_residenciales`
 --
 ALTER TABLE `usuarios_residenciales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `visitantes_rapidos`
@@ -1420,6 +1573,12 @@ ALTER TABLE `bitacora_operativa`
   ADD CONSTRAINT `fk_bitacora_operativa_visitante` FOREIGN KEY (`visitante_rapido_id`) REFERENCES `visitantes_rapidos` (`id`) ON DELETE SET NULL;
 
 --
+-- Filtros para la tabla `catalogo_herramientas`
+--
+ALTER TABLE `catalogo_herramientas`
+  ADD CONSTRAINT `fk_catalogo_herramientas_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `catalogo_materiales`
 --
 ALTER TABLE `catalogo_materiales`
@@ -1437,6 +1596,14 @@ ALTER TABLE `contactos_emergencia`
 ALTER TABLE `guardias_turnos`
   ADD CONSTRAINT `fk_guardias_turnos_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_guardias_turnos_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `guardias_turnos_excepciones`
+--
+ALTER TABLE `guardias_turnos_excepciones`
+  ADD CONSTRAINT `fk_guardias_turnos_ex_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_guardias_turnos_ex_turno` FOREIGN KEY (`turno_id`) REFERENCES `guardias_turnos` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_guardias_turnos_ex_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `home_banners_residenciales`
@@ -1501,6 +1668,16 @@ ALTER TABLE `permisos_materiales_items`
 ALTER TABLE `personas_recurrentes`
   ADD CONSTRAINT `fk_personas_recurrentes_area` FOREIGN KEY (`area_id`) REFERENCES `areas_operativas` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_personas_recurrentes_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `prestamos_herramientas`
+--
+ALTER TABLE `prestamos_herramientas`
+  ADD CONSTRAINT `fk_prestamos_herramientas_guardia` FOREIGN KEY (`guardia_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_prestamos_herramientas_herramienta` FOREIGN KEY (`herramienta_id`) REFERENCES `catalogo_herramientas` (`id`),
+  ADD CONSTRAINT `fk_prestamos_herramientas_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_prestamos_herramientas_residente` FOREIGN KEY (`residente_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_prestamos_herramientas_unidad` FOREIGN KEY (`unidad_id`) REFERENCES `unidades` (`id`);
 
 --
 -- Filtros para la tabla `reglamentos_residenciales`

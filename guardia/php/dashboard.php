@@ -6,6 +6,10 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../config/service_profile.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_login();
 require_role(['guardia', 'super_admin']);
 $user = current_user(); 
@@ -18,6 +22,9 @@ if (($user['role'] ?? '') !== 'super_admin') {
 
 $pageTitle  = 'Panel de guardia';
 $activeMenu = 'security';
+
+$toastV = @filemtime(__DIR__ . '/../../assets/js/app-toast.js') ?: time();
+$dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 ?>
 <!doctype html>
 <html lang="es">
@@ -35,7 +42,7 @@ $activeMenu = 'security';
     <?php include __DIR__ . '/../templates/dashboard.html'; ?>
   </div>
 
-  <script src="../../assets/js/app-toast.js" defer></script>
-  <script src="../js/dashboard.js" defer></script>
+  <script src="../../assets/js/app-toast.js?v=<?= (int)$toastV ?>" defer></script>
+  <script src="../js/dashboard.js?v=<?= (int)$dashV ?>" defer></script>
 </body>
 </html>

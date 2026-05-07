@@ -154,3 +154,44 @@ if (!function_exists('resolve_resident_context')) {
         ];
     }
 }
+
+if (!function_exists('residential_home_services_schema_ensure')) {
+    function residential_home_services_schema_ensure(PDO $pdo): void {
+        $targets = [
+            'home_servicios_globales',
+            'home_servicios_residenciales',
+        ];
+
+        foreach ($targets as $table) {
+            try {
+                $stmt = $pdo->prepare("
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.TABLES
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = :table
+                ");
+                $stmt->execute(['table' => $table]);
+                $exists = (int)$stmt->fetchColumn() > 0;
+                if (!$exists) {
+                    continue;
+                }
+
+                $col = $pdo->prepare("
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                      AND TABLE_NAME = :table
+                      AND COLUMN_NAME = 'perfil_url'
+                ");
+                $col->execute(['table' => $table]);
+                $hasPerfilUrl = (int)$col->fetchColumn() > 0;
+
+                if (!$hasPerfilUrl) {
+                    $pdo->exec("ALTER TABLE {$table} ADD COLUMN perfil_url VARCHAR(500) DEFAULT NULL AFTER link_url");
+                }
+            } catch (Throwable $e) {
+                // keep backward compatibility if schema introspection is unavailable
+            }
+        }
+    }
+}

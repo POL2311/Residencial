@@ -37,6 +37,7 @@ function table_exists(PDO $pdo, string $table): bool {
 }
 
 try {
+  residential_home_services_schema_ensure($pdo);
   service_profile_schema_ensure($pdo);
   $status = resolve_resident_context($pdo, $uid, false);
   if (!$status['ok']) {
@@ -56,7 +57,7 @@ try {
   if (table_exists($pdo, 'home_servicios_globales')) {
     try {
       $stmt = $pdo->query("
-        SELECT id, nombre, descripcion, imagen_url, telefono, whatsapp, link_url, categoria, orden
+        SELECT id, nombre, descripcion, imagen_url, telefono, whatsapp, link_url, perfil_url, categoria, orden
         FROM home_servicios_globales
         WHERE activo = 1
         ORDER BY orden ASC, id DESC
@@ -73,7 +74,7 @@ try {
   if ($rid > 0 && table_exists($pdo, 'home_servicios_residenciales')) {
     try {
       $stmt = $pdo->prepare("
-        SELECT id, nombre, descripcion, imagen_url, telefono, whatsapp, link_url, categoria, orden
+        SELECT id, nombre, descripcion, imagen_url, telefono, whatsapp, link_url, perfil_url, categoria, orden
         FROM home_servicios_residenciales
         WHERE residencial_id = :rid
           AND activo = 1

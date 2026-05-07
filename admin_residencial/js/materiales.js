@@ -4,6 +4,7 @@
 
   const API_CATALOGO = '/admin_residencial/php/api/materiales_catalogo.php';
   const API_PERMISOS = '/admin_residencial/php/api/permisos_materiales.php';
+  const MANUAL_VALUE = '__manual__';
 
   const els = {
     catalogoList: document.getElementById('catalogoList'),
@@ -24,18 +25,39 @@
     btnAddPermisoItem: document.getElementById('btnAddPermisoItem'),
     permisoForm: document.getElementById('permisoForm'),
     permisoError: document.getElementById('permisoError'),
-    permisoItems: document.getElementById('permisoItems'),
+    permisoItemsList: document.getElementById('permisoItemsList'),
+    permisoItemMaterial: document.getElementById('permisoItemMaterial'),
+    permisoItemCantidad: document.getElementById('permisoItemCantidad'),
+    permisoItemManualWrap: document.getElementById('permisoItemManualWrap'),
+    permisoItemNombreManual: document.getElementById('permisoItemNombreManual'),
+    permisoItemAgregarCatalogo: document.getElementById('permisoItemAgregarCatalogo'),
   };
 
-  const state = { catalogo: [], permisos: [], areas: [], responsables: [] };
+  const state = {
+    catalogo: [],
+    permisos: [],
+    areas: [],
+    responsables: [],
+    permisoDraftItems: [],
+  };
 
   function escapeHtml(v = '') {
-    return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    return String(v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   async function fetchJSON(url, options = {}) {
     const { headers = {}, ...rest } = options;
-    const res = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...rest, headers: { Accept: 'application/json', ...headers } });
+    const res = await fetch(url, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      ...rest,
+      headers: { Accept: 'application/json', ...headers },
+    });
     const json = await res.json().catch(() => ({}));
     if (!res.ok || json.ok === false) throw new Error(json.error || 'Error');
     return json;
@@ -59,72 +81,146 @@
     els.alert.classList.remove('hidden');
   }
 
+  function setPermisoError(msg = '') {
+    if (!els.permisoError) return;
+    if (!msg) {
+      els.permisoError.textContent = '';
+      els.permisoError.classList.add('hidden');
+      return;
+    }
+    els.permisoError.textContent = msg;
+    els.permisoError.classList.remove('hidden');
+  }
+
   function fillOperationalSelects(item) {
     const areaSel = els.permisoForm?.querySelector('[name="area_id"]');
     const respSel = els.permisoForm?.querySelector('[name="responsable_user_id"]');
     if (areaSel) {
-      areaSel.innerHTML = `<option value="">Sin área</option>` + state.areas.map((area) => `<option value="${area.id}" ${String(item?.area_id || '') === String(area.id) ? 'selected' : ''}>${escapeHtml(area.nombre)}</option>`).join('');
+      areaSel.innerHTML = '<option value="">Sin área</option>' + state.areas
+        .map((area) => `<option value="${area.id}" ${String(item?.area_id || '') === String(area.id) ? 'selected' : ''}>${escapeHtml(area.nombre)}</option>`)
+        .join('');
     }
     if (respSel) {
-      respSel.innerHTML = `<option value="">Sin responsable</option>` + state.responsables.map((user) => `<option value="${user.id}" ${String(item?.responsable_user_id || '') === String(user.id) ? 'selected' : ''}>${escapeHtml(user.name)}</option>`).join('');
+      respSel.innerHTML = '<option value="">Sin responsable</option>' + state.responsables
+        .map((user) => `<option value="${user.id}" ${String(item?.responsable_user_id || '') === String(user.id) ? 'selected' : ''}>${escapeHtml(user.name)}</option>`)
+        .join('');
     }
   }
 
-  function newItemRow(item = {}) {
-    return `
-      <div class="permiso-item rounded-2xl border border-slate-200 bg-white p-3">
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-[1.2fr_1fr_auto]">
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Material del catálogo</label>
-            <select class="permiso-material-id w-full rounded-xl border px-3 py-2 text-sm">
-              <option value="">Otro / escribir manualmente</option>
-              ${state.catalogo.map((material) => `<option value="${material.id}" ${String(item.material_id || '') === String(material.id) ? 'selected' : ''}>${escapeHtml(material.nombre)}</option>`).join('')}
-            </select>
-          </div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Cantidad / detalle</label>
-            <input type="text" class="permiso-cantidad w-full rounded-xl border px-3 py-2 text-sm" value="${escapeHtml(item.cantidad_texto || '')}" placeholder="Ej. 2 cajas / 1 compresor" />
-          </div>
-          <div class="flex items-end">
-            <button type="button" class="permiso-remove rounded-xl border px-3 py-2 text-sm hover:bg-slate-50">Quitar</button>
-          </div>
-        </div>
-        <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Nombre manual</label>
-            <input type="text" class="permiso-material-nombre w-full rounded-xl border px-3 py-2 text-sm" value="${escapeHtml(item.material_nombre || '')}" placeholder="Escribe si no está en el catálogo" />
-          </div>
-          <label class="flex items-center gap-2 text-sm text-slate-700 md:pb-2">
-            <input type="checkbox" class="permiso-agregar-catalogo" ${item.agregar_a_catalogo ? 'checked' : ''} />
-            Agregar al catálogo
-          </label>
-        </div>
-      </div>
-    `;
+  function renderPermisoMaterialOptions() {
+    if (!els.permisoItemMaterial) return;
+    els.permisoItemMaterial.innerHTML =
+      '<option value="">Selecciona un material</option>' +
+      state.catalogo
+        .map((material) => `<option value="${material.id}">${escapeHtml(material.nombre)}</option>`)
+        .join('') +
+      `<option value="${MANUAL_VALUE}">Otro / escribir manualmente</option>`;
   }
 
-  function collectItems() {
-    return Array.from(els.permisoItems?.querySelectorAll('.permiso-item') || []).map((row) => ({
-      material_id: row.querySelector('.permiso-material-id')?.value || '',
-      material_nombre: row.querySelector('.permiso-material-nombre')?.value || '',
-      cantidad_texto: row.querySelector('.permiso-cantidad')?.value || '',
-      agregar_a_catalogo: row.querySelector('.permiso-agregar-catalogo')?.checked ? 1 : 0,
-    }));
+  function syncPermisoItemManualFields() {
+    const catalogId = (els.permisoItemMaterial?.value || '').trim();
+    const isManual = catalogId === MANUAL_VALUE;
+    els.permisoItemManualWrap?.classList.toggle('hidden', !isManual);
+    if (!isManual) {
+      if (els.permisoItemNombreManual) els.permisoItemNombreManual.value = '';
+      if (els.permisoItemAgregarCatalogo) els.permisoItemAgregarCatalogo.checked = false;
+    }
   }
 
-  function bindItemRowEvents(container = els.permisoItems) {
-    container?.querySelectorAll('.permiso-remove').forEach((btn) => {
-      btn.onclick = () => btn.closest('.permiso-item')?.remove();
-    });
+  function resetPermisoItemComposer() {
+    if (els.permisoItemMaterial) els.permisoItemMaterial.value = '';
+    if (els.permisoItemCantidad) els.permisoItemCantidad.value = '';
+    if (els.permisoItemNombreManual) els.permisoItemNombreManual.value = '';
+    if (els.permisoItemAgregarCatalogo) els.permisoItemAgregarCatalogo.checked = false;
+    syncPermisoItemManualFields();
+  }
+
+  function currentPermisoItemFromComposer() {
+    const materialIdRaw = (els.permisoItemMaterial?.value || '').trim();
+    const cantidad = (els.permisoItemCantidad?.value || '').trim();
+    const manualName = (els.permisoItemNombreManual?.value || '').trim();
+    const addToCatalog = Boolean(els.permisoItemAgregarCatalogo?.checked);
+
+    if (!materialIdRaw) {
+      throw new Error('Selecciona un material o "Otro / escribir manualmente".');
+    }
+
+    if (!cantidad) {
+      throw new Error('Agrega la cantidad o detalle del material.');
+    }
+
+    if (materialIdRaw === MANUAL_VALUE) {
+      if (!manualName) {
+        throw new Error('Escribe el nombre manual cuando selecciones "Otro".');
+      }
+      return {
+        material_id: null,
+        material_nombre: manualName,
+        cantidad_texto: cantidad,
+        agregar_a_catalogo: addToCatalog ? 1 : 0,
+      };
+    }
+
+    const selected = els.permisoItemMaterial?.selectedOptions?.[0];
+    const catalogName = (selected?.textContent || '').trim();
+
+    return {
+      material_id: Number(materialIdRaw),
+      material_nombre: catalogName,
+      cantidad_texto: cantidad,
+      agregar_a_catalogo: 0,
+    };
+  }
+
+  function renderPermisoItemsList() {
+    if (!els.permisoItemsList) return;
+    if (!state.permisoDraftItems.length) {
+      els.permisoItemsList.innerHTML = `
+        <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+          Aún no agregas materiales a este permiso.
+        </div>
+      `;
+      return;
+    }
+
+    els.permisoItemsList.innerHTML = state.permisoDraftItems
+      .map((item, index) => `
+        <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+          <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div class="min-w-0">
+              <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.material_nombre || 'Material')}</div>
+              <div class="text-xs text-slate-500">Cantidad / detalle: ${escapeHtml(item.cantidad_texto || '')}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              ${item.material_id ? '<span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] text-slate-600">Catálogo</span>' : '<span class="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] text-sky-700">Manual</span>'}
+              <button type="button" class="permiso-item-remove rounded-xl border px-3 py-1.5 text-xs hover:bg-slate-50" data-index="${index}">Quitar</button>
+            </div>
+          </div>
+        </div>
+      `)
+      .join('');
+  }
+
+  function addPermisoDraftItem() {
+    try {
+      const item = currentPermisoItemFromComposer();
+      state.permisoDraftItems.push(item);
+      renderPermisoItemsList();
+      resetPermisoItemComposer();
+      setPermisoError('');
+    } catch (error) {
+      setPermisoError(error.message || 'No se pudo agregar el item.');
+    }
   }
 
   function renderCatalogo() {
     if (!state.catalogo.length) {
-      els.catalogoList.innerHTML = `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Todavía no hay materiales en el catálogo.</div>`;
+      els.catalogoList.innerHTML = '<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Todavía no hay materiales en el catálogo.</div>';
       return;
     }
 
-    els.catalogoList.innerHTML = state.catalogo.map((item) => `
+    els.catalogoList.innerHTML = state.catalogo
+      .map((item) => `
       <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
         <div class="flex items-start justify-between gap-3">
           <div>
@@ -138,7 +234,8 @@
           </div>
         </div>
       </div>
-    `).join('');
+    `)
+      .join('');
 
     els.catalogoList.querySelectorAll('.js-cat-edit').forEach((btn) => {
       btn.addEventListener('click', () => openCatalogoModal(state.catalogo.find((item) => item.id === Number(btn.dataset.id)) || null));
@@ -150,11 +247,12 @@
 
   function renderPermisos() {
     if (!state.permisos.length) {
-      els.permisosList.innerHTML = `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Todavía no hay permisos registrados.</div>`;
+      els.permisosList.innerHTML = '<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Todavía no hay permisos registrados.</div>';
       return;
     }
 
-    els.permisosList.innerHTML = state.permisos.map((item) => `
+    els.permisosList.innerHTML = state.permisos
+      .map((item) => `
       <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div class="min-w-0">
@@ -164,11 +262,13 @@
             </div>
             <div class="mt-1 text-sm text-slate-600">Responsable: ${escapeHtml(item.responsable_nombre || 'Sin responsable')} · Área: ${escapeHtml(item.area_nombre || 'Sin área')}</div>
             <div class="mt-3 space-y-2">
-              ${(item.items || []).map((material) => `
+              ${(item.items || [])
+                .map((material) => `
                 <div class="rounded-xl bg-white px-3 py-2 text-sm text-slate-700">
                   ${escapeHtml(material.material_nombre)} <span class="text-slate-400">·</span> ${escapeHtml(material.cantidad_texto)}
                 </div>
-              `).join('')}
+              `)
+                .join('')}
             </div>
           </div>
           <div class="grid gap-2 sm:grid-cols-2 lg:w-[340px]">
@@ -181,7 +281,7 @@
         <div class="mt-4 flex flex-col gap-3 rounded-2xl bg-white p-4 md:flex-row md:items-center md:justify-between">
           <div class="text-sm text-slate-700">
             <div class="font-medium">QR del permiso</div>
-            <div class="text-xs text-slate-500 break-all">${escapeHtml(item.qr_payload)}</div>
+            <div class="text-xs break-all text-slate-500">${escapeHtml(item.qr_payload)}</div>
             <div class="mt-1 text-xs text-slate-500">Aprobó: ${escapeHtml(item.aprobado_por_nombre || 'Pendiente')} · ${escapeHtml(item.aprobado_at || '—')}</div>
           </div>
           <div class="flex items-center gap-3">
@@ -190,9 +290,12 @@
           </div>
         </div>
       </div>
-    `).join('');
+    `)
+      .join('');
 
-    els.permisosList.querySelectorAll('.js-perm-edit').forEach((btn) => btn.addEventListener('click', () => openPermisoModal(state.permisos.find((item) => item.id === Number(btn.dataset.id)) || null)));
+    els.permisosList.querySelectorAll('.js-perm-edit').forEach((btn) =>
+      btn.addEventListener('click', () => openPermisoModal(state.permisos.find((item) => item.id === Number(btn.dataset.id)) || null)),
+    );
     els.permisosList.querySelectorAll('.js-perm-approve').forEach((btn) => btn.addEventListener('click', () => approvePermiso(Number(btn.dataset.id))));
     els.permisosList.querySelectorAll('.js-perm-cancel').forEach((btn) => btn.addEventListener('click', () => updatePermisoAction('cancel', Number(btn.dataset.id))));
     els.permisosList.querySelectorAll('.js-perm-delete').forEach((btn) => btn.addEventListener('click', () => updatePermisoAction('delete', Number(btn.dataset.id))));
@@ -208,6 +311,8 @@
     state.areas = metaRes.data?.areas || [];
     state.responsables = metaRes.data?.responsables || [];
     state.permisos = permisosRes.data?.items || [];
+    renderPermisoMaterialOptions();
+    syncPermisoItemManualFields();
     renderCatalogo();
     renderPermisos();
   }
@@ -243,12 +348,16 @@
       els.permisoForm.notas.value = item?.notas || '';
       fillOperationalSelects(item);
     }
-    els.permisoItems.innerHTML = '';
-    (item?.items?.length ? item.items : [{}]).forEach((row) => {
-      els.permisoItems.insertAdjacentHTML('beforeend', newItemRow(row));
-    });
-    bindItemRowEvents();
-    els.permisoError?.classList.add('hidden');
+
+    state.permisoDraftItems = (item?.items || []).map((row) => ({
+      material_id: row.material_id ? Number(row.material_id) : null,
+      material_nombre: row.material_nombre || '',
+      cantidad_texto: row.cantidad_texto || '',
+      agregar_a_catalogo: Number(row.agregar_a_catalogo || 0) ? 1 : 0,
+    }));
+    renderPermisoItemsList();
+    resetPermisoItemComposer();
+    setPermisoError('');
     els.permisoModal?.classList.remove('hidden');
     els.permisoModal?.classList.add('flex');
   }
@@ -278,17 +387,17 @@
   async function savePermiso(ev) {
     ev.preventDefault();
     try {
+      if (!state.permisoDraftItems.length) {
+        throw new Error('Debes agregar al menos un item al permiso.');
+      }
       const fd = new FormData(els.permisoForm);
-      fd.set('items_json', JSON.stringify(collectItems()));
+      fd.set('items_json', JSON.stringify(state.permisoDraftItems));
       await fetchJSON(API_PERMISOS, { method: 'POST', body: fd });
       closePermisoModal();
       showAlert('Permiso guardado.', 'success');
       await loadAll();
     } catch (e) {
-      if (els.permisoError) {
-        els.permisoError.textContent = e.message || 'No se pudo guardar el permiso.';
-        els.permisoError.classList.remove('hidden');
-      }
+      setPermisoError(e.message || 'No se pudo guardar el permiso.');
     }
   }
 
@@ -341,10 +450,17 @@
   els.btnPermisoCancel?.addEventListener('click', closePermisoModal);
   els.catalogoForm?.addEventListener('submit', saveCatalogo);
   els.permisoForm?.addEventListener('submit', savePermiso);
-  els.btnAddPermisoItem?.addEventListener('click', () => {
-    els.permisoItems.insertAdjacentHTML('beforeend', newItemRow());
-    bindItemRowEvents();
+  els.btnAddPermisoItem?.addEventListener('click', addPermisoDraftItem);
+  els.permisoItemMaterial?.addEventListener('change', syncPermisoItemManualFields);
+  els.permisoItemsList?.addEventListener('click', (event) => {
+    const btn = event.target.closest('.permiso-item-remove');
+    if (!btn) return;
+    const index = Number(btn.dataset.index);
+    if (!Number.isInteger(index) || index < 0 || index >= state.permisoDraftItems.length) return;
+    state.permisoDraftItems.splice(index, 1);
+    renderPermisoItemsList();
   });
+
   els.catalogoModal?.addEventListener('click', (ev) => {
     if (ev.target === els.catalogoModal) closeCatalogoModal();
   });

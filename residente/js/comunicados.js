@@ -54,6 +54,62 @@
         return 'bg-sky-50 text-sky-700 border border-sky-200';
     }
 
+    function extractText(text, max = 96) {
+        const clean = String(text || '').replace(/\s+/g, ' ').trim();
+        if (!clean) return 'Sin mensaje';
+        return clean.length > max ? `${clean.slice(0, max).trim()}…` : clean;
+    }
+
+    function ensureImageModal() {
+        let modal = document.getElementById('residentComunicadoImageModal');
+        if (modal) return modal;
+
+        modal = document.createElement('div');
+        modal.id = 'residentComunicadoImageModal';
+        modal.className = 'hidden fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm';
+        modal.innerHTML = `
+          <div class="min-h-full flex items-center justify-center">
+            <div class="w-full max-w-4xl rounded-3xl bg-white shadow-2xl overflow-hidden">
+              <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <div id="residentComunicadoImageTitle" class="text-sm font-semibold text-slate-800">Imagen adjunta</div>
+                <button type="button" id="residentComunicadoImageClose" class="h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
+              </div>
+              <div class="bg-slate-950/95">
+                <img id="residentComunicadoImagePreview" src="" alt="Imagen adjunta" class="h-[70vh] w-full object-contain" />
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        const close = () => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal || event.target.closest('#residentComunicadoImageClose')) {
+                close();
+            }
+        });
+
+        return modal;
+    }
+
+    function openImageModal(item) {
+        if (!item?.imagen_url) return;
+        const modal = ensureImageModal();
+        const title = modal.querySelector('#residentComunicadoImageTitle');
+        const image = modal.querySelector('#residentComunicadoImagePreview');
+        if (title) title.textContent = item.titulo || 'Imagen adjunta';
+        if (image) {
+            image.src = resolvePublicUrl(item.imagen_url);
+            image.alt = item.titulo || 'Imagen adjunta';
+        }
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
     function showError(msg) {
         if (!els.alert) return;
         els.alert.classList.remove('hidden');
@@ -66,24 +122,34 @@
         const json = await res.json().catch(() => null);
         if (!json || !json.ok) throw new Error(json?.error || 'No se pudo cargar comunicados.');
         const items = json.data?.items || [];
-        els.list.innerHTML = items.length ? items.map((item) => `
-          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm overflow-hidden">
-	            ${item.imagen_url ? `
-	              <div class="-mx-5 -mt-5 mb-4">
-	                <img src="${escapeHtml(resolvePublicUrl(item.imagen_url))}" alt=""
-	                     class="h-44 w-full object-cover border-b border-slate-200" loading="lazy" />
-	              </div>
-	            ` : ''}
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="text-lg font-semibold text-slate-800">${escapeHtml(item.titulo)}</div>
-                <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.tipo || 'general')} · ${escapeHtml(item.fecha_publicacion || '')}</div>
+        els.list.innerHTML = items.length ? items.map((item, index) => `
+          <article class="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+            <div class="flex flex-col gap-2 xl:grid xl:grid-cols-[1.3fr_0.75fr_0.8fr_1.6fr_auto] xl:items-center xl:gap-4">
+              <div class="min-w-0">
+                <div class="truncate text-base font-semibold text-slate-800">${escapeHtml(item.titulo || 'Comunicado')}</div>
               </div>
-              <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${badge(item.prioridad)}">${escapeHtml(item.prioridad || 'baja')}</span>
+              <div class="text-sm text-slate-500">${escapeHtml(item.tipo || 'general')}</div>
+              <div class="text-sm text-slate-500">${escapeHtml(item.fecha_publicacion || '—')}</div>
+              <div class="text-sm text-slate-600">${escapeHtml(extractText(item.mensaje, 110))}</div>
+              <div class="flex items-center gap-2 xl:justify-end">
+                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${badge(item.prioridad)}">${escapeHtml(item.prioridad || 'baja')}</span>
+                ${item.imagen_url ? `
+                  <button type="button" class="js-open-comunicado-image rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" data-index="${index}">
+                    Ver imagen adjunta
+                  </button>
+                ` : ''}
+              </div>
             </div>
-            <p class="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-600">${escapeHtml(item.mensaje || '')}</p>
           </article>
         `).join('') : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">No hay comunicados publicados por el momento.</div>`;
+
+        els.list.onclick = (event) => {
+            const btn = event.target.closest('.js-open-comunicado-image');
+            if (!btn) return;
+            const index = Number(btn.dataset.index || -1);
+            if (!Number.isInteger(index) || index < 0 || index >= items.length) return;
+            openImageModal(items[index]);
+        };
 
         window.ResidenteDashboard?.markComunicadosSeen?.();
     }

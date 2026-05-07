@@ -255,10 +255,11 @@ try {
         json_out(false, ['error' => 'El responsable seleccionado no pertenece a este cliente.']);
     }
 
-    foreach ($items as $item) {
+    $catalogNames = [];
+    foreach ($items as $idx => $item) {
         if ($item['material_id'] !== null) {
             $stmtCheck = $pdo->prepare("
-                SELECT id
+                SELECT id, nombre
                 FROM catalogo_materiales
                 WHERE id = :id
                   AND residencial_id = :rid
@@ -269,9 +270,11 @@ try {
                 'rid' => $residencialId,
             ]);
 
-            if (!$stmtCheck->fetchColumn()) {
+            $catalogRow = $stmtCheck->fetch(PDO::FETCH_ASSOC) ?: null;
+            if (!$catalogRow) {
                 json_out(false, ['error' => 'Uno de los materiales seleccionados no pertenece a tu catálogo.']);
             }
+            $catalogNames[$idx] = clean_str((string)($catalogRow['nombre'] ?? ''));
         }
     }
 
@@ -340,9 +343,9 @@ try {
         )
     ");
 
-    foreach ($items as $item) {
+    foreach ($items as $idx => $item) {
         $materialId = $item['material_id'];
-        $materialNombre = $item['material_nombre'];
+        $materialNombre = clean_str((string)($item['material_nombre'] ?? ''));
 
         if ($materialId === null && $item['agregar_a_catalogo'] && $materialNombre !== '') {
             $stmtCatIns->execute([
@@ -352,10 +355,18 @@ try {
             $materialId = (int)$pdo->lastInsertId();
         }
 
+        if ($materialId !== null && $materialNombre === '') {
+            $materialNombre = (string)($catalogNames[$idx] ?? '');
+        }
+
+        if ($materialNombre === '') {
+            $materialNombre = 'Material';
+        }
+
         $stmtInsItem->execute([
             'permiso_id' => $permisoId,
             'material_id' => $materialId,
-            'material_nombre' => $materialNombre !== '' ? $materialNombre : null,
+            'material_nombre' => $materialNombre,
             'cantidad_texto' => $item['cantidad_texto'],
             'agregar_a_catalogo' => $item['agregar_a_catalogo'],
         ]);

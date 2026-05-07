@@ -68,6 +68,68 @@
     return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(payload)}`;
   }
 
+  function ensureQrModal() {
+    let modal = document.getElementById('personalQrModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'personalQrModal';
+    modal.className = 'fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
+    modal.innerHTML = `
+      <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">QR personal</div>
+            <h3 id="personalQrTitle" class="mt-1 text-xl font-semibold text-slate-900">Personal recurrente</h3>
+          </div>
+          <button type="button" id="personalQrClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
+        </div>
+        <div class="px-5 py-6 text-center">
+          <div class="mx-auto inline-flex rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
+            <img id="personalQrImage" src="" alt="QR personal" class="h-72 w-72 max-w-full rounded-2xl object-contain" />
+          </div>
+          <div id="personalQrPayload" class="mt-4 break-all rounded-2xl bg-slate-50 px-4 py-3 text-left text-xs text-slate-500"></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    };
+
+    modal.querySelector('#personalQrClose')?.addEventListener('click', close);
+    modal.addEventListener('click', (ev) => {
+      if (ev.target === modal) close();
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !modal.classList.contains('hidden')) close();
+    });
+
+    return modal;
+  }
+
+  function openQrModal(item) {
+    if (!item?.qr_payload) return;
+    const modal = ensureQrModal();
+    const title = modal.querySelector('#personalQrTitle');
+    const image = modal.querySelector('#personalQrImage');
+    const payload = modal.querySelector('#personalQrPayload');
+
+    if (title) title.textContent = item.nombre || 'Personal recurrente';
+    if (image) {
+      image.src = qrPreview(item.qr_payload);
+      image.alt = `QR ${item.nombre || 'personal'}`;
+    }
+    if (payload) payload.textContent = item.qr_payload;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
   function render() {
     const q = String(els.search?.value || '').trim().toLowerCase();
     const items = state.items.filter((item) => {
@@ -125,7 +187,7 @@
           </div>
           <div class="flex items-center gap-3">
             <img src="${qrPreview(item.qr_payload)}" alt="QR ${escapeHtml(item.nombre)}" class="h-20 w-20 rounded-xl border bg-white object-contain p-1" loading="lazy" />
-            <a href="${qrPreview(item.qr_payload)}" target="_blank" rel="noopener" class="rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">Ver QR</a>
+            <button type="button" data-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">Ver QR</button>
           </div>
         </div>
       </div>
@@ -142,6 +204,12 @@
     });
     els.list.querySelectorAll('.js-regenerate').forEach((btn) => {
       btn.addEventListener('click', () => regenerateQr(Number(btn.dataset.id)));
+    });
+    els.list.querySelectorAll('[data-qr]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = state.items.find((row) => row.id === Number(btn.dataset.qr));
+        if (item) openQrModal(item);
+      });
     });
   }
 

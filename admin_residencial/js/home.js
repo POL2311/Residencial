@@ -38,6 +38,7 @@
 
   const els = {
     alert: document.getElementById('homeAlert'),
+    comSlider: document.getElementById('homeComunicadosSlider'),
     comTrack: document.getElementById('homeComunicadosTrack'),
     comDots: document.getElementById('homeComDots'),
     comPrev: document.getElementById('homeComPrev'),
@@ -200,6 +201,63 @@
     startAutoSlide();
   }
 
+  function bindSwipe(sliderEl, { onNext, onPrev, onInteract }) {
+    if (!sliderEl || sliderEl.dataset.swipeBound === '1') return;
+    sliderEl.dataset.swipeBound = '1';
+
+    let startX = null;
+    let startY = null;
+    let isPointerDown = false;
+
+    const threshold = 40;
+    const maxVertical = 28;
+
+    function handleEnd(endX, endY) {
+      if (startX === null || startY === null) return;
+      const dx = endX - startX;
+      const dy = endY - startY;
+      startX = null;
+      startY = null;
+      isPointerDown = false;
+      if (Math.abs(dy) > maxVertical) return;
+      if (Math.abs(dx) < threshold) return;
+      if (dx < 0) onNext?.();
+      else onPrev?.();
+      onInteract?.();
+    }
+
+    sliderEl.addEventListener('touchstart', (ev) => {
+      const touch = ev.changedTouches?.[0];
+      if (!touch) return;
+      startX = touch.clientX;
+      startY = touch.clientY;
+    }, { passive: true });
+
+    sliderEl.addEventListener('touchend', (ev) => {
+      const touch = ev.changedTouches?.[0];
+      if (!touch) return;
+      handleEnd(touch.clientX, touch.clientY);
+    }, { passive: true });
+
+    sliderEl.addEventListener('pointerdown', (ev) => {
+      if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+      isPointerDown = true;
+      startX = ev.clientX;
+      startY = ev.clientY;
+    });
+
+    sliderEl.addEventListener('pointerup', (ev) => {
+      if (!isPointerDown) return;
+      handleEnd(ev.clientX, ev.clientY);
+    });
+
+    sliderEl.addEventListener('pointercancel', () => {
+      startX = null;
+      startY = null;
+      isPointerDown = false;
+    });
+  }
+
   function renderServicios() {
     els.srvScroller.innerHTML = '';
 
@@ -308,6 +366,12 @@
 
   els.btnAllCom?.addEventListener('click', () => {
     window.AdminResidencialDashboard?.navigate?.('comunicados');
+  });
+
+  bindSwipe(els.comSlider, {
+    onPrev: prevSlide,
+    onNext: nextSlide,
+    onInteract: restartAutoSlide,
   });
 
   loadHome();

@@ -1,9 +1,11 @@
 (function () {
   window.GuardiaViews = window.GuardiaViews || {};
-  window.GuardiaViews.personas_dentro = function ({ API, fetchJSON, escapeHtml }) {
+  window.GuardiaViews.personas_dentro = function ({ API, fetchJSON, escapeHtml, navigate }) {
     const root = document.getElementById('personasDentroView');
     if (!root) return;
     const list = document.getElementById('personasDentroList');
+    const btnScan = document.getElementById('btnScanPersonalQr');
+    const AUTO_SCAN_KEY = 'guardia:accesos:auto_scan';
 
     async function load() {
       try {
@@ -34,6 +36,17 @@
     }
 
     load();
+    btnScan?.addEventListener('click', () => {
+      try {
+        window.sessionStorage.setItem(AUTO_SCAN_KEY, 'persona_recurrente');
+      } catch (_) {}
+
+      if (window.location.hash.replace('#', '') !== 'accesos') {
+        window.location.hash = 'accesos';
+      } else if (typeof navigate === 'function') {
+        navigate('accesos');
+      }
+    });
     return {};
   };
 })();

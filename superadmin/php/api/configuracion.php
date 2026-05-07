@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/_bootstrap.php';
 require_once __DIR__ . '/../../../config/mailer.php';
+require_once __DIR__ . '/../../../config/residencial_helpers.php';
 
 $action = sa_post_action('get');
 
@@ -18,6 +19,7 @@ if (!function_exists('sa_ensure_global_services_table')) {
                 telefono VARCHAR(30) DEFAULT NULL,
                 whatsapp VARCHAR(30) DEFAULT NULL,
                 link_url VARCHAR(500) DEFAULT NULL,
+                perfil_url VARCHAR(500) DEFAULT NULL,
                 categoria VARCHAR(80) NOT NULL DEFAULT 'servicio',
                 activo TINYINT(1) NOT NULL DEFAULT 1,
                 orden INT(11) NOT NULL DEFAULT 0,
@@ -28,6 +30,7 @@ if (!function_exists('sa_ensure_global_services_table')) {
                 KEY idx_home_servicios_globales_orden (orden)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
         ");
+        residential_home_services_schema_ensure($pdo);
     }
 }
 
@@ -36,7 +39,7 @@ if (!function_exists('sa_fetch_global_services')) {
     {
         sa_ensure_global_services_table($pdo);
         return $pdo->query("
-            SELECT id, nombre, descripcion, imagen_url, telefono, whatsapp, link_url, categoria, activo, orden, created_at, updated_at
+            SELECT id, nombre, descripcion, imagen_url, telefono, whatsapp, link_url, perfil_url, categoria, activo, orden, created_at, updated_at
             FROM home_servicios_globales
             ORDER BY orden ASC, id DESC
         ")->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -170,6 +173,7 @@ try {
         $telefono = sa_clean_str($_POST['telefono'] ?? '', 30);
         $whatsapp = sa_clean_str($_POST['whatsapp'] ?? '', 30);
         $linkUrl = trim((string)($_POST['link_url'] ?? ''));
+        $perfilUrl = trim((string)($_POST['perfil_url'] ?? ''));
         $categoria = sa_clean_str($_POST['categoria'] ?? 'servicio', 80);
         $orden = max(0, (int)($_POST['orden'] ?? 0));
         $activo = (int)(($_POST['activo'] ?? '0') === '1');
@@ -178,9 +182,13 @@ try {
             sa_json_out(false, ['error' => 'El nombre del servicio global es obligatorio.'], 422);
         }
 
-        foreach (['imagenUrl' => $imagenUrl, 'linkUrl' => $linkUrl] as $field => $value) {
+        foreach (['imagenUrl' => $imagenUrl, 'linkUrl' => $linkUrl, 'perfilUrl' => $perfilUrl] as $field => $value) {
             if ($value !== '' && !filter_var($value, FILTER_VALIDATE_URL)) {
-                sa_json_out(false, ['error' => $field === 'imagenUrl' ? 'La URL de imagen no es válida.' : 'El enlace externo no es válido.'], 422);
+                sa_json_out(false, ['error' =>
+                    $field === 'imagenUrl'
+                        ? 'La URL de imagen no es válida.'
+                        : ($field === 'perfilUrl' ? 'La URL del perfil no es válida.' : 'El enlace externo no es válido.')
+                ], 422);
             }
         }
 
@@ -193,6 +201,7 @@ try {
                     telefono = :telefono,
                     whatsapp = :whatsapp,
                     link_url = :link_url,
+                    perfil_url = :perfil_url,
                     categoria = :categoria,
                     activo = :activo,
                     orden = :orden
@@ -205,6 +214,7 @@ try {
                 'telefono' => ($telefono !== '' ? $telefono : null),
                 'whatsapp' => ($whatsapp !== '' ? $whatsapp : null),
                 'link_url' => ($linkUrl !== '' ? $linkUrl : null),
+                'perfil_url' => ($perfilUrl !== '' ? $perfilUrl : null),
                 'categoria' => ($categoria !== '' ? $categoria : 'servicio'),
                 'activo' => $activo,
                 'orden' => $orden,
@@ -216,9 +226,9 @@ try {
 
         $stmt = $pdo->prepare("
             INSERT INTO home_servicios_globales
-                (nombre, descripcion, imagen_url, telefono, whatsapp, link_url, categoria, activo, orden)
+                (nombre, descripcion, imagen_url, telefono, whatsapp, link_url, perfil_url, categoria, activo, orden)
             VALUES
-                (:nombre, :descripcion, :imagen_url, :telefono, :whatsapp, :link_url, :categoria, :activo, :orden)
+                (:nombre, :descripcion, :imagen_url, :telefono, :whatsapp, :link_url, :perfil_url, :categoria, :activo, :orden)
         ");
         $stmt->execute([
             'nombre' => $nombre,
@@ -227,6 +237,7 @@ try {
             'telefono' => ($telefono !== '' ? $telefono : null),
             'whatsapp' => ($whatsapp !== '' ? $whatsapp : null),
             'link_url' => ($linkUrl !== '' ? $linkUrl : null),
+            'perfil_url' => ($perfilUrl !== '' ? $perfilUrl : null),
             'categoria' => ($categoria !== '' ? $categoria : 'servicio'),
             'activo' => $activo,
             'orden' => $orden,

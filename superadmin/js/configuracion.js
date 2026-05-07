@@ -91,6 +91,7 @@
                     ${item.telefono ? `<span class="rounded-full bg-white px-3 py-1 border border-slate-200">Tel: ${escapeHtml(item.telefono)}</span>` : ''}
                     ${item.whatsapp ? `<span class="rounded-full bg-white px-3 py-1 border border-slate-200">WA: ${escapeHtml(item.whatsapp)}</span>` : ''}
                     ${item.link_url ? `<span class="rounded-full bg-white px-3 py-1 border border-slate-200">Con enlace</span>` : ''}
+                    ${item.perfil_url ? `<span class="rounded-full bg-white px-3 py-1 border border-slate-200">Con perfil</span>` : ''}
                   </div>
 
                   <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -130,6 +131,7 @@
         field('telefono').value = item?.telefono || '';
         field('whatsapp').value = item?.whatsapp || '';
         field('link_url').value = item?.link_url || '';
+        field('perfil_url').value = item?.perfil_url || '';
         field('activo').checked = Number(item?.activo ?? 1) === 1;
         els.modalTitle.textContent = item ? 'Editar servicio global' : 'Nuevo servicio global';
         els.modal.classList.remove('hidden');
@@ -251,6 +253,7 @@
                 telefono: field('telefono').value,
                 whatsapp: field('whatsapp').value,
                 link_url: field('link_url').value,
+                perfil_url: field('perfil_url').value,
                 activo: field('activo').checked ? '1' : '0',
             });
             closeModal();

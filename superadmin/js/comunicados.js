@@ -110,10 +110,10 @@
     }
 
     function setSummary(summary) {
-        els.summaryTotal.textContent = String(summary?.total ?? 0);
-        els.summaryPublicados.textContent = String(summary?.publicados ?? 0);
-        els.summaryBorradores.textContent = String(summary?.borradores ?? 0);
-        els.summaryArchivados.textContent = String(summary?.archivados ?? 0);
+        if (els.summaryTotal) els.summaryTotal.textContent = String(summary?.total ?? 0);
+        if (els.summaryPublicados) els.summaryPublicados.textContent = String(summary?.publicados ?? 0);
+        if (els.summaryBorradores) els.summaryBorradores.textContent = String(summary?.borradores ?? 0);
+        if (els.summaryArchivados) els.summaryArchivados.textContent = String(summary?.archivados ?? 0);
     }
 
     function queryString() {

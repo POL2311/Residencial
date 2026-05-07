@@ -3,6 +3,10 @@ require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/service_profile.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_login();
 require_role(['residente']);
 $resident = current_user();
@@ -12,6 +16,9 @@ if ($residencialId > 0) {
 }
 
 $pageTitle = 'Portal del residente';
+
+$toastV = @filemtime(__DIR__ . '/../../assets/js/app-toast.js') ?: time();
+$dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 ?>
 <!doctype html>
 <html lang="es">
@@ -27,7 +34,7 @@ $pageTitle = 'Portal del residente';
 <body class="min-h-screen bg-[#F2F3F5] text-slate-900">
   <?php include __DIR__ . '/../templates/dashboard.html'; ?>
 
-  <script src="../../assets/js/app-toast.js" defer></script>
-  <script src="../js/dashboard.js" defer></script>
+  <script src="../../assets/js/app-toast.js?v=<?= (int)$toastV ?>" defer></script>
+  <script src="../js/dashboard.js?v=<?= (int)$dashV ?>" defer></script>
 </body>
 </html>

@@ -30,6 +30,9 @@
 
     addError: document.getElementById('incidenciaAddError'),
     editError: document.getElementById('incidenciaEditError'),
+    scopeWrap: document.getElementById('incidenciaScopeWrap'),
+    unitField: document.getElementById('incResidentialUnitField'),
+    scopeHint: document.getElementById('incidenciaScopeHint'),
   };
 
   if (!els.list) return;
@@ -351,13 +354,20 @@
     const selU = els.formAdd.querySelector('[name="unidad_id"]');
     const operationalWrap = document.getElementById('incOperationalFields');
     const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
+    const scopeInputs = els.formAdd.querySelectorAll('[name="incidencia_scope"]');
+    scopeInputs.forEach((input) => {
+      input.checked = input.value === 'unidad';
+    });
+    els.scopeWrap?.classList.toggle('hidden', isOperational);
     if (selU) {
-      selU.closest('div')?.classList.toggle('hidden', isOperational);
+      els.unitField?.classList.toggle('hidden', isOperational);
       selU.innerHTML = '';
+      selU.innerHTML = '<option value="">Selecciona unidad</option>';
       state.unidades.forEach((u) => {
         selU.innerHTML += `<option value="${u.id}">${escapeHtml(u.clave)}</option>`;
       });
     }
+    syncResidentialScopeUi();
 
     if (operationalWrap) {
       operationalWrap.classList.toggle('hidden', !isOperational);
@@ -376,6 +386,29 @@
     }
 
     els.modalAdd.classList.remove('hidden');
+  }
+
+  function currentIncidenciaScope() {
+    const checked = els.formAdd?.querySelector('[name="incidencia_scope"]:checked');
+    return checked?.value === 'general' ? 'general' : 'unidad';
+  }
+
+  function syncResidentialScopeUi() {
+    if (!els.formAdd) return;
+    const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
+    if (isOperational) return;
+    const isGeneral = currentIncidenciaScope() === 'general';
+    els.unitField?.classList.toggle('hidden', isGeneral);
+    const selU = els.formAdd.querySelector('[name="unidad_id"]');
+    if (selU) {
+      selU.disabled = isGeneral;
+      if (isGeneral) selU.value = '';
+    }
+    if (els.scopeHint) {
+      els.scopeHint.textContent = isGeneral
+        ? 'Se registrará como incidencia general del residencial, sin ligarla a una casa.'
+        : 'Selecciona la casa relacionada con la incidencia.';
+    }
   }
 
   function closeAddModal() {
@@ -436,13 +469,14 @@
 
   function validateAddForm(fd) {
     const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
+    const scope = String(fd.get('incidencia_scope') || 'unidad');
     const unidadId = Number(fd.get('unidad_id') || 0);
     const tipo = String(fd.get('tipo') || '').trim();
     const titulo = String(fd.get('titulo') || '').trim();
     const descripcion = String(fd.get('descripcion') || '').trim();
     const prioridad = String(fd.get('prioridad') || '').trim();
 
-    if (!isOperational && unidadId <= 0) throw new Error('Debes seleccionar una unidad.');
+    if (!isOperational && scope !== 'general' && unidadId <= 0) throw new Error('Debes seleccionar una unidad.');
     if (!['seguridad', 'servicio', 'vecino', 'infraestructura', 'otro', 'robo', 'conflicto', 'salida_sin_permiso', 'visitante_sin_ine', 'material_no_coincide', 'evento_general'].includes(tipo)) {
       throw new Error('Tipo inválido.');
     }
@@ -482,6 +516,7 @@
         ? true
         : (
             (i.titulo || '').toLowerCase().includes(q) ||
+            (i.descripcion || '').toLowerCase().includes(q) ||
             (i.unidad_clave || '').toLowerCase().includes(q) ||
             (i.residente_nombre || '').toLowerCase().includes(q)
           );
@@ -535,8 +570,8 @@
           <div><span class="text-xs text-slate-500">Descripción</span><div class="whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</div></div>
           <div><span class="text-xs text-slate-500">Tipo</span><div>${escapeHtml(humanizeValue(i.tipo))}</div></div>
           <div><span class="text-xs text-slate-500">Fecha</span><div>${escapeHtml(fmtDate(i.created_at))}</div></div>
-          <div><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || '—')}</div></div>
-          <div><span class="text-xs text-slate-500">Contexto</span><div>${escapeHtml(i.unidad_clave || i.area_nombre || '—')}</div></div>
+          <div><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || 'General')}</div></div>
+          <div><span class="text-xs text-slate-500">Contexto</span><div>${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</div></div>
           <div><span class="text-xs text-slate-500">Relación</span><div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div></div>
           <div><span class="text-xs text-slate-500">Guardia</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
 
@@ -560,7 +595,7 @@
           </div>
           <div>
             <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Contexto</div>
-            <div>${escapeHtml(i.unidad_clave || i.area_nombre || '—')}</div>
+            <div>${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</div>
             <div class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">Tipo</div>
             <div class="text-xs text-slate-600">${escapeHtml(humanizeValue(i.tipo))}</div>
           </div>
@@ -632,6 +667,11 @@
   });
 
   els.btnAdd?.addEventListener('click', openAddModal);
+  els.formAdd?.addEventListener('change', (e) => {
+    if (e.target?.name === 'incidencia_scope') {
+      syncResidentialScopeUi();
+    }
+  });
 
   els.btnCloseAdd?.addEventListener('click', closeAddModal);
   els.btnCancelAdd?.addEventListener('click', closeAddModal);
@@ -675,6 +715,9 @@
     try {
       const fd = new FormData(els.formAdd);
       if (String(state.meta?.modo_operacion || 'residencial') === 'residencial') {
+        if (String(fd.get('incidencia_scope') || 'unidad') === 'general') {
+          fd.delete('unidad_id');
+        }
         fd.delete('area_id');
         fd.delete('persona_recurrente_id');
         fd.delete('visitante_rapido_id');
@@ -682,6 +725,7 @@
         fd.delete('origen_tipo');
       } else {
         fd.delete('unidad_id');
+        fd.delete('incidencia_scope');
       }
       validateAddForm(fd);
 

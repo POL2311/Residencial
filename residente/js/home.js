@@ -26,6 +26,7 @@
 
     const els = {
         alert: $('homeAlert'),
+        comSlider: $('residentHomeComSlider'),
         comTrack: $('residentHomeComTrack'),
         comDots: $('residentHomeComDots'),
         comPrev: $('residentHomeComPrev'),
@@ -211,6 +212,63 @@
         startAutoSlide();
     }
 
+    function bindSwipe(sliderEl, { onNext, onPrev, onInteract }) {
+        if (!sliderEl || sliderEl.dataset.swipeBound === '1') return;
+        sliderEl.dataset.swipeBound = '1';
+
+        let startX = null;
+        let startY = null;
+        let isPointerDown = false;
+
+        const threshold = 40;
+        const maxVertical = 28;
+
+        function handleEnd(endX, endY) {
+            if (startX === null || startY === null) return;
+            const dx = endX - startX;
+            const dy = endY - startY;
+            startX = null;
+            startY = null;
+            isPointerDown = false;
+            if (Math.abs(dy) > maxVertical) return;
+            if (Math.abs(dx) < threshold) return;
+            if (dx < 0) onNext?.();
+            else onPrev?.();
+            onInteract?.();
+        }
+
+        sliderEl.addEventListener('touchstart', (ev) => {
+            const touch = ev.changedTouches?.[0];
+            if (!touch) return;
+            startX = touch.clientX;
+            startY = touch.clientY;
+        }, { passive: true });
+
+        sliderEl.addEventListener('touchend', (ev) => {
+            const touch = ev.changedTouches?.[0];
+            if (!touch) return;
+            handleEnd(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        sliderEl.addEventListener('pointerdown', (ev) => {
+            if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+            isPointerDown = true;
+            startX = ev.clientX;
+            startY = ev.clientY;
+        });
+
+        sliderEl.addEventListener('pointerup', (ev) => {
+            if (!isPointerDown) return;
+            handleEnd(ev.clientX, ev.clientY);
+        });
+
+        sliderEl.addEventListener('pointercancel', () => {
+            startX = null;
+            startY = null;
+            isPointerDown = false;
+        });
+    }
+
     async function apiPost(url, data) {
         const fd = new FormData();
         Object.keys(data || {}).forEach((key) => fd.append(key, data[key]));
@@ -262,7 +320,7 @@
         els.services.innerHTML = state.services.map((item) => `
             <article class="min-w-[290px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
               <div class="h-28 ${item.imagen_url ? 'bg-slate-100' : 'bg-gradient-to-br from-[#DCE9EE] via-[#EEF4F6] to-[#B9CCD5]'}">
-                ${item.imagen_url ? `<img src="${escapeHtml(item.imagen_url)}" alt="${escapeHtml(item.nombre || 'Servicio')}" class="h-full w-full object-cover" loading="lazy" />` : ''}
+                ${item.imagen_url ? `<img src="${escapeHtml(resolvePublicUrl(item.imagen_url))}" alt="${escapeHtml(item.nombre || 'Servicio')}" class="h-full w-full object-cover" loading="lazy" />` : ''}
               </div>
               <div class="p-5">
                 <div class="flex items-start justify-between gap-3">
@@ -339,6 +397,11 @@
         els.comNext?.addEventListener('click', () => {
             nextSlide();
             restartAutoSlide();
+        });
+        bindSwipe(els.comSlider, {
+            onPrev: prevSlide,
+            onNext: nextSlide,
+            onInteract: restartAutoSlide,
         });
 
         els.servicesPrev?.addEventListener('click', () => {
