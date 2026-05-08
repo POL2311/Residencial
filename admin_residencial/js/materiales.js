@@ -67,6 +67,220 @@
     return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(payload)}`;
   }
 
+  function ensureQrModal() {
+    let modal = document.getElementById('permisoQrModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'permisoQrModal';
+    modal.className = 'fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
+    modal.innerHTML = `
+      <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">QR del permiso</div>
+            <h3 id="permisoQrTitle" class="mt-1 text-xl font-semibold text-slate-900">Permiso registrado</h3>
+          </div>
+          <button type="button" id="permisoQrClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
+        </div>
+        <div class="px-5 py-6 text-center">
+          <div class="mx-auto inline-flex rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
+            <img id="permisoQrImage" src="" alt="QR permiso" class="h-72 w-72 max-w-full rounded-2xl object-contain" />
+          </div>
+          <div id="permisoQrPayload" class="mt-4 break-all rounded-2xl bg-slate-50 px-4 py-3 text-left text-xs text-slate-500"></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    };
+    modal.querySelector('#permisoQrClose')?.addEventListener('click', close);
+    modal.addEventListener('click', (ev) => {
+      if (ev.target === modal) close();
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !modal.classList.contains('hidden')) close();
+    });
+    return modal;
+  }
+
+  function openQrModal(item) {
+    if (!item?.qr_payload) return;
+    const modal = ensureQrModal();
+    modal.querySelector('#permisoQrTitle').textContent = item.tipo_movimiento === 'salida' ? 'Salida autorizada' : 'Entrada autorizada';
+    const image = modal.querySelector('#permisoQrImage');
+    image.src = qrPreview(item.qr_payload);
+    image.alt = `QR permiso ${item.id || ''}`;
+    modal.querySelector('#permisoQrPayload').textContent = item.qr_payload;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function ensureDetailsModal() {
+    let modal = document.getElementById('permisoDetailsModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'permisoDetailsModal';
+    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.innerHTML = `
+      <div class="w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del permiso</div>
+            <h3 id="permisoDetailsTitle" class="mt-1 text-xl font-semibold text-slate-900">Permiso registrado</h3>
+          </div>
+          <button type="button" id="permisoDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
+        </div>
+        <div id="permisoDetailsBody" class="max-h-[75vh] overflow-y-auto px-5 py-5"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    };
+    modal.querySelector('#permisoDetailsClose')?.addEventListener('click', close);
+    modal.addEventListener('click', (ev) => {
+      if (ev.target === modal) close();
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !modal.classList.contains('hidden')) close();
+    });
+    return modal;
+  }
+
+  function closePermisoDetailsModal() {
+    const modal = document.getElementById('permisoDetailsModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  function openPermisoDetails(item) {
+    if (!item) return;
+    const modal = ensureDetailsModal();
+    modal.querySelector('#permisoDetailsTitle').textContent = item.tipo_movimiento === 'salida' ? 'Salida autorizada' : 'Entrada autorizada';
+    modal.querySelector('#permisoDetailsBody').innerHTML = `
+      <div class="space-y-4 text-sm text-slate-700">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Estado</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.estado || 'pendiente')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Responsable</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.responsable_nombre || 'Sin responsable')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Área</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.area_nombre || 'Sin área')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Aprobó</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.aprobado_por_nombre || 'Pendiente')}</div></div>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">Materiales</div>
+          <div class="mt-3 space-y-2">
+            ${(item.items || []).map((material) => `
+              <div class="rounded-xl bg-white px-3 py-2 text-sm text-slate-700">
+                ${escapeHtml(material.material_nombre)} <span class="text-slate-400">·</span> ${escapeHtml(material.cantidad_texto)}
+              </div>
+            `).join('') || '<div class="text-slate-500">Sin materiales capturados.</div>'}
+          </div>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">Notas</div>
+          <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.notas || 'Sin notas')}</div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+          <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
+        </div>
+      </div>
+    `;
+
+    modal.querySelector('[data-detail-edit]')?.addEventListener('click', () => {
+      closePermisoDetailsModal();
+      openPermisoModal(item);
+    });
+    modal.querySelector('[data-detail-qr]')?.addEventListener('click', () => openQrModal(item));
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function ensureCatalogoDetailsModal() {
+    let modal = document.getElementById('catalogoDetailsModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'catalogoDetailsModal';
+    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.innerHTML = `
+      <div class="w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del material</div>
+            <h3 id="catalogoDetailsTitle" class="mt-1 text-xl font-semibold text-slate-900">Material</h3>
+          </div>
+          <button type="button" id="catalogoDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
+        </div>
+        <div id="catalogoDetailsBody" class="max-h-[75vh] overflow-y-auto px-5 py-5"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    };
+    modal.querySelector('#catalogoDetailsClose')?.addEventListener('click', close);
+    modal.addEventListener('click', (ev) => {
+      if (ev.target === modal) close();
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !modal.classList.contains('hidden')) close();
+    });
+    return modal;
+  }
+
+  function closeCatalogoDetailsModal() {
+    const modal = document.getElementById('catalogoDetailsModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  function openCatalogoDetails(item) {
+    if (!item) return;
+    const modal = ensureCatalogoDetailsModal();
+    modal.querySelector('#catalogoDetailsTitle').textContent = item.nombre || 'Material';
+    modal.querySelector('#catalogoDetailsBody').innerHTML = `
+      <div class="space-y-4 text-sm text-slate-700">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Categoría</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.categoria || 'Sin categoría')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Estado</div><div class="mt-1 font-semibold text-slate-900">${Number(item.activo) ? 'Activo' : 'Inactivo'}</div></div>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">Descripción</div>
+          <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.descripcion || 'Sin descripción')}</div>
+        </div>
+        <button type="button" data-catalog-edit="${item.id}" class="w-full rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+      </div>
+    `;
+
+    modal.querySelector('[data-catalog-edit]')?.addEventListener('click', () => {
+      closeCatalogoDetailsModal();
+      openCatalogoModal(item);
+    });
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
   function showAlert(msg = '', type = 'info') {
     if (!els.alert) return;
     if (!msg) {
@@ -229,6 +443,7 @@
             <div class="mt-1 text-sm text-slate-500">${escapeHtml(item.descripcion || 'Sin descripción')}</div>
           </div>
           <div class="flex flex-col gap-2">
+            <button type="button" class="js-cat-more rounded-xl border px-3 py-2 text-xs hover:bg-white" data-id="${item.id}">Ver más</button>
             <button type="button" class="js-cat-edit rounded-xl border px-3 py-2 text-xs hover:bg-white" data-id="${item.id}">Editar</button>
             <button type="button" class="js-cat-delete rounded-xl bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-700" data-id="${item.id}">Eliminar</button>
           </div>
@@ -237,6 +452,9 @@
     `)
       .join('');
 
+    els.catalogoList.querySelectorAll('.js-cat-more').forEach((btn) => {
+      btn.addEventListener('click', () => openCatalogoDetails(state.catalogo.find((item) => item.id === Number(btn.dataset.id)) || null));
+    });
     els.catalogoList.querySelectorAll('.js-cat-edit').forEach((btn) => {
       btn.addEventListener('click', () => openCatalogoModal(state.catalogo.find((item) => item.id === Number(btn.dataset.id)) || null));
     });
@@ -272,6 +490,7 @@
             </div>
           </div>
           <div class="grid gap-2 sm:grid-cols-2 lg:w-[340px]">
+            <button type="button" class="js-perm-more rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Ver más</button>
             <button type="button" class="js-perm-edit rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Editar</button>
             <button type="button" class="js-perm-approve rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Aprobar</button>
             <button type="button" class="js-perm-cancel rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Cancelar</button>
@@ -286,19 +505,25 @@
           </div>
           <div class="flex items-center gap-3">
             <img src="${qrPreview(item.qr_payload)}" alt="QR permiso" class="h-20 w-20 rounded-xl border bg-white object-contain p-1" loading="lazy" />
-            <a href="${qrPreview(item.qr_payload)}" target="_blank" rel="noopener" class="rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">Ver QR</a>
+            <button type="button" class="js-perm-qr rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95" data-id="${item.id}">Ver QR</button>
           </div>
         </div>
       </div>
     `)
       .join('');
 
+    els.permisosList.querySelectorAll('.js-perm-more').forEach((btn) =>
+      btn.addEventListener('click', () => openPermisoDetails(state.permisos.find((item) => item.id === Number(btn.dataset.id)) || null)),
+    );
     els.permisosList.querySelectorAll('.js-perm-edit').forEach((btn) =>
       btn.addEventListener('click', () => openPermisoModal(state.permisos.find((item) => item.id === Number(btn.dataset.id)) || null)),
     );
     els.permisosList.querySelectorAll('.js-perm-approve').forEach((btn) => btn.addEventListener('click', () => approvePermiso(Number(btn.dataset.id))));
     els.permisosList.querySelectorAll('.js-perm-cancel').forEach((btn) => btn.addEventListener('click', () => updatePermisoAction('cancel', Number(btn.dataset.id))));
     els.permisosList.querySelectorAll('.js-perm-delete').forEach((btn) => btn.addEventListener('click', () => updatePermisoAction('delete', Number(btn.dataset.id))));
+    els.permisosList.querySelectorAll('.js-perm-qr').forEach((btn) =>
+      btn.addEventListener('click', () => openQrModal(state.permisos.find((item) => item.id === Number(btn.dataset.id)) || null)),
+    );
   }
 
   async function loadAll() {

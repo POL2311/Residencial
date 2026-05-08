@@ -33,6 +33,156 @@
     return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(payload)}`;
   }
 
+  function formatDateTime(value) {
+    if (!value) return '—';
+    const date = new Date(String(value).replace(' ', 'T'));
+    if (Number.isNaN(date.getTime())) return String(value);
+    return new Intl.DateTimeFormat('es-MX', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(date);
+  }
+
+  function ensureQrModal() {
+    let modal = document.getElementById('visitanteQrModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'visitanteQrModal';
+    modal.className = 'fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
+    modal.innerHTML = `
+      <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">QR visitante</div>
+            <h3 id="visitanteQrTitle" class="mt-1 text-xl font-semibold text-slate-900">Acceso rápido</h3>
+          </div>
+          <button type="button" id="visitanteQrClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
+        </div>
+        <div class="px-5 py-6 text-center">
+          <div class="mx-auto inline-flex rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
+            <img id="visitanteQrImage" src="" alt="QR visitante" class="h-72 w-72 max-w-full rounded-2xl object-contain" />
+          </div>
+          <div id="visitanteQrPayload" class="mt-4 break-all rounded-2xl bg-slate-50 px-4 py-3 text-left text-xs text-slate-500"></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    };
+    modal.querySelector('#visitanteQrClose')?.addEventListener('click', close);
+    modal.addEventListener('click', (ev) => {
+      if (ev.target === modal) close();
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !modal.classList.contains('hidden')) close();
+    });
+    return modal;
+  }
+
+  function openQrModal(item) {
+    if (!item?.qr_payload) return;
+    const modal = ensureQrModal();
+    modal.querySelector('#visitanteQrTitle').textContent = item.nombre_visitante || 'Acceso rápido';
+    const image = modal.querySelector('#visitanteQrImage');
+    image.src = qrPreview(item.qr_payload);
+    image.alt = `QR ${item.nombre_visitante || 'visitante'}`;
+    modal.querySelector('#visitanteQrPayload').textContent = item.qr_payload;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function ensureDetailsModal() {
+    let modal = document.getElementById('visitanteDetailsModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'visitanteDetailsModal';
+    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.innerHTML = `
+      <div class="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del acceso</div>
+            <h3 id="visitanteDetailsTitle" class="mt-1 text-xl font-semibold text-slate-900">Visitante</h3>
+          </div>
+          <button type="button" id="visitanteDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
+        </div>
+        <div id="visitanteDetailsBody" class="max-h-[75vh] overflow-y-auto px-5 py-5"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    };
+    modal.querySelector('#visitanteDetailsClose')?.addEventListener('click', close);
+    modal.addEventListener('click', (ev) => {
+      if (ev.target === modal) close();
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !modal.classList.contains('hidden')) close();
+    });
+    return modal;
+  }
+
+  function openDetailsModal(item) {
+    if (!item) return;
+    const modal = ensureDetailsModal();
+    modal.querySelector('#visitanteDetailsTitle').textContent = item.nombre_visitante || 'Visitante';
+    modal.querySelector('#visitanteDetailsBody').innerHTML = `
+      <div class="space-y-4 text-sm text-slate-700">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Estado</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.estado || 'pendiente')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Empresa</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.empresa || 'Sin empresa')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Responsable</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.responsable_nombre || 'Sin responsable')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Área</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.area_nombre || 'Sin área')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Placa</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.placa_vehiculo || '—')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Vigencia</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.fecha_desde || '—')} → ${escapeHtml(item.fecha_hasta || '—')}</div></div>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">Motivo</div>
+          <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.motivo || 'Sin motivo')}</div>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">Notas administrativas</div>
+          <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.notas_admin || 'Sin notas')}</div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+          <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
+        </div>
+      </div>
+    `;
+
+    modal.querySelector('[data-detail-edit]')?.addEventListener('click', () => {
+      closeDetailsModal();
+      openModal(item);
+    });
+    modal.querySelector('[data-detail-qr]')?.addEventListener('click', () => {
+      openQrModal(item);
+    });
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDetailsModal() {
+    const modal = document.getElementById('visitanteDetailsModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
   function showAlert(msg = '', type = 'info') {
     if (!els.alert) return;
     if (!msg) {
@@ -77,6 +227,7 @@
             <div class="mt-3 rounded-2xl bg-slate-50 p-3 text-sm text-slate-600">${escapeHtml(item.motivo)}</div>
           </div>
           <div class="grid gap-2 sm:grid-cols-2 lg:w-[340px]">
+            <button type="button" class="js-more rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Ver más</button>
             <button type="button" class="js-edit rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Editar</button>
             <button type="button" class="js-cancel rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Cancelar</button>
           </div>
@@ -89,17 +240,23 @@
           </div>
           <div class="flex items-center gap-3">
             <img src="${qrPreview(item.qr_payload)}" alt="QR visitante" class="h-20 w-20 rounded-xl border bg-white object-contain p-1" loading="lazy" />
-            <a href="${qrPreview(item.qr_payload)}" target="_blank" rel="noopener" class="rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">Ver QR</a>
+            <button type="button" class="js-qr rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95" data-id="${item.id}">Ver QR</button>
           </div>
         </div>
       </div>
     `).join('');
 
+    els.list.querySelectorAll('.js-more').forEach((btn) => {
+      btn.addEventListener('click', () => openDetailsModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
+    });
     els.list.querySelectorAll('.js-edit').forEach((btn) => {
       btn.addEventListener('click', () => openModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
     });
     els.list.querySelectorAll('.js-cancel').forEach((btn) => {
       btn.addEventListener('click', () => cancelItem(Number(btn.dataset.id)));
+    });
+    els.list.querySelectorAll('.js-qr').forEach((btn) => {
+      btn.addEventListener('click', () => openQrModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
     });
   }
 

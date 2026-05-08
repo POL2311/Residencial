@@ -130,6 +130,92 @@
     document.body.style.overflow = 'hidden';
   }
 
+  function ensureDetailsModal() {
+    let modal = document.getElementById('personalDetailsModal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'personalDetailsModal';
+    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.innerHTML = `
+      <div class="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del personal</div>
+            <h3 id="personalDetailsTitle" class="mt-1 text-xl font-semibold text-slate-900">Personal recurrente</h3>
+          </div>
+          <button type="button" id="personalDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
+        </div>
+        <div id="personalDetailsBody" class="max-h-[75vh] overflow-y-auto px-5 py-5"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    };
+
+    modal.querySelector('#personalDetailsClose')?.addEventListener('click', close);
+    modal.addEventListener('click', (ev) => {
+      if (ev.target === modal) close();
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !modal.classList.contains('hidden')) close();
+    });
+
+    return modal;
+  }
+
+  function closeDetailsModal() {
+    const modal = document.getElementById('personalDetailsModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  function openDetailsModal(item) {
+    if (!item) return;
+    const modal = ensureDetailsModal();
+    modal.querySelector('#personalDetailsTitle').textContent = item.nombre || 'Personal recurrente';
+    modal.querySelector('#personalDetailsBody').innerHTML = `
+      <div class="space-y-4 text-sm text-slate-700">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Empresa</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.empresa || 'Sin empresa')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Puesto</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.puesto || 'Sin puesto')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Área</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.area_nombre || 'Sin área')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Teléfono</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.telefono || 'Sin teléfono')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Estado</div><div class="mt-1 font-semibold text-slate-900">${item.activo ? 'Activo' : 'Inactivo'}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Presencia</div><div class="mt-1 font-semibold text-slate-900">${item.esta_dentro ? 'Dentro' : 'Fuera'}</div></div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Última entrada</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.ultima_entrada_at || '—')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Última salida</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.ultima_salida_at || '—')}</div></div>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">Notas</div>
+          <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.notas || 'Sin notas')}</div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+          <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
+        </div>
+      </div>
+    `;
+
+    modal.querySelector('[data-detail-edit]')?.addEventListener('click', () => {
+      closeDetailsModal();
+      openModal(item);
+    });
+    modal.querySelector('[data-detail-qr]')?.addEventListener('click', () => openQrModal(item));
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
   function render() {
     const q = String(els.search?.value || '').trim().toLowerCase();
     const items = state.items.filter((item) => {
@@ -174,6 +260,7 @@
             </div>
           </div>
           <div class="grid gap-2 sm:grid-cols-2 lg:w-[340px]">
+            <button type="button" class="js-more rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Ver más</button>
             <button type="button" class="js-edit rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Editar</button>
             <button type="button" class="js-reset-pin rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Resetear PIN</button>
             <button type="button" class="js-regenerate rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Regenerar QR</button>
@@ -193,6 +280,9 @@
       </div>
     `).join('');
 
+    els.list.querySelectorAll('.js-more').forEach((btn) => {
+      btn.addEventListener('click', () => openDetailsModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
+    });
     els.list.querySelectorAll('.js-edit').forEach((btn) => {
       btn.addEventListener('click', () => openModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
     });
