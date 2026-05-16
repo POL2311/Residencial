@@ -16,6 +16,8 @@
     modalTitle: document.getElementById('gModalTitle'),
     modalBody: document.getElementById('gModalBody'),
     modalClose: document.getElementById('gModalClose'),
+    menuTrigger: document.getElementById('guardMenuTrigger'),
+    dropdownMenu: document.getElementById('userDropdownMenu'),
   };
 
   function basePath() {
@@ -754,6 +756,41 @@
 
     els.btnReg?.addEventListener('click', openReglamento);
     els.notificationsButton?.addEventListener('click', openNotifications);
+
+    // Dropdown toggle logic
+    els.menuTrigger?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const menu = els.dropdownMenu;
+      if (!menu) return;
+
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        // Small timeout to allow display:block to apply before changing opacity
+        setTimeout(() => {
+          menu.classList.remove('opacity-0');
+        }, 10);
+      } else {
+        menu.classList.add('opacity-0');
+        setTimeout(() => {
+          menu.classList.add('hidden');
+        }, 200); // Wait for transition
+      }
+    });
+
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+      const menu = els.dropdownMenu;
+      const trigger = els.menuTrigger;
+      if (!menu || !trigger) return;
+
+      if (!menu.classList.contains('hidden') && !menu.contains(e.target) && !trigger.contains(e.target)) {
+        menu.classList.add('opacity-0');
+        setTimeout(() => {
+          menu.classList.add('hidden');
+        }, 200);
+      }
+    });
 
     els.modalClose?.addEventListener('click', closeModal);
     els.modal?.addEventListener('click', (ev) => {
