@@ -216,6 +216,7 @@
 
                 <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-600">
                   <div><span class="text-slate-500">Placas:</span> <span class="font-medium text-slate-800">${safeText(a.placas)}</span></div>
+                  <div><span class="text-slate-500">Tag:</span> <span class="font-medium text-slate-800">${safeText(a.tag_id)}</span></div>
                   <div><span class="text-slate-500">Modelo:</span> <span class="font-medium text-slate-800">${safeText(a.modelo)}</span></div>
                   <div><span class="text-slate-500">Color:</span> <span class="font-medium text-slate-800">${safeText(a.color)}</span></div>
                   <div><span class="text-slate-500">Propietario:</span> <span class="font-medium text-slate-800">${safeText(a.propietario_nombre)}</span></div>

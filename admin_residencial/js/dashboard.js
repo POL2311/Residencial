@@ -8,8 +8,15 @@
     modeHint: document.getElementById('operationalModeHint'),
 
     btnReg: document.getElementById('btnReglamento'),
+    footer: document.getElementById('shellFooter'),
     body: document.getElementById('dashboardBody'),
     mount: document.getElementById('dashboardViewMount'),
+    mobileDockLayer: document.getElementById('mobileDockLayer'),
+    mobileFloatingDock: document.getElementById('mobileFloatingDock'),
+    mobileMoreBtn: document.getElementById('btnOpenMobileMoreSheet'),
+    mobileMoreSheet: document.getElementById('mobileMoreSheet'),
+    mobileMoreBackdrop: document.getElementById('mobileMoreBackdrop'),
+    mobileMoreClose: document.getElementById('btnCloseMobileMoreSheet'),
 
     modal: document.getElementById('carModal'),
     modalBody: document.getElementById('carModalBody'),
@@ -63,7 +70,23 @@
     enabledViews: new Set(),
     contextLoad: 'idle', // 'idle' | 'ok' | 'error'
     homeMinimalNotice: '',
+    moreSheetOpen: false,
   };
+
+  const PRIMARY_DOCK_VIEWS = new Set(['home', 'residentes', 'incidencias', 'comunicados']);
+  const SECONDARY_DOCK_VIEWS = new Set([
+    'unidades',
+    'guardias',
+    'autos',
+    'personal_recurrente',
+    'visitantes_rapidos',
+    'materiales',
+    'solicitudes_pendientes',
+    'bitacora_operativa',
+    'perfil',
+    'reglamento',
+  ]);
+  let lastBodyScrollTop = 0;
 
   function showShellHeader() {
     if (!els.header) return;
@@ -214,6 +237,16 @@
       btn.classList.toggle('ring-2', isActive);
       btn.classList.toggle('ring-black/20', isActive);
     });
+
+    document.querySelectorAll('[data-dock-primary-view]').forEach((btn) => {
+      const isActive = btn.getAttribute('data-dock-primary-view') === view;
+      btn.classList.toggle('mobile-dock-item-active', isActive);
+    });
+
+    if (els.mobileMoreBtn) {
+      const moreActive = SECONDARY_DOCK_VIEWS.has(view) && !PRIMARY_DOCK_VIEWS.has(view);
+      els.mobileMoreBtn.classList.toggle('mobile-dock-item-active', moreActive);
+    }
   }
 
   function syncHash(view) {
@@ -234,9 +267,64 @@
     }
   }
 
+  function isMobileViewport() {
+    return window.matchMedia('(max-width: 767px)').matches;
+  }
+
+  function showMobileDock() {
+    els.mobileDockLayer?.classList.remove('mobile-dock-hidden');
+  }
+
+  function hideMobileDock() {
+    if (state.moreSheetOpen) return;
+    els.mobileDockLayer?.classList.add('mobile-dock-hidden');
+  }
+
+  function openMoreSheet() {
+    if (!isMobileViewport()) return;
+    state.moreSheetOpen = true;
+    showMobileDock();
+    els.mobileMoreBackdrop?.classList.add('is-open');
+    els.mobileMoreSheet?.classList.add('is-open');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  function closeMoreSheet() {
+    state.moreSheetOpen = false;
+    els.mobileMoreBackdrop?.classList.remove('is-open');
+    els.mobileMoreSheet?.classList.remove('is-open');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  function handleBodyScroll() {
+    if (!isMobileViewport() || !els.body) return;
+    const top = els.body.scrollTop || 0;
+
+    if (state.moreSheetOpen) {
+      lastBodyScrollTop = top;
+      showMobileDock();
+      return;
+    }
+
+    if (top <= 8) {
+      showMobileDock();
+      lastBodyScrollTop = top;
+      return;
+    }
+
+    if (top > lastBodyScrollTop + 12) {
+      hideMobileDock();
+    } else if (top < lastBodyScrollTop - 8) {
+      showMobileDock();
+    }
+
+    lastBodyScrollTop = top;
+  }
+
   async function navigateTo(view, opts = {}) {
     const { force = false } = opts;
     showShellHeader();
+    closeMoreSheet();
     if (!state.enabledViews.size) {
       renderAccessBlocked();
       return;
@@ -373,16 +461,33 @@
 
   function toggleOperationalButtons() {
     const isOperational = isOperationalMode(state.operationalMode);
+    let secondaryVisibleCount = 0;
+    let primaryVisibleCount = 0;
+
     document.querySelectorAll('[data-view]').forEach((el) => {
       const view = el.getAttribute('data-view') || '';
       if (!view) return;
       const allow = state.enabledViews.has(view);
       if (el.classList.contains('dashBtn')) {
         el.classList.toggle('hidden', !allow);
+      } else if (el.hasAttribute('data-dock-primary-view')) {
+        el.classList.toggle('hidden', !allow);
+        if (allow) primaryVisibleCount += 1;
+      } else if (el.hasAttribute('data-dock-secondary')) {
+        el.classList.toggle('hidden', !allow);
+        if (allow) secondaryVisibleCount += 1;
       } else if (el.id === 'btnReglamento' || el.id === 'btnEditAddress') {
         el.classList.toggle('hidden', !allow);
       }
     });
+
+    if (els.mobileMoreBtn) {
+      els.mobileMoreBtn.classList.toggle('hidden', secondaryVisibleCount === 0);
+    }
+    if (els.mobileDockLayer) {
+      els.mobileDockLayer.classList.toggle('hidden', primaryVisibleCount === 0 && secondaryVisibleCount === 0);
+    }
+
     if (els.modeBadge) {
       const preset = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial');
       els.modeBadge.textContent = `Servicio ${modeLabel(preset).toLowerCase()}`;
@@ -491,17 +596,39 @@
     els.mount = els.mount || document.getElementById('dashboardViewMount');
 
     document.addEventListener('click', (e) => {
+      if (e.target.closest('#btnOpenMobileMoreSheet')) {
+        e.preventDefault();
+        if (state.moreSheetOpen) {
+          closeMoreSheet();
+        } else {
+          openMoreSheet();
+        }
+        return;
+      }
+
+      if (e.target === els.mobileMoreBackdrop || e.target.closest('#btnCloseMobileMoreSheet')) {
+        e.preventDefault();
+        closeMoreSheet();
+        return;
+      }
+
       const target = e.target.closest('[data-view]');
       if (!target) return;
       const view = target.getAttribute('data-view');
       if (!view) return;
       e.preventDefault();
+      closeMoreSheet();
       navigateTo(view);
     });
 
     els.modalClose?.addEventListener('click', closeCarModal);
     els.modal?.addEventListener('click', (e) => {
       if (e.target === els.modal) closeCarModal();
+    });
+    els.body?.addEventListener('scroll', handleBodyScroll, { passive: true });
+    window.addEventListener('resize', () => {
+      closeMoreSheet();
+      showMobileDock();
     });
 
     initShellHeader();

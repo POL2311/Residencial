@@ -41,6 +41,8 @@ if (!$table) {
     json_out(false, ['error' => 'No se encontró ninguna tabla de autos.']);
 }
 
+resident_vehicle_access_schema_ensure($pdo, $table);
+
 $cols = getCols($pdo, $table);
 
 $colId        = pickCol($cols, ['id']);
@@ -48,6 +50,7 @@ $colUser      = pickCol($cols, ['propietario_user_id', 'user_id', 'residente_id'
 $colResid     = pickCol($cols, ['residencial_id', 'residencia_id', 'residential_id']);
 $colUnidad    = pickCol($cols, ['unidad_id', 'unit_id']);
 $colPlacas    = pickCol($cols, ['placas', 'placa', 'matricula']);
+$colTag       = pickCol($cols, ['tag_id']);
 $colModelo    = pickCol($cols, ['modelo', 'model', 'marca_modelo', 'descripcion_modelo']);
 $colColor     = pickCol($cols, ['color', 'colour']);
 $colCreatedAt = pickCol($cols, ['created_at', 'fecha_creado', 'created']);
@@ -92,6 +95,9 @@ try {
             }
             if ($colColor) {
                 $select[] = "a.`$colColor` AS color";
+            }
+            if ($colTag) {
+                $select[] = "a.`$colTag` AS tag_id";
             }
             if ($colUnidad) {
                 $select[] = "a.`$colUnidad` AS unidad_id";
@@ -144,6 +150,9 @@ try {
             if ($colColor) {
                 $select[] = "a.`$colColor` AS color";
             }
+            if ($colTag) {
+                $select[] = "a.`$colTag` AS tag_id";
+            }
             if ($colUnidad) {
                 $select[] = "a.`$colUnidad` AS unidad_id";
             }
@@ -186,6 +195,7 @@ try {
 
     if ($method === 'POST' && $action === 'create') {
         $placas   = strtoupper(trim((string)($_POST['placas'] ?? '')));
+        $tagId    = trim((string)($_POST['tag_id'] ?? ''));
         $modelo   = trim((string)($_POST['modelo'] ?? ''));
         $color    = trim((string)($_POST['color'] ?? ''));
         $userId   = (int)($_POST['user_id'] ?? 0);
@@ -222,6 +232,11 @@ try {
             $values[] = ':modelo';
             $params['modelo'] = $modelo !== '' ? $modelo : null;
         }
+        if ($colTag) {
+            $fields[] = $colTag;
+            $values[] = ':tag_id';
+            $params['tag_id'] = $tagId !== '' ? $tagId : null;
+        }
 
         if ($colColor) {
             $fields[] = $colColor;
@@ -251,6 +266,62 @@ try {
 
         json_out(true, [
             'message' => 'Auto registrado correctamente.',
+        ]);
+    }
+
+    if ($method === 'POST' && $action === 'update') {
+        $autoId   = (int)($_POST['auto_id'] ?? 0);
+        $placas   = strtoupper(trim((string)($_POST['placas'] ?? '')));
+        $tagId    = trim((string)($_POST['tag_id'] ?? ''));
+        $modelo   = trim((string)($_POST['modelo'] ?? ''));
+        $color    = trim((string)($_POST['color'] ?? ''));
+
+        if ($autoId <= 0 || $placas === '') {
+            json_out(false, ['error' => 'Placas y auto son obligatorios.']);
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*)
+            FROM `$table`
+            WHERE `$colId` = :id
+              " . ($colResid ? "AND `$colResid` = :rid" : '') . "
+        ");
+        $params = ['id' => $autoId];
+        if ($colResid) {
+            $params['rid'] = $residencialId;
+        }
+        $stmt->execute($params);
+        if ((int)$stmt->fetchColumn() === 0) {
+            json_out(false, ['error' => 'El auto no pertenece a tu residencial.']);
+        }
+
+        $set = ["`$colPlacas` = :placas"];
+        $upd = ['placas' => $placas, 'id' => $autoId];
+
+        if ($colModelo) {
+            $set[] = "`$colModelo` = :modelo";
+            $upd['modelo'] = $modelo !== '' ? $modelo : null;
+        }
+        if ($colColor) {
+            $set[] = "`$colColor` = :color";
+            $upd['color'] = $color !== '' ? ucfirst(strtolower($color)) : null;
+        }
+        if ($colTag) {
+            $set[] = "`$colTag` = :tag_id";
+            $upd['tag_id'] = $tagId !== '' ? $tagId : null;
+        }
+
+        $sql = "UPDATE `$table` SET " . implode(', ', $set) . " WHERE `$colId` = :id";
+        if ($colResid) {
+            $sql .= " AND `$colResid` = :rid";
+            $upd['rid'] = $residencialId;
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($upd);
+
+        json_out(true, [
+            'message' => 'Auto actualizado correctamente.',
         ]);
     }
 

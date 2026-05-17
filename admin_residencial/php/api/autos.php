@@ -14,6 +14,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/residencial_helpers.php';
 
 // Exigir autenticación y rol adecuado
 require_login();
@@ -79,6 +80,8 @@ if (!$table) {
     json_out(false, ['error' => 'No se encontró ninguna tabla de autos o vehículos.']);
 }
 
+resident_vehicle_access_schema_ensure($pdo, $table);
+
 /**
  * Obtiene metadatos de columnas para una tabla dada.
  *
@@ -125,6 +128,7 @@ $colUser      = pickCol($cols, ['residente_id', 'user_id', 'propietario_user_id'
 $colResid     = pickCol($cols, ['residencial_id', 'residencia_id', 'residential_id']);
 $colUnidad    = pickCol($cols, ['unidad_id', 'unit_id']);
 $colPlacas    = pickCol($cols, ['placas', 'placa', 'matricula']);
+$colTag       = pickCol($cols, ['tag_id']);
 $colModelo    = pickCol($cols, ['modelo', 'model', 'marca_modelo', 'descripcion_modelo']);
 $colColor     = pickCol($cols, ['color', 'colour']);
 $colActivo    = pickCol($cols, ['activo', 'active', 'estatus', 'status']);
@@ -247,6 +251,7 @@ if ($action === 'list_all') {
 // ---------- CREAR AUTO ----------
 if ($method === 'POST' && $action === 'create') {
     $placas = strtoupper(trim($_POST['placas'] ?? ''));
+    $tagId  = trim((string)($_POST['tag_id'] ?? ''));
     $modelo = trim($_POST['modelo'] ?? '');
     $color  = trim($_POST['color']  ?? '');
 
@@ -273,6 +278,11 @@ if ($method === 'POST' && $action === 'create') {
         $fields[] = $colModelo;
         $values[] = ':modelo';
         $insP['modelo'] = $modelo !== '' ? $modelo : null;
+    }
+    if ($colTag) {
+        $fields[] = $colTag;
+        $values[] = ':tag_id';
+        $insP['tag_id'] = $tagId !== '' ? $tagId : null;
     }
     if ($colColor) {
         $fields[] = $colColor;
@@ -306,6 +316,7 @@ if ($method === 'POST' && $action === 'create') {
 if ($method === 'POST' && $action === 'update') {
     $autoId = (int)($_POST['auto_id'] ?? 0);
     $placas = strtoupper(trim($_POST['placas'] ?? ''));
+    $tagId  = trim((string)($_POST['tag_id'] ?? ''));
     $modelo = trim($_POST['modelo'] ?? '');
     $color  = trim($_POST['color']  ?? '');
 
@@ -318,6 +329,10 @@ if ($method === 'POST' && $action === 'update') {
     if ($colModelo) {
         $updFields[]    = "$colModelo = :modelo";
         $updData['modelo'] = $modelo !== '' ? $modelo : null;
+    }
+    if ($colTag) {
+        $updFields[] = "$colTag = :tag_id";
+        $updData['tag_id'] = $tagId !== '' ? $tagId : null;
     }
     if ($colColor) {
         $updFields[]    = "$colColor = :color";

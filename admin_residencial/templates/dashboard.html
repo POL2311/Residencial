@@ -44,6 +44,166 @@
       .app-mobile-more {
         display: inline-flex !important;
       }
+      .mobile-dock-layer {
+        position: fixed;
+        inset-inline: 0;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 0.85rem);
+        z-index: 80;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+        transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+      }
+      .mobile-dock-hidden {
+        transform: translateY(1.1rem);
+        opacity: 0.72;
+      }
+      .mobile-floating-dock {
+        pointer-events: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem;
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(241,245,249,0.46) 100%);
+        border: 1px solid rgba(255,255,255,0.62);
+        box-shadow:
+          0 18px 42px rgba(15, 23, 42, 0.14),
+          inset 0 1px 0 rgba(255,255,255,0.42),
+          inset 0 -1px 0 rgba(148, 163, 184, 0.08);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+      }
+      .mobile-dock-item {
+        position: relative;
+        display: inline-flex;
+        min-width: 4.15rem;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.18rem;
+        border-radius: 999px;
+        padding: 0.58rem 0.72rem 0.54rem;
+        color: rgba(51, 65, 85, 0.92);
+        transition:
+          transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+          background-color 220ms ease,
+          box-shadow 220ms ease,
+          color 220ms ease,
+          opacity 220ms ease;
+      }
+      .mobile-dock-item svg {
+        height: 1.15rem;
+        width: 1.15rem;
+      }
+      .mobile-dock-item:hover {
+        transform: translateY(-1px);
+      }
+      .mobile-dock-item-label {
+        font-size: 0.67rem;
+        line-height: 1;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+      }
+      .mobile-dock-item-active {
+        color: rgba(15, 23, 42, 0.96);
+        background: rgba(255,255,255,0.48);
+        box-shadow:
+          0 10px 22px rgba(78, 114, 135, 0.15),
+          inset 0 0 0 1px rgba(255,255,255,0.4);
+        transform: translateY(-1px) scale(1.02);
+      }
+      .mobile-dock-item-active::after {
+        content: '';
+        position: absolute;
+        inset: auto 30% -0.16rem;
+        height: 0.18rem;
+        border-radius: 999px;
+        background: rgba(78, 114, 135, 0.76);
+        box-shadow: 0 0 12px rgba(78, 114, 135, 0.35);
+      }
+      .mobile-more-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 74;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.08), rgba(15, 23, 42, 0.28));
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 220ms ease;
+      }
+      .mobile-more-backdrop.is-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .mobile-more-sheet {
+        position: fixed;
+        left: 0.9rem;
+        right: 0.9rem;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 5.4rem);
+        z-index: 85;
+        border-radius: 1.9rem;
+        background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(248,250,252,0.75) 100%);
+        border: 1px solid rgba(255,255,255,0.72);
+        box-shadow: 0 26px 48px rgba(15, 23, 42, 0.18);
+        backdrop-filter: blur(28px) saturate(175%);
+        -webkit-backdrop-filter: blur(28px) saturate(175%);
+        transform: translateY(1rem) scale(0.985);
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 240ms ease,
+          transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .mobile-more-sheet.is-open {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+      }
+      .mobile-more-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+      }
+      .mobile-more-item {
+        display: flex;
+        min-height: 4.25rem;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.28rem;
+        border-radius: 1.15rem;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: rgba(255,255,255,0.56);
+        padding: 0.85rem 0.9rem;
+        color: rgb(30 41 59);
+        transition:
+          transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+          border-color 220ms ease,
+          background-color 220ms ease,
+          box-shadow 220ms ease;
+      }
+      .mobile-more-item:hover,
+      .mobile-more-item:active {
+        transform: translateY(-1px);
+        border-color: rgba(148, 163, 184, 0.45);
+        background: rgba(255,255,255,0.74);
+        box-shadow: 0 12px 22px rgba(15, 23, 42, 0.08);
+      }
+      .mobile-more-item svg {
+        height: 1.2rem;
+        width: 1.2rem;
+        color: rgb(78 114 135);
+      }
+      .mobile-more-item-title {
+        font-size: 0.83rem;
+        font-weight: 600;
+        line-height: 1.1;
+      }
+      .mobile-more-item-meta {
+        font-size: 0.67rem;
+        color: rgb(100 116 139);
+      }
     }
     @media (min-width: 768px) {
       .app-mobile-more {
@@ -108,9 +268,7 @@
 
     <!-- FOOTER -->
     <footer id="shellFooter" class="shrink-0 bg-[#F2F3F5]">
-    <div class="max-w-6xl mx-auto px-4 pb-5">
-      <!-- Reglamento pill -->
-        <!-- Pills Comunicados / Reglamento -->
+    <div class="hidden max-w-6xl mx-auto px-4 pb-5 md:block">
       <div class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:justify-end sm:items-center">
     <div id="operationalModeHint"
          class="hidden rounded-2xl border border-dashed border-[#2E5D73]/20 bg-white px-4 py-3 text-sm text-slate-600 sm:mr-auto">
@@ -281,6 +439,119 @@
 
 
 
+      </div>
+    </div>
+
+    <div class="md:hidden">
+      <div id="mobileMoreBackdrop" class="mobile-more-backdrop"></div>
+
+      <div id="mobileMoreSheet" class="mobile-more-sheet">
+        <div class="border-b border-white/55 px-4 py-3">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Accesos secundarios</div>
+              <div class="mt-1 text-base font-semibold text-slate-800">Más opciones</div>
+            </div>
+            <button id="btnCloseMobileMoreSheet"
+                    type="button"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/55 text-slate-700 shadow-sm">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="px-4 pb-4 pt-4">
+          <div id="mobileMoreGrid" class="mobile-more-grid">
+            <button type="button" data-view="unidades" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <div class="mobile-more-item-title">Unidades</div>
+              <div class="mobile-more-item-meta">Control de propiedades</div>
+            </button>
+
+            <button type="button" data-view="guardias" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <div class="mobile-more-item-title">Guardias</div>
+              <div class="mobile-more-item-meta">Equipo operativo</div>
+            </button>
+
+            <button type="button" data-view="autos" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 16l-1 3m11-3l1 3M5 16h14l-1.5-6.5A2 2 0 0 0 15.55 8H8.45a2 2 0 0 0-1.95 1.5L5 16Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 16.5h.01M16.5 16.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg>
+              <div class="mobile-more-item-title">Autos</div>
+              <div class="mobile-more-item-meta">Vehículos y tags</div>
+            </button>
+
+            <button type="button" data-view="personal_recurrente" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <div class="mobile-more-item-title">Personal</div>
+              <div class="mobile-more-item-meta">Recurrentes y QR</div>
+            </button>
+
+            <button type="button" data-view="visitantes_rapidos" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 10h14M7 14h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 4h14a2 2 0 0 1 2 2v13l-4-2-4 2-4-2-4 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+              <div class="mobile-more-item-title">Visitantes</div>
+              <div class="mobile-more-item-meta">Accesos rápidos</div>
+            </button>
+
+            <button type="button" data-view="materiales" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 7l9-4 9 4-9 4-9-4Z" stroke="currentColor" stroke-width="1.8"/><path d="M3 7v10l9 4 9-4V7" stroke="currentColor" stroke-width="1.8"/></svg>
+              <div class="mobile-more-item-title">Materiales</div>
+              <div class="mobile-more-item-meta">Permisos y catálogo</div>
+            </button>
+
+            <button type="button" data-view="solicitudes_pendientes" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 4h14a1 1 0 0 1 1 1v14l-3-2-3 2-3-2-3 2-3-2V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/></svg>
+              <div class="mobile-more-item-title">Pendientes</div>
+              <div class="mobile-more-item-meta">Solicitudes por revisar</div>
+            </button>
+
+            <button type="button" data-view="bitacora_operativa" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12M6 10h12M6 15h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 3h14a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/></svg>
+              <div class="mobile-more-item-title">Bitácora</div>
+              <div class="mobile-more-item-meta">Eventos operativos</div>
+            </button>
+
+            <button type="button" data-view="perfil" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <div class="mobile-more-item-title">Perfil</div>
+              <div class="mobile-more-item-meta">Datos de acceso</div>
+            </button>
+
+            <button id="mobileReglamentoShortcut" type="button" data-view="reglamento" data-dock-secondary="1" class="mobile-more-item hidden">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M9 9h10v10H9V9Z" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.8"/></svg>
+              <div class="mobile-more-item-title">Reglamento</div>
+              <div class="mobile-more-item-meta">Lineamientos del servicio</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mobileDockLayer" class="mobile-dock-layer">
+        <nav id="mobileFloatingDock" class="mobile-floating-dock" aria-label="Navegación principal móvil">
+          <button type="button" data-view="home" data-dock-primary-view="home" class="mobile-dock-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" stroke="currentColor" stroke-width="1.8"/></svg>
+            <span class="mobile-dock-item-label">Home</span>
+          </button>
+
+          <button type="button" data-view="residentes" data-dock-primary-view="residentes" class="mobile-dock-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 14a4 4 0 1 1 8 0" stroke="currentColor" stroke-width="1.8"/><path d="M3 21a6 6 0 0 1 18 0" stroke="currentColor" stroke-width="1.8"/></svg>
+            <span class="mobile-dock-item-label">Residentes</span>
+          </button>
+
+          <button type="button" data-view="incidencias" data-dock-primary-view="incidencias" class="mobile-dock-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 3h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 3h4l7 18H3L10 3Z" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span class="mobile-dock-item-label">Incidencias</span>
+          </button>
+
+          <button type="button" data-view="comunicados" data-dock-primary-view="comunicados" class="mobile-dock-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14v12H5z" stroke="currentColor" stroke-width="1.8"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="mobile-dock-item-label">Avisos</span>
+          </button>
+
+          <button id="btnOpenMobileMoreSheet" type="button" class="mobile-dock-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14M5 12h14M5 16h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="mobile-dock-item-label">Más</span>
+          </button>
+        </nav>
       </div>
     </div>
   </footer>

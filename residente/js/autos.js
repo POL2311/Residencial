@@ -64,6 +64,10 @@
             <label class="block text-xs text-slate-600 mb-1">Color</label>
             <input name="color" value="${escapeHtml(auto.color || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
           </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Tag ID</label>
+            <input value="${escapeHtml(auto.tag_id || '')}" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500" disabled>
+          </div>
         `;
         els.modal.classList.remove('hidden');
     }
@@ -86,6 +90,7 @@
                 <div><span class="text-slate-500">Placas:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.placas || 'Sin placas')}</span></div>
                 <div><span class="text-slate-500">Modelo:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.modelo || 'Sin modelo')}</span></div>
                 <div><span class="text-slate-500">Color:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.color || 'Sin color')}</span></div>
+                <div><span class="text-slate-500">Tag:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.tag_id || 'Sin tag')}</span></div>
               </div>
             </div>
             <div class="flex items-center gap-2">

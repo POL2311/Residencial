@@ -720,6 +720,9 @@
               <div class="text-xs text-slate-500">
                 ${escapeHtml(a.modelo || '—')} • ${escapeHtml(a.color || '—')}
               </div>
+              <div class="mt-2 text-xs text-slate-500">
+                Tag: <span class="font-medium text-slate-700">${escapeHtml(a.tag_id || 'Sin tag')}</span>
+              </div>
             </div>
           `).join('')}
         </div>
@@ -1279,6 +1282,16 @@
             </div>
 
             <div>
+              <label class="text-xs text-slate-500">Tag ID</label>
+              <input name="tag_id"
+                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                placeholder="Ej. TAG-001"
+                maxlength="120">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4">
+            <div>
               <label class="text-xs text-slate-500">Casa asignada</label>
               <input disabled
                 class="w-full mt-1 rounded-xl border bg-slate-100 px-4 py-2"
@@ -1313,6 +1326,7 @@
       const placas = normalizePlacas(fd.get('placas') || '');
       const modelo = String(fd.get('modelo') || '').trim();
       const color = String(fd.get('color') || '').trim();
+      const tagId = String(fd.get('tag_id') || '').trim();
 
       fd.set('placas', placas);
 
@@ -1328,6 +1342,11 @@
 
       if (color.length > 40) {
         showToast('El color no puede exceder 40 caracteres.', 'error');
+        return;
+      }
+
+      if (tagId.length > 120) {
+        showToast('El Tag ID no puede exceder 120 caracteres.', 'error');
         return;
       }
 

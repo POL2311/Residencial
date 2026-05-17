@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_bootstrap.php';
+require_once __DIR__ . '/../../../config/residencial_helpers.php';
 
 function report_period_config(string $raw): array
 {
@@ -150,6 +151,8 @@ function report_build_series(PDO $pdo, array $period): array
 
 try {
     $period = report_period_config((string)($_GET['period'] ?? $_POST['period'] ?? '30'));
+    $serviceId = (int)($_GET['service_id'] ?? $_POST['service_id'] ?? 0);
+    resident_vehicle_access_schema_ensure($pdo);
     $whereRange = '';
     $paramsRange = [];
 
@@ -274,6 +277,15 @@ try {
         ['label' => 'Rol más visible', 'value' => $topRole],
     ];
 
+    $accessFilters = [
+        'limit' => 120,
+        'service_id' => $serviceId > 0 ? $serviceId : null,
+    ];
+    if ($period['since'] instanceof DateTimeImmutable) {
+        $accessFilters['since'] = $period['since'];
+    }
+    $residentVehicleAccesses = resident_vehicle_access_list($pdo, $accessFilters);
+
     sa_json_out(true, [
         'data' => [
             'period' => [
@@ -284,9 +296,12 @@ try {
             'roles' => $roles,
             'latest_residenciales' => $latestResidenciales,
             'latest_users' => $latestUsers,
+            'services' => sa_fetch_services($pdo),
+            'selected_service_id' => $serviceId > 0 ? $serviceId : null,
             'summary' => $summary,
             'range_meta' => $rangeMeta,
             'series' => report_build_series($pdo, $period),
+            'resident_vehicle_accesses' => $residentVehicleAccesses,
         ],
     ]);
 } catch (Throwable $e) {

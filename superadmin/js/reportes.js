@@ -7,6 +7,7 @@
     const PER_PAGE = 3;
     const els = {
         alert: document.getElementById('reportesAlert'),
+        serviceFilter: document.getElementById('reportServiceFilter'),
         period: document.getElementById('reportPeriod'),
         btnExportCsv: document.getElementById('btnExportReportCsv'),
         btnPrint: document.getElementById('btnPrintReport'),
@@ -29,12 +30,15 @@
         residencialesPagination: document.getElementById('reportResidencialesPagination'),
         users: document.getElementById('reportUsers'),
         usersPagination: document.getElementById('reportUsersPagination'),
+        residentAccesses: document.getElementById('reportResidentAccesses'),
+        residentAccessesPagination: document.getElementById('reportResidentAccessesPagination'),
     };
 
     const state = {
         data: null,
         residencialesPage: 1,
         usersPage: 1,
+        accessesPage: 1,
     };
 
     function escapeHtml(value) {
@@ -286,6 +290,75 @@
         renderPager(els.usersPagination, items, state.usersPage, 'users');
     }
 
+    function renderServiceFilter(services = [], selectedId = null) {
+        if (!els.serviceFilter) return;
+        const currentValue = selectedId ? String(selectedId) : '';
+        els.serviceFilter.innerHTML = `
+            <option value="">Todos los residenciales</option>
+            ${services.map((service) => `
+                <option value="${service.id}" ${String(service.id) === currentValue ? 'selected' : ''}>
+                    ${escapeHtml(service.label || service.nombre || `Residencial ${service.id}`)}
+                </option>
+            `).join('')}
+        `;
+    }
+
+    function renderResidentAccessesTable(items = state.data?.resident_vehicle_accesses || []) {
+        const { visible, page } = getPageInfo(items, state.accessesPage);
+        state.accessesPage = page;
+
+        els.residentAccesses.innerHTML = items.length ? `
+            <div class="space-y-3 md:hidden">
+              ${visible.map((row) => `
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-slate-800">${escapeHtml(row.placas || 'Sin placas')}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(row.residencial_nombre || 'Sin residencial')}</div>
+                    </div>
+                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${row.tipo_movimiento === 'ingreso' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">${row.tipo_movimiento === 'ingreso' ? 'Ingreso' : 'Egreso'}</span>
+                  </div>
+                  <dl class="mt-4 grid grid-cols-1 gap-3 text-sm">
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-400">Residente</dt><dd class="mt-1 text-slate-700">${escapeHtml(row.residente_nombre || 'Sin residente')}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-400">Unidad</dt><dd class="mt-1 text-slate-700">${escapeHtml(row.unidad_clave || 'Sin unidad')}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-400">Tag</dt><dd class="mt-1 text-slate-700">${escapeHtml(row.tag_id || 'Sin tag')}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-400">Fecha</dt><dd class="mt-1 text-slate-700">${escapeHtml(row.fecha_hora || '—')}</dd></div>
+                  </dl>
+                </article>
+              `).join('')}
+            </div>
+            <div class="hidden md:block">
+              <div class="grid grid-cols-[minmax(170px,1fr)_minmax(170px,1fr)_140px_150px_170px_150px] items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div>Residencial</div>
+                <div>Residente / unidad</div>
+                <div>Placas</div>
+                <div>Tag</div>
+                <div>Movimiento</div>
+                <div>Fecha</div>
+              </div>
+              <div class="mt-3 space-y-3">
+                ${visible.map((row) => `
+                  <article class="grid grid-cols-[minmax(170px,1fr)_minmax(170px,1fr)_140px_150px_170px_150px] items-center gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-slate-800">${escapeHtml(row.residencial_nombre || 'Sin residencial')}</div>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm text-slate-700">${escapeHtml(row.residente_nombre || 'Sin residente')}</div>
+                      <div class="mt-1 text-xs text-slate-500">${escapeHtml(row.unidad_clave || 'Sin unidad')}</div>
+                    </div>
+                    <div class="text-sm text-slate-700">${escapeHtml(row.placas || 'Sin placas')}</div>
+                    <div class="text-sm text-slate-700">${escapeHtml(row.tag_id || 'Sin tag')}</div>
+                    <div><span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${row.tipo_movimiento === 'ingreso' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">${row.tipo_movimiento === 'ingreso' ? 'Ingreso' : 'Egreso'}</span></div>
+                    <div class="text-sm text-slate-500">${escapeHtml(row.fecha_hora || '—')}</div>
+                  </article>
+                `).join('')}
+              </div>
+            </div>
+        ` : `<div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Sin accesos de residentes en el rango seleccionado.</div>`;
+
+        renderPager(els.residentAccessesPagination, items, state.accessesPage, 'accesses');
+    }
+
     function downloadCsv(filename, rows) {
         const csv = rows.map((row) => row.map((cell) => {
             const text = String(cell ?? '');
@@ -318,6 +391,18 @@
             ['Usuarios visibles'],
             ['Nombre', 'Email', 'Rol', 'Estado', 'Creado'],
             ...userPage.map((row) => [row.name, row.email, row.rol, Number(row.is_active || 0) === 1 ? 'Activo' : 'Inactivo', row.created_at || '']),
+            [],
+            ['Accesos de residentes visibles'],
+            ['Residencial', 'Residente', 'Unidad', 'Placas', 'Tag', 'Movimiento', 'Fecha'],
+            ...getPageInfo(state.data.resident_vehicle_accesses || [], state.accessesPage).visible.map((row) => [
+                row.residencial_nombre || '',
+                row.residente_nombre || '',
+                row.unidad_clave || '',
+                row.placas || '',
+                row.tag_id || '',
+                row.tipo_movimiento || '',
+                row.fecha_hora || '',
+            ]),
         ];
         downloadCsv(`reporte-superadmin-${state.data.period?.value || 'actual'}.csv`, rows);
     }
@@ -410,18 +495,24 @@
         renderSeriesChart(data.series || {});
         renderRolesChart(data.roles || []);
         renderRoles(data.roles || []);
+        renderServiceFilter(data.services || [], data.selected_service_id || null);
         renderResidencialesTable(data.latest_residenciales || []);
         renderUsersTable(data.latest_users || []);
+        renderResidentAccessesTable(data.resident_vehicle_accesses || []);
     }
 
     async function load(resetPages = true) {
         if (resetPages) {
             state.residencialesPage = 1;
             state.usersPage = 1;
+            state.accessesPage = 1;
         }
 
         const url = new URL(API, window.location.origin);
         url.searchParams.set('period', els.period?.value || '30');
+        if (els.serviceFilter?.value) {
+            url.searchParams.set('service_id', els.serviceFilter.value);
+        }
         const res = await fetch(url.toString(), {
             credentials: 'same-origin',
             headers: { Accept: 'application/json' },
@@ -447,15 +538,28 @@
         }
 
         const { totalPages } = getPageInfo(state.data.latest_users || [], state.usersPage);
-        if (action === 'prev' && state.usersPage > 1) state.usersPage -= 1;
-        if (action === 'next' && state.usersPage < totalPages) state.usersPage += 1;
-        renderUsersTable(state.data.latest_users || []);
+        if (group === 'users') {
+            if (action === 'prev' && state.usersPage > 1) state.usersPage -= 1;
+            if (action === 'next' && state.usersPage < totalPages) state.usersPage += 1;
+            renderUsersTable(state.data.latest_users || []);
+            return;
+        }
+
+        const accessPages = getPageInfo(state.data.resident_vehicle_accesses || [], state.accessesPage).totalPages;
+        if (action === 'prev' && state.accessesPage > 1) state.accessesPage -= 1;
+        if (action === 'next' && state.accessesPage < accessPages) state.accessesPage += 1;
+        renderResidentAccessesTable(state.data.resident_vehicle_accesses || []);
     }
 
     els.residencialesPagination?.addEventListener('click', handlePagerClick);
     els.usersPagination?.addEventListener('click', handlePagerClick);
+    els.residentAccessesPagination?.addEventListener('click', handlePagerClick);
 
     els.period?.addEventListener('change', () => {
+        load(true).catch((err) => showAlert('error', err.message || 'No se pudieron actualizar los reportes.'));
+    });
+
+    els.serviceFilter?.addEventListener('change', () => {
         load(true).catch((err) => showAlert('error', err.message || 'No se pudieron actualizar los reportes.'));
     });
 

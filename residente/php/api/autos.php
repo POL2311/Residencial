@@ -10,6 +10,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/residencial_helpers.php';
 
 require_login();
 require_role(['residente']);
@@ -165,6 +166,8 @@ if (!$table) {
   json_out(false, ['error' => 'No existe ninguna tabla de autos/vehículos (probé: ' . implode(', ', $candidateTables) . ').']);
 }
 
+resident_vehicle_access_schema_ensure($pdo, $table);
+
 $meta = getColsMeta($pdo, $table);
 $cols = array_keys($meta);
 
@@ -174,6 +177,7 @@ $colUser      = pickCol($cols, ['residente_id','user_id','propietario_user_id','
 $colResid     = pickCol($cols, ['residencial_id','residencia_id','residential_id']);
 $colUnidad    = pickCol($cols, ['unidad_id','unit_id']);
 $colPlacas    = pickCol($cols, ['placas','placa','matricula']);
+$colTag       = pickCol($cols, ['tag_id']);
 $colModelo    = pickCol($cols, ['modelo','model','marca_modelo','descripcion_modelo']);
 $colColor     = pickCol($cols, ['color','colour']);
 $colActivo    = pickCol($cols, ['activo','active','estatus','status']);
@@ -210,11 +214,13 @@ $whereSql = "WHERE " . implode(' AND ', $whereParts);
 
 function listAutos(PDO $pdo, string $table, string $whereSql, array $params,
                    string $colId, string $colPlacas, ?string $colModelo, ?string $colColor): array {
+  global $colTag;
 
   $select = [
     "$colId AS id",
     "$colPlacas AS placas",
   ];
+  $select[] = $colTag ? "$colTag AS tag_id" : "NULL AS tag_id";
   $select[] = $colModelo ? "$colModelo AS modelo" : "NULL AS modelo";
   $select[] = $colColor  ? "$colColor  AS color"  : "NULL AS color";
 
@@ -227,6 +233,7 @@ function listAutos(PDO $pdo, string $table, string $whereSql, array $params,
     return [
       'id'     => (int)($r['id'] ?? 0),
       'placas' => (string)($r['placas'] ?? ''),
+      'tag_id' => (string)($r['tag_id'] ?? ''),
       'modelo' => (string)($r['modelo'] ?? ''),
       'color'  => (string)($r['color'] ?? ''),
     ];

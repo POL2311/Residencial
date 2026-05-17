@@ -1,0 +1,61 @@
+<div id="adminAutosView" class="space-y-5">
+  <div id="adminAutosAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">Control vehicular</div>
+        <h2 class="mt-1 text-3xl font-semibold text-slate-800">Autos</h2>
+        <p class="mt-1 text-sm text-slate-500">Consulta autos registrados y su Tag ID por residente.</p>
+      </div>
+      <button id="btnRefreshAdminAutos" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+        Refrescar
+      </button>
+    </div>
+  </section>
+
+  <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div>
+        <div class="text-sm font-semibold text-slate-800">Autos registrados</div>
+        <div class="text-xs text-slate-500">Edita placas, modelo, color y Tag ID.</div>
+      </div>
+    </div>
+    <div id="adminAutosList" class="space-y-3"></div>
+  </section>
+
+  <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <div class="text-sm font-semibold text-slate-800">Accesos de residentes</div>
+        <div class="text-xs text-slate-500">Histórico de ingresos y egresos detectados por tag.</div>
+      </div>
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <select id="residentAccessTypeFilter" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">
+          <option value="">Todos</option>
+          <option value="ingreso">Ingresos</option>
+          <option value="egreso">Egresos</option>
+        </select>
+      </div>
+    </div>
+    <div id="residentAccessList" class="space-y-3"></div>
+  </section>
+
+  <div id="adminAutoEditModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+    <div class="flex min-h-full items-end justify-center p-0 md:items-center md:p-4">
+      <div class="w-full rounded-t-2xl bg-white shadow-2xl md:max-w-lg md:rounded-2xl">
+        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <div id="adminAutoEditModalTitle" class="text-sm font-semibold text-slate-800">Editar auto</div>
+          <button id="btnCloseAdminAutoModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+        </div>
+        <form id="adminAutoEditForm" class="space-y-3 p-4">
+          <div id="adminAutoEditBody" class="space-y-3"></div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button id="btnCancelAdminAutoModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,6 +10,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/residencial_helpers.php';
 
 require_login();
 require_role(['guardia', 'super_admin']);
@@ -53,6 +54,8 @@ function getGuardResidencialId(PDO $pdo, int $uid): int {
 
 $residencial_id = getGuardResidencialId($pdo, $uid);
 if ($residencial_id <= 0) json_out(false, ['error' => 'Tu usuario guardia no está asignado a un residencial.'], 403);
+
+resident_vehicle_access_schema_ensure($pdo, 'autos');
 
 function listItems(PDO $pdo, int $rid, array $filters = []): array {
   $where = ["a.residencial_id = :rid", "a.activo = 1"];
