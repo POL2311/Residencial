@@ -105,13 +105,13 @@
     if (!state.banners.length) {
       els.comTrack.innerHTML = `
         <div class="min-w-full">
-          <div class="h-64 md:h-80 bg-slate-100 flex flex-col items-center justify-center text-slate-600 px-6 text-center">
+          <div class="flex h-56 flex-col items-center justify-center bg-slate-100 px-6 text-center text-slate-600 md:h-72">
             <div class="text-sm font-semibold text-slate-700">No hay comunicados activos.</div>
-            <div class="mt-2 text-xs leading-5 text-slate-500 max-w-md">
+            <div class="mt-2 max-w-md text-xs leading-5 text-slate-500">
               Revisa que estén en <b>Publicado</b>, con <b>fecha de publicación</b> menor o igual a hoy y que la <b>expiración</b> no esté vencida.
             </div>
             <button id="homeGoComunicados"
-              class="mt-4 inline-flex items-center justify-center rounded-full bg-[#2E5D73] px-4 py-2 text-xs font-semibold text-white hover:opacity-95">
+              class="app-admin-primary mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold">
               Ir a Comunicados
             </button>
           </div>
@@ -133,13 +133,13 @@
         : 'background:#cbd5e1;';
 
       slide.innerHTML = `
-        <div class="h-64 md:h-80 flex items-end" style="${bgImage}">
-          <div class="w-full bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
-            <span class="inline-block rounded-full bg-white/20 px-3 py-1 text-xs mb-3">
+        <div class="flex h-56 items-end md:h-72" style="${bgImage}">
+          <div class="w-full bg-gradient-to-t from-slate-950/72 via-slate-900/30 to-white/0 p-5 text-white md:p-6">
+            <span class="mb-3 inline-block rounded-full border border-white/15 bg-white/16 px-3 py-1 text-xs backdrop-blur-md">
               ${escapeHtml(b.categoria || 'General')}
             </span>
-            <h3 class="text-2xl font-bold">${escapeHtml(b.titulo || '')}</h3>
-            <p class="text-sm text-white/85 mt-2">
+            <h3 class="text-[1.85rem] font-semibold leading-tight md:text-[2.1rem]">${escapeHtml(b.titulo || '')}</h3>
+            <p class="mt-2 max-w-xl text-sm text-white/84 md:text-[0.95rem]">
               ${escapeHtml(b.subtitulo || '')}
             </p>
           </div>
@@ -263,7 +263,7 @@
 
     if (!state.servicios.length) {
       els.srvScroller.innerHTML = `
-        <div class="min-w-[280px] rounded-3xl bg-white shadow border border-slate-200 p-6 text-slate-500">
+        <div class="min-w-[280px] rounded-3xl border border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
           No hay servicios activos.
         </div>
       `;
@@ -272,7 +272,7 @@
 
     state.servicios.forEach((s) => {
       const card = document.createElement('div');
-      card.className = 'min-w-[280px] rounded-3xl bg-white shadow border border-slate-200 overflow-hidden';
+      card.className = 'min-w-[280px] overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm';
 
       const bgImage = s.imagen_url
         ? `background-image:url('${escapeHtml(resolvePublicUrl(s.imagen_url))}'); background-size:cover; background-position:center;`
@@ -282,7 +282,7 @@
       const telDigits = String(s.telefono || '').replace(/\D+/g, '');
 
       card.innerHTML = `
-        <div class="h-40" style="${bgImage}"></div>
+        <div class="h-32 md:h-40" style="${bgImage}"></div>
         <div class="p-4">
           <div class="flex items-start justify-between gap-3">
             <div>
@@ -298,29 +298,29 @@
                   </span>
                 ` : ''}
               </div>
-              <h3 class="mt-2 font-semibold text-slate-800">${escapeHtml(s.nombre || '')}</h3>
+              <h3 class="mt-2 text-lg font-semibold text-slate-800">${escapeHtml(s.nombre || '')}</h3>
             </div>
           </div>
-          <p class="text-sm text-slate-500 mt-1">${escapeHtml(s.descripcion || '')}</p>
+          <p class="mt-1 text-sm leading-6 text-slate-500">${escapeHtml(s.descripcion || '')}</p>
 
-          <div class="flex flex-wrap gap-2 mt-4">
+          <div class="mt-4 flex flex-wrap gap-2">
             ${telDigits ? `
               <a href="tel:${escapeHtml(telDigits)}"
-                class="inline-flex items-center px-3 py-2 rounded-xl border text-sm hover:bg-slate-50">
+                class="app-admin-ghost inline-flex items-center rounded-xl px-3 py-2 text-sm">
                 Llamar
               </a>
             ` : ''}
 
             ${waDigits ? `
               <a href="https://wa.me/52${escapeHtml(waDigits)}" target="_blank" rel="noopener noreferrer"
-                class="inline-flex items-center px-3 py-2 rounded-xl bg-emerald-100 text-emerald-700 text-sm hover:bg-emerald-200">
+                class="inline-flex items-center rounded-xl bg-emerald-100 px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-200">
                 WhatsApp
               </a>
             ` : ''}
 
             ${s.link_url ? `
               <a href="${escapeHtml(s.link_url)}" target="_blank" rel="noopener noreferrer"
-                class="inline-flex items-center px-3 py-2 rounded-xl bg-sky-100 text-sky-700 text-sm hover:bg-sky-200">
+                class="inline-flex items-center rounded-xl bg-sky-100 px-3 py-2 text-sm text-sky-700 hover:bg-sky-200">
                 Ver más
               </a>
             ` : ''}

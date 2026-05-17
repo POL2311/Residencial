@@ -1,11 +1,13 @@
-<div id="incidenciasView" class="space-y-4">
+<div id="incidenciasView" class="space-y-5">
   <div id="incidenciasAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
 
-  <div>
-    <h1 class="text-2xl font-semibold text-slate-800">Incidencias</h1>
+  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="app-admin-kicker">Operación y seguridad</div>
+    <h1 class="app-admin-title">Incidencias</h1>
+    <p class="app-admin-subtitle">Da seguimiento a reportes del residencial con una vista más compacta y enfocada en prioridad y estado.</p>
   </div>
 
-  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
     <div class="flex items-center gap-3">
       <label class="text-sm">Mostrar:</label>
@@ -25,7 +27,7 @@
         class="w-full md:w-[340px] rounded-xl border px-4 py-2 text-sm"
       />
       <button id="btnAddIncidencia"
-        class="bg-[#2E5D73] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-95 whitespace-nowrap">
+        class="app-admin-primary whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold">
         + Reportar
       </button>
     </div>

@@ -517,35 +517,14 @@
 
     visibles.forEach((c) => {
       const card = document.createElement('div');
-      card.className = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm';
-
-      const imageUrl = resolvePublicUrl(c.imagen_url);
-      const imageHtml = imageUrl
-        ? `
-            <div class="mb-4 hidden overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 md:block">
-              <img src="${escapeHtml(imageUrl)}" alt=""
-                   class="h-44 w-full object-cover" loading="lazy" />
-            </div>
-          `
-        : '';
+      card.className = 'rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm';
 
       const hb = homeBadge(c);
 
       card.innerHTML = `
-        <div class="flex flex-col md:flex-row md:justify-between gap-4">
+        <div class="flex flex-col gap-4 md:flex-row md:justify-between">
           <div class="flex-1 min-w-0">
-            ${imageHtml}
-            <h3 class="font-semibold text-2xl text-slate-900">${escapeHtml(c.titulo || '—')}</h3>
-
-            <div class="text-sm text-slate-500 mt-2">
-              ${escapeHtml(c.tipo || '—')} · ${escapeHtml(c.fecha_publicacion || '—')}
-            </div>
-
-            <p class="text-base text-slate-700 mt-4 whitespace-pre-line break-words">
-              ${escapeHtml(c.mensaje || '')}
-            </p>
-
-            <div class="flex gap-2 mt-4 flex-wrap">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="inline-block px-3 py-1 text-xs rounded-full ${badge(c.prioridad)}">
                 ${escapeHtml(c.prioridad || '')}
               </span>
@@ -556,6 +535,15 @@
                 ${escapeHtml(hb.label)}
               </span>
             </div>
+            <h3 class="mt-4 text-[1.65rem] font-semibold leading-tight text-slate-900 md:text-2xl">${escapeHtml(c.titulo || '—')}</h3>
+
+            <div class="mt-2 text-sm text-slate-500">
+              ${escapeHtml(c.tipo || '—')} · ${escapeHtml(c.fecha_publicacion || '—')}
+            </div>
+
+            <p class="mt-4 max-w-3xl text-[0.98rem] leading-7 text-slate-700 whitespace-pre-line break-words">
+              ${escapeHtml(c.mensaje || '')}
+            </p>
           </div>
 
           <div class="flex md:flex-col gap-2 md:items-end">

@@ -3,6 +3,157 @@
   <style>
     .app-dashboard-shell {
       min-height: 100dvh;
+      background:
+        radial-gradient(circle at top left, rgba(186, 230, 253, 0.42), transparent 32%),
+        radial-gradient(circle at top right, rgba(165, 243, 252, 0.24), transparent 22%),
+        linear-gradient(180deg, #f8fbff 0%, #f3f7fb 32%, #eef3f8 100%);
+      color: rgb(15 23 42);
+    }
+    #shellHeader {
+      background: transparent;
+      color: rgb(15 23 42);
+      box-shadow: none;
+    }
+    #dashboardBody {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      background: transparent;
+    }
+    #dashboardBody::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 12% 16%, rgba(255,255,255,0.92), transparent 26%),
+        radial-gradient(circle at 84% 10%, rgba(191, 219, 254, 0.2), transparent 18%),
+        radial-gradient(circle at 50% 100%, rgba(255,255,255,0.8), transparent 30%);
+    }
+    #dashboardViewMount {
+      position: relative;
+      z-index: 1;
+    }
+    #dashboardViewMount > [id$="View"] {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    #dashboardViewMount .rounded-\[1\.75rem\].border.border-slate-200.bg-white,
+    #dashboardViewMount .rounded-2xl.border.border-slate-200.bg-white,
+    #dashboardViewMount .rounded-2xl.border.border-slate-200.bg-white\/70,
+    #dashboardViewMount .rounded-3xl.bg-white.shadow.border.border-slate-200,
+    #dashboardViewMount article.rounded-\[1\.75rem\].border.border-slate-200.bg-white,
+    #dashboardViewMount article.rounded-2xl.border.border-slate-200.bg-white {
+      border-color: rgba(226, 232, 240, 0.82);
+      background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(248,250,252,0.8) 100%);
+      box-shadow:
+        0 18px 40px rgba(148, 163, 184, 0.12),
+        0 4px 12px rgba(15, 23, 42, 0.04),
+        inset 0 1px 0 rgba(255,255,255,0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    #dashboardViewMount .rounded-2xl.bg-slate-50,
+    #dashboardViewMount .rounded-xl.bg-slate-50,
+    #dashboardViewMount .bg-slate-50 {
+      background: rgba(248, 250, 252, 0.76);
+    }
+    #dashboardViewMount input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    #dashboardViewMount select,
+    #dashboardViewMount textarea {
+      border-color: rgba(203, 213, 225, 0.95);
+      background: rgba(255,255,255,0.82);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+      transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease, transform 180ms ease;
+    }
+    #dashboardViewMount input:focus,
+    #dashboardViewMount select:focus,
+    #dashboardViewMount textarea:focus {
+      outline: none;
+      border-color: rgba(78, 114, 135, 0.44);
+      box-shadow:
+        0 0 0 4px rgba(78, 114, 135, 0.1),
+        inset 0 1px 0 rgba(255,255,255,0.76);
+      background: rgba(255,255,255,0.95);
+    }
+    #dashboardViewMount button,
+    #dashboardViewMount a {
+      transition:
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 220ms ease,
+        background-color 220ms ease,
+        border-color 220ms ease,
+        opacity 220ms ease;
+    }
+    #dashboardViewMount button:hover,
+    #dashboardViewMount a:hover {
+      transform: translateY(-1px);
+    }
+    #dashboardViewMount .app-admin-kicker {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgb(148 163 184);
+    }
+    #dashboardViewMount .app-admin-title {
+      margin-top: 0.35rem;
+      font-size: clamp(1.75rem, 2vw, 2.35rem);
+      line-height: 1.05;
+      font-weight: 700;
+      color: rgb(15 23 42);
+    }
+    #dashboardViewMount .app-admin-subtitle {
+      margin-top: 0.55rem;
+      max-width: 44rem;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: rgb(100 116 139);
+    }
+    #dashboardViewMount .app-admin-primary {
+      background: linear-gradient(180deg, rgba(67, 108, 129, 0.98) 0%, rgba(46, 93, 115, 1) 100%);
+      color: white;
+      box-shadow: 0 14px 26px rgba(46, 93, 115, 0.18);
+    }
+    #dashboardViewMount .app-admin-primary:hover {
+      box-shadow: 0 18px 30px rgba(46, 93, 115, 0.22);
+    }
+    #dashboardViewMount .app-admin-ghost {
+      border-color: rgba(203, 213, 225, 0.9);
+      background: rgba(255,255,255,0.76);
+      color: rgb(51 65 85);
+    }
+    #dashboardViewMount .app-admin-empty {
+      border: 1px dashed rgba(203, 213, 225, 0.92);
+      background: linear-gradient(180deg, rgba(255,255,255,0.64) 0%, rgba(248,250,252,0.72) 100%);
+      color: rgb(100 116 139);
+    }
+    #shellFooter {
+      background: transparent;
+    }
+    #shellFooter .dashBtn {
+      overflow: hidden;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      background: linear-gradient(180deg, rgba(96, 133, 153, 0.95) 0%, rgba(78, 114, 135, 0.98) 100%);
+      box-shadow:
+        0 18px 32px rgba(148, 163, 184, 0.14),
+        inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+    #shellFooter .dashBtn[data-view="incidencias"] {
+      background: linear-gradient(180deg, rgba(248, 113, 113, 0.95) 0%, rgba(239, 90, 90, 0.98) 100%);
+    }
+    #shellFooter .dashBtn:hover {
+      box-shadow:
+        0 24px 38px rgba(148, 163, 184, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.24);
+    }
+    #shellFooter #btnReglamento {
+      border: 1px solid rgba(255,255,255,0.5);
+      background: linear-gradient(180deg, rgba(100, 116, 139, 0.9) 0%, rgba(71, 85, 105, 0.96) 100%);
+      box-shadow: 0 16px 30px rgba(148, 163, 184, 0.16);
     }
     @media (max-width: 767px) {
       .app-dashboard-shell {
@@ -10,25 +161,29 @@
         overflow: hidden;
       }
       #shellHeader {
-        flex: 0 0 25vh;
-        min-height: 25vh;
-        max-height: 25vh;
-        overflow-y: auto;
+        flex: 0 0 auto;
+        min-height: auto;
+        max-height: none;
+        overflow: visible;
       }
       #dashboardBody {
-        flex: 0 0 50vh !important;
-        min-height: 50vh;
-        max-height: 50vh;
+        flex: 1 1 auto !important;
+        min-height: 0;
+        max-height: none;
         overflow-y: auto;
+        overscroll-behavior: contain;
       }
       #dashboardViewMount {
-        min-height: 0;
+        min-height: 100%;
+        padding-top: 0.65rem;
+        padding-bottom: 7.1rem;
       }
       #shellFooter {
-        flex: 0 0 25vh;
-        min-height: 25vh;
-        max-height: 25vh;
-        overflow-y: auto;
+        flex: 0 0 auto;
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
+        background: transparent;
       }
       .app-mobile-scroll-list {
         max-height: none;
@@ -47,7 +202,7 @@
       .mobile-dock-layer {
         position: fixed;
         inset-inline: 0;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 0.85rem);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
         z-index: 80;
         display: flex;
         justify-content: center;
@@ -65,14 +220,14 @@
         gap: 0.4rem;
         padding: 0.45rem;
         border-radius: 999px;
-        background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(241,245,249,0.46) 100%);
-        border: 1px solid rgba(255,255,255,0.62);
+        background: linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(243,247,252,0.62) 100%);
+        border: 1px solid rgba(255,255,255,0.76);
         box-shadow:
-          0 18px 42px rgba(15, 23, 42, 0.14),
+          0 22px 44px rgba(148, 163, 184, 0.24),
           inset 0 1px 0 rgba(255,255,255,0.42),
           inset 0 -1px 0 rgba(148, 163, 184, 0.08);
-        backdrop-filter: blur(22px) saturate(170%);
-        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        backdrop-filter: blur(26px) saturate(170%);
+        -webkit-backdrop-filter: blur(26px) saturate(170%);
       }
       .mobile-dock-item {
         position: relative;
@@ -204,6 +359,19 @@
         font-size: 0.67rem;
         color: rgb(100 116 139);
       }
+      #dashboardViewMount .app-admin-title {
+        font-size: 1.55rem;
+      }
+      #dashboardViewMount .app-admin-subtitle {
+        font-size: 0.9rem;
+        line-height: 1.55;
+      }
+      #dashboardViewMount .rounded-\[1\.75rem\].border.border-slate-200.bg-white,
+      #dashboardViewMount .rounded-2xl.border.border-slate-200.bg-white,
+      #dashboardViewMount article.rounded-\[1\.75rem\].border.border-slate-200.bg-white,
+      #dashboardViewMount article.rounded-2xl.border.border-slate-200.bg-white {
+        border-radius: 1.5rem;
+      }
     }
     @media (min-width: 768px) {
       .app-mobile-more {
@@ -213,42 +381,42 @@
   </style>
 
   <!-- HEADER -->
-  <header id="shellHeader" class="shrink-0 bg-[#2E5D73] text-white shadow-lg">
-    <div class="max-w-6xl mx-auto px-3 py-3 sm:px-4">
-      <div class="overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/10 shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-md">
-        <div class="border-b border-white/10 px-3 py-3 sm:px-4">
+  <header id="shellHeader" class="shrink-0 text-slate-900">
+    <div class="mx-auto max-w-6xl px-3 pb-1 pt-3 sm:px-4 sm:pb-2 sm:pt-4">
+      <div class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/60 shadow-[0_26px_60px_rgba(148,163,184,0.18)] backdrop-blur-2xl">
+        <div class="px-4 py-4 sm:px-5 sm:py-4">
           <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div class="flex min-w-0 items-start gap-3">
-              <div class="h-10 w-10 shrink-0 rounded-full bg-[#E9E3D9] p-0.5 shadow sm:h-11 sm:w-11">
+              <div class="h-10 w-10 shrink-0 rounded-[1.1rem] bg-white p-0.5 shadow-[0_10px_24px_rgba(148,163,184,0.22)] sm:h-11 sm:w-11">
                 <img
                   id="systemLogoImg"
                   src="../../assets/img/logo_asher.png"
                   alt="Logo del sistema"
-                  class="h-full w-full rounded-full object-cover"
+                  class="h-full w-full rounded-[0.95rem] object-cover"
                   loading="lazy"
                 />
               </div>
               <div class="min-w-0">
-                <div class="text-[10px] uppercase tracking-[0.24em] text-white/60">Administración residencial</div>
-                <div id="residentName" class="mt-1 truncate text-xl font-semibold leading-tight sm:text-2xl">—</div>
-                <div id="residentAddress" class="mt-1 text-sm leading-relaxed text-white/82">—</div>
+                <div class="text-[10px] uppercase tracking-[0.24em] text-slate-400">Administración residencial</div>
+                <div id="residentName" class="mt-1 truncate text-xl font-semibold leading-tight text-slate-900 sm:text-2xl">—</div>
+                <div id="residentAddress" class="mt-1 text-sm leading-relaxed text-slate-500">—</div>
               </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 lg:justify-end">
-              <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/10 px-3 py-2 text-xs text-white/80">
-                <span class="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(110,231,183,0.18)]"></span>
-                <span class="font-medium text-white/85">Sistema activo</span>
+              <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/80 px-3 py-2 text-xs text-emerald-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"></span>
+                <span class="font-medium">Sistema activo</span>
               </div>
               <a id="btnEditAddress"
                       href="#perfil"
                       data-view="perfil"
-                      class="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-medium text-white/90 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/20 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                      class="inline-flex items-center rounded-full border border-slate-200 bg-white/70 px-3 py-2 text-xs font-medium text-slate-700 shadow-[0_10px_24px_rgba(148,163,184,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300">
                 Editar información
               </a>
               <a id="logoutLink"
                  href="../../logout.php"
-                 class="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/20 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                 class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-sm text-slate-700 shadow-[0_10px_24px_rgba(148,163,184,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300">
                 Cerrar sesión
               </a>
             </div>
@@ -261,13 +429,13 @@
   </header>
 
   <!-- BODY -->
-  <main id="dashboardBody" class="flex-1 overflow-y-auto bg-[#F2F3F5]">
-    <div id="dashboardViewMount" class="max-w-6xl mx-auto min-h-[60vh] px-4 py-4">
+  <main id="dashboardBody" class="relative flex-1 overflow-y-auto">
+    <div id="dashboardViewMount" class="mx-auto min-h-[60vh] max-w-6xl px-3 pb-28 pt-2 sm:px-4 sm:pb-32 sm:pt-3">
     </div>
   </main>
 
     <!-- FOOTER -->
-    <footer id="shellFooter" class="shrink-0 bg-[#F2F3F5]">
+    <footer id="shellFooter" class="shrink-0 bg-transparent">
     <div class="hidden max-w-6xl mx-auto px-4 pb-5 md:block">
       <div class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:justify-end sm:items-center">
     <div id="operationalModeHint"
