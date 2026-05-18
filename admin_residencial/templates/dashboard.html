@@ -3,10 +3,7 @@
   <style>
     .app-dashboard-shell {
       min-height: 100dvh;
-      background:
-        radial-gradient(circle at top left, rgba(186, 230, 253, 0.42), transparent 32%),
-        radial-gradient(circle at top right, rgba(165, 243, 252, 0.24), transparent 22%),
-        linear-gradient(180deg, #f8fbff 0%, #f3f7fb 32%, #eef3f8 100%);
+      background: #f4f7fb;
       color: rgb(15 23 42);
     }
     #shellHeader {
@@ -27,10 +24,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background:
-        radial-gradient(circle at 12% 16%, rgba(255,255,255,0.92), transparent 26%),
-        radial-gradient(circle at 84% 10%, rgba(191, 219, 254, 0.2), transparent 18%),
-        radial-gradient(circle at 50% 100%, rgba(255,255,255,0.8), transparent 30%);
+      background: transparent;
     }
     #dashboardViewMount {
       position: relative;
@@ -126,34 +120,139 @@
       background: rgba(255,255,255,0.76);
       color: rgb(51 65 85);
     }
+    #dashboardViewMount .app-admin-secondary {
+      border-color: rgba(203, 213, 225, 0.92);
+      background: rgba(241, 245, 249, 0.95);
+      color: rgb(51 65 85);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+    }
+    #dashboardViewMount .app-admin-danger {
+      border-color: rgba(254, 205, 211, 0.95);
+      background: linear-gradient(180deg, rgba(255, 241, 242, 0.98) 0%, rgba(255, 228, 230, 0.94) 100%);
+      color: rgb(190 24 93);
+      box-shadow: 0 10px 22px rgba(244, 63, 94, 0.08);
+    }
+    #dashboardViewMount .app-admin-chip {
+      border-color: rgba(226, 232, 240, 0.95);
+      background: rgba(255,255,255,0.82);
+      color: rgb(71 85 105);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
     #dashboardViewMount .app-admin-empty {
       border: 1px dashed rgba(203, 213, 225, 0.92);
       background: linear-gradient(180deg, rgba(255,255,255,0.64) 0%, rgba(248,250,252,0.72) 100%);
       color: rgb(100 116 139);
     }
+    #dashboardViewMount button[class*="bg-[#2E5D73]"],
+    #dashboardViewMount button[class*="bg-emerald-600"],
+    #dashboardViewMount button[class*="bg-blue-600"],
+    #dashboardViewMount a[class*="bg-[#2E5D73]"] {
+      border: 1px solid rgba(67, 108, 129, 0.12);
+      background: linear-gradient(180deg, rgba(67, 108, 129, 0.98) 0%, rgba(46, 93, 115, 1) 100%);
+      color: white;
+      box-shadow: 0 14px 26px rgba(46, 93, 115, 0.18);
+    }
+    #dashboardViewMount button[class*="bg-[#2E5D73]"]:hover,
+    #dashboardViewMount button[class*="bg-emerald-600"]:hover,
+    #dashboardViewMount button[class*="bg-blue-600"]:hover,
+    #dashboardViewMount a[class*="bg-[#2E5D73]"]:hover {
+      box-shadow: 0 18px 30px rgba(46, 93, 115, 0.22);
+    }
+    #dashboardViewMount button[class*="bg-slate-100"],
+    #dashboardViewMount a[class*="bg-slate-100"] {
+      border: 1px solid rgba(203, 213, 225, 0.92);
+      background: rgba(241, 245, 249, 0.95);
+      color: rgb(51 65 85);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+    }
+    #dashboardViewMount button[class*="bg-rose-100"],
+    #dashboardViewMount a[class*="bg-rose-100"] {
+      border: 1px solid rgba(254, 205, 211, 0.95);
+      background: linear-gradient(180deg, rgba(255, 241, 242, 0.98) 0%, rgba(255, 228, 230, 0.94) 100%);
+      color: rgb(190 24 93);
+      box-shadow: 0 10px 22px rgba(244, 63, 94, 0.08);
+    }
+    #dashboardViewMount button[class*="border"][class*="bg-white"],
+    #dashboardViewMount a[class*="border"][class*="bg-white"] {
+      border-color: rgba(203, 213, 225, 0.9);
+      background: rgba(255,255,255,0.78);
+      color: rgb(51 65 85);
+      box-shadow:
+        0 8px 18px rgba(148, 163, 184, 0.08),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+    }
     #shellFooter {
       background: transparent;
     }
     #shellFooter .dashBtn {
-      overflow: hidden;
-      border: 1px solid rgba(226, 232, 240, 0.95);
-      background: linear-gradient(180deg, rgba(96, 133, 153, 0.95) 0%, rgba(78, 114, 135, 0.98) 100%);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.85rem;
+      min-height: 3.7rem;
+      padding: 0.9rem 1.25rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(203, 213, 225, 0.9);
+      background: rgba(255, 255, 255, 0.82);
+      color: rgb(51 65 85);
       box-shadow:
-        0 18px 32px rgba(148, 163, 184, 0.14),
-        inset 0 1px 0 rgba(255,255,255,0.18);
+        0 12px 28px rgba(148, 163, 184, 0.12),
+        inset 0 1px 0 rgba(255,255,255,0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
     #shellFooter .dashBtn[data-view="incidencias"] {
-      background: linear-gradient(180deg, rgba(248, 113, 113, 0.95) 0%, rgba(239, 90, 90, 0.98) 100%);
+      border-color: rgba(253, 164, 175, 0.76);
+      background: rgba(255, 241, 242, 0.9);
+      color: rgb(190 24 93);
+      box-shadow:
+        0 12px 28px rgba(244, 63, 94, 0.1),
+        inset 0 1px 0 rgba(255,255,255,0.9);
     }
     #shellFooter .dashBtn:hover {
+      transform: translateY(-1px);
       box-shadow:
-        0 24px 38px rgba(148, 163, 184, 0.18),
-        inset 0 1px 0 rgba(255,255,255,0.24);
+        0 18px 34px rgba(148, 163, 184, 0.16),
+        inset 0 1px 0 rgba(255,255,255,0.94);
     }
-    #shellFooter #btnReglamento {
-      border: 1px solid rgba(255,255,255,0.5);
-      background: linear-gradient(180deg, rgba(100, 116, 139, 0.9) 0%, rgba(71, 85, 105, 0.96) 100%);
-      box-shadow: 0 16px 30px rgba(148, 163, 184, 0.16);
+    #shellFooter .dashBtn[data-view="incidencias"]:hover {
+      box-shadow:
+        0 18px 34px rgba(244, 63, 94, 0.14),
+        inset 0 1px 0 rgba(255,255,255,0.94);
+    }
+    #shellFooter .dashBtn svg {
+      flex-shrink: 0;
+      color: rgba(71, 85, 105, 0.92);
+    }
+    #shellFooter .dashBtn[data-view="incidencias"] svg {
+      color: rgba(225, 29, 72, 0.92);
+    }
+    #shellFooter .dashBtn[data-view="reglamento"] svg {
+      color: rgba(37, 99, 235, 0.85);
+    }
+    #shellFooter .dashBtn.ring-2 {
+      border-color: rgba(103, 164, 195, 0.75);
+      background: rgba(239, 247, 250, 0.94);
+      box-shadow:
+        0 18px 36px rgba(103, 164, 195, 0.18),
+        0 0 0 1px rgba(103, 164, 195, 0.12),
+        inset 0 1px 0 rgba(255,255,255,0.94);
+    }
+    #shellFooter .dashBtn.ring-2[data-view="incidencias"] {
+      border-color: rgba(251, 113, 133, 0.82);
+      background: rgba(255, 239, 242, 0.95);
+      box-shadow:
+        0 18px 36px rgba(244, 63, 94, 0.16),
+        0 0 0 1px rgba(251, 113, 133, 0.12),
+        inset 0 1px 0 rgba(255,255,255,0.94);
+    }
+    #shellFooter .dashBtnLabel {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: inherit;
+    }
+    #shellFooter .dashBtnMeta {
+      display: none;
     }
     @media (max-width: 767px) {
       .app-dashboard-shell {
@@ -216,9 +315,12 @@
       .mobile-floating-dock {
         pointer-events: auto;
         display: inline-flex;
+        width: min(calc(100vw - 1.15rem), 28rem);
+        max-width: calc(100vw - 1.15rem);
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.45rem;
+        justify-content: space-between;
+        gap: 0.24rem;
+        padding: 0.38rem;
         border-radius: 999px;
         background: linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(243,247,252,0.62) 100%);
         border: 1px solid rgba(255,255,255,0.76);
@@ -232,13 +334,14 @@
       .mobile-dock-item {
         position: relative;
         display: inline-flex;
-        min-width: 4.15rem;
+        min-width: 0;
+        flex: 1 1 0;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 0.18rem;
+        gap: 0.15rem;
         border-radius: 999px;
-        padding: 0.58rem 0.72rem 0.54rem;
+        padding: 0.55rem 0.25rem 0.5rem;
         color: rgba(51, 65, 85, 0.92);
         transition:
           transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -248,17 +351,18 @@
           opacity 220ms ease;
       }
       .mobile-dock-item svg {
-        height: 1.15rem;
-        width: 1.15rem;
+        height: 1.02rem;
+        width: 1.02rem;
       }
       .mobile-dock-item:hover {
         transform: translateY(-1px);
       }
       .mobile-dock-item-label {
-        font-size: 0.67rem;
+        font-size: 0.6rem;
         line-height: 1;
         font-weight: 500;
         letter-spacing: 0.01em;
+        white-space: nowrap;
       }
       .mobile-dock-item-active {
         color: rgba(15, 23, 42, 0.96);
@@ -288,6 +392,10 @@
         pointer-events: none;
         transition: opacity 220ms ease;
       }
+      .mobile-more-backdrop[aria-hidden="true"],
+      .mobile-more-sheet[aria-hidden="true"] {
+        display: none !important;
+      }
       .mobile-more-backdrop.is-open {
         opacity: 1;
         pointer-events: auto;
@@ -316,48 +424,116 @@
         transform: translateY(0) scale(1);
         pointer-events: auto;
       }
+      .mobile-dock-layer.dock-hidden-by-modal {
+        opacity: 0 !important;
+        transform: translateY(1.6rem) !important;
+        pointer-events: none !important;
+      }
+      .mobile-more-content {
+        max-height: min(calc(100vh - 12rem), 30rem);
+        overflow-y: auto;
+      }
+      .desktop-more-popover {
+        display: none;
+      }
       .mobile-more-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.7rem;
+        gap: 0.72rem;
       }
       .mobile-more-item {
         display: flex;
-        min-height: 4.25rem;
         flex-direction: column;
+        align-items: center;
         justify-content: center;
-        gap: 0.28rem;
-        border-radius: 1.15rem;
-        border: 1px solid rgba(226, 232, 240, 0.95);
-        background: rgba(255,255,255,0.56);
-        padding: 0.85rem 0.9rem;
+        gap: 0.7rem;
+        min-height: 6.25rem;
+        border-radius: 1.45rem;
+        border: 1px solid rgba(226, 232, 240, 0.96);
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(248,250,252,0.64) 100%);
+        padding: 0.85rem 0.7rem 0.8rem;
         color: rgb(30 41 59);
+        text-align: center;
         transition:
           transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
           border-color 220ms ease,
           background-color 220ms ease,
           box-shadow 220ms ease;
+        box-shadow:
+          0 12px 28px rgba(148, 163, 184, 0.08),
+          inset 0 1px 0 rgba(255,255,255,0.74);
       }
       .mobile-more-item:hover,
       .mobile-more-item:active {
         transform: translateY(-1px);
-        border-color: rgba(148, 163, 184, 0.45);
-        background: rgba(255,255,255,0.74);
-        box-shadow: 0 12px 22px rgba(15, 23, 42, 0.08);
+        border-color: rgba(148, 163, 184, 0.44);
+        background: rgba(255,255,255,0.82);
+        box-shadow:
+          0 16px 32px rgba(15, 23, 42, 0.08),
+          inset 0 1px 0 rgba(255,255,255,0.82);
+      }
+      .mobile-more-item-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 2.65rem;
+        width: 2.65rem;
+        border-radius: 999px;
+        border: 1px solid rgba(203, 213, 225, 0.72);
+        background: rgba(248, 250, 252, 0.88);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.82);
       }
       .mobile-more-item svg {
-        height: 1.2rem;
-        width: 1.2rem;
+        height: 1.12rem;
+        width: 1.12rem;
         color: rgb(78 114 135);
       }
+      .mobile-more-item-copy {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        text-align: center;
+      }
       .mobile-more-item-title {
-        font-size: 0.83rem;
-        font-weight: 600;
-        line-height: 1.1;
+        font-size: 0.9rem;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
       }
       .mobile-more-item-meta {
-        font-size: 0.67rem;
-        color: rgb(100 116 139);
+        display: none !important;
+      }
+      .mobile-more-item-chevron {
+        display: none !important;
+      }
+      #shellHeader .inline-flex {
+        max-width: 100%;
+      }
+      #dashboardViewMount .app-admin-primary,
+      #dashboardViewMount .app-admin-ghost,
+      #dashboardViewMount .app-admin-secondary,
+      #dashboardViewMount .app-admin-danger,
+      #dashboardViewMount button[class*="bg-[#2E5D73]"],
+      #dashboardViewMount button[class*="bg-emerald-600"],
+      #dashboardViewMount button[class*="bg-blue-600"],
+      #dashboardViewMount button[class*="bg-slate-100"],
+      #dashboardViewMount button[class*="bg-rose-100"],
+      #dashboardViewMount button[class*="border"][class*="bg-white"],
+      #dashboardViewMount a[class*="bg-[#2E5D73]"],
+      #dashboardViewMount a[class*="bg-slate-100"],
+      #dashboardViewMount a[class*="bg-rose-100"],
+      #dashboardViewMount a[class*="border"][class*="bg-white"] {
+        padding-inline: 0.95rem;
+        white-space: nowrap;
+      }
+      #dashboardViewMount .flex.justify-end > .app-admin-ghost,
+      #dashboardViewMount .flex.justify-end > .app-admin-primary {
+        width: 100%;
+        justify-content: center;
       }
       #dashboardViewMount .app-admin-title {
         font-size: 1.55rem;
@@ -374,6 +550,196 @@
       }
     }
     @media (min-width: 768px) {
+      #shellFooter {
+        padding-bottom: 0;
+      }
+      .mobile-dock-layer {
+        position: fixed;
+        inset-inline: 0;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+        z-index: 80;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 1;
+        transform: none;
+        padding: 0;
+        transition: none;
+      }
+      .mobile-dock-hidden {
+        transform: none;
+        opacity: 1;
+      }
+      .mobile-floating-dock {
+        pointer-events: auto;
+        display: inline-flex;
+        width: min(calc(100vw - 1.15rem), 28rem);
+        max-width: calc(100vw - 1.15rem);
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.24rem;
+        padding: 0.38rem;
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(243,247,252,0.62) 100%);
+        border: 1px solid rgba(255,255,255,0.76);
+        box-shadow:
+          0 22px 44px rgba(148, 163, 184, 0.24),
+          inset 0 1px 0 rgba(255,255,255,0.42),
+          inset 0 -1px 0 rgba(148, 163, 184, 0.08);
+        backdrop-filter: blur(26px) saturate(170%);
+        -webkit-backdrop-filter: blur(26px) saturate(170%);
+      }
+      .mobile-dock-item {
+        position: relative;
+        display: inline-flex;
+        min-width: 0;
+        flex: 1 1 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.15rem;
+        border-radius: 999px;
+        padding: 0.55rem 0.25rem 0.5rem;
+        color: rgba(51, 65, 85, 0.92);
+        transition:
+          transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+          background-color 220ms ease,
+          box-shadow 220ms ease,
+          color 220ms ease,
+          opacity 220ms ease;
+      }
+      .mobile-dock-item svg {
+        height: 1.02rem;
+        width: 1.02rem;
+      }
+      .mobile-dock-item-label {
+        font-size: 0.6rem;
+        line-height: 1;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+      }
+      .mobile-dock-item:hover {
+        transform: translateY(-1px);
+      }
+      .mobile-dock-item-active {
+        color: rgba(15, 23, 42, 0.96);
+        background: rgba(255,255,255,0.5);
+        box-shadow:
+          0 12px 24px rgba(78, 114, 135, 0.14),
+          inset 0 0 0 1px rgba(255,255,255,0.42);
+        transform: translateY(-1px) scale(1.015);
+      }
+      .mobile-dock-item-active::after {
+        content: '';
+        position: absolute;
+        inset: auto 34% -0.18rem;
+        height: 0.19rem;
+        border-radius: 999px;
+        background: rgba(78, 114, 135, 0.76);
+        box-shadow: 0 0 12px rgba(78, 114, 135, 0.28);
+      }
+      .mobile-more-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 74;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.05), rgba(15, 23, 42, 0.22));
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 220ms ease;
+      }
+      .mobile-more-backdrop.is-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+    @media (min-width: 750px) {
+      .desktop-more-popover {
+        display: none !important;
+      }
+      .mobile-more-sheet {
+        left: 50%;
+        right: auto;
+        width: min(42rem, calc(100vw - 3rem));
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 6rem);
+        transform: translate(-50%, 1rem) scale(0.985);
+      }
+      .mobile-more-sheet.is-open {
+        transform: translate(-50%, 0) scale(1);
+      }
+      .mobile-more-content {
+        max-height: min(calc(100vh - 13rem), 34rem);
+      }
+      .mobile-more-grid {
+        grid-template-columns: 1fr;
+      }
+      .mobile-more-item {
+        flex-direction: row;
+        justify-content: flex-start;
+        min-height: 5.75rem;
+        padding-inline: 1.2rem;
+        text-align: left;
+      }
+      .mobile-more-item-copy {
+        align-items: flex-start;
+        text-align: left;
+      }
+      .mobile-more-item-title {
+        font-size: 1rem;
+      }
+    }
+    @media (max-width: 420px) {
+      .mobile-more-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .mobile-floating-dock {
+        width: min(calc(100vw - 0.75rem), 26.75rem);
+        max-width: calc(100vw - 0.75rem);
+        gap: 0.16rem;
+        padding: 0.34rem;
+      }
+      .mobile-dock-item {
+        padding: 0.5rem 0.18rem 0.46rem;
+      }
+      .mobile-dock-item svg {
+        height: 0.96rem;
+        width: 0.96rem;
+      }
+      .mobile-dock-item-label {
+        font-size: 0.57rem;
+      }
+      .mobile-more-item {
+        min-height: 6.1rem;
+        gap: 0.64rem;
+        padding: 0.78rem 0.6rem 0.72rem;
+        text-align: center;
+      }
+      .mobile-more-item-title {
+        font-size: 0.84rem;
+      }
+    }
+    @media (max-width: 360px) {
+      .mobile-floating-dock {
+        width: min(calc(100vw - 0.5rem), 24.5rem);
+        max-width: calc(100vw - 0.5rem);
+      }
+      .mobile-dock-item {
+        padding: 0.48rem 0.12rem 0.42rem;
+      }
+      .mobile-dock-item-label {
+        font-size: 0.54rem;
+      }
+      #shellHeader .flex.flex-wrap.items-center.gap-2 {
+        gap: 0.5rem;
+      }
+      #shellHeader a,
+      #shellHeader .inline-flex {
+        font-size: 0.72rem;
+      }
+    }
+    @media (min-width: 768px) {
       .app-mobile-more {
         display: none !important;
       }
@@ -382,7 +748,7 @@
 
   <!-- HEADER -->
   <header id="shellHeader" class="shrink-0 text-slate-900">
-    <div class="mx-auto max-w-6xl px-3 pb-1 pt-3 sm:px-4 sm:pb-2 sm:pt-4">
+    <div class="mx-auto max-w-6xl px-3 pb-1 pt-5 sm:px-4 sm:pb-2 sm:pt-6">
       <div class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/60 shadow-[0_26px_60px_rgba(148,163,184,0.18)] backdrop-blur-2xl">
         <div class="px-4 py-4 sm:px-5 sm:py-4">
           <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -436,184 +802,186 @@
 
     <!-- FOOTER -->
     <footer id="shellFooter" class="shrink-0 bg-transparent">
-    <div class="hidden max-w-6xl mx-auto px-4 pb-5 md:block">
-      <div class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:justify-end sm:items-center">
+    <div class="hidden max-w-6xl mx-auto px-4 pb-5">
+      <div class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:items-center">
     <div id="operationalModeHint"
          class="hidden rounded-2xl border border-dashed border-[#2E5D73]/20 bg-white px-4 py-3 text-sm text-slate-600 sm:mr-auto">
       El perfil de servicio de este cliente se configura desde Superadmin.
     </div>
-  
-    <a id="btnReglamento"
-            href="#reglamento"
-            data-view="reglamento"
-            class="inline-flex items-center gap-2 rounded-full bg-[#6B6B6B] text-white px-4 py-2 shadow">
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
-        <path d="M9 9h10v10H9V9Z" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"
-                stroke="currentColor" stroke-width="1.8"/>
-        </svg>
-        <span class="text-sm">Reglamento</span>
-    </a>
     </div>
 
 
-      <!-- BOTONERA 3x3 ADMIN RESIDENCIAL -->
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <!-- BOTONERA DESKTOP PREMIUM -->
+      <div class="flex flex-wrap gap-3 lg:gap-3.5">
 
 
         <!-- Unidades -->
         <button type="button"
-                class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="unidades">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-11 w-11 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"
                     stroke="currentColor" stroke-width="1.8"/>
             </svg>
-            <div class="text-base font-light">Unidades</div>
+            <div class="dashBtnLabel">Unidades</div>
           </div>
         </button>
 
         <!-- Residentes -->
         <button type="button"
-                class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="residentes">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-11 w-11 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M7 14a4 4 0 1 1 8 0" stroke="currentColor" stroke-width="1.8"/>
               <path d="M3 21a6 6 0 0 1 18 0" stroke="currentColor" stroke-width="1.8"/>
             </svg>
-            <div class="text-base font-light">Residentes</div>
+            <div class="dashBtnLabel">Residentes</div>
           </div>
         </button>
 
 
         <!-- Guardias -->
         <button type="button"
-                class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="guardias">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-11 w-11 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"
                     stroke="currentColor" stroke-width="1.8"/>
             </svg>
-            <div class="text-base font-light">Guardias</div>
+            <div class="dashBtnLabel">Guardias</div>
           </div>
         </button>
 
         <!-- Incidencias -->
         <button type="button"
-                class="dashBtn rounded-2xl bg-[#EF5A5A] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF5A5A]/30 active:scale-[0.99]"
+                class="dashBtn rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF5A5A]/20 active:scale-[0.99]"
                 data-view="incidencias">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-11 w-11 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M12 9v4m0 3h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               <path d="M10 3h4l7 18H3L10 3Z" stroke="currentColor" stroke-width="1.6"/>
             </svg>
-            <div class="text-base font-light">Incidencias</div>
+            <div class="dashBtnLabel">Incidencias</div>
           </div>
         </button>
 
         <!-- Resumen -->
         <button type="button"
-                class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="home">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-11 w-11 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"
                     stroke="currentColor" stroke-width="1.8"/>
             </svg>
-            <div class="text-base font-light">Home</div>
+            <div class="dashBtnLabel">Home</div>
           </div>
         </button>
         <!-- Pagos (si no lo quieres, quítalo) -->
         <button type="button"
-                class="dashBtn rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="comunicados">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-10 w-10 shrink-0" viewBox="0 0 24 24" fill="none">
             <path d="M9 9h10v10H9V9Z" stroke="currentColor" stroke-width="1.8"/>
             <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"
                     stroke="currentColor" stroke-width="1.8"/>
             </svg>
-            <div class="text-base font-light">Comunicados</div>
+            <div class="dashBtnLabel">Comunicados</div>
           </div>
         </button>
 
         <button type="button"
                 data-operational-only="1"
-                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn hidden rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="personal_recurrente">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-10 w-10 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/>
               <path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
-            <div class="text-base font-light">Personal</div>
+            <div class="dashBtnLabel">Personal</div>
           </div>
         </button>
 
         <button type="button"
                 data-operational-only="1"
-                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn hidden rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="visitantes_rapidos">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-10 w-10 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M5 10h14M7 14h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
               <path d="M5 4h14a2 2 0 0 1 2 2v13l-4-2-4 2-4-2-4 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/>
             </svg>
-            <div class="text-base font-light">Visitantes</div>
+            <div class="dashBtnLabel">Visitantes</div>
           </div>
         </button>
 
         <button type="button"
                 data-operational-only="1"
-                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn hidden rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="materiales">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-10 w-10 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M3 7l9-4 9 4-9 4-9-4Z" stroke="currentColor" stroke-width="1.8"/>
               <path d="M3 7v10l9 4 9-4V7" stroke="currentColor" stroke-width="1.8"/>
             </svg>
-            <div class="text-base font-light">Materiales</div>
+            <div class="dashBtnLabel">Materiales</div>
           </div>
         </button>
 
         <button type="button"
                 data-operational-only="1"
-                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn hidden rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="solicitudes_pendientes">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-10 w-10 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
               <path d="M5 4h14a1 1 0 0 1 1 1v14l-3-2-3 2-3-2-3 2-3-2V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/>
             </svg>
-            <div class="text-base font-light">Pendientes</div>
+            <div class="dashBtnLabel">Pendientes</div>
           </div>
         </button>
 
         <button type="button"
                 data-operational-only="1"
-                class="dashBtn hidden rounded-2xl bg-[#4E7287] text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:brightness-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/30 active:scale-[0.99]"
+                class="dashBtn hidden rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]"
                 data-view="bitacora_operativa">
-          <div class="h-[92px] sm:h-[105px] flex flex-col items-center justify-center gap-1.5 px-2 text-center">
-            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-10 w-10 shrink-0" viewBox="0 0 24 24" fill="none">
               <path d="M6 5h12M6 10h12M6 15h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
               <path d="M5 3h14a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/>
             </svg>
-            <div class="text-base font-light">Bitácora</div>
+            <div class="dashBtnLabel">Bitácora</div>
           </div>
         </button>
+
+        <a id="btnReglamento"
+            href="#reglamento"
+            data-view="reglamento"
+            class="dashBtn rounded-[2rem] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20 active:scale-[0.99]">
+          <div class="flex items-center gap-3 text-left">
+            <svg class="h-10 w-10 shrink-0" viewBox="0 0 24 24" fill="none">
+            <path d="M9 9h10v10H9V9Z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"
+                    stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <div class="dashBtnLabel">Reglamento</div>
+          </div>
+        </a>
 
 
 
       </div>
     </div>
 
-    <div class="md:hidden">
-      <div id="mobileMoreBackdrop" class="mobile-more-backdrop"></div>
+    <div>
+      <div id="mobileMoreBackdrop" class="mobile-more-backdrop" aria-hidden="true"></div>
 
-      <div id="mobileMoreSheet" class="mobile-more-sheet">
+      <div id="mobileMoreSheet" class="mobile-more-sheet" aria-hidden="true">
         <div class="border-b border-white/55 px-4 py-3">
           <div class="flex items-center justify-between gap-3">
             <div>
@@ -628,66 +996,66 @@
           </div>
         </div>
 
-        <div class="px-4 pb-4 pt-4">
+        <div class="mobile-more-content px-4 pb-4 pt-4">
           <div id="mobileMoreGrid" class="mobile-more-grid">
             <button type="button" data-view="unidades" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" stroke="currentColor" stroke-width="1.8"/></svg>
-              <div class="mobile-more-item-title">Unidades</div>
-              <div class="mobile-more-item-meta">Control de propiedades</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Unidades</div><div class="mobile-more-item-meta">Control de propiedades</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button type="button" data-view="guardias" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z" stroke="currentColor" stroke-width="1.8"/></svg>
-              <div class="mobile-more-item-title">Guardias</div>
-              <div class="mobile-more-item-meta">Equipo operativo</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Guardias</div><div class="mobile-more-item-meta">Equipo operativo</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button type="button" data-view="autos" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M7 16l-1 3m11-3l1 3M5 16h14l-1.5-6.5A2 2 0 0 0 15.55 8H8.45a2 2 0 0 0-1.95 1.5L5 16Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 16.5h.01M16.5 16.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg>
-              <div class="mobile-more-item-title">Autos</div>
-              <div class="mobile-more-item-meta">Vehículos y tags</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M7 16l-1 3m11-3l1 3M5 16h14l-1.5-6.5A2 2 0 0 0 15.55 8H8.45a2 2 0 0 0-1.95 1.5L5 16Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 16.5h.01M16.5 16.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Autos</div><div class="mobile-more-item-meta">Vehículos y tags</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button type="button" data-view="personal_recurrente" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              <div class="mobile-more-item-title">Personal</div>
-              <div class="mobile-more-item-meta">Recurrentes y QR</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Personal</div><div class="mobile-more-item-meta">Recurrentes y QR</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button type="button" data-view="visitantes_rapidos" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M5 10h14M7 14h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 4h14a2 2 0 0 1 2 2v13l-4-2-4 2-4-2-4 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
-              <div class="mobile-more-item-title">Visitantes</div>
-              <div class="mobile-more-item-meta">Accesos rápidos</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 10h14M7 14h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 4h14a2 2 0 0 1 2 2v13l-4-2-4 2-4-2-4 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Visitantes</div><div class="mobile-more-item-meta">Accesos rápidos</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button type="button" data-view="materiales" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M3 7l9-4 9 4-9 4-9-4Z" stroke="currentColor" stroke-width="1.8"/><path d="M3 7v10l9 4 9-4V7" stroke="currentColor" stroke-width="1.8"/></svg>
-              <div class="mobile-more-item-title">Materiales</div>
-              <div class="mobile-more-item-meta">Permisos y catálogo</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7l9-4 9 4-9 4-9-4Z" stroke="currentColor" stroke-width="1.8"/><path d="M3 7v10l9 4 9-4V7" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Materiales</div><div class="mobile-more-item-meta">Permisos y catálogo</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button type="button" data-view="solicitudes_pendientes" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 4h14a1 1 0 0 1 1 1v14l-3-2-3 2-3-2-3 2-3-2V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/></svg>
-              <div class="mobile-more-item-title">Pendientes</div>
-              <div class="mobile-more-item-meta">Solicitudes por revisar</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 4h14a1 1 0 0 1 1 1v14l-3-2-3 2-3-2-3 2-3-2V5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Pendientes</div><div class="mobile-more-item-meta">Solicitudes por revisar</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button type="button" data-view="bitacora_operativa" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12M6 10h12M6 15h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 3h14a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/></svg>
-              <div class="mobile-more-item-title">Bitácora</div>
-              <div class="mobile-more-item-meta">Eventos operativos</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12M6 10h12M6 15h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M5 3h14a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Bitácora</div><div class="mobile-more-item-meta">Eventos operativos</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button type="button" data-view="perfil" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              <div class="mobile-more-item-title">Perfil</div>
-              <div class="mobile-more-item-meta">Datos de acceso</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Perfil</div><div class="mobile-more-item-meta">Datos de acceso</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
 
             <button id="mobileReglamentoShortcut" type="button" data-view="reglamento" data-dock-secondary="1" class="mobile-more-item hidden">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M9 9h10v10H9V9Z" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.8"/></svg>
-              <div class="mobile-more-item-title">Reglamento</div>
-              <div class="mobile-more-item-meta">Lineamientos del servicio</div>
+              <div class="mobile-more-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 9h10v10H9V9Z" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <div class="mobile-more-item-copy"><div class="mobile-more-item-title">Reglamento</div><div class="mobile-more-item-meta">Lineamientos del servicio</div></div>
+              <span class="mobile-more-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </button>
           </div>
         </div>

@@ -1,4 +1,17 @@
 <div id="residentHomeView" class="space-y-6">
+  <section class="rounded-[2rem] border border-slate-200 bg-white px-5 py-6 shadow-sm">
+    <div class="app-admin-kicker">Centro del residente</div>
+    <h1 class="app-admin-title">Tu residencial, en una sola vista</h1>
+    <p class="app-admin-subtitle">Consulta avisos vigentes, servicios útiles y accesos frecuentes con una navegación más clara y ligera.</p>
+    <div class="mt-5 flex flex-wrap gap-3">
+      <button type="button" data-home-nav="comunicados" class="app-admin-primary rounded-full px-5 py-2.5 text-sm font-medium">
+        Ver comunicados
+      </button>
+      <button type="button" data-home-nav="servicios" class="app-admin-ghost rounded-full px-5 py-2.5 text-sm font-medium">
+        Explorar servicios
+      </button>
+    </div>
+  </section>
 
   <div id="homeAlert"
        class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"></div>
@@ -11,7 +24,7 @@
         <h2 class="mt-1 text-2xl font-semibold text-slate-700">Anuncios destacados</h2>
       </div>
       <button type="button" data-home-nav="comunicados"
-        class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm hover:bg-slate-50">
+        class="app-admin-ghost rounded-full px-4 py-2 text-sm font-medium">
         Ver todos
       </button>
     </div>
@@ -44,7 +57,7 @@
         <h2 class="mt-1 text-2xl font-semibold text-slate-700">Servicios destacados</h2>
       </div>
       <button type="button" data-home-nav="servicios"
-        class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm hover:bg-slate-50">
+        class="app-admin-ghost rounded-full px-4 py-2 text-sm font-medium">
         Ver todos
       </button>
     </div>

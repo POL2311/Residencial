@@ -17,6 +17,7 @@
     mobileMoreSheet: document.getElementById('mobileMoreSheet'),
     mobileMoreBackdrop: document.getElementById('mobileMoreBackdrop'),
     mobileMoreClose: document.getElementById('btnCloseMobileMoreSheet'),
+    desktopMorePopover: document.getElementById('desktopMorePopover'),
 
     modal: document.getElementById('carModal'),
     modalBody: document.getElementById('carModalBody'),
@@ -245,7 +246,7 @@
 
     if (els.mobileMoreBtn) {
       const moreActive = SECONDARY_DOCK_VIEWS.has(view) && !PRIMARY_DOCK_VIEWS.has(view);
-      els.mobileMoreBtn.classList.toggle('mobile-dock-item-active', moreActive);
+      els.mobileMoreBtn.classList.toggle('mobile-dock-item-active', moreActive || state.moreSheetOpen);
     }
   }
 
@@ -271,6 +272,10 @@
     return window.matchMedia('(max-width: 767px)').matches;
   }
 
+  function isLargeMoreViewport() {
+    return window.matchMedia('(min-width: 750px)').matches;
+  }
+
   function showMobileDock() {
     els.mobileDockLayer?.classList.remove('mobile-dock-hidden');
   }
@@ -280,45 +285,109 @@
     els.mobileDockLayer?.classList.add('mobile-dock-hidden');
   }
 
+  function isManagedOverlay(el) {
+    return !!el && (
+      el === els.mobileDockLayer ||
+      el === els.mobileMoreBackdrop ||
+      el === els.mobileMoreSheet ||
+      el === els.desktopMorePopover ||
+      el === document.getElementById('appToastRoot') ||
+      !!els.mobileDockLayer?.contains(el)
+    );
+  }
+
+  function hasActiveModal() {
+    return Array.from(document.body.querySelectorAll('*')).some((el) => {
+      if (!(el instanceof HTMLElement) || isManagedOverlay(el)) return false;
+      if (el.classList.contains('hidden') || el.getAttribute('aria-hidden') === 'true') return false;
+      const style = window.getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden' || style.position !== 'fixed') return false;
+      const zIndex = Number.parseInt(style.zIndex || '0', 10);
+      if (!Number.isFinite(zIndex) || zIndex < 50) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.width >= 80 && rect.height >= 80;
+    });
+  }
+
+  function syncDockModalState() {
+    const hasModal = hasActiveModal();
+    els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
+    if (hasModal) {
+      closeMoreSheet();
+    } else if (!state.moreSheetOpen) {
+      showMobileDock();
+    }
+  }
+
+  function initModalWatcher() {
+    if (!document.body) return;
+    const observer = new MutationObserver(() => {
+      window.requestAnimationFrame(syncDockModalState);
+    });
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'hidden', 'aria-hidden'],
+    });
+    syncDockModalState();
+  }
+
+  function positionDesktopMorePopover() {
+    if (!els.mobileMoreBtn || !els.desktopMorePopover || !isLargeMoreViewport() || !state.moreSheetOpen) return;
+
+    const margin = 16;
+    const btnRect = els.mobileMoreBtn.getBoundingClientRect();
+    const desiredWidth = Math.min(window.innerWidth - (margin * 2), 352);
+
+    els.desktopMorePopover.style.width = `${desiredWidth}px`;
+    els.desktopMorePopover.style.maxWidth = `${window.innerWidth - (margin * 2)}px`;
+
+    const sheetHeight = Math.min(els.desktopMorePopover.scrollHeight || 0, window.innerHeight - (margin * 2));
+    const left = Math.min(
+      Math.max(margin, btnRect.right - desiredWidth),
+      window.innerWidth - desiredWidth - margin
+    );
+    const top = Math.max(margin, btnRect.top - sheetHeight - 12);
+
+    els.desktopMorePopover.style.left = `${left}px`;
+    els.desktopMorePopover.style.top = `${top}px`;
+  }
+
   function openMoreSheet() {
-    if (!isMobileViewport()) return;
     state.moreSheetOpen = true;
     showMobileDock();
+    els.mobileMoreBackdrop?.setAttribute('aria-hidden', 'false');
+    els.mobileMoreSheet?.setAttribute('aria-hidden', 'false');
     els.mobileMoreBackdrop?.classList.add('is-open');
     els.mobileMoreSheet?.classList.add('is-open');
     document.body.classList.add('overflow-hidden');
+    setActiveButtons(state.currentView || 'home');
   }
 
   function closeMoreSheet() {
     state.moreSheetOpen = false;
+    document.body.classList.remove('overflow-hidden');
     els.mobileMoreBackdrop?.classList.remove('is-open');
     els.mobileMoreSheet?.classList.remove('is-open');
-    document.body.classList.remove('overflow-hidden');
+    els.mobileMoreBackdrop?.setAttribute('aria-hidden', 'true');
+    els.mobileMoreSheet?.setAttribute('aria-hidden', 'true');
+    if (els.desktopMorePopover) {
+      els.desktopMorePopover.classList.add('hidden');
+      els.desktopMorePopover.setAttribute('aria-hidden', 'true');
+      els.desktopMorePopover.style.left = '';
+      els.desktopMorePopover.style.top = '';
+      els.desktopMorePopover.style.width = '';
+      els.desktopMorePopover.style.maxWidth = '';
+    }
+    setActiveButtons(state.currentView || 'home');
   }
 
   function handleBodyScroll() {
-    if (!isMobileViewport() || !els.body) return;
-    const top = els.body.scrollTop || 0;
-
-    if (state.moreSheetOpen) {
-      lastBodyScrollTop = top;
-      showMobileDock();
-      return;
+    showMobileDock();
+    if (els.body) {
+      lastBodyScrollTop = els.body.scrollTop || 0;
     }
-
-    if (top <= 8) {
-      showMobileDock();
-      lastBodyScrollTop = top;
-      return;
-    }
-
-    if (top > lastBodyScrollTop + 12) {
-      hideMobileDock();
-    } else if (top < lastBodyScrollTop - 8) {
-      showMobileDock();
-    }
-
-    lastBodyScrollTop = top;
   }
 
   async function navigateTo(view, opts = {}) {
@@ -476,6 +545,8 @@
       } else if (el.hasAttribute('data-dock-secondary')) {
         el.classList.toggle('hidden', !allow);
         if (allow) secondaryVisibleCount += 1;
+      } else if (el.hasAttribute('data-dock-desktop-secondary')) {
+        el.classList.toggle('hidden', !allow);
       } else if (el.id === 'btnReglamento' || el.id === 'btnEditAddress') {
         el.classList.toggle('hidden', !allow);
       }
@@ -629,9 +700,11 @@
     window.addEventListener('resize', () => {
       closeMoreSheet();
       showMobileDock();
+      syncDockModalState();
     });
 
     initShellHeader();
+    initModalWatcher();
     loadContext().then(() => {
       // If context failed, we show the big blocked card.
       if (!state.enabledViews.size && state.contextLoad === 'error') {
@@ -653,6 +726,7 @@
   });
 
   window.addEventListener('hashchange', () => {
+    closeMoreSheet();
     if (!state.enabledViews.size) {
       // If context failed, keep the blocked state; if minimal mode, ignore hash changes to disallowed views.
       if (state.contextLoad === 'error') return;

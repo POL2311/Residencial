@@ -11,6 +11,13 @@
     modeBadge: document.getElementById('guardModeBadge'),
     btnReg: document.getElementById('btnReglamento'),
     body: document.getElementById('dashboardBody'),
+    mount: document.getElementById('dashboardViewMount'),
+    mobileDockLayer: document.getElementById('mobileDockLayer'),
+    mobileMoreBtn: document.getElementById('btnOpenMobileMoreSheet'),
+    mobileMoreSheet: document.getElementById('mobileMoreSheet'),
+    mobileMoreBackdrop: document.getElementById('mobileMoreBackdrop'),
+    mobileMoreClose: document.getElementById('btnCloseMobileMoreSheet'),
+    desktopMorePopover: document.getElementById('desktopMorePopover'),
 
     modal: document.getElementById('gModal'),
     modalTitle: document.getElementById('gModalTitle'),
@@ -55,7 +62,10 @@
     contextDiagnostic: null,
     navToken: 0,
     isNavigating: false,
+    moreSheetOpen: false,
   };
+  const PRIMARY_DOCK_VIEWS = new Set(['home', 'accesos', 'incidencias', 'autos']);
+  const SECONDARY_DOCK_VIEWS = new Set(['paqueteria', 'personas_dentro', 'materiales_autorizados', 'bitacora_hoy', 'perfil']);
 
   function escapeHtml(s) {
     return String(s ?? '')
@@ -85,15 +95,126 @@
     els.header.style.transform = 'translateY(0)';
   }
 
+  function isLargeMoreViewport() {
+    return window.matchMedia('(min-width: 750px)').matches;
+  }
+
+  function showMobileDock() {
+    els.mobileDockLayer?.classList.remove('mobile-dock-hidden');
+  }
+
+  function isManagedOverlay(el) {
+    return !!el && (
+      el === els.mobileDockLayer ||
+      el === els.mobileMoreBackdrop ||
+      el === els.mobileMoreSheet ||
+      el === els.desktopMorePopover ||
+      el === document.getElementById('appToastRoot') ||
+      !!els.mobileDockLayer?.contains(el)
+    );
+  }
+
+  function hasActiveModal() {
+    return Array.from(document.body.querySelectorAll('*')).some((el) => {
+      if (!(el instanceof HTMLElement) || isManagedOverlay(el)) return false;
+      if (el.classList.contains('hidden') || el.getAttribute('aria-hidden') === 'true') return false;
+      const style = window.getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden' || style.position !== 'fixed') return false;
+      const zIndex = Number.parseInt(style.zIndex || '0', 10);
+      if (!Number.isFinite(zIndex) || zIndex < 50) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.width >= 80 && rect.height >= 80;
+    });
+  }
+
+  function syncDockModalState() {
+    const hasModal = hasActiveModal();
+    els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
+    if (hasModal) {
+      closeMoreSheet();
+    } else if (!state.moreSheetOpen) {
+      showMobileDock();
+    }
+  }
+
+  function initModalWatcher() {
+    if (!document.body) return;
+    const observer = new MutationObserver(() => {
+      window.requestAnimationFrame(syncDockModalState);
+    });
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'hidden', 'aria-hidden'],
+    });
+    syncDockModalState();
+  }
+
+  function positionDesktopMorePopover() {
+    if (!els.mobileMoreBtn || !els.desktopMorePopover || !isLargeMoreViewport() || !state.moreSheetOpen) return;
+    const margin = 16;
+    const btnRect = els.mobileMoreBtn.getBoundingClientRect();
+    const desiredWidth = Math.min(window.innerWidth - (margin * 2), 352);
+    els.desktopMorePopover.style.width = `${desiredWidth}px`;
+    els.desktopMorePopover.style.maxWidth = `${window.innerWidth - (margin * 2)}px`;
+    const popoverHeight = Math.min(els.desktopMorePopover.scrollHeight || 0, window.innerHeight - (margin * 2));
+    const left = Math.min(Math.max(margin, btnRect.right - desiredWidth), window.innerWidth - desiredWidth - margin);
+    const top = Math.max(margin, btnRect.top - popoverHeight - 12);
+    els.desktopMorePopover.style.left = `${left}px`;
+    els.desktopMorePopover.style.top = `${top}px`;
+  }
+
+  function openMoreSheet() {
+    state.moreSheetOpen = true;
+    showMobileDock();
+    els.mobileMoreBackdrop?.setAttribute('aria-hidden', 'false');
+    els.mobileMoreSheet?.setAttribute('aria-hidden', 'false');
+    els.mobileMoreBackdrop?.classList.add('is-open');
+    els.mobileMoreSheet?.classList.add('is-open');
+    document.body.classList.add('overflow-hidden');
+    setActiveButtons(state.currentView || 'home');
+  }
+
+  function closeMoreSheet() {
+    state.moreSheetOpen = false;
+    document.body.classList.remove('overflow-hidden');
+    els.mobileMoreBackdrop?.classList.remove('is-open');
+    els.mobileMoreSheet?.classList.remove('is-open');
+    els.mobileMoreBackdrop?.setAttribute('aria-hidden', 'true');
+    els.mobileMoreSheet?.setAttribute('aria-hidden', 'true');
+    if (els.desktopMorePopover) {
+      els.desktopMorePopover.classList.add('hidden');
+      els.desktopMorePopover.setAttribute('aria-hidden', 'true');
+      els.desktopMorePopover.style.left = '';
+      els.desktopMorePopover.style.top = '';
+      els.desktopMorePopover.style.width = '';
+      els.desktopMorePopover.style.maxWidth = '';
+    }
+    setActiveButtons(state.currentView || 'home');
+  }
+
   function toggleOperationalButtons() {
+    let primaryVisibleCount = 0;
+    let secondaryVisibleCount = 0;
     document.querySelectorAll('[data-view]').forEach((el) => {
       const view = el.getAttribute('data-view') || '';
       if (!view) return;
       const allow = state.canOperate && state.enabledViews.has(view);
-      // Any navigation entry point (tile, header button, etc.) must match allowed_views.
-      // Otherwise users can click it and get redirected to home, which feels like a bug.
-      el.classList.toggle('hidden', !allow);
+      if (el.hasAttribute('data-dock-primary-view')) {
+        el.classList.toggle('hidden', !allow);
+        if (allow) primaryVisibleCount += 1;
+      } else if (el.hasAttribute('data-dock-secondary')) {
+        el.classList.toggle('hidden', !allow);
+        if (allow) secondaryVisibleCount += 1;
+      } else if (el.hasAttribute('data-dock-desktop-secondary')) {
+        el.classList.toggle('hidden', !allow);
+      } else {
+        el.classList.toggle('hidden', !allow);
+      }
     });
+    els.mobileMoreBtn?.classList.toggle('hidden', secondaryVisibleCount === 0);
+    els.mobileDockLayer?.classList.toggle('hidden', primaryVisibleCount === 0 && secondaryVisibleCount === 0);
 
     if (els.notificationsButton) {
       els.notificationsButton.classList.toggle('hidden', !state.canOperate);
@@ -357,6 +478,14 @@
       btn.classList.toggle('ring-white/50', isActive);
       btn.classList.toggle('scale-[0.99]', isActive);
     });
+    document.querySelectorAll('[data-dock-primary-view]').forEach((btn) => {
+      const active = btn.getAttribute('data-dock-primary-view') === view;
+      btn.classList.toggle('mobile-dock-item-active', active);
+    });
+    if (els.mobileMoreBtn) {
+      const moreActive = SECONDARY_DOCK_VIEWS.has(view) && !PRIMARY_DOCK_VIEWS.has(view);
+      els.mobileMoreBtn.classList.toggle('mobile-dock-item-active', moreActive || state.moreSheetOpen);
+    }
   }
 
   async function loadTemplate(view, token) {
@@ -489,6 +618,7 @@
 
   async function navigateTo(view, opts = {}) {
     const { force = false } = opts;
+    closeMoreSheet();
     if (!view) view = firstEnabledView();
     if (state.canOperate && !state.enabledViews.size) {
       renderViewError('guardia', 'Este servicio no tiene vistas operables para Guardia.');
@@ -739,6 +869,26 @@
 
   function bindStaticEvents() {
     document.addEventListener('click', (e) => {
+      if (e.target.closest('#btnOpenMobileMoreSheet')) {
+        e.preventDefault();
+        if (state.moreSheetOpen) closeMoreSheet();
+        else openMoreSheet();
+        return;
+      }
+
+      if (e.target === els.mobileMoreBackdrop || e.target.closest('#btnCloseMobileMoreSheet')) {
+        e.preventDefault();
+        closeMoreSheet();
+        return;
+      }
+
+      if (e.target.closest('#mobileReglamentoShortcut') || e.target.closest('#desktopReglamentoShortcut')) {
+        e.preventDefault();
+        closeMoreSheet();
+        openReglamento();
+        return;
+      }
+
       const t = e.target.closest('[data-view]');
       if (!t) return;
       const v = t.getAttribute('data-view');
@@ -760,7 +910,15 @@
       if (ev.target === els.modal) closeModal();
     });
 
+    els.body?.addEventListener('scroll', showMobileDock, { passive: true });
+    window.addEventListener('resize', () => {
+      closeMoreSheet();
+      showMobileDock();
+      syncDockModalState();
+    });
+
     window.addEventListener('hashchange', () => {
+      closeMoreSheet();
       const next = initialView();
       const current = state.targetView || state.currentView;
       if (next && next !== current) {
@@ -786,6 +944,7 @@
   document.addEventListener('DOMContentLoaded', async () => {
     initShellHeader();
     bindStaticEvents();
+    initModalWatcher();
     await loadContext();
     if (!state.canOperate) {
       await navigateTo('', { force: true });
