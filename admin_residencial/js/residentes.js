@@ -73,6 +73,12 @@
 
   const ALLOWED_PAYMENT_METHODS = ['efectivo', 'transferencia', 'tarjeta'];
 
+  function syncDashboardOverlayState() {
+    window.AdminResidencialDashboard?.syncOverlayState?.();
+  }
+
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
+
   // =========================
   // HELPERS UI
   // =========================
@@ -212,6 +218,7 @@
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      syncDashboardOverlayState();
 
       const cleanup = () => {
         modal.classList.add('hidden');
@@ -220,6 +227,7 @@
         cancelBtn.onclick = null;
         modal.onclick = null;
         document.removeEventListener('keydown', onKeydown);
+        syncDashboardOverlayState();
       };
 
       const onKeydown = (e) => {
@@ -346,6 +354,7 @@
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      syncDashboardOverlayState();
       setTimeout(() => inputEl.focus(), 0);
 
       const cleanup = () => {
@@ -355,6 +364,7 @@
         cancelBtn.onclick = null;
         modal.onclick = null;
         document.removeEventListener('keydown', onKeydown);
+        syncDashboardOverlayState();
       };
 
       const onKeydown = (e) => {
@@ -413,6 +423,7 @@
       if (el) el.onclick = () => {
         modal.remove();
         document.body.style.overflow = '';
+        syncDashboardOverlayState();
       };
     });
   }
@@ -1079,6 +1090,7 @@
   function openModal(mode, r = null) {
     document.body.style.overflow = 'hidden';
     els.modal.classList.remove('hidden');
+    syncDashboardOverlayState();
     els.modalForm.reset();
     closeInlineUnidadPanel();
     state.selectedUnidadId = '';
@@ -1121,6 +1133,7 @@
     state.editingId = null;
     state.selectedUnidadId = '';
     closeInlineUnidadPanel();
+    syncDashboardOverlayState();
   }
 
   function openAddPagoModal(residente) {
@@ -1189,51 +1202,56 @@
     `;
 
     document.body.appendChild(modal);
+    syncDashboardOverlayState();
     bindModalClose(modal, ['#closeAddPago', '#cancelAddPago']);
 
     modal.querySelector('#addPagoForm').onsubmit = async (e) => {
       e.preventDefault();
-      const fd = new FormData(e.target);
+      const submitBtn = e.submitter || e.target.querySelector('button[type="submit"]');
+      await withPendingAction({ button: submitBtn, scope: e.target, label: 'Guardando...' }, async () => {
+        const fd = new FormData(e.target);
 
-      const monto = Number(fd.get('monto') || 0);
-      const fecha = String(fd.get('fecha') || '').trim();
-      const metodo = String(fd.get('metodo') || '').trim().toLowerCase();
-      const concepto = String(fd.get('concepto') || '').trim();
+        const monto = Number(fd.get('monto') || 0);
+        const fecha = String(fd.get('fecha') || '').trim();
+        const metodo = String(fd.get('metodo') || '').trim().toLowerCase();
+        const concepto = String(fd.get('concepto') || '').trim();
 
-      if (!(monto > 0)) {
-        showToast('El monto debe ser mayor a 0.', 'error');
-        return;
-      }
-
-      if (!isValidDateYMD(fecha)) {
-        showToast('La fecha del pago no es válida.', 'error');
-        return;
-      }
-
-      if (metodo && !ALLOWED_PAYMENT_METHODS.includes(metodo)) {
-        showToast('El método de pago no es válido.', 'error');
-        return;
-      }
-
-      if (concepto.length > 120) {
-        showToast('El concepto no puede exceder 120 caracteres.', 'error');
-        return;
-      }
-
-      try {
-        const resp = await api.pagos.create(fd);
-
-        modal.remove();
-        await refreshCurrentDetail({ resetPagos: true });
-        const updated = resp?.data?.residente_actualizado || null;
-        if (updated) {
-          updateResidentInState(updated);
-          renderResidentes();
+        if (!(monto > 0)) {
+          showToast('El monto debe ser mayor a 0.', 'error');
+          return;
         }
-        showToast(resp.message || MESSAGES.pagoCreado, 'success');
-      } catch (err) {
-        showToast(err.message || 'No se pudo registrar el pago.', 'error');
-      }
+
+        if (!isValidDateYMD(fecha)) {
+          showToast('La fecha del pago no es válida.', 'error');
+          return;
+        }
+
+        if (metodo && !ALLOWED_PAYMENT_METHODS.includes(metodo)) {
+          showToast('El método de pago no es válido.', 'error');
+          return;
+        }
+
+        if (concepto.length > 120) {
+          showToast('El concepto no puede exceder 120 caracteres.', 'error');
+          return;
+        }
+
+        try {
+          const resp = await api.pagos.create(fd);
+
+          modal.remove();
+          syncDashboardOverlayState();
+          await refreshCurrentDetail({ resetPagos: true });
+          const updated = resp?.data?.residente_actualizado || null;
+          if (updated) {
+            updateResidentInState(updated);
+            renderResidentes();
+          }
+          showToast(resp.message || MESSAGES.pagoCreado, 'success');
+        } catch (err) {
+          showToast(err.message || 'No se pudo registrar el pago.', 'error');
+        }
+      });
     };
   }
 
@@ -1317,48 +1335,53 @@
     `;
 
     document.body.appendChild(modal);
+    syncDashboardOverlayState();
     bindModalClose(modal, ['#closeAddAuto', '#cancelAddAuto']);
 
     modal.querySelector('#addAutoForm').onsubmit = async (e) => {
       e.preventDefault();
-      const fd = new FormData(e.target);
+      const submitBtn = e.submitter || e.target.querySelector('button[type="submit"]');
+      await withPendingAction({ button: submitBtn, scope: e.target, label: 'Guardando...' }, async () => {
+        const fd = new FormData(e.target);
 
-      const placas = normalizePlacas(fd.get('placas') || '');
-      const modelo = String(fd.get('modelo') || '').trim();
-      const color = String(fd.get('color') || '').trim();
-      const tagId = String(fd.get('tag_id') || '').trim();
+        const placas = normalizePlacas(fd.get('placas') || '');
+        const modelo = String(fd.get('modelo') || '').trim();
+        const color = String(fd.get('color') || '').trim();
+        const tagId = String(fd.get('tag_id') || '').trim();
 
-      fd.set('placas', placas);
+        fd.set('placas', placas);
 
-      if (placas.length < 5 || placas.length > 15) {
-        showToast('Las placas deben tener entre 5 y 15 caracteres.', 'error');
-        return;
-      }
+        if (placas.length < 5 || placas.length > 15) {
+          showToast('Las placas deben tener entre 5 y 15 caracteres.', 'error');
+          return;
+        }
 
-      if (modelo.length > 80) {
-        showToast('El modelo no puede exceder 80 caracteres.', 'error');
-        return;
-      }
+        if (modelo.length > 80) {
+          showToast('El modelo no puede exceder 80 caracteres.', 'error');
+          return;
+        }
 
-      if (color.length > 40) {
-        showToast('El color no puede exceder 40 caracteres.', 'error');
-        return;
-      }
+        if (color.length > 40) {
+          showToast('El color no puede exceder 40 caracteres.', 'error');
+          return;
+        }
 
-      if (tagId.length > 120) {
-        showToast('El Tag ID no puede exceder 120 caracteres.', 'error');
-        return;
-      }
+        if (tagId.length > 120) {
+          showToast('El Tag ID no puede exceder 120 caracteres.', 'error');
+          return;
+        }
 
-      try {
-        const resp = await api.autos.create(fd);
+        try {
+          const resp = await api.autos.create(fd);
 
-        modal.remove();
-        await refreshCurrentDetail({ resetAutos: true });
-        showToast(resp.message || MESSAGES.autoCreado, 'success');
-      } catch (err) {
-        showToast(err.message || 'No se pudo registrar el auto.', 'error');
-      }
+          modal.remove();
+          syncDashboardOverlayState();
+          await refreshCurrentDetail({ resetAutos: true });
+          showToast(resp.message || MESSAGES.autoCreado, 'success');
+        } catch (err) {
+          showToast(err.message || 'No se pudo registrar el auto.', 'error');
+        }
+      });
     };
   }
 
@@ -1426,6 +1449,7 @@
 
       els.detailModalContent.innerHTML = renderDetailModal(r, totalPagado);
       els.detailModal.classList.remove('hidden');
+      syncDashboardOverlayState();
 
       attachDetailEventListeners();
     } catch (e) {
@@ -1445,6 +1469,7 @@
   function attachDetailEventListeners() {
     document.getElementById('btnCloseDetail')?.addEventListener('click', () => {
       els.detailModal.classList.add('hidden');
+      syncDashboardOverlayState();
     });
 
     document.getElementById('btnAddPago')?.addEventListener('click', () => {
@@ -1625,46 +1650,53 @@
   els.btnCancelInlineUnidad?.addEventListener('click', () => closeInlineUnidadPanel());
 
   els.btnSaveInlineUnidad?.addEventListener('click', async () => {
-    const fd = new FormData();
-    const clave = String(els.inlineUnidadForm?.querySelector('[name="clave"]')?.value || '').trim();
-    const tipo = String(els.inlineUnidadForm?.querySelector('[name="tipo"]')?.value || '').trim();
-    const torre = String(els.inlineUnidadForm?.querySelector('[name="torre"]')?.value || '').trim();
+    await withPendingAction({
+      button: els.btnSaveInlineUnidad,
+      scope: els.inlineUnidadForm,
+      label: 'Guardando...',
+      lock: [els.btnCancelInlineUnidad].filter(Boolean),
+    }, async () => {
+      const fd = new FormData();
+      const clave = String(els.inlineUnidadForm?.querySelector('[name="clave"]')?.value || '').trim();
+      const tipo = String(els.inlineUnidadForm?.querySelector('[name="tipo"]')?.value || '').trim();
+      const torre = String(els.inlineUnidadForm?.querySelector('[name="torre"]')?.value || '').trim();
 
-    if (!clave) {
-      showInlineUnidadAlert('La clave es obligatoria.');
-      return;
-    }
-
-    if (!['casa', 'departamento', 'local', 'otro'].includes(tipo)) {
-      showInlineUnidadAlert('Selecciona un tipo válido.');
-      return;
-    }
-
-    fd.set('action', 'create_inline_for_residente');
-    fd.set('clave', clave);
-    fd.set('tipo', tipo);
-    fd.set('torre', torre);
-
-    try {
-      const resp = await api.unidades.createInline(fd);
-      const unidad = resp.unidad || null;
-
-      if (unidad?.id) {
-        state.unidades = state.unidades.filter((item) => String(item.id) !== String(unidad.id));
-        state.unidades.push(unidad);
-        state.selectedUnidadId = String(unidad.id);
-        fillUnidades(state.selectedUnidadId);
+      if (!clave) {
+        showInlineUnidadAlert('La clave es obligatoria.');
+        return;
       }
 
-      showInlineUnidadAlert(resp.message || 'Casa agregada correctamente.', 'success');
-      showToast(resp.message || 'Casa agregada correctamente.', 'success');
+      if (!['casa', 'departamento', 'local', 'otro'].includes(tipo)) {
+        showInlineUnidadAlert('Selecciona un tipo válido.');
+        return;
+      }
 
-      setTimeout(() => {
-        closeInlineUnidadPanel();
-      }, 250);
-    } catch (err) {
-      showInlineUnidadAlert(err.message || 'No se pudo crear la casa.');
-    }
+      fd.set('action', 'create_inline_for_residente');
+      fd.set('clave', clave);
+      fd.set('tipo', tipo);
+      fd.set('torre', torre);
+
+      try {
+        const resp = await api.unidades.createInline(fd);
+        const unidad = resp.unidad || null;
+
+        if (unidad?.id) {
+          state.unidades = state.unidades.filter((item) => String(item.id) !== String(unidad.id));
+          state.unidades.push(unidad);
+          state.selectedUnidadId = String(unidad.id);
+          fillUnidades(state.selectedUnidadId);
+        }
+
+        showInlineUnidadAlert(resp.message || 'Casa agregada correctamente.', 'success');
+        showToast(resp.message || 'Casa agregada correctamente.', 'success');
+
+        setTimeout(() => {
+          closeInlineUnidadPanel();
+        }, 250);
+      } catch (err) {
+        showInlineUnidadAlert(err.message || 'No se pudo crear la casa.');
+      }
+    });
   });
 
   if (!els.modalForm) {
@@ -1672,73 +1704,80 @@
   } else {
     els.modalForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = e.submitter || els.modalForm.querySelector('button[type="submit"]');
+      await withPendingAction({
+        button: submitBtn,
+        scope: els.modalForm,
+        label: 'Guardando...',
+        lock: [els.btnCancelModal, els.btnCloseModal, els.btnInlineAddUnidad, els.btnSaveInlineUnidad, els.btnCancelInlineUnidad].filter(Boolean),
+      }, async () => {
+        try {
+          const isEditing = !!state.editingId;
 
-      try {
-        const isEditing = !!state.editingId;
+          const fd = new FormData(els.modalForm);
+          fd.append('action', isEditing ? 'update' : 'create');
+          if (isEditing) fd.append('id', state.editingId);
 
-        const fd = new FormData(els.modalForm);
-        fd.append('action', isEditing ? 'update' : 'create');
-        if (isEditing) fd.append('id', state.editingId);
+          const nombre = String(fd.get('nombre') || '').trim();
+          const telefono = normalizePhoneDigits(fd.get('telefono') || '');
+          const email = String(fd.get('email') || '').trim();
+          const unidadId = String(fd.get('unidad_id') || '').trim();
+          const password = String(fd.get('password') || '').trim();
+          const passwordConfirm = String(fd.get('password_confirm') || '').trim();
 
-        const nombre = String(fd.get('nombre') || '').trim();
-        const telefono = normalizePhoneDigits(fd.get('telefono') || '');
-        const email = String(fd.get('email') || '').trim();
-        const unidadId = String(fd.get('unidad_id') || '').trim();
-        const password = String(fd.get('password') || '').trim();
-        const passwordConfirm = String(fd.get('password_confirm') || '').trim();
+          fd.set('telefono', telefono);
 
-        fd.set('telefono', telefono);
-
-        if (nombre.length < 3 || nombre.length > 120) {
-          showToast('El nombre debe tener entre 3 y 120 caracteres.', 'error');
-          return;
-        }
-
-        if (telefono && (telefono.length < 10 || telefono.length > 15)) {
-          showToast('El teléfono debe tener entre 10 y 15 dígitos.', 'error');
-          return;
-        }
-
-        if (!email) {
-          showToast('El correo es obligatorio.', 'error');
-          return;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-          showToast('El correo no es válido.', 'error');
-          return;
-        }
-
-        if (!unidadId) {
-          showToast('Debes seleccionar una unidad.', 'error');
-          return;
-        }
-
-        if (password || passwordConfirm) {
-          if (password.length < 8) {
-            showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
+          if (nombre.length < 3 || nombre.length > 120) {
+            showToast('El nombre debe tener entre 3 y 120 caracteres.', 'error');
             return;
           }
 
-          if (password !== passwordConfirm) {
-            showToast('Las contraseñas no coinciden.', 'error');
+          if (telefono && (telefono.length < 10 || telefono.length > 15)) {
+            showToast('El teléfono debe tener entre 10 y 15 dígitos.', 'error');
             return;
           }
+
+          if (!email) {
+            showToast('El correo es obligatorio.', 'error');
+            return;
+          }
+
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            showToast('El correo no es válido.', 'error');
+            return;
+          }
+
+          if (!unidadId) {
+            showToast('Debes seleccionar una unidad.', 'error');
+            return;
+          }
+
+          if (password || passwordConfirm) {
+            if (password.length < 8) {
+              showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
+              return;
+            }
+
+            if (password !== passwordConfirm) {
+              showToast('Las contraseñas no coinciden.', 'error');
+              return;
+            }
+          }
+
+          const resp = await api.residentes.save(fd);
+
+          closeModal();
+          await loadData();
+
+          showToast(
+            resp.message || (isEditing ? MESSAGES.residenteActualizado : MESSAGES.residenteCreado),
+            'success'
+          );
+        } catch (err) {
+          showToast(err?.message || 'No se pudo guardar el residente.', 'error');
         }
-
-        const resp = await api.residentes.save(fd);
-
-        closeModal();
-        await loadData();
-
-        showToast(
-          resp.message || (isEditing ? MESSAGES.residenteActualizado : MESSAGES.residenteCreado),
-          'success'
-        );
-      } catch (err) {
-        showToast(err?.message || 'No se pudo guardar el residente.', 'error');
-      }
+      });
     });
   }
 

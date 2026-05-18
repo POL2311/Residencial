@@ -40,6 +40,8 @@
     responsables: [],
     permisoDraftItems: [],
   };
+  const syncDashboardOverlayState = () => window.AdminResidencialDashboard?.syncOverlayState?.();
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
   function escapeHtml(v = '') {
     return String(v)
@@ -97,6 +99,7 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+      syncDashboardOverlayState();
     };
     modal.querySelector('#permisoQrClose')?.addEventListener('click', close);
     modal.addEventListener('click', (ev) => {
@@ -119,6 +122,7 @@
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    syncDashboardOverlayState();
   }
 
   function ensureDetailsModal() {
@@ -146,6 +150,7 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+      syncDashboardOverlayState();
     };
     modal.querySelector('#permisoDetailsClose')?.addEventListener('click', close);
     modal.addEventListener('click', (ev) => {
@@ -191,9 +196,16 @@
           <div class="text-xs uppercase tracking-wide text-slate-400">Notas</div>
           <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.notas || 'Sin notas')}</div>
         </div>
-        <div class="grid gap-3 sm:grid-cols-2">
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">QR del permiso</div>
+          <div class="mt-2 break-all text-xs text-slate-500">${escapeHtml(item.qr_payload || 'Sin QR generado')}</div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
           <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
+          <button type="button" data-detail-approve="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Aprobar</button>
+          <button type="button" data-detail-cancel="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Cancelar</button>
+          <button type="button" data-detail-delete="${item.id}" class="rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white hover:bg-rose-700 sm:col-span-2 lg:col-span-1">Eliminar</button>
         </div>
       </div>
     `;
@@ -203,10 +215,23 @@
       openPermisoModal(item);
     });
     modal.querySelector('[data-detail-qr]')?.addEventListener('click', () => openQrModal(item));
+    modal.querySelector('[data-detail-approve]')?.addEventListener('click', async () => {
+      closePermisoDetailsModal();
+      await approvePermiso(item.id);
+    });
+    modal.querySelector('[data-detail-cancel]')?.addEventListener('click', async () => {
+      closePermisoDetailsModal();
+      await updatePermisoAction('cancel', item.id);
+    });
+    modal.querySelector('[data-detail-delete]')?.addEventListener('click', async () => {
+      closePermisoDetailsModal();
+      await updatePermisoAction('delete', item.id);
+    });
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    syncDashboardOverlayState();
   }
 
   function ensureCatalogoDetailsModal() {
@@ -234,6 +259,7 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+      syncDashboardOverlayState();
     };
     modal.querySelector('#catalogoDetailsClose')?.addEventListener('click', close);
     modal.addEventListener('click', (ev) => {
@@ -267,7 +293,10 @@
           <div class="text-xs uppercase tracking-wide text-slate-400">Descripción</div>
           <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.descripcion || 'Sin descripción')}</div>
         </div>
-        <button type="button" data-catalog-edit="${item.id}" class="w-full rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <button type="button" data-catalog-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+          <button type="button" data-catalog-delete="${item.id}" class="rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white hover:bg-rose-700">Eliminar</button>
+        </div>
       </div>
     `;
 
@@ -275,10 +304,15 @@
       closeCatalogoDetailsModal();
       openCatalogoModal(item);
     });
+    modal.querySelector('[data-catalog-delete]')?.addEventListener('click', async () => {
+      closeCatalogoDetailsModal();
+      await deleteCatalogo(item.id);
+    });
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    syncDashboardOverlayState();
   }
 
   function showAlert(msg = '', type = 'info') {
@@ -440,12 +474,10 @@
           <div>
             <div class="font-semibold text-slate-800">${escapeHtml(item.nombre)}</div>
             <div class="mt-1 text-sm text-slate-600">${escapeHtml(item.categoria || 'Sin categoría')}</div>
-            <div class="mt-1 text-sm text-slate-500">${escapeHtml(item.descripcion || 'Sin descripción')}</div>
+            <div class="mt-1 text-sm text-slate-500 line-clamp-2">${escapeHtml(item.descripcion || 'Sin descripción')}</div>
           </div>
-          <div class="flex flex-col gap-2">
+          <div class="w-[150px] shrink-0">
             <button type="button" class="js-cat-more rounded-xl border px-3 py-2 text-xs hover:bg-white" data-id="${item.id}">Ver más</button>
-            <button type="button" class="js-cat-edit rounded-xl border px-3 py-2 text-xs hover:bg-white" data-id="${item.id}">Editar</button>
-            <button type="button" class="js-cat-delete rounded-xl bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-700" data-id="${item.id}">Eliminar</button>
           </div>
         </div>
       </div>
@@ -454,12 +486,6 @@
 
     els.catalogoList.querySelectorAll('.js-cat-more').forEach((btn) => {
       btn.addEventListener('click', () => openCatalogoDetails(state.catalogo.find((item) => item.id === Number(btn.dataset.id)) || null));
-    });
-    els.catalogoList.querySelectorAll('.js-cat-edit').forEach((btn) => {
-      btn.addEventListener('click', () => openCatalogoModal(state.catalogo.find((item) => item.id === Number(btn.dataset.id)) || null));
-    });
-    els.catalogoList.querySelectorAll('.js-cat-delete').forEach((btn) => {
-      btn.addEventListener('click', () => deleteCatalogo(Number(btn.dataset.id)));
     });
   }
 
@@ -479,33 +505,13 @@
               <span class="rounded-full px-2.5 py-1 text-xs ${item.estado === 'pendiente' ? 'bg-amber-100 text-amber-700' : item.estado === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : item.estado === 'en_proceso' ? 'bg-sky-100 text-sky-700' : item.estado === 'usado' ? 'bg-slate-200 text-slate-700' : 'bg-rose-100 text-rose-700'}">${escapeHtml(item.estado)}</span>
             </div>
             <div class="mt-1 text-sm text-slate-600">Responsable: ${escapeHtml(item.responsable_nombre || 'Sin responsable')} · Área: ${escapeHtml(item.area_nombre || 'Sin área')}</div>
-            <div class="mt-3 space-y-2">
-              ${(item.items || [])
-                .map((material) => `
-                <div class="rounded-xl bg-white px-3 py-2 text-sm text-slate-700">
-                  ${escapeHtml(material.material_nombre)} <span class="text-slate-400">·</span> ${escapeHtml(material.cantidad_texto)}
-                </div>
-              `)
-                .join('')}
+            <div class="mt-2 text-sm text-slate-500">
+              ${(item.items || []).slice(0, 2).map((material) => `${escapeHtml(material.material_nombre)} · ${escapeHtml(material.cantidad_texto)}`).join(' · ') || 'Sin materiales'}
+              ${(item.items || []).length > 2 ? ` · +${(item.items || []).length - 2} más` : ''}
             </div>
           </div>
-          <div class="grid gap-2 sm:grid-cols-2 lg:w-[340px]">
+          <div class="lg:w-[180px] shrink-0">
             <button type="button" class="js-perm-more rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Ver más</button>
-            <button type="button" class="js-perm-edit rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Editar</button>
-            <button type="button" class="js-perm-approve rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Aprobar</button>
-            <button type="button" class="js-perm-cancel rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Cancelar</button>
-            <button type="button" class="js-perm-delete rounded-xl bg-rose-600 px-3 py-2 text-sm text-white hover:bg-rose-700" data-id="${item.id}">Eliminar</button>
-          </div>
-        </div>
-        <div class="mt-4 flex flex-col gap-3 rounded-2xl bg-white p-4 md:flex-row md:items-center md:justify-between">
-          <div class="text-sm text-slate-700">
-            <div class="font-medium">QR del permiso</div>
-            <div class="text-xs break-all text-slate-500">${escapeHtml(item.qr_payload)}</div>
-            <div class="mt-1 text-xs text-slate-500">Aprobó: ${escapeHtml(item.aprobado_por_nombre || 'Pendiente')} · ${escapeHtml(item.aprobado_at || '—')}</div>
-          </div>
-          <div class="flex items-center gap-3">
-            <img src="${qrPreview(item.qr_payload)}" alt="QR permiso" class="h-20 w-20 rounded-xl border bg-white object-contain p-1" loading="lazy" />
-            <button type="button" class="js-perm-qr rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95" data-id="${item.id}">Ver QR</button>
           </div>
         </div>
       </div>
@@ -514,15 +520,6 @@
 
     els.permisosList.querySelectorAll('.js-perm-more').forEach((btn) =>
       btn.addEventListener('click', () => openPermisoDetails(state.permisos.find((item) => item.id === Number(btn.dataset.id)) || null)),
-    );
-    els.permisosList.querySelectorAll('.js-perm-edit').forEach((btn) =>
-      btn.addEventListener('click', () => openPermisoModal(state.permisos.find((item) => item.id === Number(btn.dataset.id)) || null)),
-    );
-    els.permisosList.querySelectorAll('.js-perm-approve').forEach((btn) => btn.addEventListener('click', () => approvePermiso(Number(btn.dataset.id))));
-    els.permisosList.querySelectorAll('.js-perm-cancel').forEach((btn) => btn.addEventListener('click', () => updatePermisoAction('cancel', Number(btn.dataset.id))));
-    els.permisosList.querySelectorAll('.js-perm-delete').forEach((btn) => btn.addEventListener('click', () => updatePermisoAction('delete', Number(btn.dataset.id))));
-    els.permisosList.querySelectorAll('.js-perm-qr').forEach((btn) =>
-      btn.addEventListener('click', () => openQrModal(state.permisos.find((item) => item.id === Number(btn.dataset.id)) || null)),
     );
   }
 
@@ -556,11 +553,13 @@
     els.catalogoError?.classList.add('hidden');
     els.catalogoModal?.classList.remove('hidden');
     els.catalogoModal?.classList.add('flex');
+    syncDashboardOverlayState();
   }
 
   function closeCatalogoModal() {
     els.catalogoModal?.classList.add('hidden');
     els.catalogoModal?.classList.remove('flex');
+    syncDashboardOverlayState();
   }
 
   function openPermisoModal(item) {
@@ -585,45 +584,63 @@
     setPermisoError('');
     els.permisoModal?.classList.remove('hidden');
     els.permisoModal?.classList.add('flex');
+    syncDashboardOverlayState();
   }
 
   function closePermisoModal() {
     els.permisoModal?.classList.add('hidden');
     els.permisoModal?.classList.remove('flex');
+    syncDashboardOverlayState();
   }
 
   async function saveCatalogo(ev) {
     ev.preventDefault();
-    try {
-      const fd = new FormData(els.catalogoForm);
-      fd.set('activo', els.catalogoForm.activo.checked ? '1' : '0');
-      await fetchJSON(API_CATALOGO, { method: 'POST', body: fd });
-      closeCatalogoModal();
-      showAlert('Catálogo actualizado.', 'success');
-      await loadAll();
-    } catch (e) {
-      if (els.catalogoError) {
-        els.catalogoError.textContent = e.message || 'No se pudo guardar el material.';
-        els.catalogoError.classList.remove('hidden');
+    const submitBtn = ev.submitter || els.catalogoForm?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.catalogoForm,
+      label: 'Guardando...',
+      lock: [els.btnCatalogoCancel, els.btnCatalogoClose].filter(Boolean),
+    }, async () => {
+      try {
+        const fd = new FormData(els.catalogoForm);
+        fd.set('activo', els.catalogoForm.activo.checked ? '1' : '0');
+        await fetchJSON(API_CATALOGO, { method: 'POST', body: fd });
+        closeCatalogoModal();
+        showAlert('Catálogo actualizado.', 'success');
+        await loadAll();
+      } catch (e) {
+        if (els.catalogoError) {
+          els.catalogoError.textContent = e.message || 'No se pudo guardar el material.';
+          els.catalogoError.classList.remove('hidden');
+        }
       }
-    }
+    });
   }
 
   async function savePermiso(ev) {
     ev.preventDefault();
-    try {
-      if (!state.permisoDraftItems.length) {
-        throw new Error('Debes agregar al menos un item al permiso.');
+    const submitBtn = ev.submitter || els.permisoForm?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.permisoForm,
+      label: 'Guardando...',
+      lock: [els.btnPermisoCancel, els.btnPermisoClose, els.btnAddPermisoItem].filter(Boolean),
+    }, async () => {
+      try {
+        if (!state.permisoDraftItems.length) {
+          throw new Error('Debes agregar al menos un item al permiso.');
+        }
+        const fd = new FormData(els.permisoForm);
+        fd.set('items_json', JSON.stringify(state.permisoDraftItems));
+        await fetchJSON(API_PERMISOS, { method: 'POST', body: fd });
+        closePermisoModal();
+        showAlert('Permiso guardado.', 'success');
+        await loadAll();
+      } catch (e) {
+        setPermisoError(e.message || 'No se pudo guardar el permiso.');
       }
-      const fd = new FormData(els.permisoForm);
-      fd.set('items_json', JSON.stringify(state.permisoDraftItems));
-      await fetchJSON(API_PERMISOS, { method: 'POST', body: fd });
-      closePermisoModal();
-      showAlert('Permiso guardado.', 'success');
-      await loadAll();
-    } catch (e) {
-      setPermisoError(e.message || 'No se pudo guardar el permiso.');
-    }
+    });
   }
 
   async function deleteCatalogo(id) {

@@ -25,6 +25,7 @@
     autos: [],
     accesses: [],
   };
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -204,42 +205,50 @@
 
   els.form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const formData = new FormData(els.form);
-    const placas = normalizePlacas(formData.get('placas'));
-    const modelo = String(formData.get('modelo') || '').trim();
-    const color = String(formData.get('color') || '').trim();
-    const tagId = String(formData.get('tag_id') || '').trim();
+    const submitBtn = e.submitter || els.form?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.form,
+      label: 'Guardando...',
+      lock: [els.btnCancelModal, els.btnCloseModal].filter(Boolean),
+    }, async () => {
+      const formData = new FormData(els.form);
+      const placas = normalizePlacas(formData.get('placas'));
+      const modelo = String(formData.get('modelo') || '').trim();
+      const color = String(formData.get('color') || '').trim();
+      const tagId = String(formData.get('tag_id') || '').trim();
 
-    formData.set('placas', placas);
+      formData.set('placas', placas);
 
-    if (placas.length < 5 || placas.length > 15) {
-      showAlert('error', 'Las placas deben tener entre 5 y 15 caracteres.');
-      return;
-    }
-    if (modelo.length > 80) {
-      showAlert('error', 'El modelo no puede exceder 80 caracteres.');
-      return;
-    }
-    if (color.length > 40) {
-      showAlert('error', 'El color no puede exceder 40 caracteres.');
-      return;
-    }
-    if (tagId.length > 120) {
-      showAlert('error', 'El Tag ID no puede exceder 120 caracteres.');
-      return;
-    }
+      if (placas.length < 5 || placas.length > 15) {
+        showAlert('error', 'Las placas deben tener entre 5 y 15 caracteres.');
+        return;
+      }
+      if (modelo.length > 80) {
+        showAlert('error', 'El modelo no puede exceder 80 caracteres.');
+        return;
+      }
+      if (color.length > 40) {
+        showAlert('error', 'El color no puede exceder 40 caracteres.');
+        return;
+      }
+      if (tagId.length > 120) {
+        showAlert('error', 'El Tag ID no puede exceder 120 caracteres.');
+        return;
+      }
 
-    try {
-      await fetchJson(API_AUTOS, {
-        method: 'POST',
-        body: formData,
-      });
-      closeModal();
-      await loadAutos();
-      showAlert('ok', 'Auto actualizado correctamente.');
-    } catch (err) {
-      showAlert('error', err.message || 'No se pudo actualizar el auto.');
-    }
+      try {
+        await fetchJson(API_AUTOS, {
+          method: 'POST',
+          body: formData,
+        });
+        closeModal();
+        await loadAutos();
+        showAlert('ok', 'Auto actualizado correctamente.');
+      } catch (err) {
+        showAlert('error', err.message || 'No se pudo actualizar el auto.');
+      }
+    });
   });
 
   loadAll().catch((err) => showAlert('error', err.message || 'No se pudo cargar la vista de autos.'));

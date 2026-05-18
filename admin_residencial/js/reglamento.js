@@ -27,6 +27,7 @@
   const state = {
     previewVisible: true,
   };
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
   function escapeHtml(value = '') {
     return String(value)
@@ -186,17 +187,23 @@
   els.form.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearFormError();
+    const submitBtn = e.submitter || els.form?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.form,
+      label: 'Guardando...',
+    }, async () => {
+      try {
+        const fd = new FormData(els.form);
+        validateForm(fd);
 
-    try {
-      const fd = new FormData(els.form);
-      validateForm(fd);
-
-      const json = await api.reglamento.save(fd);
-      renderPreview();
-      showAlert(json.message || 'Reglamento guardado.');
-    } catch (err) {
-      showFormError(err.message || 'Error al guardar reglamento.');
-    }
+        const json = await api.reglamento.save(fd);
+        renderPreview();
+        showAlert(json.message || 'Reglamento guardado.');
+      } catch (err) {
+        showFormError(err.message || 'Error al guardar reglamento.');
+      }
+    });
   });
 
   loadReglamento();

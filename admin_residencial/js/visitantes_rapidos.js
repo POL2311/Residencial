@@ -16,6 +16,8 @@
   };
 
   const state = { items: [], areas: [], responsables: [] };
+  const syncDashboardOverlayState = () => window.AdminResidencialDashboard?.syncOverlayState?.();
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
   function escapeHtml(v = '') {
     return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -73,6 +75,7 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+      syncDashboardOverlayState();
     };
     modal.querySelector('#visitanteQrClose')?.addEventListener('click', close);
     modal.addEventListener('click', (ev) => {
@@ -95,6 +98,7 @@
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    syncDashboardOverlayState();
   }
 
   function ensureDetailsModal() {
@@ -122,6 +126,7 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+      syncDashboardOverlayState();
     };
     modal.querySelector('#visitanteDetailsClose')?.addEventListener('click', close);
     modal.addEventListener('click', (ev) => {
@@ -155,9 +160,14 @@
           <div class="text-xs uppercase tracking-wide text-slate-400">Notas administrativas</div>
           <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.notas_admin || 'Sin notas')}</div>
         </div>
-        <div class="grid gap-3 sm:grid-cols-2">
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">QR del visitante</div>
+          <div class="mt-2 break-all text-xs text-slate-500">${escapeHtml(item.qr_payload || 'Sin QR generado')}</div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
           <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
+          <button type="button" data-detail-cancel="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50 sm:col-span-2 lg:col-span-1">Cancelar</button>
         </div>
       </div>
     `;
@@ -169,10 +179,15 @@
     modal.querySelector('[data-detail-qr]')?.addEventListener('click', () => {
       openQrModal(item);
     });
+    modal.querySelector('[data-detail-cancel]')?.addEventListener('click', async () => {
+      closeDetailsModal();
+      await cancelItem(item.id);
+    });
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    syncDashboardOverlayState();
   }
 
   function closeDetailsModal() {
@@ -224,23 +239,9 @@
             </div>
             <div class="mt-1 text-sm text-slate-600">${escapeHtml(item.empresa || 'Sin empresa')} · Responsable: ${escapeHtml(item.responsable_nombre || 'Sin responsable')}</div>
             <div class="mt-1 text-sm text-slate-500">Área: <b>${escapeHtml(item.area_nombre || 'Sin área')}</b> · Placa: ${escapeHtml(item.placa_vehiculo || '—')}</div>
-            <div class="mt-3 rounded-2xl bg-slate-50 p-3 text-sm text-slate-600">${escapeHtml(item.motivo)}</div>
           </div>
-          <div class="grid gap-2 sm:grid-cols-2 lg:w-[340px]">
+          <div class="lg:w-[180px]">
             <button type="button" class="js-more rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Ver más</button>
-            <button type="button" class="js-edit rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Editar</button>
-            <button type="button" class="js-cancel rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Cancelar</button>
-          </div>
-        </div>
-        <div class="mt-4 flex flex-col gap-3 rounded-2xl bg-slate-50 p-4 md:flex-row md:items-center md:justify-between">
-          <div class="text-sm text-slate-700">
-            <div class="font-medium">QR de visitante</div>
-            <div class="text-xs text-slate-500 break-all">${escapeHtml(item.qr_payload)}</div>
-            <div class="mt-1 text-xs text-slate-500">Vigencia: ${escapeHtml(item.fecha_desde)} → ${escapeHtml(item.fecha_hasta)}</div>
-          </div>
-          <div class="flex items-center gap-3">
-            <img src="${qrPreview(item.qr_payload)}" alt="QR visitante" class="h-20 w-20 rounded-xl border bg-white object-contain p-1" loading="lazy" />
-            <button type="button" class="js-qr rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95" data-id="${item.id}">Ver QR</button>
           </div>
         </div>
       </div>
@@ -248,15 +249,6 @@
 
     els.list.querySelectorAll('.js-more').forEach((btn) => {
       btn.addEventListener('click', () => openDetailsModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
-    });
-    els.list.querySelectorAll('.js-edit').forEach((btn) => {
-      btn.addEventListener('click', () => openModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
-    });
-    els.list.querySelectorAll('.js-cancel').forEach((btn) => {
-      btn.addEventListener('click', () => cancelItem(Number(btn.dataset.id)));
-    });
-    els.list.querySelectorAll('.js-qr').forEach((btn) => {
-      btn.addEventListener('click', () => openQrModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
     });
   }
 
@@ -278,11 +270,13 @@
     els.formError?.classList.add('hidden');
     els.modal?.classList.remove('hidden');
     els.modal?.classList.add('flex');
+    syncDashboardOverlayState();
   }
 
   function closeModal() {
     els.modal?.classList.add('hidden');
     els.modal?.classList.remove('flex');
+    syncDashboardOverlayState();
   }
 
   async function loadData() {
@@ -298,18 +292,26 @@
 
   async function submitForm(ev) {
     ev.preventDefault();
-    try {
-      const fd = new FormData(els.form);
-      await fetchJSON(API, { method: 'POST', body: fd });
-      closeModal();
-      showAlert('Acceso rápido guardado correctamente.', 'success');
-      await loadData();
-    } catch (e) {
-      if (els.formError) {
-        els.formError.textContent = e.message || 'No se pudo guardar el acceso.';
-        els.formError.classList.remove('hidden');
+    const submitBtn = ev.submitter || els.form?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.form,
+      label: 'Guardando...',
+      lock: [els.btnCancel, els.btnClose].filter(Boolean),
+    }, async () => {
+      try {
+        const fd = new FormData(els.form);
+        await fetchJSON(API, { method: 'POST', body: fd });
+        closeModal();
+        showAlert('Acceso rápido guardado correctamente.', 'success');
+        await loadData();
+      } catch (e) {
+        if (els.formError) {
+          els.formError.textContent = e.message || 'No se pudo guardar el acceso.';
+          els.formError.classList.remove('hidden');
+        }
       }
-    }
+    });
   }
 
   async function cancelItem(id) {

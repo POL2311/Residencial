@@ -1,9 +1,7 @@
 (function () {
   const els = {
     header: document.getElementById('shellHeader'),
-    name: document.getElementById('residentName'),
     addr: document.getElementById('residentAddress'),
-    btnEdit: document.getElementById('btnEditAddress'),
     modeBadge: document.getElementById('operationalModeBadge'),
     modeHint: document.getElementById('operationalModeHint'),
 
@@ -17,7 +15,6 @@
     mobileMoreSheet: document.getElementById('mobileMoreSheet'),
     mobileMoreBackdrop: document.getElementById('mobileMoreBackdrop'),
     mobileMoreClose: document.getElementById('btnCloseMobileMoreSheet'),
-    desktopMorePopover: document.getElementById('desktopMorePopover'),
 
     modal: document.getElementById('carModal'),
     modalBody: document.getElementById('carModalBody'),
@@ -121,6 +118,32 @@
       servicio: 'Servicio',
     };
     return map[key] || 'Residencial';
+  }
+
+  function resolveServiceDisplayName(data = {}, ctx = {}) {
+    const profile = data.service_profile || state.serviceProfile || {};
+    const candidates = [
+      data.direccion,
+      ctx.residencial_nombre,
+      data.residencial_nombre,
+      profile.nombre_servicio,
+      profile.service_name,
+      profile.nombre,
+      ctx.servicio_nombre,
+      data.servicio_nombre,
+      ctx.nombre_servicio,
+      data.nombre_servicio,
+      profile.preset_servicio,
+      data.modo_operacion,
+      ctx.modo_operacion,
+    ];
+
+    for (const candidate of candidates) {
+      const value = String(candidate || '').trim();
+      if (value) return value;
+    }
+
+    return 'Servicio activo';
   }
 
   function firstEnabledView() {
@@ -250,6 +273,10 @@
     }
   }
 
+  function resolveActiveView(fallback = 'home') {
+    return state.pendingView || state.currentView || fallback;
+  }
+
   function syncHash(view) {
     if ((window.location.hash || '').replace('#', '') !== view) {
       window.location.hash = view;
@@ -257,23 +284,13 @@
   }
 
   function scrollToViewTop() {
-    const wrap = els.mount || els.body;
     if (els.body && typeof els.body.scrollTo === 'function') {
-      els.body.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    if (wrap && typeof wrap.scrollIntoView === 'function') {
-      wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      els.body.scrollTo({ top: 0, behavior: 'auto' });
     }
   }
 
   function isMobileViewport() {
     return window.matchMedia('(max-width: 767px)').matches;
-  }
-
-  function isLargeMoreViewport() {
-    return window.matchMedia('(min-width: 750px)').matches;
   }
 
   function showMobileDock() {
@@ -290,7 +307,6 @@
       el === els.mobileDockLayer ||
       el === els.mobileMoreBackdrop ||
       el === els.mobileMoreSheet ||
-      el === els.desktopMorePopover ||
       el === document.getElementById('appToastRoot') ||
       !!els.mobileDockLayer?.contains(el)
     );
@@ -312,6 +328,13 @@
   function syncDockModalState() {
     const hasModal = hasActiveModal();
     els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
+    if (els.mobileDockLayer) {
+      els.mobileDockLayer.style.display = hasModal ? 'none' : '';
+      els.mobileDockLayer.setAttribute('aria-hidden', hasModal ? 'true' : 'false');
+    }
+    if (els.footer) {
+      els.footer.style.pointerEvents = hasModal ? 'none' : '';
+    }
     if (hasModal) {
       closeMoreSheet();
     } else if (!state.moreSheetOpen) {
@@ -333,27 +356,6 @@
     syncDockModalState();
   }
 
-  function positionDesktopMorePopover() {
-    if (!els.mobileMoreBtn || !els.desktopMorePopover || !isLargeMoreViewport() || !state.moreSheetOpen) return;
-
-    const margin = 16;
-    const btnRect = els.mobileMoreBtn.getBoundingClientRect();
-    const desiredWidth = Math.min(window.innerWidth - (margin * 2), 352);
-
-    els.desktopMorePopover.style.width = `${desiredWidth}px`;
-    els.desktopMorePopover.style.maxWidth = `${window.innerWidth - (margin * 2)}px`;
-
-    const sheetHeight = Math.min(els.desktopMorePopover.scrollHeight || 0, window.innerHeight - (margin * 2));
-    const left = Math.min(
-      Math.max(margin, btnRect.right - desiredWidth),
-      window.innerWidth - desiredWidth - margin
-    );
-    const top = Math.max(margin, btnRect.top - sheetHeight - 12);
-
-    els.desktopMorePopover.style.left = `${left}px`;
-    els.desktopMorePopover.style.top = `${top}px`;
-  }
-
   function openMoreSheet() {
     state.moreSheetOpen = true;
     showMobileDock();
@@ -362,7 +364,7 @@
     els.mobileMoreBackdrop?.classList.add('is-open');
     els.mobileMoreSheet?.classList.add('is-open');
     document.body.classList.add('overflow-hidden');
-    setActiveButtons(state.currentView || 'home');
+    setActiveButtons(resolveActiveView());
   }
 
   function closeMoreSheet() {
@@ -372,15 +374,7 @@
     els.mobileMoreSheet?.classList.remove('is-open');
     els.mobileMoreBackdrop?.setAttribute('aria-hidden', 'true');
     els.mobileMoreSheet?.setAttribute('aria-hidden', 'true');
-    if (els.desktopMorePopover) {
-      els.desktopMorePopover.classList.add('hidden');
-      els.desktopMorePopover.setAttribute('aria-hidden', 'true');
-      els.desktopMorePopover.style.left = '';
-      els.desktopMorePopover.style.top = '';
-      els.desktopMorePopover.style.width = '';
-      els.desktopMorePopover.style.maxWidth = '';
-    }
-    setActiveButtons(state.currentView || 'home');
+    setActiveButtons(resolveActiveView());
   }
 
   function handleBodyScroll() {
@@ -393,7 +387,6 @@
   async function navigateTo(view, opts = {}) {
     const { force = false } = opts;
     showShellHeader();
-    closeMoreSheet();
     if (!state.enabledViews.size) {
       renderAccessBlocked();
       return;
@@ -401,10 +394,15 @@
     view = normalizeView(view || 'home');
 
     if (!force && (state.pendingView === view || state.currentView === view) && state.isNavigating === false) {
+      state.pendingView = view;
+      closeMoreSheet();
+      setActiveButtons(view);
       syncHash(view);
       return;
     }
 
+    state.pendingView = view;
+    closeMoreSheet();
     const token = ++state.navToken;
     state.isNavigating = true;
     state.pendingView = view;
@@ -440,6 +438,7 @@
       `;
       state.pendingView = null;
       state.isNavigating = false;
+      setActiveButtons(resolveActiveView());
       return;
     }
 
@@ -455,12 +454,14 @@
       `;
       state.pendingView = null;
       state.isNavigating = false;
+      setActiveButtons(resolveActiveView());
       return;
     }
 
     state.currentView = view;
     state.pendingView = null;
     state.isNavigating = false;
+    setActiveButtons(view);
   }
 
   function initialView() {
@@ -470,10 +471,9 @@
   }
 
   async function loadContext() {
-    els.name = els.name || document.getElementById('residentName');
     els.addr = els.addr || document.getElementById('residentAddress');
     // Header chips ("carsContainer") were removed for a cleaner UI.
-    if (!els.name || !els.addr) return;
+    if (!els.addr) return;
 
     try {
       const res = await fetch(`${API}contexto.php`, {
@@ -497,26 +497,12 @@
       const allowed = Array.isArray(state.serviceProfile?.allowed_views) ? state.serviceProfile.allowed_views : [];
       debugLogContext(allowed, state.enabledViews);
 
-      // Nombre
-      els.name.textContent = data.user?.name || 'Admin residencial';
-
-      // Dirección / contexto
-      if (data.direccion && String(data.direccion).trim() !== '') {
-        els.addr.textContent = data.direccion;
-      } else {
-        const resName = (ctx.residencial_nombre || data.residencial_nombre || '').trim();
-        const unidad = (ctx.unidad_clave || data.unidad_clave || '').trim(); // por si lo mandan
-        els.addr.textContent =
-          (resName && unidad)
-            ? `Residencial: ${resName} · Unidad: ${unidad}`
-            : (resName ? `Residencial: ${resName}` : '—');
-      }
+      els.addr.textContent = resolveServiceDisplayName(data, ctx);
 
       toggleOperationalButtons();
     } catch (e) {
       console.warn('loadContext() falló:', e);
-      els.name.textContent = 'Admin residencial';
-      els.addr.textContent = '—';
+      els.addr.textContent = 'Servicio activo';
       state.context = null;
       state.operationalMode = 'residencial';
       state.serviceProfile = null;
@@ -545,9 +531,7 @@
       } else if (el.hasAttribute('data-dock-secondary')) {
         el.classList.toggle('hidden', !allow);
         if (allow) secondaryVisibleCount += 1;
-      } else if (el.hasAttribute('data-dock-desktop-secondary')) {
-        el.classList.toggle('hidden', !allow);
-      } else if (el.id === 'btnReglamento' || el.id === 'btnEditAddress') {
+      } else if (el.id === 'btnReglamento') {
         el.classList.toggle('hidden', !allow);
       }
     });
@@ -625,12 +609,14 @@
     `;
     showShellHeader();
     els.modal.classList.remove('hidden');
+    syncDockModalState();
   }
 
   function closeCarModal() {
     els.modal = els.modal || document.getElementById('carModal');
     if (!els.modal) return;
     els.modal.classList.add('hidden');
+    syncDockModalState();
   }
 
   function escapeHtml(s) {
@@ -640,6 +626,85 @@
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
+  }
+
+  async function withPendingAction(options, task) {
+    const settings = options || {};
+    const button = settings.button instanceof HTMLElement ? settings.button : null;
+    const scope = settings.scope instanceof HTMLElement ? settings.scope : (button?.form || null);
+    const label = settings.label || 'Guardando...';
+    const lock = Array.isArray(settings.lock) ? settings.lock.filter((el) => el instanceof HTMLElement) : [];
+
+    if (scope?.dataset.submitting === '1') return;
+    if (button?.dataset.pending === '1') return;
+
+    const lockedState = lock.map((el) => ({ el, disabled: !!el.disabled }));
+    const submitOriginal = button ? {
+      html: button.innerHTML,
+      disabled: !!button.disabled,
+      minWidth: button.style.minWidth || '',
+    } : null;
+
+    const usesLightText = !!button && (
+      button.classList.contains('text-white') ||
+      button.className.includes('bg-[#2E5D73]') ||
+      button.className.includes('bg-blue-') ||
+      button.className.includes('bg-emerald-') ||
+      button.className.includes('bg-rose-') ||
+      button.className.includes('bg-amber-')
+    );
+
+    const spinnerClasses = usesLightText
+      ? 'border-white/35 border-t-white'
+      : 'border-slate-300 border-t-slate-700';
+
+    if (scope) {
+      scope.dataset.submitting = '1';
+      scope.setAttribute('aria-busy', 'true');
+    }
+
+    if (button) {
+      const width = Math.ceil(button.getBoundingClientRect().width || 0);
+      if (width > 0) button.style.minWidth = `${width}px`;
+      button.dataset.pending = '1';
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.classList.add('opacity-70', 'cursor-not-allowed');
+      button.innerHTML = `
+        <span class="inline-flex items-center justify-center gap-2">
+          <span class="h-4 w-4 animate-spin rounded-full border-2 ${spinnerClasses}"></span>
+          <span>${escapeHtml(label)}</span>
+        </span>
+      `;
+    }
+
+    lockedState.forEach(({ el }) => {
+      el.disabled = true;
+      el.classList.add('opacity-70', 'cursor-not-allowed');
+    });
+
+    try {
+      return await task();
+    } finally {
+      if (scope) {
+        delete scope.dataset.submitting;
+        scope.removeAttribute('aria-busy');
+      }
+
+      if (button && submitOriginal) {
+        button.disabled = submitOriginal.disabled;
+        button.removeAttribute('aria-busy');
+        delete button.dataset.pending;
+        button.classList.remove('opacity-70', 'cursor-not-allowed');
+        button.innerHTML = submitOriginal.html;
+        button.style.minWidth = submitOriginal.minWidth;
+      }
+
+      lockedState.forEach(({ el, disabled }) => {
+        el.disabled = disabled;
+        el.classList.remove('opacity-70', 'cursor-not-allowed');
+      });
+    }
   }
 
   // ✅ API GLOBAL (para vistas)
@@ -656,6 +721,8 @@
     getContext: () => state.context,
     getOperationalMode: () => state.operationalMode,
     getServiceProfile: () => state.serviceProfile,
+    syncOverlayState: syncDockModalState,
+    withPendingAction,
   };
 
   window.AdminResidencialDashboard = api;

@@ -30,6 +30,7 @@
     serviceGuardiaEnabled: true,
     selectedTurnosGuardiaId: null,
   };
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
   function escapeHtml(value = '') {
     return String(value)
@@ -641,18 +642,25 @@
   els.form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearModalError();
+    const submitBtn = e.submitter || els.form?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.form,
+      label: 'Guardando...',
+      lock: [els.btnClose].filter(Boolean),
+    }, async () => {
+      try {
+        const fd = new FormData(els.form);
 
-    try {
-      const fd = new FormData(els.form);
-
-      if (state.editingId) {
-        await handleEdit(fd);
-      } else {
-        await handleCreate(fd);
+        if (state.editingId) {
+          await handleEdit(fd);
+        } else {
+          await handleCreate(fd);
+        }
+      } catch (err) {
+        showModalError(err.message || 'Error al guardar guardia');
       }
-    } catch (err) {
-      showModalError(err.message || 'Error al guardar guardia');
-    }
+    });
   });
 
   async function fetchTurnos(guardiaId) {
@@ -993,55 +1001,59 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = e.submitter || form.querySelector('button[type="submit"]');
+      await withPendingAction({ button: submitBtn, scope: form, label: 'Guardando...' }, async () => {
+        const fd = new FormData(form);
+        const isUpdate = !!fd.get('turno_id');
+        fd.append('action', isUpdate ? 'update' : 'create');
 
-      const fd = new FormData(form);
-      const isUpdate = !!fd.get('turno_id');
-      fd.append('action', isUpdate ? 'update' : 'create');
+        try {
+          validateTurnoForm(fd);
 
-      try {
-        validateTurnoForm(fd);
+          const json = await fetchJSON(TURNOS_API, {
+            method: 'POST',
+            body: fd,
+          });
 
-        const json = await fetchJSON(TURNOS_API, {
-          method: 'POST',
-          body: fd,
-        });
-
-        showAlert(json.message || 'Turno guardado correctamente.');
-        form.reset();
-        form.querySelector('[name="turno_id"]').value = '';
-        form.querySelector('[name="activo"]').checked = true;
-        listWrap.innerHTML = renderTurnosList(json.turnos || [], guardia.id);
-        await load();
-      } catch (err) {
-        showAlert(err.message || 'Error al guardar turno', true);
-      }
+          showAlert(json.message || 'Turno guardado correctamente.');
+          form.reset();
+          form.querySelector('[name="turno_id"]').value = '';
+          form.querySelector('[name="activo"]').checked = true;
+          listWrap.innerHTML = renderTurnosList(json.turnos || [], guardia.id);
+          await load();
+        } catch (err) {
+          showAlert(err.message || 'Error al guardar turno', true);
+        }
+      });
     });
 
     exceptionForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = e.submitter || exceptionForm.querySelector('button[type="submit"]');
+      await withPendingAction({ button: submitBtn, scope: exceptionForm, label: 'Guardando...' }, async () => {
+        const fd = new FormData(exceptionForm);
+        const isUpdate = !!fd.get('exception_id');
+        fd.append('action', isUpdate ? 'update_exception' : 'create_exception');
 
-      const fd = new FormData(exceptionForm);
-      const isUpdate = !!fd.get('exception_id');
-      fd.append('action', isUpdate ? 'update_exception' : 'create_exception');
+        try {
+          validateExceptionForm(fd);
 
-      try {
-        validateExceptionForm(fd);
+          const json = await fetchJSON(TURNOS_API, {
+            method: 'POST',
+            body: fd,
+          });
 
-        const json = await fetchJSON(TURNOS_API, {
-          method: 'POST',
-          body: fd,
-        });
-
-        showAlert(json.message || 'Excepción guardada correctamente.');
-        exceptionForm.reset();
-        exceptionForm.querySelector('[name="exception_id"]').value = '';
-        exceptionForm.querySelector('[name="activo"]').checked = true;
-        exceptionsWrap.innerHTML = renderExceptionsList(json.exceptions || [], guardia.id);
-        listWrap.innerHTML = renderTurnosList(json.turnos || [], guardia.id);
-        await load();
-      } catch (err) {
-        showAlert(err.message || 'Error al guardar excepción', true);
-      }
+          showAlert(json.message || 'Excepción guardada correctamente.');
+          exceptionForm.reset();
+          exceptionForm.querySelector('[name="exception_id"]').value = '';
+          exceptionForm.querySelector('[name="activo"]').checked = true;
+          exceptionsWrap.innerHTML = renderExceptionsList(json.exceptions || [], guardia.id);
+          listWrap.innerHTML = renderTurnosList(json.turnos || [], guardia.id);
+          await load();
+        } catch (err) {
+          showAlert(err.message || 'Error al guardar excepción', true);
+        }
+      });
     });
 
     listWrap.addEventListener('click', async (e) => {
@@ -1145,18 +1157,25 @@
   els.form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearModalError();
+    const submitBtn = e.submitter || els.form?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.form,
+      label: 'Guardando...',
+      lock: [els.btnClose].filter(Boolean),
+    }, async () => {
+      try {
+        const fd = new FormData(els.form);
 
-    try {
-      const fd = new FormData(els.form);
-
-      if (state.editingId) {
-        await handleEdit(fd);
-      } else {
-        await handleCreate(fd);
+        if (state.editingId) {
+          await handleEdit(fd);
+        } else {
+          await handleCreate(fd);
+        }
+      } catch (err) {
+        showModalError(err.message || 'Error al guardar guardia');
       }
-    } catch (err) {
-      showModalError(err.message || 'Error al guardar guardia');
-    }
+    });
   });
 
   els.list.addEventListener('click', async (e) => {

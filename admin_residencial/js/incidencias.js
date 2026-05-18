@@ -47,6 +47,7 @@
     page: 1,
     perPage: 3,
   };
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
   function escapeHtml(value = '') {
     return String(value)
@@ -785,48 +786,62 @@
   els.formAdd?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearFormError(els.addError);
-
-    try {
-      const fd = new FormData(els.formAdd);
-      if (String(state.meta?.modo_operacion || 'residencial') === 'residencial') {
-        if (String(fd.get('incidencia_scope') || 'unidad') === 'general') {
+    const submitBtn = e.submitter || els.formAdd?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.formAdd,
+      label: 'Guardando...',
+      lock: [els.btnCancelAdd, els.btnCloseAdd].filter(Boolean),
+    }, async () => {
+      try {
+        const fd = new FormData(els.formAdd);
+        if (String(state.meta?.modo_operacion || 'residencial') === 'residencial') {
+          if (String(fd.get('incidencia_scope') || 'unidad') === 'general') {
+            fd.delete('unidad_id');
+          }
+          fd.delete('area_id');
+          fd.delete('persona_recurrente_id');
+          fd.delete('visitante_rapido_id');
+          fd.delete('permiso_material_id');
+          fd.delete('origen_tipo');
+        } else {
           fd.delete('unidad_id');
+          fd.delete('incidencia_scope');
         }
-        fd.delete('area_id');
-        fd.delete('persona_recurrente_id');
-        fd.delete('visitante_rapido_id');
-        fd.delete('permiso_material_id');
-        fd.delete('origen_tipo');
-      } else {
-        fd.delete('unidad_id');
-        fd.delete('incidencia_scope');
-      }
-      validateAddForm(fd);
+        validateAddForm(fd);
 
-      const resp = await api.incidencias.save(fd);
-      closeAddModal();
-      showAlert(resp.message || 'Incidencia registrada.');
-      await loadAll();
-    } catch (e2) {
-      showFormError(els.addError, e2.message || 'Error al registrar incidencia.');
-    }
+        const resp = await api.incidencias.save(fd);
+        closeAddModal();
+        showAlert(resp.message || 'Incidencia registrada.');
+        await loadAll();
+      } catch (e2) {
+        showFormError(els.addError, e2.message || 'Error al registrar incidencia.');
+      }
+    });
   });
 
   els.formEdit?.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearFormError(els.editError);
+    const submitBtn = e.submitter || els.formEdit?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.formEdit,
+      label: 'Guardando...',
+      lock: [els.btnCancelEdit, els.btnCloseEdit].filter(Boolean),
+    }, async () => {
+      try {
+        const fd = new FormData(els.formEdit);
+        validateEditForm(fd);
 
-    try {
-      const fd = new FormData(els.formEdit);
-      validateEditForm(fd);
-
-      const resp = await api.incidencias.save(fd);
-      closeEditModal();
-      showAlert(resp.message || 'Incidencia actualizada.');
-      await loadAll();
-    } catch (e2) {
-      showFormError(els.editError, e2.message || 'Error al actualizar incidencia.');
-    }
+        const resp = await api.incidencias.save(fd);
+        closeEditModal();
+        showAlert(resp.message || 'Incidencia actualizada.');
+        await loadAll();
+      } catch (e2) {
+        showFormError(els.editError, e2.message || 'Error al actualizar incidencia.');
+      }
+    });
   });
 
   ensureUiHelpers();

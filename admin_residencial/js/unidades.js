@@ -40,6 +40,7 @@ console.log('[UNIDADES] JS ACTIVO');
   };
 
   const PER_PAGE = 3;
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
   /* =========================
      HELPERS
@@ -337,21 +338,28 @@ console.log('[UNIDADES] JS ACTIVO');
 
   els.modalForm.addEventListener('submit', async e => {
     e.preventDefault();
+    const submitBtn = e.submitter || els.modalForm.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.modalForm,
+      label: 'Guardando...',
+      lock: [els.btnCancelModal, els.btnCloseModal].filter(Boolean),
+    }, async () => {
+      const fd = new FormData(els.modalForm);
+      fd.set('action', state.editingId ? 'update' : 'create');
+      if (state.editingId) fd.set('id', state.editingId);
 
-    const fd = new FormData(els.modalForm);
-    fd.set('action', state.editingId ? 'update' : 'create');
-    if (state.editingId) fd.set('id', state.editingId);
-
-    try {
-      await fetchJSON(
-        '/admin_residencial/php/api/unidades.php',
-        { method: 'POST', body: fd }
-      );
-      closeModal();
-      loadUnidades();
-    } catch (e) {
-      showAlert(e.message, 'error');
-    }
+      try {
+        await fetchJSON(
+          '/admin_residencial/php/api/unidades.php',
+          { method: 'POST', body: fd }
+        );
+        closeModal();
+        loadUnidades();
+      } catch (e) {
+        showAlert(e.message, 'error');
+      }
+    });
   });
 
   els.search?.addEventListener('input', e =>

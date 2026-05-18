@@ -20,6 +20,8 @@
   };
 
   const state = { items: [], areas: [] };
+  const syncDashboardOverlayState = () => window.AdminResidencialDashboard?.syncOverlayState?.();
+  const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
   function escapeHtml(v = '') {
     return String(v)
@@ -98,6 +100,7 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+      syncDashboardOverlayState();
     };
 
     modal.querySelector('#personalQrClose')?.addEventListener('click', close);
@@ -128,6 +131,7 @@
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    syncDashboardOverlayState();
   }
 
   function ensureDetailsModal() {
@@ -155,6 +159,7 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+      syncDashboardOverlayState();
     };
 
     modal.querySelector('#personalDetailsClose')?.addEventListener('click', close);
@@ -198,9 +203,16 @@
           <div class="text-xs uppercase tracking-wide text-slate-400">Notas</div>
           <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.notas || 'Sin notas')}</div>
         </div>
-        <div class="grid gap-3 sm:grid-cols-2">
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <div class="text-xs uppercase tracking-wide text-slate-400">QR personal</div>
+          <div class="mt-2 break-all text-xs text-slate-500">${escapeHtml(item.qr_payload || 'Sin QR generado')}</div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
           <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
+          <button type="button" data-detail-reset="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Resetear PIN</button>
+          <button type="button" data-detail-regenerate="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Regenerar QR</button>
+          <button type="button" data-detail-delete="${item.id}" class="rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white hover:bg-rose-700 sm:col-span-2 lg:col-span-1">Eliminar</button>
         </div>
       </div>
     `;
@@ -210,10 +222,17 @@
       openModal(item);
     });
     modal.querySelector('[data-detail-qr]')?.addEventListener('click', () => openQrModal(item));
+    modal.querySelector('[data-detail-reset]')?.addEventListener('click', () => resetPin(item.id));
+    modal.querySelector('[data-detail-regenerate]')?.addEventListener('click', () => regenerateQr(item.id));
+    modal.querySelector('[data-detail-delete]')?.addEventListener('click', async () => {
+      closeDetailsModal();
+      await removeItem(item.id);
+    });
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    syncDashboardOverlayState();
   }
 
   function render() {
@@ -253,28 +272,10 @@
               <div class="mt-1 text-sm text-slate-500">
                 Área: <b>${escapeHtml(item.area_nombre || 'Sin área')}</b> · ${escapeHtml(item.telefono || 'Sin teléfono')}
               </div>
-              <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
-                <span>Última entrada: ${escapeHtml(item.ultima_entrada_at || '—')}</span>
-                <span>Última salida: ${escapeHtml(item.ultima_salida_at || '—')}</span>
-              </div>
             </div>
           </div>
-          <div class="grid gap-2 sm:grid-cols-2 lg:w-[340px]">
+          <div class="lg:w-[180px]">
             <button type="button" class="js-more rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Ver más</button>
-            <button type="button" class="js-edit rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Editar</button>
-            <button type="button" class="js-reset-pin rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Resetear PIN</button>
-            <button type="button" class="js-regenerate rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Regenerar QR</button>
-            <button type="button" class="js-delete rounded-xl bg-rose-600 px-3 py-2 text-sm text-white hover:bg-rose-700" data-id="${item.id}">Eliminar</button>
-          </div>
-        </div>
-        <div class="mt-4 flex flex-col gap-3 rounded-2xl bg-slate-50 p-4 md:flex-row md:items-center md:justify-between">
-          <div class="text-sm text-slate-700">
-            <div class="font-medium">QR personal</div>
-            <div class="text-xs text-slate-500 break-all">${escapeHtml(item.qr_payload)}</div>
-          </div>
-          <div class="flex items-center gap-3">
-            <img src="${qrPreview(item.qr_payload)}" alt="QR ${escapeHtml(item.nombre)}" class="h-20 w-20 rounded-xl border bg-white object-contain p-1" loading="lazy" />
-            <button type="button" data-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-3 py-2 text-sm font-semibold text-white hover:opacity-95">Ver QR</button>
           </div>
         </div>
       </div>
@@ -282,24 +283,6 @@
 
     els.list.querySelectorAll('.js-more').forEach((btn) => {
       btn.addEventListener('click', () => openDetailsModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
-    });
-    els.list.querySelectorAll('.js-edit').forEach((btn) => {
-      btn.addEventListener('click', () => openModal(state.items.find((item) => item.id === Number(btn.dataset.id)) || null));
-    });
-    els.list.querySelectorAll('.js-delete').forEach((btn) => {
-      btn.addEventListener('click', () => removeItem(Number(btn.dataset.id)));
-    });
-    els.list.querySelectorAll('.js-reset-pin').forEach((btn) => {
-      btn.addEventListener('click', () => resetPin(Number(btn.dataset.id)));
-    });
-    els.list.querySelectorAll('.js-regenerate').forEach((btn) => {
-      btn.addEventListener('click', () => regenerateQr(Number(btn.dataset.id)));
-    });
-    els.list.querySelectorAll('[data-qr]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const item = state.items.find((row) => row.id === Number(btn.dataset.qr));
-        if (item) openQrModal(item);
-      });
     });
   }
 
@@ -321,11 +304,13 @@
     }
     els.modal?.classList.remove('hidden');
     els.modal?.classList.add('flex');
+    syncDashboardOverlayState();
   }
 
   function closeModal() {
     els.modal?.classList.add('hidden');
     els.modal?.classList.remove('flex');
+    syncDashboardOverlayState();
   }
 
   async function loadMeta() {
@@ -341,19 +326,27 @@
 
   async function saveForm(ev) {
     ev.preventDefault();
-    try {
-      const fd = new FormData(els.form);
-      fd.set('activo', els.form.activo.checked ? '1' : '0');
-      await fetchJSON(API, { method: 'POST', body: fd });
-      closeModal();
-      showAlert('Personal guardado correctamente.', 'success');
-      await loadMeta();
-    } catch (e) {
-      if (els.formError) {
-        els.formError.textContent = e.message || 'No se pudo guardar la información.';
-        els.formError.classList.remove('hidden');
+    const submitBtn = ev.submitter || els.form?.querySelector('button[type="submit"]');
+    await withPendingAction({
+      button: submitBtn,
+      scope: els.form,
+      label: 'Guardando...',
+      lock: [els.btnCancel, els.btnClose].filter(Boolean),
+    }, async () => {
+      try {
+        const fd = new FormData(els.form);
+        fd.set('activo', els.form.activo.checked ? '1' : '0');
+        await fetchJSON(API, { method: 'POST', body: fd });
+        closeModal();
+        showAlert('Personal guardado correctamente.', 'success');
+        await loadMeta();
+      } catch (e) {
+        if (els.formError) {
+          els.formError.textContent = e.message || 'No se pudo guardar la información.';
+          els.formError.classList.remove('hidden');
+        }
       }
-    }
+    });
   }
 
   async function removeItem(id) {
