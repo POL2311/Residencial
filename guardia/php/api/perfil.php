@@ -23,6 +23,28 @@ function out(bool $ok, array $extra = []) {
   exit;
 }
 
+function refresh_session_user(array $newUser): void {
+  if (session_status() !== PHP_SESSION_ACTIVE) @session_start();
+
+  if (array_key_exists('name', $newUser)) {
+    $_SESSION['user_name'] = (string)$newUser['name'];
+  }
+  if (array_key_exists('id', $newUser)) {
+    $_SESSION['user_id'] = (int)$newUser['id'];
+  }
+
+  if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
+    foreach (['name','email','telefono'] as $k) {
+      if (array_key_exists($k, $newUser)) $_SESSION['user'][$k] = $newUser[$k];
+    }
+  }
+  if (isset($_SESSION['auth_user']) && is_array($_SESSION['auth_user'])) {
+    foreach (['name','email','telefono'] as $k) {
+      if (array_key_exists($k, $newUser)) $_SESSION['auth_user'][$k] = $newUser[$k];
+    }
+  }
+}
+
 function fetch_user(PDO $pdo, int $uid): array {
   $stmt = $pdo->prepare("
     SELECT id, name, email, telefono
@@ -77,7 +99,7 @@ if ($action === 'update_name') {
   if ($name === '') out(false, ['error'=>'Nombre requerido']);
 
   $pdo->prepare("UPDATE users SET name=? WHERE id=?")->execute([$name, $uid]);
-  $_SESSION['user_name'] = $name;
+  refresh_session_user(['id' => $uid, 'name' => $name]);
 
   out(true, ['message'=>'Nombre actualizado']);
 }
@@ -97,6 +119,7 @@ if ($action === 'update_phone') {
   }
 
   $pdo->prepare("UPDATE users SET telefono=? WHERE id=?")->execute([$telefono, $uid]);
+  refresh_session_user(['telefono' => $telefono]);
 
   out(true, ['message'=>'Teléfono actualizado']);
 }
@@ -117,7 +140,14 @@ if ($action === 'update_email') {
     out(false, ['error'=>'Contraseña incorrecta']);
   }
 
+  $stmtEmail = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1");
+  $stmtEmail->execute([$email, $uid]);
+  if ($stmtEmail->fetchColumn()) {
+    out(false, ['error' => 'Ese correo ya está en uso.']);
+  }
+
   $pdo->prepare("UPDATE users SET email=? WHERE id=?")->execute([$email, $uid]);
+  refresh_session_user(['email' => $email]);
 
   out(true, ['message'=>'Correo actualizado']);
 }

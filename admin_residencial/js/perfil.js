@@ -21,11 +21,24 @@
     v_res_ubicacion: $('v_res_ubicacion'),
     v_stat_residentes: $('v_stat_residentes'),
     v_stat_guardias: $('v_stat_guardias'),
+    userForm: $('perfilUserForm'),
+    userName: $('perfilUserName'),
+    userEmail: $('perfilUserEmail'),
+    userTelefono: $('perfilUserTelefono'),
+    userPassword: $('perfilUserPassword'),
+    userPasswordConfirm: $('perfilUserPasswordConfirm'),
+    userSaveBtn: $('perfilUserSaveBtn'),
   };
 
   function showError(msg) {
     els.alert.textContent = msg;
     els.alert.className = 'rounded-2xl px-4 py-3 text-sm bg-rose-50 border border-rose-200 text-rose-800';
+    els.alert.classList.remove('hidden');
+  }
+
+  function showSuccess(msg) {
+    els.alert.textContent = msg;
+    els.alert.className = 'rounded-2xl px-4 py-3 text-sm bg-emerald-50 border border-emerald-200 text-emerald-800';
     els.alert.classList.remove('hidden');
   }
 
@@ -75,11 +88,58 @@
 
     els.v_stat_residentes.textContent = data.stats.residentes;
     els.v_stat_guardias.textContent = data.stats.guardias;
+
+    if (els.userName) els.userName.value = data.user?.name || '';
+    if (els.userEmail) els.userEmail.value = data.user?.email || '';
+    if (els.userTelefono) els.userTelefono.value = data.user?.telefono || '';
+  }
+
+  async function saveUserPerfil(ev) {
+    ev.preventDefault();
+    const name = (els.userName?.value || '').trim();
+    const email = (els.userEmail?.value || '').trim();
+    const telefono = (els.userTelefono?.value || '').trim();
+    const password = (els.userPassword?.value || '').trim();
+    const passwordConfirm = (els.userPasswordConfirm?.value || '').trim();
+
+    if (!name) throw new Error('El nombre es obligatorio.');
+    if (!email) throw new Error('El email es obligatorio.');
+    if (password || passwordConfirm) {
+      if (password.length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
+      if (password !== passwordConfirm) throw new Error('La confirmación de contraseña no coincide.');
+    }
+
+    await apiPost({
+      action: 'update_user',
+      name,
+      email,
+      telefono,
+      password,
+      password_confirm: passwordConfirm,
+    });
+
+    if (els.userPassword) els.userPassword.value = '';
+    if (els.userPasswordConfirm) els.userPasswordConfirm.value = '';
+    showSuccess('Perfil actualizado correctamente.');
   }
 
   (async function init() {
     try {
       await loadPerfil();
+      els.userForm?.addEventListener('submit', async (ev) => {
+        try {
+          const withPendingAction = window.AdminResidencialDashboard?.withPendingAction;
+          if (typeof withPendingAction === 'function') {
+            await withPendingAction({ button: els.userSaveBtn, scope: els.userForm, label: 'Guardando...' }, async () => {
+              await saveUserPerfil(ev);
+            });
+          } else {
+            await saveUserPerfil(ev);
+          }
+        } catch (e) {
+          showError(e.message || 'No se pudo actualizar tu perfil.');
+        }
+      });
     } catch (e) {
       showError(e.message);
     }

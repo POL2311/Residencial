@@ -38,6 +38,11 @@ function join_parts(array $parts, string $sep = ' · '): string {
   return implode($sep, $out);
 }
 
+function service_entity_label(?string $mode): string {
+  $normalized = operational_normalize_mode((string)($mode ?? 'residencial'));
+  return $normalized === 'residencial' ? 'Residencial' : 'Servicio';
+}
+
 try {
   operational_schema_ensure($pdo);
   service_profile_schema_ensure($pdo);
@@ -92,9 +97,10 @@ try {
   if ($ctx) {
     $resName = clean_str($ctx['residencial_nombre'] ?? '');
     $unidad  = clean_str($ctx['unidad_clave'] ?? '');
+    $entityLabel = service_entity_label((string)($ctx['modo_operacion'] ?? 'residencial'));
 
     $header_line = trim(
-      ($resName !== '' ? ('Residencial: ' . $resName) : '') .
+      ($resName !== '' ? ($entityLabel . ': ' . $resName) : '') .
       (($resName !== '' && $unidad !== '') ? ' · ' : '') .
       ($unidad !== '' ? ('Unidad: ' . $unidad) : '')
     );

@@ -62,10 +62,75 @@ if ($action === 'get') {
 
     json_out(true, [
       'data' => [
+        'user' => [
+          'id' => (int)$uid,
+          'name' => (string)($user['name'] ?? ''),
+          'email' => (string)($user['email'] ?? ''),
+          'telefono' => (string)($user['telefono'] ?? ''),
+        ],
         'residencial' => $res,
         'stats' => $stats
       ]
     ]);
+  } catch (Throwable $e) {
+    json_out(false, ['error' => $e->getMessage()]);
+  }
+}
+
+if ($action === 'update_user') {
+  try {
+    $name = trim((string)($_POST['name'] ?? ''));
+    $email = trim((string)($_POST['email'] ?? ''));
+    $telefono = trim((string)($_POST['telefono'] ?? ''));
+    $password = (string)($_POST['password'] ?? '');
+    $passwordConfirm = (string)($_POST['password_confirm'] ?? '');
+
+    if ($name === '') {
+      json_out(false, ['error' => 'El nombre es obligatorio.']);
+    }
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      json_out(false, ['error' => 'Email inválido.']);
+    }
+    if ($password !== '' || $passwordConfirm !== '') {
+      if (strlen($password) < 8) {
+        json_out(false, ['error' => 'La contraseña debe tener al menos 8 caracteres.']);
+      }
+      if ($password !== $passwordConfirm) {
+        json_out(false, ['error' => 'La confirmación de contraseña no coincide.']);
+      }
+    }
+
+    $stmtEmail = $pdo->prepare("
+      SELECT id
+      FROM users
+      WHERE email = :email AND id <> :id
+      LIMIT 1
+    ");
+    $stmtEmail->execute([
+      'email' => $email,
+      'id' => $uid,
+    ]);
+    if ($stmtEmail->fetchColumn()) {
+      json_out(false, ['error' => 'Ese email ya está en uso por otro usuario.']);
+    }
+
+    $sql = "UPDATE users SET name = :name, email = :email, telefono = :telefono";
+    $params = [
+      'name' => $name,
+      'email' => $email,
+      'telefono' => ($telefono !== '' ? $telefono : null),
+      'id' => $uid,
+    ];
+    if ($password !== '') {
+      $sql .= ", password_hash = :password_hash";
+      $params['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+    }
+    $sql .= " WHERE id = :id LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    json_out(true, ['data' => ['message' => 'Perfil actualizado correctamente.']]);
   } catch (Throwable $e) {
     json_out(false, ['error' => $e->getMessage()]);
   }

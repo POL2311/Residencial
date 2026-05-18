@@ -88,6 +88,11 @@ function pending_payload(array $user, ?int $residencialId, ?string $headerLine, 
   ];
 }
 
+function service_entity_label(?string $mode): string {
+  $normalized = operational_normalize_mode((string)($mode ?? 'residencial'));
+  return $normalized === 'residencial' ? 'Residencial' : 'Servicio';
+}
+
 try {
   operational_schema_ensure($pdo);
   service_profile_schema_ensure($pdo);
@@ -151,7 +156,7 @@ try {
 
   $residencialId = (int)$res['id'];
   $profile = service_profile_get($pdo, $residencialId);
-  $header_line = 'Residencial: ' . $res['nombre'];
+  $header_line = service_entity_label((string)($res['modo_operacion'] ?? 'residencial')) . ': ' . $res['nombre'];
 
   $direccion = implode(', ', array_filter([
     $res['calle'] ?? '',

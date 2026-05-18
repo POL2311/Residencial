@@ -10,6 +10,7 @@ header('Expires: 0');
 require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
+require_once __DIR__ . '/../../../config/operational_mode.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
@@ -52,6 +53,11 @@ function join_parts(array $parts, string $sep = ' · '): string {
   return implode($sep, $out);
 }
 
+function service_entity_label(?string $mode): string {
+  $normalized = operational_normalize_mode((string)($mode ?? 'residencial'));
+  return $normalized === 'residencial' ? 'Residencial' : 'Servicio';
+}
+
 try {
   service_profile_schema_ensure($pdo);
   // 1) Usuario fresco desde BD (evita datos viejos de sesión)
@@ -73,6 +79,7 @@ try {
       SELECT
         r.id     AS residencial_id,
         r.nombre AS residencial_nombre,
+        r.modo_operacion AS modo_operacion,
         r.calle  AS res_calle,
         r.numero_exterior AS res_numero_exterior,
         r.numero_interior AS res_numero_interior,
@@ -109,9 +116,10 @@ try {
     $profile = service_profile_api_require_module($pdo, (int)$ctx['residencial_id'], 'residente', 'contexto', 'El portal de residente no está habilitado para este cliente.');
     $resName = clean_str($ctx['residencial_nombre'] ?? '');
     $unidad  = clean_str($ctx['unidad_clave'] ?? '');
+    $entityLabel = service_entity_label((string)($ctx['modo_operacion'] ?? 'residencial'));
 
     $header_line = trim(
-      ($resName !== '' ? ('Residencial: ' . $resName) : '') .
+      ($resName !== '' ? ($entityLabel . ': ' . $resName) : '') .
       (($resName !== '' && $unidad !== '') ? ' · ' : '') .
       ($unidad !== '' ? ('Unidad: ' . $unidad) : '')
     );
