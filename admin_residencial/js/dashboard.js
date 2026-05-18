@@ -311,10 +311,11 @@
 
   function syncDockModalState() {
     const hasModal = hasActiveModal();
-    els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
-    if (hasModal) {
+    const shouldHideDock = hasModal || state.moreSheetOpen;
+    els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', shouldHideDock);
+    if (hasModal && state.moreSheetOpen) {
       closeMoreSheet();
-    } else if (!state.moreSheetOpen) {
+    } else if (!shouldHideDock) {
       showMobileDock();
     }
   }
@@ -356,7 +357,7 @@
 
   function openMoreSheet() {
     state.moreSheetOpen = true;
-    showMobileDock();
+    syncDockModalState();
     els.mobileMoreBackdrop?.setAttribute('aria-hidden', 'false');
     els.mobileMoreSheet?.setAttribute('aria-hidden', 'false');
     els.mobileMoreBackdrop?.classList.add('is-open');
@@ -380,6 +381,7 @@
       els.desktopMorePopover.style.width = '';
       els.desktopMorePopover.style.maxWidth = '';
     }
+    syncDockModalState();
     setActiveButtons(state.currentView || 'home');
   }
 
