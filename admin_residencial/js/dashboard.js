@@ -67,7 +67,7 @@
     serviceProfile: null,
     enabledViews: new Set(),
     contextLoad: 'idle', // 'idle' | 'ok' | 'error'
-    homeMinimalNotice: '',
+    accessBlocked: false,
     moreSheetOpen: false,
   };
 
@@ -100,7 +100,7 @@
 
   function normalizeView(view) {
     const normalized = ALLOWED_VIEWS.has(view) ? view : 'home';
-    if (!state.enabledViews.size) return firstEnabledView();
+    if (!state.enabledViews.size) return '';
     return state.enabledViews.has(normalized) ? normalized : firstEnabledView();
   }
 
@@ -153,9 +153,44 @@
     return first || '';
   }
 
+  function isViewEnabledByProfile(profile, view) {
+    const alwaysEnabledViews = new Set(['home', 'perfil', 'reglamento']);
+    if (alwaysEnabledViews.has(view)) return true;
+
+    const moduleFlagByView = {
+      unidades: 'habilita_unidades',
+      residentes: 'habilita_residentes_catalogo',
+      guardias: 'habilita_guardias_catalogo',
+      incidencias: 'habilita_incidencias',
+      comunicados: 'habilita_comunicados',
+      autos: 'habilita_autos',
+      personal_recurrente: 'habilita_personal_recurrente',
+      visitantes_rapidos: 'habilita_visitantes_rapidos',
+      materiales: 'habilita_materiales',
+      solicitudes_pendientes: 'habilita_solicitudes_pendientes',
+      bitacora_operativa: 'habilita_bitacora_operativa',
+    };
+
+    const flag = moduleFlagByView[view];
+    if (!flag) return false;
+
+    const moduleMeta = profile?.modules?.[flag];
+    if (moduleMeta && typeof moduleMeta === 'object' && Object.prototype.hasOwnProperty.call(moduleMeta, 'enabled')) {
+      return moduleMeta.enabled === true;
+    }
+
+    return Number(profile?.[flag] ?? 0) === 1;
+  }
+
   function buildEnabledViews(profile) {
     const allowed = Array.isArray(profile?.allowed_views) ? profile.allowed_views : [];
-    return new Set(allowed.filter((view) => ALLOWED_VIEWS.has(view)));
+    const candidates = allowed;
+    return new Set(
+      candidates.filter((view) => (
+        ALLOWED_VIEWS.has(view) &&
+        isViewEnabledByProfile(profile, view)
+      ))
+    );
   }
 
   function loadViewScript(view, token) {
@@ -199,6 +234,8 @@
   }
 
   function renderAccessBlocked(message = '') {
+    state.accessBlocked = true;
+    hideFooterNavigation();
     const wrap = els.mount || els.body;
     if (!wrap) return;
 
@@ -212,26 +249,6 @@
         </div>
       </div>
     `;
-  }
-
-  function renderHomeMinimalNotice(message) {
-    const wrap = els.mount || els.body;
-    if (!wrap) return;
-    if (!message) return;
-    const notice = `
-      <div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-        ${escapeHtml(message)}
-      </div>
-    `;
-    if (wrap.firstElementChild) {
-      wrap.insertAdjacentHTML('afterbegin', notice);
-    } else {
-      wrap.innerHTML = notice + wrap.innerHTML;
-    }
-  }
-
-  function minimalViewsSet() {
-    return new Set(['home', 'perfil', 'reglamento']);
   }
 
   function debugEnabled() {
@@ -294,6 +311,7 @@
   }
 
   function showMobileDock() {
+    if (state.accessBlocked) return;
     els.mobileDockLayer?.classList.remove('mobile-dock-hidden');
   }
 
@@ -326,6 +344,10 @@
   }
 
   function syncDockModalState() {
+    if (state.accessBlocked) {
+      hideFooterNavigation();
+      return;
+    }
     const hasModal = hasActiveModal();
     els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
     if (els.mobileDockLayer) {
@@ -357,6 +379,7 @@
   }
 
   function openMoreSheet() {
+    if (state.accessBlocked) return;
     state.moreSheetOpen = true;
     showMobileDock();
     els.mobileMoreBackdrop?.setAttribute('aria-hidden', 'false');
@@ -377,6 +400,35 @@
     setActiveButtons(resolveActiveView());
   }
 
+  function hideFooterNavigation() {
+    closeMoreSheet();
+    if (els.mobileDockLayer) {
+      els.mobileDockLayer.classList.add('hidden', 'mobile-dock-hidden');
+      els.mobileDockLayer.style.display = 'none';
+      els.mobileDockLayer.setAttribute('aria-hidden', 'true');
+      els.mobileDockLayer.style.pointerEvents = 'none';
+    }
+    if (els.footer) {
+      els.footer.style.pointerEvents = 'none';
+    }
+  }
+
+  function showFooterNavigationIfAllowed() {
+    if (state.accessBlocked) return;
+    if (!els.mobileDockLayer) return;
+    if (!state.enabledViews.size) {
+      hideFooterNavigation();
+      return;
+    }
+    els.mobileDockLayer.classList.remove('mobile-dock-hidden');
+    els.mobileDockLayer.style.display = '';
+    els.mobileDockLayer.setAttribute('aria-hidden', 'false');
+    els.mobileDockLayer.style.pointerEvents = '';
+    if (els.footer) {
+      els.footer.style.pointerEvents = '';
+    }
+  }
+
   function handleBodyScroll() {
     showMobileDock();
     if (els.body) {
@@ -391,7 +443,18 @@
       renderAccessBlocked();
       return;
     }
-    view = normalizeView(view || 'home');
+    const requestedView = String(view || 'home').trim();
+    if (!force && requestedView && !state.enabledViews.has(requestedView)) {
+      renderAccessBlocked('La sección solicitada no está habilitada para este perfil de servicio.');
+      return;
+    }
+    view = normalizeView(requestedView || 'home');
+    if (!view) {
+      renderAccessBlocked();
+      return;
+    }
+    state.accessBlocked = false;
+    showFooterNavigationIfAllowed();
 
     if (!force && (state.pendingView === view || state.currentView === view) && state.isNavigating === false) {
       state.pendingView = view;
@@ -462,6 +525,7 @@
     state.pendingView = null;
     state.isNavigating = false;
     setActiveButtons(view);
+    showFooterNavigationIfAllowed();
   }
 
   function initialView() {
@@ -492,7 +556,7 @@
       state.serviceProfile = data.service_profile || null;
       state.contextLoad = state.serviceProfile ? 'ok' : 'error';
       state.enabledViews = state.serviceProfile ? buildEnabledViews(state.serviceProfile) : new Set();
-      state.homeMinimalNotice = '';
+      state.accessBlocked = !state.enabledViews.size;
 
       const allowed = Array.isArray(state.serviceProfile?.allowed_views) ? state.serviceProfile.allowed_views : [];
       debugLogContext(allowed, state.enabledViews);
@@ -500,6 +564,7 @@
       els.addr.textContent = resolveServiceDisplayName(data, ctx);
 
       toggleOperationalButtons();
+      showFooterNavigationIfAllowed();
     } catch (e) {
       console.warn('loadContext() falló:', e);
       els.addr.textContent = 'Servicio activo';
@@ -508,9 +573,10 @@
       state.serviceProfile = null;
       state.enabledViews = new Set();
       state.contextLoad = 'error';
-      state.homeMinimalNotice = '';
+      state.accessBlocked = true;
       debugLogContext([], state.enabledViews);
       toggleOperationalButtons();
+      hideFooterNavigation();
     }
   }
 
@@ -529,18 +595,28 @@
         el.classList.toggle('hidden', !allow);
         if (allow) primaryVisibleCount += 1;
       } else if (el.hasAttribute('data-dock-secondary')) {
-        el.classList.toggle('hidden', !allow);
-        if (allow) secondaryVisibleCount += 1;
+        const allowInSecondaryDock = allow && SECONDARY_DOCK_VIEWS.has(view);
+        el.classList.toggle('hidden', !allowInSecondaryDock);
+        if (allowInSecondaryDock) secondaryVisibleCount += 1;
       } else if (el.id === 'btnReglamento') {
         el.classList.toggle('hidden', !allow);
       }
     });
 
     if (els.mobileMoreBtn) {
-      els.mobileMoreBtn.classList.toggle('hidden', secondaryVisibleCount === 0);
+      const hideMoreButton = secondaryVisibleCount === 0;
+      els.mobileMoreBtn.classList.toggle('hidden', hideMoreButton);
+      if (hideMoreButton && state.moreSheetOpen) {
+        closeMoreSheet();
+      }
     }
     if (els.mobileDockLayer) {
       els.mobileDockLayer.classList.toggle('hidden', primaryVisibleCount === 0 && secondaryVisibleCount === 0);
+    }
+    if (state.accessBlocked) {
+      hideFooterNavigation();
+    } else {
+      showFooterNavigationIfAllowed();
     }
 
     if (els.modeBadge) {
@@ -766,7 +842,7 @@
     els.body?.addEventListener('scroll', handleBodyScroll, { passive: true });
     window.addEventListener('resize', () => {
       closeMoreSheet();
-      showMobileDock();
+      showFooterNavigationIfAllowed();
       syncDockModalState();
     });
 
@@ -779,26 +855,22 @@
         return;
       }
 
-      // If context loaded but there are no operable modules, fall back to a minimal Home/Perfil/Reglamento experience.
+      // If context loaded but there are no operable modules, keep a blocked controlled state.
       if (!state.enabledViews.size && state.contextLoad === 'ok') {
-        state.enabledViews = minimalViewsSet();
-        state.homeMinimalNotice = 'Este servicio aún no tiene módulos habilitados para Admin operativo. Puedes ver Home/Perfil/Reglamento mientras se habilitan módulos desde Superadmin.';
+        renderAccessBlocked('Este servicio aún no tiene módulos operables para Admin residencial.');
         toggleOperationalButtons();
+        return;
       }
 
-      navigateTo(initialView() || 'home', { force: true }).then(() => {
-        if (state.homeMinimalNotice) renderHomeMinimalNotice(state.homeMinimalNotice);
-      });
+      navigateTo(initialView() || 'home', { force: true });
     });
   });
 
   window.addEventListener('hashchange', () => {
     closeMoreSheet();
-    if (!state.enabledViews.size) {
-      // If context failed, keep the blocked state; if minimal mode, ignore hash changes to disallowed views.
-      if (state.contextLoad === 'error') return;
-      state.enabledViews = minimalViewsSet();
-      toggleOperationalButtons();
+    if (!state.enabledViews.size || state.accessBlocked) {
+      hideFooterNavigation();
+      return;
     }
     const next = normalizeView((window.location.hash || '').replace('#', '').trim());
     const current = state.pendingView || state.currentView;

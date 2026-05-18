@@ -699,16 +699,16 @@
     const turnoEl = els.turnoBadge || document.getElementById('guardTurnoBadge');
     const statusEl = els.statusBadge || document.getElementById('guardStatusBadge');
 
-    if (nameEl) nameEl.textContent = data.user?.name || 'Guardia';
-    if (ctxEl) ctxEl.textContent = data.header_line || data.direccion || '—';
+    const rawName = String(data.user?.name || 'Guardia').trim();
+    const cleanedName = /^guardia\d+$/i.test(rawName) ? 'Guardia' : rawName.replace(/\d+\s*$/, '').trim() || 'Guardia';
+    const serviceLabel = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial').trim() || 'residencial';
+
+    if (nameEl) nameEl.textContent = cleanedName;
+    if (ctxEl) ctxEl.textContent = `Servicio: ${serviceLabel}`;
 
     if (hintEl) {
-      if (data.direccion) {
-        hintEl.textContent = data.direccion;
-        hintEl.classList.remove('hidden');
-      } else {
-        hintEl.classList.add('hidden');
-      }
+      hintEl.textContent = '';
+      hintEl.classList.add('hidden');
     }
 
     if (turnoEl) {
@@ -756,8 +756,8 @@
       if (!state.canOperate) {
         if (els.ctx) els.ctx.textContent = 'Activacion pendiente';
         if (els.hint) {
-          els.hint.textContent = state.contextDiagnostic?.reason_message || '';
-          els.hint.classList.remove('hidden');
+          els.hint.textContent = '';
+          els.hint.classList.add('hidden');
         }
       }
       toggleOperationalButtons();

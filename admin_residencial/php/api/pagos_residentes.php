@@ -11,13 +11,15 @@ require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/resident_access.php';
+require_once __DIR__ . '/../../../config/service_profile.php';
 
 require_login();
-require_role(['residente', 'admin_residencial']);
+require_role(['admin_residencial']);
 
 $user = current_user();
 $uid = (int)($user['id'] ?? 0);
-$isAdmin = ($user['role'] ?? ($user['tipo_usuario_nombre'] ?? '')) === 'admin_residencial';
+$residencialId = service_profile_resolve_residencial_id_for_user($pdo, $uid);
+service_profile_api_require_module($pdo, $residencialId, 'admin_residencial', 'residentes', 'Los pagos de residentes no están habilitados para este cliente.');
 
 $candidateTables = [
     'pagos_residentes',
@@ -109,11 +111,9 @@ function listPagos(
 }
 
 $requestUserId = $uid;
-if ($isAdmin) {
-    $param = $_GET['user_id'] ?? $_POST['user_id'] ?? null;
-    if ($param && ctype_digit((string)$param)) {
-        $requestUserId = (int)$param;
-    }
+$param = $_GET['user_id'] ?? $_POST['user_id'] ?? null;
+if ($param && ctype_digit((string)$param)) {
+    $requestUserId = (int)$param;
 }
 
 $ctx = get_context_for_user($pdo, $requestUserId);

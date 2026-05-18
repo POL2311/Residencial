@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_operational_bootstrap.php';
+admin_module_required('home', 'La configuración operativa no está habilitada para este cliente.');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 

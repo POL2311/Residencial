@@ -183,6 +183,9 @@
         color 220ms ease,
         opacity 220ms ease;
     }
+    .mobile-dock-item.hidden {
+      display: none !important;
+    }
     .mobile-dock-item svg {
       height: 1.02rem;
       width: 1.02rem;
@@ -285,6 +288,12 @@
         0 12px 28px rgba(148, 163, 184, 0.08),
         inset 0 1px 0 rgba(255,255,255,0.74);
     }
+    .mobile-more-item.hidden {
+      display: none !important;
+    }
+    .desktop-more-item.hidden {
+      display: none !important;
+    }
     .mobile-more-item-icon {
       display: inline-flex;
       align-items: center;
@@ -383,7 +392,7 @@
               </div>
               <div class="min-w-0">
                 <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Portal residente</div>
-                <div id="residentName" class="mt-2 truncate text-2xl font-semibold leading-tight text-slate-800 sm:text-3xl">—</div>
+                <div id="residentName" class="hidden">—</div>
                 <div id="residentAddress" class="mt-2 text-sm leading-relaxed text-slate-500">—</div>
               </div>
             </div>
@@ -393,11 +402,6 @@
                 <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(74,222,128,0.16)]"></span>
                 <span class="font-medium">Sistema activo</span>
               </div>
-              <button id="btnEditAddress"
-                      type="button"
-                      class="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm">
-                Editar información
-              </button>
               <button id="residentNotificationsButton"
                       type="button"
                       class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-700 shadow-sm"

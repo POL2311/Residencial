@@ -391,7 +391,7 @@
             currentNotificationUserId = Number(data.user?.id || 0);
             currentNotificationResidencialId = Number(ctx.residencial_id || 0);
 
-            els.name.textContent = data.user?.name || 'Residente';
+            if (els.name) els.name.textContent = data.user?.name || 'Residente';
             if (data.setup_incomplete) {
                 els.addr.textContent = data.setup_message || 'Configuración pendiente';
                 renderCars([]);
@@ -401,12 +401,12 @@
                 return;
             }
 
-            if (data.direccion && String(data.direccion).trim() !== '') {
-                els.addr.textContent = data.direccion;
+            const resName = (ctx.residencial_nombre || data.residencial_nombre || '').trim();
+            const unidad = (ctx.unidad_clave || data.unidad_clave || '').trim();
+            if (resName || unidad) {
+                els.addr.textContent = [resName ? `Residencial: ${resName}` : '', unidad ? `Unidad: ${unidad}` : ''].filter(Boolean).join(' · ');
             } else {
-                const resName = (ctx.residencial_nombre || data.residencial_nombre || '').trim();
-                const unidad = (ctx.unidad_clave || data.unidad_clave || '').trim();
-                els.addr.textContent = (resName && unidad) ? `Residencial: ${resName} · Unidad: ${unidad}` : (resName || unidad || '—');
+                els.addr.textContent = String(data.direccion || '').trim() || '—';
             }
 
             renderCars(data.autos || []);
@@ -415,7 +415,7 @@
             setActiveButtons(state.currentView || 'home');
         } catch (e) {
             console.warn('loadContext() fallo:', e);
-            els.name.textContent = 'Residente';
+            if (els.name) els.name.textContent = 'Residente';
             els.addr.textContent = '—';
             els.cars.innerHTML = `<span class="rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs text-slate-500">Sin autos registrados</span>`;
             currentNotificationMeta = null;

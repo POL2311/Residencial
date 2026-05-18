@@ -11,8 +11,10 @@ require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/api_helpers.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/comunicados_helpers.php';
+require_once __DIR__ . '/_operational_bootstrap.php';
 
 require_login();
+admin_module_required('home', 'El inicio no está habilitado para este cliente.');
 
 $user = current_user();
 $userId = (int)($user['id'] ?? 0);

@@ -239,15 +239,15 @@
 
   function openIncidenciaDetail(inc) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-[9998] bg-black/60 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 z-[9998] bg-black/60 p-3 md:p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="flex min-h-full items-center justify-center">
-        <div class="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div class="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
           <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <div class="text-lg font-semibold text-slate-900">Detalle de incidencia</div>
             <button type="button" class="js-inc-detail-close h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
           </div>
-          <div class="space-y-4 p-5">
+          <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
             <div>
               <div class="text-xs text-slate-500">Título</div>
               <div class="text-xl font-semibold text-slate-900">${escapeHtml(inc.titulo || '—')}</div>
