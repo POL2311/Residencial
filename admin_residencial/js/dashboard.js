@@ -302,7 +302,21 @@
       if (el.classList.contains('hidden') || el.getAttribute('aria-hidden') === 'true') return false;
       const style = window.getComputedStyle(el);
       if (style.display === 'none' || style.visibility === 'hidden' || style.position !== 'fixed') return false;
-      const zIndex = Number.parseInt(style.zIndex || '0', 10);
+
+      let zIndex = Number.parseInt(style.zIndex || '0', 10);
+
+      if (!Number.isFinite(zIndex) || zIndex === 0) {
+        const twMatch = (el.className || '').match(/z-\[(\d+)\]/);
+        if (twMatch && twMatch[1]) {
+          zIndex = Number.parseInt(twMatch[1], 10);
+        } else {
+          const standardTwMatch = (el.className || '').match(/\bz-(\d+)\b/);
+          if (standardTwMatch && standardTwMatch[1]) {
+             zIndex = Number.parseInt(standardTwMatch[1], 10);
+          }
+        }
+      }
+
       if (!Number.isFinite(zIndex) || zIndex < 50) return false;
       const rect = el.getBoundingClientRect();
       return rect.width >= 80 && rect.height >= 80;
@@ -311,10 +325,11 @@
 
   function syncDockModalState() {
     const hasModal = hasActiveModal();
-    els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
-    if (hasModal) {
+    const shouldHideDock = hasModal || state.moreSheetOpen;
+    els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', shouldHideDock);
+    if (hasModal && state.moreSheetOpen) {
       closeMoreSheet();
-    } else if (!state.moreSheetOpen) {
+    } else if (!shouldHideDock) {
       showMobileDock();
     }
   }
@@ -356,7 +371,7 @@
 
   function openMoreSheet() {
     state.moreSheetOpen = true;
-    showMobileDock();
+    syncDockModalState();
     els.mobileMoreBackdrop?.setAttribute('aria-hidden', 'false');
     els.mobileMoreSheet?.setAttribute('aria-hidden', 'false');
     els.mobileMoreBackdrop?.classList.add('is-open');
@@ -380,6 +395,7 @@
       els.desktopMorePopover.style.width = '';
       els.desktopMorePopover.style.maxWidth = '';
     }
+    syncDockModalState();
     setActiveButtons(state.currentView || 'home');
   }
 
