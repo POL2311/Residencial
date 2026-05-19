@@ -141,7 +141,7 @@
           </div>
           <button type="button" id="permisoDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
         </div>
-        <div id="permisoDetailsBody" class="max-h-[75vh] overflow-y-auto px-5 py-5"></div>
+        <div id="permisoDetailsBody" class="max-h-[90%] overflow-y-auto px-5 py-5"></div>
       </div>
     `;
     document.body.appendChild(modal);
@@ -250,7 +250,7 @@
           </div>
           <button type="button" id="catalogoDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
         </div>
-        <div id="catalogoDetailsBody" class="max-h-[75vh] overflow-y-auto px-5 py-5"></div>
+        <div id="catalogoDetailsBody" class="max-h-[90%] overflow-y-auto px-5 py-5"></div>
       </div>
     `;
     document.body.appendChild(modal);

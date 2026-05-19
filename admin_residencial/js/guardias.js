@@ -882,7 +882,7 @@
           <button class="js-close-turno-modal h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200">✕</button>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-6 p-5 max-h-[82vh] overflow-y-auto">
+        <div class="grid lg:grid-cols-2 gap-6 p-5 max-h-[90%] overflow-y-auto">
           <div>
             <form id="guardiaTurnoForm" class="space-y-3">
               <input type="hidden" name="turno_id">

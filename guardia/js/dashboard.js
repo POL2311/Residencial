@@ -312,7 +312,7 @@
         <div class="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-xs text-sky-800">
           Revisa estos cambios para mantener actualizada la base local de accesos del guardia.
         </div>
-        <div class="space-y-3 max-h-[58vh] overflow-y-auto pr-1">
+        <div class="space-y-3 max-h-[90%] overflow-y-auto pr-1">
           ${items.map((item) => `
             <article class="rounded-2xl border ${item.status === 'permitido' ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'} px-4 py-4">
               <div class="flex items-start justify-between gap-3">
@@ -841,7 +841,7 @@
 
       if (els.modalBody) {
         els.modalBody.innerHTML = `
-          <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+          <div class="space-y-3 max-h-[90%] overflow-y-auto pr-2">
             <div class="text-lg font-semibold text-slate-800">
               ${escapeHtml(r.titulo)}
             </div>

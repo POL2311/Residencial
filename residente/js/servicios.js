@@ -72,7 +72,7 @@
         modal.className = 'hidden fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm';
         modal.innerHTML = `
           <div class="min-h-full flex items-center justify-center">
-            <div class="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <div class="flex max-h-[90%] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
               <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                 <div id="residentServicioModalTitle" class="text-sm font-semibold text-slate-800">Detalle del servicio</div>
                 <button type="button" id="residentServicioModalClose" class="h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
