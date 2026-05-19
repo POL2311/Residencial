@@ -1,4 +1,4 @@
-<div class="app-dashboard-shell min-h-screen flex flex-col">
+<div class="app-dashboard-shell min-h-[100dvh] flex flex-col">
   <div id="appToastRoot" aria-live="polite" aria-atomic="true" class="pointer-events-none fixed inset-x-4 top-4 z-[90] flex flex-col items-stretch gap-3 sm:inset-x-auto sm:right-4 sm:top-4 sm:w-[min(24rem,calc(100vw-2rem))]"></div>
   <style>
     .app-dashboard-shell { min-height: 100dvh; background: #f4f7fb; color: rgb(15 23 42); }
@@ -68,7 +68,7 @@
     .mobile-more-sheet { position: fixed; left:0.9rem; right:0.9rem; bottom:calc(env(safe-area-inset-bottom, 0px) + 5.4rem); z-index:85; border-radius:1.9rem; background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(248,250,252,0.75) 100%); border:1px solid rgba(255,255,255,0.72); box-shadow:0 26px 48px rgba(15,23,42,0.18); backdrop-filter: blur(28px) saturate(175%); -webkit-backdrop-filter: blur(28px) saturate(175%); transform: translateY(1rem) scale(0.985); opacity:0; pointer-events:none; transition: opacity 240ms ease, transform 280ms cubic-bezier(0.22,1,0.36,1); }
     .mobile-more-sheet.is-open { opacity:1; transform: translateY(0) scale(1); pointer-events:auto; }
     .mobile-dock-layer.dock-hidden-by-modal { opacity:0 !important; transform: translateY(1.6rem) !important; pointer-events:none !important; }
-    .mobile-more-content { max-height:min(calc(100vh - 12rem),30rem); overflow-y:auto; }
+    .mobile-more-content { max-height:min(calc(100dvh - 12rem),30rem); overflow-y:auto; }
     .mobile-more-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0.72rem; }
     .mobile-more-item { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.7rem; min-height:6.25rem; border-radius:1.45rem; border:1px solid rgba(226,232,240,0.96); background:linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(248,250,252,0.64) 100%); padding:0.85rem 0.7rem 0.8rem; color:rgb(30 41 59); text-align:center; box-shadow:0 12px 28px rgba(148,163,184,0.08), inset 0 1px 0 rgba(255,255,255,0.74); }
     .mobile-more-item-icon,.desktop-more-item-icon { display:inline-flex; align-items:center; justify-content:center; height:2.4rem; width:2.4rem; border-radius:999px; border:1px solid rgba(203,213,225,0.72); background:rgba(248,250,252,0.88); }
@@ -81,7 +81,7 @@
       .desktop-more-popover { display:none !important; }
       .mobile-more-sheet { left:50%; right:auto; width:min(42rem,calc(100vw - 3rem)); bottom:calc(env(safe-area-inset-bottom, 0px) + 6rem); transform:translate(-50%,1rem) scale(0.985); }
       .mobile-more-sheet.is-open { transform:translate(-50%,0) scale(1); }
-      .mobile-more-content { max-height:min(calc(100vh - 13rem),34rem); }
+      .mobile-more-content { max-height:min(calc(100dvh - 13rem),34rem); }
       .mobile-more-grid { grid-template-columns:1fr; }
       .mobile-more-item { flex-direction:row; justify-content:flex-start; min-height:5.75rem; padding-inline:1.2rem; text-align:left; }
       .mobile-more-item-title { font-size:1rem; }

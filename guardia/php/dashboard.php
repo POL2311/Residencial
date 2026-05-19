@@ -30,11 +30,11 @@ $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-[#F2F3F5] text-slate-900">
+<body class="min-h-[100dvh] bg-[#F2F3F5] text-slate-900">
   <audio id="soundOk" src="/assets/sounds/ok.mp3" preload="auto"></audio>
   <audio id="soundNo" src="/assets/sounds/no.mp3" preload="auto"></audio>
 

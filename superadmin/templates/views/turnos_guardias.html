@@ -35,19 +35,19 @@
     <form id="turnosGuardiasFilterForm" class="grid grid-cols-1 gap-3 md:grid-cols-4">
       <div>
         <label class="mb-1 block text-xs text-slate-600">Servicio</label>
-        <select id="turnosFilterServicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="turnosFilterServicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
         </select>
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Guardia</label>
-        <select id="turnosFilterGuardia" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="turnosFilterGuardia" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
         </select>
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Estatus</label>
-        <select id="turnosFilterActivo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="turnosFilterActivo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
           <option value="1">Activos</option>
           <option value="0">Inactivos</option>
@@ -55,7 +55,7 @@
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Buscar</label>
-        <input id="turnosFilterQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Guardia, correo, servicio o turno..." />
+        <input id="turnosFilterQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Guardia, correo, servicio o turno..." />
       </div>
       <div class="md:col-span-4 flex justify-end gap-2">
         <button id="btnResetTurnosFilters" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Limpiar</button>
@@ -91,27 +91,27 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Servicio *</label>
-                <select name="residencial_id" id="turnoGuardiaServiceSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></select>
+                <select name="residencial_id" id="turnoGuardiaServiceSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required></select>
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Guardia *</label>
-                <select name="guardia_id" id="turnoGuardiaUserSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></select>
+                <select name="guardia_id" id="turnoGuardiaUserSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required></select>
               </div>
               <div class="md:col-span-2">
                 <label class="mb-1 block text-xs text-slate-600">Nombre del turno *</label>
-                <input name="nombre_turno" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Ej. Vespertino" required />
+                <input name="nombre_turno" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Ej. Vespertino" required />
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Hora inicio *</label>
-                <input type="time" name="hora_inicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                <input type="time" name="hora_inicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Hora fin *</label>
-                <input type="time" name="hora_fin" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                <input type="time" name="hora_fin" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
               </div>
               <div class="md:col-span-2">
                 <label class="mb-1 block text-xs text-slate-600">Días *</label>
-                <input name="dias_semana" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="LUN,MAR,MIE,JUE,VIE" required />
+                <input name="dias_semana" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="LUN,MAR,MIE,JUE,VIE" required />
               </div>
             </div>
             <label class="flex items-center gap-2 text-sm text-slate-600">
@@ -148,19 +148,19 @@
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Fecha inicio *</label>
-                  <input type="date" name="fecha_inicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input type="date" name="fecha_inicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Fecha fin *</label>
-                  <input type="date" name="fecha_fin" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input type="date" name="fecha_fin" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Motivo *</label>
-                  <input name="motivo" maxlength="120" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Ej. Permiso, incapacidad, ausencia" required />
+                  <input name="motivo" maxlength="120" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Ej. Permiso, incapacidad, ausencia" required />
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Notas</label>
-                  <textarea name="notas" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Opcional"></textarea>
+                  <textarea name="notas" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Opcional"></textarea>
                 </div>
               </div>
               <label class="flex items-center gap-2 text-sm text-slate-600">
@@ -177,7 +177,7 @@
               <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Periodo</label>
-                  <select id="turnoGuardiaExceptionFilterPeriod" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <select id="turnoGuardiaExceptionFilterPeriod" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                     <option value="">Todas</option>
                     <option value="today">Hoy</option>
                     <option value="upcoming">Próximas</option>
@@ -186,7 +186,7 @@
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Estatus</label>
-                  <select id="turnoGuardiaExceptionFilterActive" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <select id="turnoGuardiaExceptionFilterActive" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                     <option value="">Todas</option>
                     <option value="1">Activas</option>
                     <option value="0">Inactivas</option>

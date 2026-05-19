@@ -35,13 +35,13 @@
     <form id="saIncidenciasFilterForm" class="grid grid-cols-1 gap-3 md:grid-cols-5">
       <div>
         <label class="mb-1 block text-xs text-slate-600">Servicio</label>
-        <select id="saIncFilterServicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="saIncFilterServicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
         </select>
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Estado</label>
-        <select id="saIncFilterEstado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="saIncFilterEstado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
           <option value="abierta">Abierta</option>
           <option value="en_proceso">En proceso</option>
@@ -50,7 +50,7 @@
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
-        <select id="saIncFilterPrioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="saIncFilterPrioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todas</option>
           <option value="alta">Alta</option>
           <option value="media">Media</option>
@@ -59,11 +59,11 @@
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Tipo</label>
-        <input id="saIncFilterTipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="seguridad, vecino, robo..." />
+        <input id="saIncFilterTipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="seguridad, vecino, robo..." />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Buscar</label>
-        <input id="saIncFilterQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Título, servicio, unidad, guardia..." />
+        <input id="saIncFilterQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Título, servicio, unidad, guardia..." />
       </div>
       <div class="md:col-span-5 flex justify-end gap-2">
         <button id="btnResetSaIncFilters" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Limpiar</button>
@@ -97,22 +97,22 @@
             <div id="saIncidenciaFormError" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Servicio *</label>
-              <select name="residencial_id" id="saIncidenciaServiceSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></select>
+              <select name="residencial_id" id="saIncidenciaServiceSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required></select>
             </div>
 
             <div id="saIncUnidadWrap">
               <label class="mb-1 block text-xs text-slate-600">Unidad</label>
-              <select name="unidad_id" id="saIncUnidadSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              <select name="unidad_id" id="saIncUnidadSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
             </div>
 
             <div id="saIncOperationalFields" class="hidden space-y-4">
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Área</label>
-                <select name="area_id" id="saIncAreaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+                <select name="area_id" id="saIncAreaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Origen</label>
-                <select name="origen_tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <select name="origen_tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                   <option value="">Evento general</option>
                   <option value="persona_recurrente">Persona recurrente</option>
                   <option value="visitante_rapido">Visitante rápido</option>
@@ -122,21 +122,21 @@
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Persona recurrente</label>
-                <select name="persona_recurrente_id" id="saIncPersonaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+                <select name="persona_recurrente_id" id="saIncPersonaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Visitante rápido</label>
-                <select name="visitante_rapido_id" id="saIncVisitanteSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+                <select name="visitante_rapido_id" id="saIncVisitanteSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Permiso material</label>
-                <select name="permiso_material_id" id="saIncPermisoSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+                <select name="permiso_material_id" id="saIncPermisoSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
               </div>
             </div>
 
             <div>
               <label class="mb-1 block text-xs text-slate-600">Tipo</label>
-              <select name="tipo" id="saIncTipoSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select name="tipo" id="saIncTipoSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="seguridad">Seguridad</option>
                 <option value="servicio">Servicio</option>
                 <option value="vecino">Vecino</option>
@@ -146,15 +146,15 @@
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Título *</label>
-              <input name="titulo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+              <input name="titulo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Descripción *</label>
-              <textarea name="descripcion" rows="4" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></textarea>
+              <textarea name="descripcion" rows="4" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required></textarea>
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
-              <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="baja">Baja</option>
                 <option value="media" selected>Media</option>
                 <option value="alta">Alta</option>
@@ -183,13 +183,13 @@
             <input type="hidden" name="id" />
             <div>
               <label class="mb-1 block text-xs text-slate-600">Asignar guardia</label>
-              <select name="guardia_id" id="saIncEditGuardiaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select name="guardia_id" id="saIncEditGuardiaSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="">-- Sin asignar --</option>
               </select>
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Estado</label>
-              <select name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="abierta">Abierta</option>
                 <option value="en_proceso">En proceso</option>
                 <option value="cerrada">Cerrada</option>
@@ -197,7 +197,7 @@
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
-              <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="baja">Baja</option>
                 <option value="media">Media</option>
                 <option value="alta">Alta</option>

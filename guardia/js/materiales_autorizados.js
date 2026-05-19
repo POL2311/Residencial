@@ -264,24 +264,24 @@
           <div class="grid gap-3 md:grid-cols-3">
             <div>
               <label class="mb-1 block text-xs font-medium text-slate-600">Tipo</label>
-              <select name="tipo_movimiento" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20">
+              <select name="tipo_movimiento" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20">
                 <option value="entrada">Entrada</option>
                 <option value="salida">Salida</option>
               </select>
             </div>
             <div>
               <label class="mb-1 block text-xs font-medium text-slate-600">Responsable interno</label>
-              <select id="guardMaterialResponsable" name="responsable_user_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
+              <select id="guardMaterialResponsable" name="responsable_user_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
             </div>
             <div>
               <label class="mb-1 block text-xs font-medium text-slate-600">Área</label>
-              <select id="guardMaterialArea" name="area_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
+              <select id="guardMaterialArea" name="area_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
             </div>
           </div>
 
           <div>
             <label class="mb-1 block text-xs font-medium text-slate-600">Notas</label>
-            <textarea name="notas" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Describe qué intentan ingresar o sacar."></textarea>
+            <textarea name="notas" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Describe qué intentan ingresar o sacar."></textarea>
           </div>
 
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -299,17 +299,17 @@
               <div class="grid gap-3 md:grid-cols-[1.2fr_0.8fr]">
                 <div>
                   <label class="mb-1 block text-xs font-medium text-slate-600">Material</label>
-                  <select id="guardMaterialItemMaterial" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
+                  <select id="guardMaterialItemMaterial" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
                 </div>
                 <div>
                   <label class="mb-1 block text-xs font-medium text-slate-600">Cantidad / detalle</label>
-                  <input id="guardMaterialItemCantidad" type="text" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Ej. 2 bultos, 1 compresor" />
+                  <input id="guardMaterialItemCantidad" type="text" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Ej. 2 bultos, 1 compresor" />
                 </div>
               </div>
               <div id="guardMaterialManualWrap" class="mt-3 hidden grid gap-3 md:grid-cols-[1fr_auto]">
                 <div>
                   <label class="mb-1 block text-xs font-medium text-slate-600">Nombre manual</label>
-                  <input id="guardMaterialManualName" type="text" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Escribe si no existe en catálogo" />
+                  <input id="guardMaterialManualName" type="text" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Escribe si no existe en catálogo" />
                 </div>
                 <label class="flex items-center gap-2 text-sm text-slate-700 md:pb-2">
                   <input id="guardMaterialAddCatalog" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-[#2E5D73] focus:ring-[#2E5D73]/20" />

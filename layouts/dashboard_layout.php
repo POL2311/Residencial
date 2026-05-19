@@ -11,7 +11,7 @@ $user = current_user();
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($pageTitle ?? 'Dashboard', ENT_QUOTES, 'UTF-8') ?></title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -31,9 +31,9 @@ $user = current_user();
       }
     </script>
 </head>
-<body class="min-h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.35),_transparent_60%),_radial-gradient(circle_at_bottom,_rgba(129,140,248,0.25),_transparent_60%)] text-slate-100">
+<body class="min-h-[100dvh] bg-slate-950 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.35),_transparent_60%),_radial-gradient(circle_at_bottom,_rgba(129,140,248,0.25),_transparent_60%)] text-slate-100">
 
-<div class="min-h-screen flex">
+<div class="min-h-[100dvh] flex">
 
 <aside
     id="sidebar"

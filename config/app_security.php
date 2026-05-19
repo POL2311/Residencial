@@ -179,11 +179,11 @@ if (!function_exists('app_render_error_page')) {
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>' . $titleEsc . '</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-[#F2F3F5] px-4 py-8 text-slate-900">
+<body class="min-h-[100dvh] bg-[#F2F3F5] px-4 py-8 text-slate-900">
   <div class="mx-auto flex min-h-[80vh] max-w-xl items-center justify-center">
     <div class="w-full rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg">
       <div class="text-xs uppercase tracking-[0.2em] text-slate-400">' . $statusEsc . ' · ' . $status . '</div>

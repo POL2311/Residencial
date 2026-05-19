@@ -204,9 +204,9 @@
     function openPasswordModal() {
       openModal('Cambiar contraseña', `
         <div class="space-y-3">
-          <input id="m_cur" type="password" placeholder="Contraseña actual" class="w-full rounded-xl border px-3 py-2 text-sm">
-          <input id="m_new" type="password" placeholder="Nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-sm">
-          <input id="m_new2" type="password" placeholder="Confirmar nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-sm">
+          <input id="m_cur" type="password" placeholder="Contraseña actual" class="w-full rounded-xl border px-3 py-2 text-base">
+          <input id="m_new" type="password" placeholder="Nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-base">
+          <input id="m_new2" type="password" placeholder="Confirmar nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-base">
           <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
             Guardar
           </button>
