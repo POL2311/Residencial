@@ -84,9 +84,9 @@
     <div class="mx-auto max-w-6xl px-3 pt-3 sm:px-4 sm:pt-4">
       <div class="guard-shell-card">
         <div class="px-4 py-4 sm:px-5 sm:py-5">
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div class="relative flex-1 min-w-0">
-              <button id="profileDropdownBtn" type="button" class="flex min-w-0 items-center gap-3 text-left w-full sm:w-auto rounded-2xl p-1 -ml-1 transition-colors hover:bg-slate-50/80">
+          <div class="flex flex-row items-center justify-between w-full relative">
+            <div class="flex-1 min-w-0">
+              <button id="profileDropdownBtn" type="button" class="flex min-w-0 items-center gap-3 text-left rounded-2xl p-1 -ml-1 transition-colors hover:bg-slate-50/80">
                 <div class="h-11 w-11 shrink-0 rounded-full bg-[#E9E3D9] p-0.5 shadow sm:h-12 sm:w-12">
                   <img id="systemLogoImg" src="../../assets/img/logo_asher.png" alt="Perfil" class="h-full w-full rounded-full object-cover" loading="lazy" />
                 </div>
@@ -97,13 +97,13 @@
                       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                     </svg>
                   </div>
-                  <div id="guardContext" class="truncate text-[13px] text-slate-500">—</div>
+                  <div id="guardContext" class="truncate text-[13px] text-slate-500 hidden sm:block">—</div>
                   <div id="guardHint" class="mt-1 text-[11px] text-slate-400 hidden"></div>
                 </div>
               </button>
 
               <!-- Dropdown Menu -->
-              <div id="profileDropdownMenu" class="absolute left-0 top-full mt-2 hidden w-48 origin-top-left rounded-2xl border border-slate-200/60 bg-white/95 py-1.5 shadow-xl backdrop-blur-xl z-50">
+              <div id="profileDropdownMenu" class="absolute left-0 top-full mt-2 hidden w-48 z-50 rounded-2xl border border-slate-200/60 bg-white/95 py-1.5 shadow-lg backdrop-blur-xl">
                 <a href="../../logout.php" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
                   <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -115,7 +115,7 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-3 sm:justify-end shrink-0">
+            <div class="flex items-center gap-3 shrink-0">
               <div class="hidden sm:inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/80 px-3 py-1.5 text-[11px] font-medium text-emerald-700">
                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(74,222,128,0.16)]"></span>
                 <span>Activo</span>
