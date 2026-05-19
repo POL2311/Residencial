@@ -54,19 +54,19 @@
           ${auto.id ? `<input type="hidden" name="auto_id" value="${escapeHtml(auto.id)}">` : ''}
           <div>
             <label class="block text-xs text-slate-600 mb-1">Placas</label>
-            <input name="placas" value="${escapeHtml(auto.placas || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required>
+            <input name="placas" value="${escapeHtml(auto.placas || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required>
           </div>
           <div>
             <label class="block text-xs text-slate-600 mb-1">Modelo</label>
-            <input name="modelo" value="${escapeHtml(auto.modelo || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <input name="modelo" value="${escapeHtml(auto.modelo || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           </div>
           <div>
             <label class="block text-xs text-slate-600 mb-1">Color</label>
-            <input name="color" value="${escapeHtml(auto.color || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <input name="color" value="${escapeHtml(auto.color || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           </div>
           <div>
             <label class="block text-xs text-slate-600 mb-1">Tag ID</label>
-            <input value="${escapeHtml(auto.tag_id || '')}" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500" disabled>
+            <input value="${escapeHtml(auto.tag_id || '')}" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-base text-slate-500" disabled>
           </div>
         `;
         els.modal.classList.remove('hidden');

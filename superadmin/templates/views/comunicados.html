@@ -16,13 +16,13 @@
     <form id="saComunicadosFilterForm" class="grid grid-cols-1 gap-3 md:grid-cols-4">
       <div>
         <label class="mb-1 block text-xs text-slate-600">Servicio</label>
-        <select id="saComFilterServicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="saComFilterServicio" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
         </select>
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Estado</label>
-        <select id="saComFilterEstado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="saComFilterEstado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
           <option value="publicado">Publicado</option>
           <option value="borrador">Borrador</option>
@@ -31,7 +31,7 @@
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
-        <select id="saComFilterPrioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="saComFilterPrioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todas</option>
           <option value="alta">Alta</option>
           <option value="media">Media</option>
@@ -40,7 +40,7 @@
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Buscar</label>
-        <input id="saComFilterQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Título, mensaje o servicio..." />
+        <input id="saComFilterQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Título, mensaje o servicio..." />
       </div>
       <div class="md:col-span-4 flex justify-end gap-2">
         <button id="btnResetSaComFilters" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Limpiar</button>
@@ -75,15 +75,15 @@
             <input type="hidden" name="id" />
             <div>
               <label class="mb-1 block text-xs text-slate-600">Servicio *</label>
-              <select name="residencial_id" id="saComunicadoServiceSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></select>
+              <select name="residencial_id" id="saComunicadoServiceSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required></select>
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Título *</label>
-              <input name="titulo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+              <input name="titulo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Mensaje *</label>
-              <textarea name="mensaje" rows="5" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></textarea>
+              <textarea name="mensaje" rows="5" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required></textarea>
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Fotografía (opcional)</label>
@@ -96,7 +96,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Tipo</label>
-                <select name="tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <select name="tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                   <option value="general">General</option>
                   <option value="mantenimiento">Mantenimiento</option>
                   <option value="seguridad">Seguridad</option>
@@ -105,7 +105,7 @@
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Prioridad</label>
-                <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                   <option value="baja">Baja</option>
                   <option value="media">Media</option>
                   <option value="alta">Alta</option>
@@ -113,16 +113,16 @@
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Publicación</label>
-                <input type="date" name="fecha_publicacion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                <input type="date" name="fecha_publicacion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
               </div>
               <div>
                 <label class="mb-1 block text-xs text-slate-600">Expiración</label>
-                <input type="date" name="fecha_expiracion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                <input type="date" name="fecha_expiracion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
               </div>
             </div>
             <div>
               <label class="mb-1 block text-xs text-slate-600">Estado</label>
-              <select name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="publicado">Publicado</option>
                 <option value="borrador">Borrador</option>
                 <option value="archivado">Archivado</option>

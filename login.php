@@ -56,12 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login - Sistema Residencial</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200">
-    <div class="flex min-h-screen items-center justify-center px-4 py-5 sm:px-6 sm:py-8">
+<body class="min-h-[100dvh] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200">
+    <div class="flex min-h-[100dvh] items-center justify-center px-4 py-5 sm:px-6 sm:py-8">
     <div class="mx-auto w-full max-w-md rounded-[1.75rem] bg-white p-5 shadow-xl sm:p-8">
         <h1 class="mb-2 text-center text-2xl font-bold text-slate-800 sm:text-[1.9rem]">
             Acceso al sistema

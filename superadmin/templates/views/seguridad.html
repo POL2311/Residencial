@@ -10,17 +10,17 @@
     <form id="seguridadForm" class="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div>
         <label class="mb-1 block text-xs text-slate-600">Máximo de intentos fallidos</label>
-        <input name="max_intentos_login" type="number" min="1" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+        <input name="max_intentos_login" type="number" min="1" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
         <p class="mt-1 text-xs text-slate-500">Después de este límite, la cuenta puede bloquearse temporalmente.</p>
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Minutos de bloqueo</label>
-        <input name="minutos_bloqueo_login" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+        <input name="minutos_bloqueo_login" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
         <p class="mt-1 text-xs text-slate-500">Usa 0 para no bloquear de forma automática.</p>
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Tiempo de sesión (min)</label>
-        <input name="tiempo_sesion_minutos" type="number" min="10" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+        <input name="tiempo_sesion_minutos" type="number" min="10" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
         <p class="mt-1 text-xs text-slate-500">Controla inactividad máxima antes del cierre de sesión.</p>
       </div>
       <div class="flex items-center">

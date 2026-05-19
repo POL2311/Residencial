@@ -390,36 +390,36 @@
         <form id="frmNewPkg" class="space-y-3">
           <div>
             <label class="text-xs text-slate-500">Unidad *</label>
-            <select id="pkgUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <select id="pkgUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
               <option value="">Cargando unidades…</option>
             </select>
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Residente destinatario *</label>
-            <select id="pkgResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" disabled>
+            <select id="pkgResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base" disabled>
               <option value="">Selecciona primero una unidad</option>
             </select>
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Empresa</label>
-            <input id="pkgEmpresa" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Amazon, DHL..." />
+            <input id="pkgEmpresa" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Amazon, DHL..." />
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Descripción *</label>
-            <input id="pkgDesc" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+            <input id="pkgDesc" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Rastreo</label>
-            <input id="pkgTrack" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+            <input id="pkgTrack" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Notas</label>
-            <textarea id="pkgNotas" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" rows="3"></textarea>
+            <textarea id="pkgNotas" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base" rows="3"></textarea>
           </div>
 
           <div id="pkgErr" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>

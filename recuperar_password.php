@@ -40,12 +40,12 @@ $csrfToken = app_csrf_token();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Restablecer contraseña</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200">
-    <div class="flex min-h-screen items-center justify-center px-4 py-5 sm:px-6 sm:py-8">
+<body class="min-h-[100dvh] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200">
+    <div class="flex min-h-[100dvh] items-center justify-center px-4 py-5 sm:px-6 sm:py-8">
         <div class="mx-auto w-full max-w-md rounded-[1.75rem] bg-white p-5 shadow-xl sm:p-8">
             <div class="mb-5">
                 <a href="<?= htmlspecialchars(app_login_url(), ENT_QUOTES, 'UTF-8') ?>" class="text-sm text-slate-500 hover:text-slate-700">← Volver al inicio de sesión</a>

@@ -10,27 +10,27 @@
     <form id="configForm" class="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div class="md:col-span-2">
         <label class="mb-1 block text-xs text-slate-600">Nombre del sistema</label>
-        <input name="nombre_sistema" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+        <input name="nombre_sistema" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Empresa</label>
-        <input name="empresa" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+        <input name="empresa" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Email de soporte</label>
-        <input name="email_soporte" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+        <input name="email_soporte" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1 block text-xs text-slate-600">URL del logo</label>
-        <input name="logo_url" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="https://..." />
+        <input name="logo_url" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="https://..." />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Color primario</label>
-        <input name="color_primario" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="#0ea5e9" />
+        <input name="color_primario" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="#0ea5e9" />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Color secundario</label>
-        <input name="color_secundario" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="#1e293b" />
+        <input name="color_secundario" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="#1e293b" />
       </div>
       <div class="md:col-span-2 border-t border-slate-100 pt-4">
         <div class="text-sm font-semibold text-slate-700">Correo SMTP</div>
@@ -38,23 +38,23 @@
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Host SMTP</label>
-        <input name="smtp_host" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="smtp.tudominio.com" />
+        <input name="smtp_host" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="smtp.tudominio.com" />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Puerto</label>
-        <input name="smtp_port" type="number" min="1" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="587" />
+        <input name="smtp_port" type="number" min="1" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="587" />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Usuario SMTP</label>
-        <input name="smtp_username" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="no-reply@tudominio.com" />
+        <input name="smtp_username" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="no-reply@tudominio.com" />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Contraseña SMTP</label>
-        <input name="smtp_password" type="password" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="••••••••" />
+        <input name="smtp_password" type="password" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="••••••••" />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Cifrado</label>
-        <select name="smtp_encryption" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select name="smtp_encryption" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="tls">TLS</option>
           <option value="ssl">SSL</option>
           <option value="none">Ninguno</option>
@@ -62,11 +62,11 @@
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Correo remitente</label>
-        <input name="smtp_from_email" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="no-reply@tudominio.com" />
+        <input name="smtp_from_email" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="no-reply@tudominio.com" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1 block text-xs text-slate-600">Nombre remitente</label>
-        <input name="smtp_from_name" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Sistema Residencial" />
+        <input name="smtp_from_name" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Sistema Residencial" />
       </div>
       <div class="md:col-span-2 flex justify-end gap-2">
         <button id="btnRefreshConfig" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Recargar</button>
@@ -82,7 +82,7 @@
         <p class="mt-1 text-sm text-slate-500">Envía un correo corto para validar que la configuración SMTP sí está funcionando.</p>
       </div>
       <div class="flex w-full flex-col gap-2 md:w-auto md:flex-row">
-        <input id="smtpTestEmail" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm md:w-80" placeholder="correo@destino.com" />
+        <input id="smtpTestEmail" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base md:w-80" placeholder="correo@destino.com" />
         <button id="btnTestSmtp" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Enviar prueba</button>
       </div>
     </div>
@@ -122,23 +122,23 @@
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Nombre *</label>
-                  <input name="nombre" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="nombre" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Descripción</label>
-                  <textarea name="descripcion" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Describe el servicio o la promoción."></textarea>
+                  <textarea name="descripcion" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Describe el servicio o la promoción."></textarea>
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">URL de imagen</label>
-                  <input name="imagen_url" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="https://..." />
+                  <input name="imagen_url" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="https://..." />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Categoría</label>
-                  <input name="categoria" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="servicio, promocion, aliado..." />
+                  <input name="categoria" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="servicio, promocion, aliado..." />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Orden</label>
-                  <input name="orden" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" value="0" />
+                  <input name="orden" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" value="0" />
                 </div>
               </div>
             </section>
@@ -151,19 +151,19 @@
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Teléfono</label>
-                  <input name="telefono" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="5551234567" />
+                  <input name="telefono" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="5551234567" />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">WhatsApp</label>
-                  <input name="whatsapp" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="5551234567" />
+                  <input name="whatsapp" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="5551234567" />
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Enlace externo</label>
-                  <input name="link_url" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="https://..." />
+                  <input name="link_url" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="https://..." />
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Perfil</label>
-                  <input name="perfil_url" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="https://..." />
+                  <input name="perfil_url" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="https://..." />
                 </div>
                 <label class="md:col-span-2 flex items-center gap-2 text-sm text-slate-600">
                   <input type="checkbox" name="activo" value="1" checked>

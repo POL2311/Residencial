@@ -35,17 +35,17 @@
     <form id="residencialesFilterForm" class="grid grid-cols-1 gap-3 md:grid-cols-4">
       <div class="md:col-span-2">
         <label class="mb-1 block text-xs text-slate-600">Buscar</label>
-        <input id="resFiltroQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Nombre, código, ciudad, estado..." />
+        <input id="resFiltroQ" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" placeholder="Nombre, código, ciudad, estado..." />
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Plan</label>
-        <select id="resFiltroPlan" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="resFiltroPlan" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
         </select>
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Estatus</label>
-        <select id="resFiltroEstatus" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="resFiltroEstatus" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
           <option value="prueba">Prueba</option>
           <option value="activo">Activo</option>
@@ -55,7 +55,7 @@
       </div>
       <div>
         <label class="mb-1 block text-xs text-slate-600">Modo</label>
-        <select id="resFiltroModo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+        <select id="resFiltroModo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
           <option value="">Todos</option>
           <option value="residencial">Residencial</option>
           <option value="empresa">Empresa</option>
@@ -102,15 +102,15 @@
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Nombre del servicio o cliente *</label>
-                  <input name="nombre" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="nombre" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Código interno *</label>
-                  <input name="codigo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="codigo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Tipo</label>
-                  <select name="tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <select name="tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                     <option value="fraccionamiento">Fraccionamiento</option>
                     <option value="torre">Torre</option>
                     <option value="mixto">Mixto</option>
@@ -120,7 +120,7 @@
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Modo operativo</label>
-                  <select name="modo_operacion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <select name="modo_operacion" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                     <option value="residencial">Residencial</option>
                     <option value="empresa">Empresa / oficina</option>
                     <option value="obra">Obra / construcción</option>
@@ -130,11 +130,11 @@
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Máx. casas/deptos</label>
-                  <input name="max_casas" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  <input name="max_casas" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Máx. guardias</label>
-                  <input name="max_guardias" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  <input name="max_guardias" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
                 </div>
               </div>
             </section>
@@ -147,35 +147,35 @@
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">País *</label>
-                  <input name="pais" value="México" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="pais" value="México" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Estado *</label>
-                  <input name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Ciudad *</label>
-                  <input name="ciudad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="ciudad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Colonia *</label>
-                  <input name="colonia" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="colonia" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Calle *</label>
-                  <input name="calle" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="calle" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Número exterior *</label>
-                  <input name="numero_exterior" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="numero_exterior" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Número interior</label>
-                  <input name="numero_interior" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  <input name="numero_interior" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Código postal *</label>
-                  <input name="codigo_postal" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="codigo_postal" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
               </div>
             </section>
@@ -188,15 +188,15 @@
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Nombre de contacto *</label>
-                  <input name="nombre_contacto" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="nombre_contacto" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Teléfono de contacto *</label>
-                  <input name="telefono_contacto" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="telefono_contacto" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Email de contacto *</label>
-                  <input name="email_contacto" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+                  <input name="email_contacto" type="email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" required />
                 </div>
               </div>
             </section>
@@ -209,13 +209,13 @@
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Plan</label>
-                  <select name="plan_id" id="resPlanSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <select name="plan_id" id="resPlanSelect" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                     <option value="">Sin asignar</option>
                   </select>
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Estatus del plan</label>
-                  <select name="estatus_plan" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <select name="estatus_plan" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                     <option value="prueba">Prueba</option>
                     <option value="activo" selected>Activo</option>
                     <option value="suspendido">Suspendido</option>
@@ -224,15 +224,15 @@
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Inicio del plan</label>
-                  <input name="fecha_inicio_plan" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  <input name="fecha_inicio_plan" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
                 </div>
                 <div>
                   <label class="mb-1 block text-xs text-slate-600">Fin del plan</label>
-                  <input name="fecha_fin_plan" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  <input name="fecha_fin_plan" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
                 </div>
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Zona horaria</label>
-                  <input name="zona_horaria" value="America/Mexico_City" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  <input name="zona_horaria" value="America/Mexico_City" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
                 </div>
               </div>
               <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -251,7 +251,7 @@
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-xs text-slate-600">Tipo de servicio</label>
-                  <select name="preset_servicio" id="resServicePreset" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <select name="preset_servicio" id="resServicePreset" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                     <option value="residencial">Residencial</option>
                     <option value="empresa">Empresa</option>
                     <option value="obra">Obra</option>
@@ -310,7 +310,7 @@
                 <div class="mt-2 text-sm text-slate-500">Este perfil define qué tipo de servicio es, quién puede entrar y qué módulos estarán disponibles. No crea usuarios por sí mismo.</div>
                 <div class="mt-4">
                   <label class="mb-1 block text-xs text-slate-600">Tipo de servicio</label>
-                  <select name="preset_servicio" id="serviceProfilePreset" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                  <select name="preset_servicio" id="serviceProfilePreset" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base">
                     <option value="residencial">Residencial</option>
                     <option value="empresa">Empresa</option>
                     <option value="obra">Obra</option>

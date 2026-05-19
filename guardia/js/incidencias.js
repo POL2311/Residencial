@@ -502,12 +502,12 @@
           ${isOperational ? `
             <div>
               <label class="text-xs text-slate-500">Área</label>
-              <select id="incArea" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              <select id="incArea" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
             </div>
 
             <div>
               <label class="text-xs text-slate-500">Origen</label>
-              <select id="incOrigenTipo" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select id="incOrigenTipo" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="">Evento general</option>
                 <option value="persona_recurrente" ${item?.origen_tipo === 'persona_recurrente' ? 'selected' : ''}>Persona recurrente</option>
                 <option value="visitante_rapido" ${item?.origen_tipo === 'visitante_rapido' ? 'selected' : ''}>Visitante rápido</option>
@@ -518,27 +518,27 @@
 
             <div>
               <label class="text-xs text-slate-500">Persona recurrente</label>
-              <select id="incPersona" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              <select id="incPersona" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
             </div>
 
             <div>
               <label class="text-xs text-slate-500">Visitante rápido</label>
-              <select id="incVisitante" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              <select id="incVisitante" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
             </div>
 
             <div>
               <label class="text-xs text-slate-500">Permiso material</label>
-              <select id="incPermiso" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              <select id="incPermiso" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
             </div>
           ` : `
             <div>
               <label class="text-xs text-slate-500">Unidad *</label>
-              <select id="incUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></select>
+              <select id="incUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base"></select>
             </div>
 
             <div>
               <label class="text-xs text-slate-500">Residente *</label>
-              <select id="incResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select id="incResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="">Selecciona primero una unidad</option>
               </select>
             </div>
@@ -546,14 +546,14 @@
 
           <div>
             <label class="text-xs text-slate-500">Tipo</label>
-            <select id="incTipo" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <select id="incTipo" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
               ${typeOptions}
             </select>
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Prioridad</label>
-            <select id="incPrioridad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <select id="incPrioridad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
               <option value="baja" ${item?.prioridad === 'baja' ? 'selected' : ''}>Baja</option>
               <option value="media" ${!item || item?.prioridad === 'media' ? 'selected' : ''}>Media</option>
               <option value="alta" ${item?.prioridad === 'alta' ? 'selected' : ''}>Alta</option>
@@ -563,7 +563,7 @@
           ${isEdit ? `
             <div>
               <label class="text-xs text-slate-500">Estado</label>
-              <select id="incEstadoEdit" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <select id="incEstadoEdit" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base">
                 <option value="abierta" ${item?.estado === 'abierta' ? 'selected' : ''}>Abierta</option>
                 <option value="en_proceso" ${item?.estado === 'en_proceso' ? 'selected' : ''}>En proceso</option>
                 <option value="cerrada" ${item?.estado === 'cerrada' ? 'selected' : ''}>Cerrada</option>
@@ -573,12 +573,12 @@
 
           <div>
             <label class="text-xs text-slate-500">Título *</label>
-            <input id="incTitulo" value="${safeText(item?.titulo || '', '')}" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+            <input id="incTitulo" value="${safeText(item?.titulo || '', '')}" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base" />
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Descripción *</label>
-            <textarea id="incDesc" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" rows="4">${safeText(item?.descripcion || '', '')}</textarea>
+            <textarea id="incDesc" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base" rows="4">${safeText(item?.descripcion || '', '')}</textarea>
           </div>
 
           <div id="incErr" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>

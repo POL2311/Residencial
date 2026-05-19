@@ -164,28 +164,28 @@
           <div id="herrNewLoanError" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Herramienta</label>
-            <select id="herrToolSelect" name="herramienta_id" class="w-full rounded-xl border px-3 py-2 text-sm" required></select>
+            <select id="herrToolSelect" name="herramienta_id" class="w-full rounded-xl border px-3 py-2 text-base" required></select>
           </div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Unidad</label>
-            <select id="herrUnitSelect" name="unidad_id" class="w-full rounded-xl border px-3 py-2 text-sm" required></select>
+            <select id="herrUnitSelect" name="unidad_id" class="w-full rounded-xl border px-3 py-2 text-base" required></select>
           </div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Residente (opcional)</label>
-            <select id="herrResidentSelect" name="residente_id" class="w-full rounded-xl border px-3 py-2 text-sm">
+            <select id="herrResidentSelect" name="residente_id" class="w-full rounded-xl border px-3 py-2 text-base">
               <option value="">—</option>
             </select>
           </div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Notas (opcional)</label>
-            <textarea name="notas" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm" placeholder="Detalle del préstamo…"></textarea>
+            <textarea name="notas" rows="3" class="w-full rounded-xl border px-3 py-2 text-base" placeholder="Detalle del préstamo…"></textarea>
           </div>
           <div>
             <div class="text-xs text-slate-600">Evidencias (opcional, máximo 3)</div>
             <div class="mt-2 grid gap-2 sm:grid-cols-3">
-              <input type="file" name="evidencia_1" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
-              <input type="file" name="evidencia_2" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
-              <input type="file" name="evidencia_3" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
+              <input type="file" name="evidencia_1" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-base" />
+              <input type="file" name="evidencia_2" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-base" />
+              <input type="file" name="evidencia_3" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-base" />
             </div>
           </div>
           <div class="flex justify-end gap-2 pt-2">

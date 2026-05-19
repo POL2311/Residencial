@@ -1,4 +1,4 @@
-<div class="app-dashboard-shell min-h-screen flex flex-col">
+<div class="app-dashboard-shell min-h-[100dvh] flex flex-col">
   <div id="appToastRoot" aria-live="polite" aria-atomic="true" class="pointer-events-none fixed inset-x-4 top-4 z-[90] flex flex-col items-stretch gap-3 sm:inset-x-auto sm:right-4 sm:top-4 sm:w-[min(24rem,calc(100vw-2rem))]"></div>
   <style>
     .app-dashboard-shell {
@@ -263,7 +263,7 @@
       pointer-events: none !important;
     }
     .mobile-more-content {
-      max-height: min(calc(100vh - 12rem), 30rem);
+      max-height: min(calc(100dvh - 12rem), 30rem);
       overflow-y: auto;
     }
     .mobile-more-grid {
@@ -353,7 +353,7 @@
         transform: translate(-50%, 0) scale(1);
       }
       .mobile-more-content {
-        max-height: min(calc(100vh - 13rem), 34rem);
+        max-height: min(calc(100dvh - 13rem), 34rem);
       }
       .mobile-more-grid {
         grid-template-columns: 1fr;
