@@ -22,19 +22,13 @@
       btnSalida: document.getElementById('btnConfirmarSalida'),
       actionButtonsWrap: document.getElementById('accessActionButtons'),
 
-      btnOpenCamera: document.getElementById('btnOpenCamera'),
-      cameraModal: document.getElementById('cameraModal'),
       cameraHint: document.getElementById('cameraHint'),
-      cameraSupportNote: document.getElementById('cameraSupportNote'),
       video: document.getElementById('video'),
       btnRetryCamera: document.getElementById('btnRetryCamera'),
-      btnCloseCamera: document.getElementById('btnCloseCamera'),
+      camFallback: document.getElementById('cameraFallback'),
+      camOverlay: document.getElementById('cameraOverlay'),
 
-      residentSection: document.getElementById('residentDirectSection'),
-      residentSearch: document.getElementById('residentDirectSearch'),
-      residentAlert: document.getElementById('residentDirectAlert'),
       residentResults: document.getElementById('residentDirectResults'),
-      btnResidentSearch: document.getElementById('btnBuscarResidenteDirecto'),
 
       hist: document.getElementById('accesosHist'),
       histPagination: document.getElementById('accesosHistPagination'),
@@ -133,34 +127,31 @@
       return idx === -1 ? '' : path.slice(0, idx);
     }
 
-    function showCameraRetry(show) {
-      els.btnRetryCamera?.classList.toggle('hidden', !show);
-      if (els.btnCloseCamera) {
-        els.btnCloseCamera.classList.toggle('sm:col-span-2', !!show);
-        els.btnCloseCamera.classList.toggle('sm:col-span-1', !show);
+    function setCameraState(s, msg) {
+      if (!els.cameraHint) return;
+      if (s === 'error') {
+        els.cameraHint.classList.add('hidden');
+        els.camOverlay?.classList.add('hidden');
+        els.camFallback?.classList.remove('hidden');
+        if (els.camFallback) {
+          const div = els.camFallback.querySelector('div.text-sm');
+          if (div) div.textContent = msg || 'Cámara no disponible';
+        }
+      } else if (s === 'success' || s === 'ok') {
+        els.cameraHint.classList.remove('hidden');
+        els.cameraHint.className = 'absolute bottom-4 left-0 right-0 text-center text-xs font-medium text-emerald-400 drop-shadow-md z-10';
+        els.cameraHint.textContent = msg || 'Código escaneado...';
+        els.camOverlay?.classList.replace('border-white/20', 'border-emerald-400');
+        els.camFallback?.classList.add('hidden');
+      } else {
+        els.cameraHint.classList.remove('hidden');
+        els.cameraHint.className = 'absolute bottom-4 left-0 right-0 text-center text-xs font-medium text-white/90 drop-shadow-md z-10';
+        els.cameraHint.textContent = msg || 'Escaneando código QR...';
+        if (els.camOverlay && els.camOverlay.classList.contains('border-emerald-400')) {
+            els.camOverlay.classList.replace('border-emerald-400', 'border-white/20');
+        }
+        els.camFallback?.classList.add('hidden');
       }
-    }
-
-    function setCameraState(kind, message, note = '') {
-      if (els.cameraHint) {
-        els.cameraHint.className = `mt-2 text-xs ${
-          kind === 'error'
-            ? 'text-rose-700'
-            : kind === 'success'
-            ? 'text-emerald-700'
-            : 'text-slate-500'
-        }`;
-        els.cameraHint.textContent = message;
-      }
-
-      if (els.cameraSupportNote) {
-        els.cameraSupportNote.className = `mt-2 text-[11px] ${
-          kind === 'error' ? 'text-rose-500' : 'text-slate-400'
-        }`;
-        els.cameraSupportNote.textContent = note || 'Si no abre o no detecta el QR, puedes ingresar el código manualmente.';
-      }
-
-      showCameraRetry(kind === 'error');
     }
 
     function isSecureCameraContext() {
@@ -838,26 +829,27 @@
     }
 
     async function openCamera() {
-      if (!els.cameraModal || !els.video || !isAlive()) return;
+      if (!els.video || !isAlive()) return;
       closeCamera();
-      els.cameraModal.classList.remove('hidden');
-      els.cameraModal.classList.add('flex');
-      setCameraState('idle', 'Estamos solicitando permiso de cámara…');
+      els.camFallback?.classList.add('hidden');
+      els.camOverlay?.classList.remove('hidden');
+
+      setCameraState('idle', 'Solicitando cámara…');
       alertMsg('');
 
       if (!isSecureCameraContext()) {
-        setCameraState('error', 'La cámara requiere HTTPS.', 'Abre este panel desde un dominio seguro para que el navegador permita la cámara.');
+        setCameraState('error', 'La cámara requiere HTTPS.');
         return;
       }
       if (!navigator.mediaDevices?.getUserMedia) {
-        setCameraState('error', 'Este navegador no puede abrir cámara.', 'Usa el código manual o prueba desde otro navegador móvil.');
+        setCameraState('error', 'Navegador sin acceso a cámara.');
         return;
       }
 
       try {
         const permissionState = await getCameraPermissionState();
         if (permissionState === 'denied') {
-          setCameraState('error', 'Activa el permiso de cámara en tu navegador.', 'Revisa permisos del sitio y luego toca "Reintentar cámara".');
+          setCameraState('error', 'Permiso de cámara denegado.');
           return;
         }
 
@@ -871,16 +863,12 @@
         if (!state.scannerMode) {
           throw new Error('No se pudo preparar el lector QR.');
         }
-        setCameraState('success', 'Apunta al código QR.', state.scannerMode === 'native'
-          ? 'La lectura está lista. Si no detecta, también puedes ingresar el código manualmente.'
-          : 'Usando lector QR compatible con este navegador. Si no detecta, usa el código manual.');
+        setCameraState('success', 'Apunta al código QR.');
         scanLoop();
       } catch (e) {
         const mapped = mapCameraError(e);
         closeCamera();
-        els.cameraModal?.classList.remove('hidden');
-        els.cameraModal?.classList.add('flex');
-        setCameraState('error', mapped.message, mapped.note);
+        setCameraState('error', mapped.message);
         alertMsg(mapped.message);
       }
     }
@@ -907,8 +895,7 @@
     }
 
     function closeCamera() {
-      els.cameraModal?.classList.add('hidden');
-      els.cameraModal?.classList.remove('flex');
+      if (!isAlive()) return;
       if (state.rafId) cancelAnimationFrame(state.rafId);
       state.rafId = null;
       if (state.stream) state.stream.getTracks().forEach((track) => track.stop());
@@ -918,12 +905,10 @@
       state.scannerMode = null;
       state.scanning = false;
       state.lastScanAt = 0;
-      setCameraState('idle', 'Esperando código QR…');
     }
 
     function bindEvents() {
       els.btnBuscar?.addEventListener('click', () => buscar(els.codigo?.value?.trim()));
-      els.btnResidentSearch?.addEventListener('click', () => buscarResidente(els.residentSearch?.value?.trim()));
       els.btnEntrada?.addEventListener('click', () => {
         if (state.actionSource === 'resident') registrarResidente('entrada');
         else registrar('entrada');
@@ -932,9 +917,7 @@
         if (state.actionSource === 'resident') registrarResidente('salida');
         else registrar('salida');
       });
-      els.btnOpenCamera?.addEventListener('click', openCamera);
       els.btnRetryCamera?.addEventListener('click', openCamera);
-      els.btnCloseCamera?.addEventListener('click', closeCamera);
       els.modalClose?.addEventListener('click', closeActionModal);
       els.btnRefrescar?.addEventListener('click', loadHist);
       els.codigo?.addEventListener('keydown', (e) => {
@@ -942,15 +925,6 @@
           e.preventDefault();
           buscar(els.codigo?.value?.trim());
         }
-      });
-      els.residentSearch?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          buscarResidente(els.residentSearch?.value?.trim());
-        }
-      });
-      els.cameraModal?.addEventListener('click', (e) => {
-        if (e.target === els.cameraModal) closeCamera();
       });
       els.modal?.addEventListener('click', (e) => {
         if (e.target === els.modal) closeActionModal();
@@ -1005,14 +979,9 @@
     function init() {
       alertMsg('');
       resetResultArea();
-      if (isOperational()) {
-        els.residentSection?.classList.add('hidden');
-      } else {
-        els.residentSection?.classList.remove('hidden');
-      }
       bindEvents();
       loadHist();
-      applyAutoScanIntent(consumeAutoScanIntent());
+      openCamera();
     }
 
     init();

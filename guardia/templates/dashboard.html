@@ -38,9 +38,9 @@
     .guard-shell-card {
       overflow: hidden;
       border-radius: 2rem;
-      border: 1px solid rgba(226,232,240,0.9);
+      border: 1px solid rgba(226,232,240,0.4);
       background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(248,250,252,0.8) 100%);
-      box-shadow: 0 22px 46px rgba(148, 163, 184, 0.15), inset 0 1px 0 rgba(255,255,255,0.9);
+      box-shadow: 0 22px 46px rgba(148, 163, 184, 0.10), inset 0 1px 0 rgba(255,255,255,0.9);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
     }
@@ -84,33 +84,49 @@
     <div class="mx-auto max-w-6xl px-3 pt-3 sm:px-4 sm:pt-4">
       <div class="guard-shell-card">
         <div class="px-4 py-4 sm:px-5 sm:py-5">
-          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div class="flex min-w-0 items-start gap-3">
-              <div class="h-12 w-12 shrink-0 rounded-full bg-[#E9E3D9] p-0.5 shadow sm:h-14 sm:w-14">
-                <img id="systemLogoImg" src="../../assets/img/logo_asher.png" alt="Logo del sistema" class="h-full w-full rounded-full object-cover" loading="lazy" />
-              </div>
-              <div class="min-w-0">
-                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Guardia</div>
-                <div id="guardName" class="mt-2 truncate text-2xl font-semibold leading-tight text-slate-800 sm:text-3xl">—</div>
-                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
-                  <span id="guardContext" class="leading-relaxed">—</span>
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="relative flex-1 min-w-0">
+              <button id="profileDropdownBtn" type="button" class="flex min-w-0 items-center gap-3 text-left w-full sm:w-auto rounded-2xl p-1 -ml-1 transition-colors hover:bg-slate-50/80">
+                <div class="h-11 w-11 shrink-0 rounded-full bg-[#E9E3D9] p-0.5 shadow sm:h-12 sm:w-12">
+                  <img id="systemLogoImg" src="../../assets/img/logo_asher.png" alt="Perfil" class="h-full w-full rounded-full object-cover" loading="lazy" />
                 </div>
-                <div id="guardHint" class="mt-1 text-xs text-slate-400 hidden"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1">
+                    <div id="guardName" class="truncate text-sm font-semibold text-slate-800">—</div>
+                    <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div id="guardContext" class="truncate text-[13px] text-slate-500">—</div>
+                  <div id="guardHint" class="mt-1 text-[11px] text-slate-400 hidden"></div>
+                </div>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <div id="profileDropdownMenu" class="absolute left-0 top-full mt-2 hidden w-48 origin-top-left rounded-2xl border border-slate-200/60 bg-white/95 py-1.5 shadow-xl backdrop-blur-xl z-50">
+                <a href="../../logout.php" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  Cerrar sesión
+                </a>
               </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2 lg:justify-end">
-              <div class="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/80 px-3 py-2 text-xs text-emerald-700">
-                <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(74,222,128,0.16)]"></span>
-                <span class="font-medium">Caseta operando</span>
+
+            <div class="flex items-center gap-3 sm:justify-end shrink-0">
+              <div class="hidden sm:inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/80 px-3 py-1.5 text-[11px] font-medium text-emerald-700">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(74,222,128,0.16)]"></span>
+                <span>Activo</span>
               </div>
-              <button id="guardNotificationsButton" type="button" class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-700 shadow-sm" aria-label="Notificaciones operativas" title="Notificaciones operativas">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M15 17H5l1.2-1.6A2 2 0 0 0 6.5 14.2V10a5.5 5.5 0 1 1 11 0v4.2c0 .43.14.85.4 1.2L19 17h-4Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <button id="guardNotificationsButton" type="button" class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/80 text-slate-700 shadow-sm transition-transform hover:scale-105" aria-label="Notificaciones operativas" title="Notificaciones operativas">
+                <svg class="h-[1.15rem] w-[1.15rem]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M15 17H5l1.2-1.6A2 2 0 0 0 6.5 14.2V10a5.5 5.5 0 1 1 11 0v4.2c0 .43.14.85.4 1.2L19 17h-4Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
-                <span id="guardNotificationsBadge" class="hidden absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-rose-400 shadow-[0_0_0_3px_rgba(244,63,94,0.18)]"></span>
+                <span id="guardNotificationsBadge" class="hidden absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-rose-500 shadow-sm ring-2 ring-white"></span>
               </button>
-              <a id="logoutLink" href="../../logout.php" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm text-slate-600 shadow-sm">Cerrar sesión</a>
             </div>
           </div>
         </div>

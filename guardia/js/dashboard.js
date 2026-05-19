@@ -4,6 +4,8 @@
     name: document.getElementById('guardName'),
     ctx: document.getElementById('guardContext'),
     hint: document.getElementById('guardHint'),
+    profileDropdownBtn: document.getElementById('profileDropdownBtn'),
+    profileDropdownMenu: document.getElementById('profileDropdownMenu'),
     notificationsButton: document.getElementById('guardNotificationsButton'),
     notificationsBadge: document.getElementById('guardNotificationsBadge'),
     turnoBadge: document.getElementById('guardTurnoBadge'),
@@ -869,6 +871,17 @@
 
   function bindStaticEvents() {
     document.addEventListener('click', (e) => {
+      if (els.profileDropdownMenu && els.profileDropdownBtn) {
+        if (!els.profileDropdownBtn.contains(e.target) && !els.profileDropdownMenu.contains(e.target)) {
+          els.profileDropdownMenu.classList.add('hidden');
+        }
+      }
+      if (e.target.closest('#profileDropdownBtn')) {
+        e.preventDefault();
+        els.profileDropdownMenu.classList.toggle('hidden');
+        return;
+      }
+
       if (e.target.closest('#btnOpenMobileMoreSheet')) {
         e.preventDefault();
         if (state.moreSheetOpen) closeMoreSheet();
