@@ -21,6 +21,25 @@ if (!function_exists('resident_access_column_exists')) {
     }
 }
 
+if (!function_exists('resident_access_column_type')) {
+    function resident_access_column_type(PDO $pdo, string $table, string $column): string
+    {
+        $stmt = $pdo->prepare("
+            SELECT COLUMN_TYPE
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = :table
+              AND COLUMN_NAME = :column
+            LIMIT 1
+        ");
+        $stmt->execute([
+            'table' => $table,
+            'column' => $column,
+        ]);
+        return (string)($stmt->fetchColumn() ?: '');
+    }
+}
+
 if (!function_exists('resident_access_ensure_schema')) {
     function resident_access_ensure_schema(PDO $pdo): void
     {
@@ -48,6 +67,19 @@ if (!function_exists('resident_access_ensure_schema')) {
             }
             if (!resident_access_column_exists($pdo, 'accesos_guardia', 'unidad_id')) {
                 $pdo->exec("ALTER TABLE accesos_guardia ADD COLUMN unidad_id INT(11) NULL DEFAULT NULL");
+            }
+        }
+
+        if (tableExists($pdo, 'visitas')) {
+            if (!resident_access_column_exists($pdo, 'visitas', 'entrada_registrada_at')) {
+                $pdo->exec("ALTER TABLE visitas ADD COLUMN entrada_registrada_at DATETIME NULL DEFAULT NULL AFTER estado");
+            }
+            if (!resident_access_column_exists($pdo, 'visitas', 'salida_registrada_at')) {
+                $pdo->exec("ALTER TABLE visitas ADD COLUMN salida_registrada_at DATETIME NULL DEFAULT NULL AFTER entrada_registrada_at");
+            }
+            $estadoType = resident_access_column_type($pdo, 'visitas', 'estado');
+            if (!str_contains($estadoType, 'en_curso') || !str_contains($estadoType, 'finalizado')) {
+                $pdo->exec("ALTER TABLE visitas MODIFY COLUMN estado ENUM('pendiente','en_curso','usado','finalizado','vencido','cancelado') NOT NULL DEFAULT 'pendiente'");
             }
         }
     }

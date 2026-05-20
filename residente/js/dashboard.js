@@ -38,9 +38,9 @@
     const BASE = baseResidentPath();
     const API = BASE + 'php/api/';
     const VIEWS = BASE + 'templates/views/';
-    const inlineViews = new Set(['home', 'visitas', 'incidencias', 'perfil', 'paqueteria', 'autos', 'pagos', 'comunicados', 'servicios', 'reglamento']);
+    const inlineViews = new Set(['home', 'visitas', 'incidencias', 'perfil', 'paqueteria', 'autos', 'pagos', 'comunicados', 'servicios', 'amenidades', 'reglamento']);
     const PRIMARY_DOCK_VIEWS = new Set(['home', 'visitas', 'incidencias', 'comunicados']);
-    const SECONDARY_DOCK_VIEWS = new Set(['paqueteria', 'autos', 'pagos', 'servicios', 'perfil', 'reglamento']);
+    const SECONDARY_DOCK_VIEWS = new Set(['paqueteria', 'autos', 'pagos', 'servicios', 'amenidades', 'perfil', 'reglamento']);
 
     let currentViewScript = null;
     let currentNotificationMeta = null;
@@ -239,6 +239,7 @@
                 pagos: BASE + 'js/pagos.js',
                 comunicados: BASE + 'js/comunicados.js',
                 servicios: BASE + 'js/servicios.js',
+                amenidades: BASE + 'js/amenidades.js',
                 reglamento: BASE + 'js/reglamento.js',
             };
 

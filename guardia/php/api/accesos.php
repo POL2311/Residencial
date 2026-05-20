@@ -76,7 +76,7 @@ function time_in_range(?string $from, ?string $to, DateTime $now): bool
     return $current >= $from && $current <= $to;
 }
 
-function evaluar_visita(array $visita): array
+function evaluar_visita_base(array $visita): array
 {
     $now = now_mx();
     $today = $now->format('Y-m-d');
@@ -94,9 +94,9 @@ function evaluar_visita(array $visita): array
         $motivo = 'Acceso vencido.';
     }
 
-    if (($visita['estado'] ?? '') === 'usado' && (int)($visita['uso_unico'] ?? 0) === 1) {
+    if (in_array((string)($visita['estado'] ?? ''), ['finalizado', 'usado'], true)) {
         $permitido = false;
-        $motivo = 'Acceso de uso único ya utilizado.';
+        $motivo = 'Acceso ya finalizado.';
     }
 
     if ($permitido) {
@@ -121,6 +121,57 @@ function evaluar_visita(array $visita): array
         'fecha_actual' => $today,
         'hora_actual' => $now->format('H:i:s'),
     ];
+}
+
+function evaluar_visita(array $visita): array
+{
+    $base = evaluar_visita_base($visita);
+    $entradaAt = trim((string)($visita['entrada_registrada_at'] ?? ''));
+    $salidaAt = trim((string)($visita['salida_registrada_at'] ?? ''));
+    $estado = (string)($visita['estado'] ?? 'pendiente');
+
+    $canEntrada = (bool)$base['permitido'] && $entradaAt === '' && $salidaAt === '' && $estado === 'pendiente';
+    $canSalida = (bool)$base['permitido'] && ($entradaAt !== '' || $estado === 'en_curso') && $salidaAt === '';
+
+    $motivo = (string)($base['motivo'] ?? '');
+    if (!$motivo && !$canEntrada && !$canSalida) {
+        if ($salidaAt !== '' || $estado === 'finalizado') {
+            $motivo = 'La salida ya fue registrada.';
+        } elseif ($entradaAt !== '' || $estado === 'en_curso') {
+            $motivo = 'Entrada registrada; el siguiente movimiento es salida.';
+        } else {
+            $motivo = 'El acceso no tiene movimientos disponibles.';
+        }
+    }
+
+    return array_merge($base, [
+        'permitido' => $canEntrada || $canSalida,
+        'motivo' => $motivo,
+        'can_entrada' => $canEntrada,
+        'can_salida' => $canSalida,
+        'next_action' => $canEntrada ? 'entrada' : ($canSalida ? 'salida' : ''),
+    ]);
+}
+
+function evaluar_visita_movimiento(array $visita, string $tipoEvento): array
+{
+    $ev = evaluar_visita($visita);
+
+    if ($tipoEvento === 'verificacion') {
+        return $ev;
+    }
+
+    if ($tipoEvento === 'entrada' && empty($ev['can_entrada'])) {
+        $ev['permitido'] = false;
+        $ev['motivo'] = $ev['motivo'] ?: 'La entrada no está disponible para este QR.';
+    }
+
+    if ($tipoEvento === 'salida' && empty($ev['can_salida'])) {
+        $ev['permitido'] = false;
+        $ev['motivo'] = $ev['motivo'] ?: 'La salida no está disponible para este QR.';
+    }
+
+    return $ev;
 }
 
 function operational_mode_for_rid(PDO $pdo, int $rid): string
@@ -703,8 +754,8 @@ try {
             $visita['estado'] = 'vencido';
         }
 
-        $ev = evaluar_visita($visita);
-        $permitido = ($override !== '') ? ($override === 'permitido') : (bool)$ev['permitido'];
+        $ev = evaluar_visita_movimiento($visita, $tipoEvento);
+        $permitido = $override === 'denegado' ? false : (bool)$ev['permitido'];
         $motivoDenegado = $permitido ? '' : ($ev['motivo'] ?: 'Acceso denegado.');
 
         $resultado = $permitido ? 'permitido' : 'denegado';
@@ -722,10 +773,28 @@ try {
             'obs' => ($obs !== '' ? $obs : null),
         ]);
 
-        if ($permitido && (int)($visita['uso_unico'] ?? 0) === 1 && ($visita['estado'] ?? '') !== 'usado') {
-            $up = $pdo->prepare("UPDATE visitas SET estado='usado' WHERE id=:id");
+        if ($permitido && $tipoEvento === 'entrada') {
+            $up = $pdo->prepare("
+                UPDATE visitas
+                SET estado = 'en_curso',
+                    entrada_registrada_at = COALESCE(entrada_registrada_at, NOW()),
+                    updated_at = NOW()
+                WHERE id = :id
+            ");
             $up->execute(['id' => (int)$visita['id']]);
-            $visita['estado'] = 'usado';
+            $visita['estado'] = 'en_curso';
+            $visita['entrada_registrada_at'] = $visita['entrada_registrada_at'] ?: date('Y-m-d H:i:s');
+        } elseif ($permitido && $tipoEvento === 'salida') {
+            $up = $pdo->prepare("
+                UPDATE visitas
+                SET estado = 'finalizado',
+                    salida_registrada_at = COALESCE(salida_registrada_at, NOW()),
+                    updated_at = NOW()
+                WHERE id = :id
+            ");
+            $up->execute(['id' => (int)$visita['id']]);
+            $visita['estado'] = 'finalizado';
+            $visita['salida_registrada_at'] = $visita['salida_registrada_at'] ?: date('Y-m-d H:i:s');
         }
 
         $pdo->commit();

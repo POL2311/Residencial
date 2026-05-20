@@ -1,0 +1,66 @@
+<div id="residentAmenidadesView" class="space-y-4">
+  <div id="residentAmenidadesAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div>
+      <h2 class="text-3xl font-semibold text-slate-700">Amenidades</h2>
+      <p class="text-sm text-slate-500">Aparta espacios compartidos y consulta el estado de tus solicitudes.</p>
+    </div>
+    <button id="btnNuevaAmenidadResident" type="button" class="app-admin-primary rounded-xl px-4 py-2 text-sm text-white shadow hover:opacity-95">
+      Nueva solicitud
+    </button>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+    <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="text-sm font-semibold text-slate-700">Espacios disponibles</div>
+      <div id="residentAmenidadesCatalogo" class="mt-4 space-y-3"></div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="text-sm font-semibold text-slate-700">Mis solicitudes</div>
+      <div id="residentAmenidadesReservas" class="mt-4 space-y-3"></div>
+    </section>
+  </div>
+
+  <div id="residentAmenidadModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
+      <div class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-w-xl sm:rounded-2xl">
+        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <div class="text-sm font-semibold text-slate-800">Solicitar amenidad</div>
+          <button id="btnCloseResidentAmenidadModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">×</button>
+        </div>
+        <form id="residentAmenidadForm" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-3 overflow-y-auto p-4">
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Amenidad</label>
+              <select name="amenidad_id" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Fecha</label>
+              <input name="fecha" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+            </div>
+            <div class="grid gap-3 md:grid-cols-2">
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Hora inicio</label>
+                <input name="hora_inicio" type="time" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+              </div>
+              <div>
+                <label class="mb-1 block text-xs text-slate-600">Hora fin</label>
+                <input name="hora_fin" type="time" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required />
+              </div>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600">Notas para administración</label>
+              <textarea name="notas_residente" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></textarea>
+            </div>
+          </div>
+          <div class="flex flex-col-reverse gap-2 border-t border-slate-100 bg-white px-4 py-3 sm:flex-row sm:justify-end">
+            <button id="btnCancelResidentAmenidadModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold text-white">Enviar solicitud</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

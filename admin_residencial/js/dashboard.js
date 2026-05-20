@@ -52,6 +52,7 @@
     'personal_recurrente',
     'visitantes_rapidos',
     'materiales',
+    'amenidades',
     'solicitudes_pendientes',
     'bitacora_operativa',
   ]);
@@ -79,6 +80,7 @@
     'personal_recurrente',
     'visitantes_rapidos',
     'materiales',
+    'amenidades',
     'solicitudes_pendientes',
     'bitacora_operativa',
     'perfil',
@@ -167,6 +169,7 @@
       personal_recurrente: 'habilita_personal_recurrente',
       visitantes_rapidos: 'habilita_visitantes_rapidos',
       materiales: 'habilita_materiales',
+      amenidades: 'habilita_amenidades',
       solicitudes_pendientes: 'habilita_solicitudes_pendientes',
       bitacora_operativa: 'habilita_bitacora_operativa',
     };
@@ -210,6 +213,7 @@
       personal_recurrente: BASE + 'js/personal_recurrente.js',
       visitantes_rapidos: BASE + 'js/visitantes_rapidos.js',
       materiales: BASE + 'js/materiales.js',
+      amenidades: BASE + 'js/amenidades.js',
       solicitudes_pendientes: BASE + 'js/solicitudes_pendientes.js',
       bitacora_operativa: BASE + 'js/bitacora_operativa.js',
     };

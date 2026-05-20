@@ -106,6 +106,48 @@ CREATE TABLE `areas_operativas` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `amenidades`
+--
+
+CREATE TABLE `amenidades` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `descripcion` text,
+  `ubicacion` varchar(150) DEFAULT NULL,
+  `capacidad` int(10) UNSIGNED DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `amenidad_reservas`
+--
+
+CREATE TABLE `amenidad_reservas` (
+  `id` int(11) NOT NULL,
+  `residencial_id` int(11) NOT NULL,
+  `amenidad_id` int(11) NOT NULL,
+  `residente_id` int(11) NOT NULL,
+  `unidad_id` int(11) NOT NULL,
+  `fecha` date NOT NULL,
+  `hora_inicio` time NOT NULL,
+  `hora_fin` time NOT NULL,
+  `estado` varchar(20) NOT NULL DEFAULT 'pendiente',
+  `notas_residente` text,
+  `notas_admin` text,
+  `revisado_por_user_id` int(11) DEFAULT NULL,
+  `revisado_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `autos`
 --
 
@@ -785,6 +827,7 @@ CREATE TABLE `residenciales_servicio_config` (
   `habilita_personal_recurrente` tinyint(1) NOT NULL DEFAULT '0',
   `habilita_visitantes_rapidos` tinyint(1) NOT NULL DEFAULT '0',
   `habilita_materiales` tinyint(1) NOT NULL DEFAULT '0',
+  `habilita_amenidades` tinyint(1) NOT NULL DEFAULT '0',
   `habilita_solicitudes_pendientes` tinyint(1) NOT NULL DEFAULT '0',
   `habilita_bitacora_operativa` tinyint(1) NOT NULL DEFAULT '0',
   `habilita_herramientas` tinyint(1) NOT NULL DEFAULT '0',
@@ -796,10 +839,10 @@ CREATE TABLE `residenciales_servicio_config` (
 -- Volcado de datos para la tabla `residenciales_servicio_config`
 --
 
-INSERT INTO `residenciales_servicio_config` (`id`, `residencial_id`, `preset_servicio`, `habilita_admin_operativo`, `habilita_guardia`, `habilita_residente`, `habilita_unidades`, `habilita_residentes_catalogo`, `habilita_guardias_catalogo`, `habilita_guardias_admin_actions`, `habilita_autos`, `habilita_visitas_residente`, `habilita_paqueteria`, `habilita_pagos`, `habilita_comunicados`, `habilita_servicios_directorio`, `habilita_control_acceso`, `habilita_incidencias`, `habilita_personal_recurrente`, `habilita_visitantes_rapidos`, `habilita_materiales`, `habilita_solicitudes_pendientes`, `habilita_bitacora_operativa`, `habilita_herramientas`, `created_at`, `updated_at`) VALUES
-(1, 1, 'residencial', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2026-04-30 00:24:09', '2026-05-06 11:52:30'),
-(2, 2, 'residencial', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, '2026-05-05 16:58:08', '2026-05-06 11:17:46'),
-(3, 3, 'comercio', 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, '2026-05-06 11:18:30', '2026-05-06 11:18:30');
+INSERT INTO `residenciales_servicio_config` (`id`, `residencial_id`, `preset_servicio`, `habilita_admin_operativo`, `habilita_guardia`, `habilita_residente`, `habilita_unidades`, `habilita_residentes_catalogo`, `habilita_guardias_catalogo`, `habilita_guardias_admin_actions`, `habilita_autos`, `habilita_visitas_residente`, `habilita_paqueteria`, `habilita_pagos`, `habilita_comunicados`, `habilita_servicios_directorio`, `habilita_control_acceso`, `habilita_incidencias`, `habilita_personal_recurrente`, `habilita_visitantes_rapidos`, `habilita_materiales`, `habilita_amenidades`, `habilita_solicitudes_pendientes`, `habilita_bitacora_operativa`, `habilita_herramientas`, `created_at`, `updated_at`) VALUES
+(1, 1, 'residencial', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2026-04-30 00:24:09', '2026-05-06 11:52:30'),
+(2, 2, 'residencial', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, '2026-05-05 16:58:08', '2026-05-06 11:17:46'),
+(3, 3, 'comercio', 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, '2026-05-06 11:18:30', '2026-05-06 11:18:30');
 
 -- --------------------------------------------------------
 
@@ -999,7 +1042,9 @@ CREATE TABLE `visitas` (
   `hora_hasta` time DEFAULT NULL,
   `uso_unico` tinyint(1) NOT NULL DEFAULT '1',
   `codigo_acceso` varchar(64) NOT NULL,
-  `estado` enum('pendiente','usado','vencido','cancelado') NOT NULL DEFAULT 'pendiente',
+  `estado` enum('pendiente','en_curso','usado','finalizado','vencido','cancelado') NOT NULL DEFAULT 'pendiente',
+  `entrada_registrada_at` datetime DEFAULT NULL,
+  `salida_registrada_at` datetime DEFAULT NULL,
   `notas` text,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -1040,6 +1085,26 @@ ALTER TABLE `areas_operativas`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_areas_operativas_residencial` (`residencial_id`),
   ADD KEY `idx_areas_operativas_activo` (`activo`);
+
+--
+-- Indices de la tabla `amenidades`
+--
+ALTER TABLE `amenidades`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_amenidades_residencial` (`residencial_id`),
+  ADD KEY `idx_amenidades_activo` (`activo`);
+
+--
+-- Indices de la tabla `amenidad_reservas`
+--
+ALTER TABLE `amenidad_reservas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_amenidad_reservas_residencial` (`residencial_id`),
+  ADD KEY `idx_amenidad_reservas_amenidad_fecha` (`amenidad_id`,`fecha`),
+  ADD KEY `idx_amenidad_reservas_residente` (`residente_id`),
+  ADD KEY `idx_amenidad_reservas_unidad` (`unidad_id`),
+  ADD KEY `idx_amenidad_reservas_estado` (`estado`),
+  ADD KEY `idx_amenidad_reservas_revisor` (`revisado_por_user_id`);
 
 --
 -- Indices de la tabla `autos`
@@ -1347,6 +1412,18 @@ ALTER TABLE `areas_operativas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `amenidades`
+--
+ALTER TABLE `amenidades`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `amenidad_reservas`
+--
+ALTER TABLE `amenidad_reservas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `autos`
 --
 ALTER TABLE `autos`
@@ -1560,6 +1637,22 @@ ALTER TABLE `archivos_operativos`
 --
 ALTER TABLE `areas_operativas`
   ADD CONSTRAINT `fk_areas_operativas_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `amenidades`
+--
+ALTER TABLE `amenidades`
+  ADD CONSTRAINT `fk_amenidades_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `amenidad_reservas`
+--
+ALTER TABLE `amenidad_reservas`
+  ADD CONSTRAINT `fk_amenidad_reservas_amenidad` FOREIGN KEY (`amenidad_id`) REFERENCES `amenidades` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_amenidad_reservas_residencial` FOREIGN KEY (`residencial_id`) REFERENCES `residenciales` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_amenidad_reservas_residente` FOREIGN KEY (`residente_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_amenidad_reservas_revisor` FOREIGN KEY (`revisado_por_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_amenidad_reservas_unidad` FOREIGN KEY (`unidad_id`) REFERENCES `unidades` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `bitacora_operativa`

@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../config/auth.php';
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/residencial_helpers.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/resident_access.php';
 
 require_login();
 require_role(['residente']);
@@ -96,6 +97,7 @@ function normalize_legacy_codes(PDO $pdo, int $rid, int $unidadId, int $uid): vo
 
 try {
   service_profile_schema_ensure($pdo);
+  resident_access_ensure_schema($pdo);
   $ctx = get_context($pdo, $uid);
   $rid = (int)$ctx['residencial_id'];
   $unidadId = (int)$ctx['unidad_id'];

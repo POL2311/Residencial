@@ -44,6 +44,7 @@
     paqueteria: BASE + 'js/paqueteria.js',
     personas_dentro: BASE + 'js/personas_dentro.js',
     materiales_autorizados: BASE + 'js/materiales_autorizados.js',
+    amenidades: BASE + 'js/amenidades.js',
     bitacora_hoy: BASE + 'js/bitacora_hoy.js',
   };
 
@@ -65,7 +66,7 @@
     moreSheetOpen: false,
   };
   const PRIMARY_DOCK_VIEWS = new Set(['home', 'accesos', 'incidencias', 'autos']);
-  const SECONDARY_DOCK_VIEWS = new Set(['paqueteria', 'personas_dentro', 'materiales_autorizados', 'bitacora_hoy', 'perfil']);
+  const SECONDARY_DOCK_VIEWS = new Set(['paqueteria', 'personas_dentro', 'materiales_autorizados', 'amenidades', 'bitacora_hoy', 'perfil']);
 
   function escapeHtml(s) {
     return String(s ?? '')

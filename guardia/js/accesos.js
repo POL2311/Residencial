@@ -279,9 +279,35 @@
       return '';
     }
 
+    function allowedCurrentActions() {
+      if (state.actionSource === 'resident') {
+        const allow = !!state.currentResident?.access?.allow_direct_access;
+        return { entrada: allow, salida: allow };
+      }
+
+      if (state.actionSource !== 'code' || !state.current) {
+        return { entrada: false, salida: false };
+      }
+
+      if (state.currentKind === 'visita_residencial') {
+        return {
+          entrada: !!state.currentEval?.can_entrada,
+          salida: !!state.currentEval?.can_salida,
+        };
+      }
+
+      if (state.currentKind === 'persona_recurrente') {
+        return { entrada: true, salida: true };
+      }
+
+      const allow = !!state.currentEval?.permitido;
+      return { entrada: allow, salida: allow };
+    }
+
     function setButtonsDisabled(disabled) {
-      if (els.btnEntrada) els.btnEntrada.disabled = disabled;
-      if (els.btnSalida) els.btnSalida.disabled = disabled;
+      const allowed = allowedCurrentActions();
+      if (els.btnEntrada) els.btnEntrada.disabled = disabled || !allowed.entrada;
+      if (els.btnSalida) els.btnSalida.disabled = disabled || !allowed.salida;
     }
 
     function setActionsVisible(show) {
@@ -289,15 +315,8 @@
     }
 
     function canRegisterCurrentAction() {
-      if (state.actionSource === 'resident') {
-        return !!state.currentResident?.access?.allow_direct_access;
-      }
-
-      if (state.actionSource !== 'code' || !state.current) return false;
-
-      if (state.currentKind === 'persona_recurrente') return true;
-
-      return !!state.currentEval?.permitido;
+      const allowed = allowedCurrentActions();
+      return !!(allowed.entrada || allowed.salida);
     }
 
     function enableActions(on) {
@@ -452,13 +471,15 @@
       els.modalBody.innerHTML = `
         <div class="space-y-4">
           <div class="font-semibold text-base ${permitido ? 'text-emerald-700' : 'text-rose-700'}">
-            ${permitido ? '✔ Acceso permitido' : '✖ Acceso denegado'}
+            ${permitido ? (ev?.next_action === 'salida' ? '✔ Listo para registrar salida' : '✔ Listo para registrar entrada') : '✖ Acceso denegado'}
           </div>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-2 text-sm">
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Visitante</div><div class="mt-1 font-medium text-slate-800">${safeText(visita?.nombre_visitante)}</div></div>
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Unidad</div><div class="mt-1 font-medium text-slate-800">${safeText(visita?.unidad_clave)}</div></div>
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Residente</div><div class="mt-1 font-medium text-slate-800">${safeText(visita?.residente_nombre)}</div></div>
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Placa</div><div class="mt-1 font-medium text-slate-800">${safeText(visita?.placa_vehiculo)}</div></div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Estado</div><div class="mt-1 font-medium text-slate-800">${safeText(visita?.estado || 'pendiente')}</div></div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Siguiente acción</div><div class="mt-1 font-medium text-slate-800">${safeText(ev?.next_action || 'Sin movimientos')}</div></div>
           </div>
           ${permitido ? '' : `<div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">${safeText(ev?.motivo || 'Acceso denegado.', '')}</div>`}
         </div>
