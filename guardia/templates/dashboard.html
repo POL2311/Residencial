@@ -4,7 +4,7 @@
     .app-dashboard-shell { min-height: 100dvh; background: #f4f7fb; color: rgb(15 23 42); }
     #shellHeader { background: transparent; color: rgb(15 23 42); box-shadow: none; }
     #dashboardBody { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; background: transparent; }
-    #dashboardViewMount { position: relative; z-index: 1; }
+    #dashboardViewMount { position: relative; z-index: 0; }
     #dashboardViewMount > [id$="View"] { display: flex; flex-direction: column; gap: 1rem; }
     #dashboardViewMount .rounded-\[1\.75rem\].border.border-slate-200.bg-white,
     #dashboardViewMount .rounded-2xl.border.border-slate-200.bg-white,
@@ -67,7 +67,7 @@
     .mobile-more-item-title,.desktop-more-item-title { font-size:0.9rem; font-weight:700; line-height:1.15; letter-spacing:-0.02em; }
     .mobile-more-item-meta,.mobile-more-item-chevron { display:none !important; }
     .desktop-more-popover { display:none; }
-    @media (max-width: 767px) { .app-dashboard-shell { height:100dvh; overflow:hidden; } #dashboardViewMount { min-height:100%; padding-top:0.65rem; padding-bottom:7.1rem; } }
+    @media (max-width: 767px) { .app-dashboard-shell { height:100dvh; } #dashboardViewMount { min-height:100%; padding-top:0.65rem; padding-bottom:7.1rem; } }
     @media (min-width: 750px) {
       .desktop-more-popover { display:none !important; }
       .mobile-more-sheet { left:50%; right:auto; width:min(42rem,calc(100vw - 3rem)); bottom:calc(env(safe-area-inset-bottom, 0px) + 6rem); transform:translate(-50%,1rem) scale(0.985); }
@@ -79,7 +79,7 @@
     }
   </style>
 
-  <header id="shellHeader" class="shrink-0 text-slate-900">
+  <header id="shellHeader" class="shrink-0 text-slate-900 relative z-50">
     <div class="mx-auto max-w-6xl px-3 pt-3 sm:px-4 sm:pt-4">
       <div class="guard-shell-card">
         <div class="px-4 py-4 sm:px-5 sm:py-5">
