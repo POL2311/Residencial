@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OS-Gate - La inteligencia que tu residencial necesita</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            500: '#64748b',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        teal: {
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* Custom scrollbar for a more premium feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-800 antialiased bg-white selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="#" class="text-2xl font-bold text-slate-900 tracking-tight">OS-Gate</a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#modulos" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Módulos</a>
+                    <a href="#seguridad" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Seguridad</a>
+                    <a href="#roles" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Roles</a>
+                </nav>
+
+                <!-- CTA -->
+                <div class="hidden md:flex items-center">
+                    <a href="#demo" class="inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow transition-all">
+                        Agendar Demo
+                    </a>
+                </div>
+
+                <!-- Mobile menu button (visual only for this mockup) -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-slate-500 hover:text-slate-900 focus:outline-none">
+                        <i class="ph ph-list text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-20">
+        <!-- Hero Section -->
+        <section class="relative bg-white overflow-hidden py-16 lg:py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
+                    <!-- Text Content -->
+                    <div class="lg:col-span-6 text-center lg:text-left mb-16 lg:mb-0">
+                        <span class="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold mb-6">Nuevo Sistema de Control Operativo</span>
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight mb-6">
+                            La inteligencia que tu residencial necesita. <br class="hidden lg:block"/>
+                            <span class="text-slate-800">El control que tú mereces.</span>
+                        </h1>
+                        <p class="text-lg text-slate-500 mb-10 max-w-2xl mx-auto lg:mx-0">
+                            Elimina las filas interminables y los errores humanos. Una plataforma premium SaaS para automatizar el acceso vehicular, gestionar paquetería y centralizar el control con cero fricción.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                            <a href="#demo" class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-semibold rounded-lg text-white bg-teal-600 hover:bg-teal-700 shadow-md hover:shadow-lg transition-all">
+                                Agendar Demostración
+                            </a>
+                            <a href="#modulos" class="inline-flex items-center justify-center px-8 py-4 border-2 border-slate-800 text-base font-semibold rounded-lg text-slate-800 hover:bg-slate-800 hover:text-white transition-all">
+                                Explorar Funciones
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Hero Mockup Placeholder -->
+                    <div class="lg:col-span-6">
+                        <div class="relative mx-auto w-full rounded-2xl shadow-xl lg:max-w-lg aspect-[4/3] bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden group">
+                            <!-- Decoración sutil de UI -->
+                            <div class="absolute top-0 w-full h-12 bg-white border-b border-slate-100 flex items-center px-4 space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-slate-200"></div>
+                                <div class="w-3 h-3 rounded-full bg-slate-200"></div>
+                                <div class="w-3 h-3 rounded-full bg-slate-200"></div>
+                            </div>
+                            <!-- Mockup Content Indicator -->
+                            <div class="text-center text-slate-400 transform group-hover:scale-105 transition-transform duration-500">
+                                <i class="ph ph-layout text-6xl mb-4 opacity-50"></i>
+                                <p class="font-medium">Interfaz del Dashboard OS-Gate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modulos Section -->
+        <section id="modulos" class="py-24 bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4">Módulos de Operación</h2>
+                    <p class="text-lg text-slate-500">Herramientas especializadas diseñadas para resolver los problemas críticos del día a día en residenciales de alta plusvalía.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Card 1 -->
+                    <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform group">
+                        <div class="w-12 h-12 rounded-lg bg-teal-50 flex items-center justify-center mb-6 group-hover:bg-teal-100 transition-colors">
+                            <i class="ph ph-package text-2xl text-teal-600"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 mb-3">Gestión de Paquetería</h3>
+                        <p class="text-sm text-slate-500 mb-4">Registro fotográfico y notificaciones automáticas al residente cuando llega un paquete. Cero extravíos.</p>
+                        <span class="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">Trazabilidad Total</span>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform group">
+                        <div class="w-12 h-12 rounded-lg bg-teal-50 flex items-center justify-center mb-6 group-hover:bg-teal-100 transition-colors">
+                            <i class="ph ph-qr-code text-2xl text-teal-600"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 mb-3">Accesos Express</h3>
+                        <p class="text-sm text-slate-500 mb-4">Generación de pases QR dinámicos para invitados, servicios o proveedores temporales con expiración automática.</p>
+                        <span class="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">Fluidez de Acceso</span>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform group">
+                        <div class="w-12 h-12 rounded-lg bg-teal-50 flex items-center justify-center mb-6 group-hover:bg-teal-100 transition-colors">
+                            <i class="ph ph-calendar-check text-2xl text-teal-600"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 mb-3">Accesos Recurrentes</h3>
+                        <p class="text-sm text-slate-500 mb-4">Aprobación y gestión simplificada para trabajadores del hogar o contratistas con horarios definidos.</p>
+                        <span class="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">Control de Horarios</span>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform group">
+                        <div class="w-12 h-12 rounded-lg bg-teal-50 flex items-center justify-center mb-6 group-hover:bg-teal-100 transition-colors">
+                            <i class="ph ph-warning-circle text-2xl text-teal-600"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-900 mb-3">Control de Incidencias</h3>
+                        <p class="text-sm text-slate-500 mb-4">Bitácora digitalizada para registro de eventualidades de seguridad, rondines y reportes vecinales en tiempo real.</p>
+                        <span class="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">Reportes Centralizados</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seguridad Section -->
+        <section id="seguridad" class="py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:flex lg:items-center lg:justify-between mb-16">
+                    <div class="lg:w-1/2">
+                        <h2 class="text-3xl font-bold text-slate-900 mb-4">Candados de Seguridad por Hardware</h2>
+                        <p class="text-lg text-slate-500">Nuestra plataforma se integra sin fisuras con la infraestructura física del residencial para garantizar que ninguna regla sea omitida.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+                        <i class="ph ph-traffic-signal text-4xl text-teal-600 mb-6"></i>
+                        <h4 class="text-lg font-bold text-slate-900 mb-2">Semáforo Inteligente</h4>
+                        <p class="text-slate-600 text-sm">Resuelve la ambigüedad en el acceso. Sincronizado en tiempo real con el estado de pago y autorización del residente, indicando a guardias si el acceso es permitido (Verde) o requiere revisión (Rojo).</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+                        <i class="ph ph-broadcast text-4xl text-teal-600 mb-6"></i>
+                        <h4 class="text-lg font-bold text-slate-900 mb-2">Sensores de Proximidad UHF</h4>
+                        <p class="text-slate-600 text-sm">Resuelve los cuellos de botella vehiculares. Lectura de tags a distancia para apertura automática de plumas, permitiendo un flujo continuo sin intervención de la caseta de guardia.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+                        <i class="ph ph-shield-check text-4xl text-teal-600 mb-6"></i>
+                        <h4 class="text-lg font-bold text-slate-900 mb-2">Espera Activa Antirráfaga</h4>
+                        <p class="text-slate-600 text-sm">Resuelve el problema de múltiples vehículos ingresando con una sola autorización. La pluma desciende inmediatamente tras el cruce detectado, previniendo accesos no autorizados en fila.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roles Section -->
+        <section id="roles" class="py-24 bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4">Perfiles de Operación a la Medida</h2>
+                    <p class="text-lg text-slate-500 max-w-2xl mx-auto">Vistas y herramientas diseñadas específicamente para maximizar la eficiencia de cada actor en el ecosistema del residencial.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Role: Administrador -->
+                    <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8 hover:-translate-y-1 transition-transform">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center">
+                                <i class="ph ph-buildings text-xl text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">Administrador Residencial</h3>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Control total sobre padrón de residentes.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Gestión de cuotas y estados de cuenta.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Auditoría en tiempo real de casetas.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Configuración de parámetros globales.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Role: Guardia -->
+                    <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8 hover:-translate-y-1 transition-transform relative overflow-hidden">
+                        <!-- Highlight border top -->
+                        <div class="absolute top-0 left-0 w-full h-1 bg-teal-600"></div>
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
+                                <i class="ph ph-shield text-xl text-teal-700"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">Personal de Seguridad</h3>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Consola centralizada de accesos.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Escáner de identificaciones y QR integrado.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Recepción rápida de paquetería.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Alertas visuales inconfundibles.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Role: Residente -->
+                    <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8 hover:-translate-y-1 transition-transform">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                                <i class="ph ph-user text-xl text-blue-700"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">Residente Autónomo</h3>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Generación de invitaciones desde el móvil.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Notificaciones push de llegadas.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Historial personal de visitas.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="ph ph-check-circle text-teal-600 text-xl mr-3 mt-0.5"></i>
+                                <span class="text-slate-600 text-sm">Gestión de su grupo familiar y vehículos.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="demo" class="py-24 bg-slate-900 relative overflow-hidden">
+            <!-- Background pattern decoration (optional subtlety) -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <svg class="absolute left-full transform -translate-y-3/4 -translate-x-1/4 md:-translate-y-1/2 lg:-translate-x-1/2" width="404" height="784" fill="none" viewBox="0 0 404 784"><defs><pattern id="5d0dd344-b041-4d26-bec4-8d33ea57ec9b" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="4" height="4" fill="currentColor"></rect></pattern></defs><rect width="404" height="784" fill="url(#5d0dd344-b041-4d26-bec4-8d33ea57ec9b)"></rect></svg>
+            </div>
+
+            <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">¿Listo para elevar el estándar de tu residencial?</h2>
+                <p class="text-xl text-slate-300 mb-10">Agenda una demostración guiada y descubre por qué las administraciones más exigentes confían en la infraestructura de OS-Gate.</p>
+                <button class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-teal-600 hover:bg-teal-500 shadow-lg hover:shadow-xl transition-all">
+                    Solicitar Demostración
+                    <i class="ph ph-arrow-right ml-2 font-bold"></i>
+                </button>
+                <p class="mt-6 text-sm text-slate-400">Implementación en menos de 2 semanas sin disrupción de servicio.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-6 md:mb-0">
+                <span class="text-2xl font-bold text-white tracking-tight">OS-Gate</span>
+                <p class="text-slate-400 text-sm mt-2">© 2024 OS-Gate. Todos los derechos reservados.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                    <span class="sr-only">Términos de Servicio</span>
+                    Términos
+                </a>
+                <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                    <span class="sr-only">Privacidad</span>
+                    Privacidad
+                </a>
+                <a href="#" class="text-slate-400 hover:text-white transition-colors">
+                    <span class="sr-only">Soporte</span>
+                    Soporte
+                </a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+[Wed May 20 01:44:07 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Wed May 20 01:44:52 2026] [::1]:53254 Accepted
+[Wed May 20 01:44:52 2026] [::1]:53254 [200]: GET /index.html
+[Wed May 20 01:44:52 2026] [::1]:53254 Closing
