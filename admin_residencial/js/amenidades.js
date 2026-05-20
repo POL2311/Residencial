@@ -255,7 +255,9 @@
       showAlert(fd.get('decision') === 'approve' ? 'Reserva aprobada.' : 'Reserva rechazada.');
       await load();
     } catch (err) {
+      closeReviewModal();
       showAlert(err.message || 'No se pudo revisar la solicitud.', 'error');
+      await load().catch(() => {});
     }
   });
 

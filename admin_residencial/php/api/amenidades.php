@@ -111,38 +111,107 @@ try {
             json_out(false, ['error' => 'Solicitud inválida.']);
         }
 
-        $pdo->beginTransaction();
-        $stmt = $pdo->prepare("
-            SELECT *
-            FROM amenidad_reservas
-            WHERE id = :id
-              AND residencial_id = :rid
-            LIMIT 1
-            FOR UPDATE
-        ");
-        $stmt->execute(['id' => $id, 'rid' => $residencialId]);
-        $reserva = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-
-        if (!$reserva) {
-            $pdo->rollBack();
-            json_out(false, ['error' => 'No encontramos esa solicitud.']);
-        }
-        if ((string)$reserva['estado'] !== 'pendiente') {
-            $pdo->rollBack();
-            json_out(false, ['error' => 'Solo puedes revisar solicitudes pendientes.']);
-        }
-
         $nuevoEstado = $decision === 'approve' ? 'aprobada' : 'rechazada';
-        if ($nuevoEstado === 'aprobada' && amenidades_has_overlap(
-            $pdo,
-            (int)$reserva['amenidad_id'],
-            (string)$reserva['fecha'],
-            substr((string)$reserva['hora_inicio'], 0, 5),
-            substr((string)$reserva['hora_fin'], 0, 5),
-            $id
-        )) {
-            $pdo->rollBack();
-            json_out(false, ['error' => 'Ya existe una reserva aprobada para ese horario.']);
+
+        if ($nuevoEstado === 'aprobada') {
+            $stmtTarget = $pdo->prepare("
+                SELECT *
+                FROM amenidad_reservas
+                WHERE id = :id
+                  AND residencial_id = :rid
+                LIMIT 1
+            ");
+            $stmtTarget->execute(['id' => $id, 'rid' => $residencialId]);
+            $target = $stmtTarget->fetch(PDO::FETCH_ASSOC) ?: null;
+
+            if (!$target) {
+                json_out(false, ['error' => 'No encontramos esa solicitud.']);
+            }
+
+            $horaInicio = substr((string)$target['hora_inicio'], 0, 5);
+            $horaFin = substr((string)$target['hora_fin'], 0, 5);
+
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare("
+                SELECT *
+                FROM amenidad_reservas
+                WHERE residencial_id = :rid
+                  AND amenidad_id = :amenidad_id
+                  AND fecha = :fecha
+                  AND estado IN ('pendiente', 'aprobada')
+                  AND :hora_inicio < hora_fin
+                  AND :hora_fin > hora_inicio
+                ORDER BY id ASC
+                FOR UPDATE
+            ");
+            $stmt->execute([
+                'rid' => $residencialId,
+                'amenidad_id' => (int)$target['amenidad_id'],
+                'fecha' => (string)$target['fecha'],
+                'hora_inicio' => $horaInicio,
+                'hora_fin' => $horaFin,
+            ]);
+            $lockedReservas = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            $reserva = null;
+            $hasApprovedConflict = false;
+            foreach ($lockedReservas as $row) {
+                if ((int)$row['id'] === $id) {
+                    $reserva = $row;
+                    continue;
+                }
+                if ((string)$row['estado'] === 'aprobada') {
+                    $hasApprovedConflict = true;
+                }
+            }
+
+            if (!$reserva) {
+                $stmtCurrent = $pdo->prepare("
+                    SELECT *
+                    FROM amenidad_reservas
+                    WHERE id = :id
+                      AND residencial_id = :rid
+                    LIMIT 1
+                    FOR UPDATE
+                ");
+                $stmtCurrent->execute(['id' => $id, 'rid' => $residencialId]);
+                $reserva = $stmtCurrent->fetch(PDO::FETCH_ASSOC) ?: null;
+            }
+
+            if (!$reserva) {
+                $pdo->rollBack();
+                json_out(false, ['error' => 'No encontramos esa solicitud.']);
+            }
+            if ((string)$reserva['estado'] !== 'pendiente') {
+                $pdo->rollBack();
+                json_out(false, ['error' => 'Solo puedes revisar solicitudes pendientes.']);
+            }
+            if ($hasApprovedConflict) {
+                $pdo->rollBack();
+                http_response_code(422);
+                json_out(false, ['error' => 'No se puede aprobar: la amenidad ya está apartada en ese horario.']);
+            }
+        } else {
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare("
+                SELECT *
+                FROM amenidad_reservas
+                WHERE id = :id
+                  AND residencial_id = :rid
+                LIMIT 1
+                FOR UPDATE
+            ");
+            $stmt->execute(['id' => $id, 'rid' => $residencialId]);
+            $reserva = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+            if (!$reserva) {
+                $pdo->rollBack();
+                json_out(false, ['error' => 'No encontramos esa solicitud.']);
+            }
+            if ((string)$reserva['estado'] !== 'pendiente') {
+                $pdo->rollBack();
+                json_out(false, ['error' => 'Solo puedes revisar solicitudes pendientes.']);
+            }
         }
 
         $up = $pdo->prepare("

@@ -64,8 +64,16 @@ if (!function_exists('amenidades_schema_ensure')) {
                     KEY idx_amenidad_reservas_amenidad_fecha (amenidad_id, fecha),
                     KEY idx_amenidad_reservas_residente (residente_id),
                     KEY idx_amenidad_reservas_unidad (unidad_id),
-                    KEY idx_amenidad_reservas_estado (estado)
+                    KEY idx_amenidad_reservas_estado (estado),
+                    KEY idx_amenidad_reservas_daily_active (residencial_id, amenidad_id, residente_id, fecha, estado)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+
+        if (!operational_index_exists($pdo, 'amenidad_reservas', 'idx_amenidad_reservas_daily_active')) {
+            $pdo->exec("
+                ALTER TABLE amenidad_reservas
+                ADD KEY idx_amenidad_reservas_daily_active (residencial_id, amenidad_id, residente_id, fecha, estado)
             ");
         }
 
@@ -149,6 +157,29 @@ if (!function_exists('amenidades_validate_time_range')) {
     }
 }
 
+if (!function_exists('amenidades_has_daily_active_request')) {
+    function amenidades_has_daily_active_request(PDO $pdo, int $residencialId, int $amenidadId, int $residenteId, string $fecha): bool
+    {
+        amenidades_schema_ensure($pdo);
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*)
+            FROM amenidad_reservas
+            WHERE residencial_id = :rid
+              AND amenidad_id = :amenidad_id
+              AND residente_id = :residente_id
+              AND fecha = :fecha
+              AND estado IN ('pendiente', 'aprobada')
+        ");
+        $stmt->execute([
+            'rid' => $residencialId,
+            'amenidad_id' => $amenidadId,
+            'residente_id' => $residenteId,
+            'fecha' => $fecha,
+        ]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+}
+
 if (!function_exists('amenidades_has_overlap')) {
     function amenidades_has_overlap(PDO $pdo, int $amenidadId, string $fecha, string $horaInicio, string $horaFin, int $excludeReservaId = 0): bool
     {
@@ -226,4 +257,3 @@ if (!function_exists('amenidades_normalize_reserva')) {
         ];
     }
 }
-

@@ -1104,6 +1104,7 @@ ALTER TABLE `amenidad_reservas`
   ADD KEY `idx_amenidad_reservas_residente` (`residente_id`),
   ADD KEY `idx_amenidad_reservas_unidad` (`unidad_id`),
   ADD KEY `idx_amenidad_reservas_estado` (`estado`),
+  ADD KEY `idx_amenidad_reservas_daily_active` (`residencial_id`,`amenidad_id`,`residente_id`,`fecha`,`estado`),
   ADD KEY `idx_amenidad_reservas_revisor` (`revisado_por_user_id`);
 
 --

@@ -133,6 +133,10 @@ try {
             resident_amenidades_out(false, ['error' => 'La amenidad no está disponible.'], 404);
         }
 
+        if (amenidades_has_daily_active_request($pdo, $rid, $amenidadId, $uid, $fecha)) {
+            resident_amenidades_out(false, ['error' => 'Ya tienes una solicitud activa para esta amenidad en ese día.'], 422);
+        }
+
         if (amenidades_has_overlap($pdo, $amenidadId, $fecha, $horaInicio, $horaFin)) {
             resident_amenidades_out(false, ['error' => 'Ese horario ya está apartado. Elige otro horario.'], 422);
         }
@@ -195,4 +199,3 @@ try {
 } catch (Throwable $e) {
     app_json_exception($e, 'No pudimos procesar amenidades.');
 }
-
