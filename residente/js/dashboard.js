@@ -374,7 +374,7 @@
     }
 
     async function loadContext() {
-        if (!els.name || !els.addr || !els.cars) return;
+        if (!els.name || !els.addr ) return;
         try {
             const res = await fetch(`${API}contexto.php`, {
                 headers: { 'Accept': 'application/json' },
