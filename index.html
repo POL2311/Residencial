@@ -28,7 +28,8 @@
             --green: #1fd17c;
             --amber: #f7b955;
             --danger: #ff6b7a;
-            --radius: 8px;
+            --radius: 18px;
+            --radius-sm: 12px;
             --shadow-soft: 0 24px 70px rgba(12, 18, 28, 0.13);
             --shadow-dark: 0 34px 90px rgba(0, 0, 0, 0.38);
             --container: min(1180px, calc(100% - 40px));
@@ -65,24 +66,6 @@
 
         button {
             font: inherit;
-        }
-
-        .skip-link {
-            position: fixed;
-            left: 16px;
-            top: 16px;
-            z-index: 100;
-            transform: translateY(-120%);
-            border-radius: var(--radius);
-            background: var(--paper);
-            color: var(--ink);
-            padding: 10px 14px;
-            box-shadow: var(--shadow-soft);
-            transition: transform 180ms ease;
-        }
-
-        .skip-link:focus {
-            transform: translateY(0);
         }
 
         .page-shell {
@@ -205,10 +188,12 @@
             min-height: 100svh;
             padding: 116px 0 64px;
             background:
+                radial-gradient(circle at 12% 18%, rgba(25, 213, 255, 0.24), transparent 26%),
+                radial-gradient(circle at 82% 10%, rgba(31, 209, 124, 0.14), transparent 28%),
+                radial-gradient(circle at 50% 82%, rgba(23, 107, 255, 0.18), transparent 34%),
                 linear-gradient(180deg, rgba(8, 11, 16, 0.86), rgba(8, 11, 16, 0.95) 58%, #0c1118),
                 repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 96px),
                 repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 96px),
-                radial-gradient(circle at 50% -20%, rgba(25, 213, 255, 0.24), transparent 42%),
                 #080b10;
             color: var(--paper);
         }
@@ -221,6 +206,16 @@
                 linear-gradient(125deg, transparent 0 44%, rgba(23, 107, 255, 0.18) 44% 45%, transparent 45% 100%),
                 linear-gradient(65deg, transparent 0 60%, rgba(31, 209, 124, 0.12) 60% 61%, transparent 61% 100%);
             opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.08), transparent 46%),
+                linear-gradient(180deg, transparent 0 70%, rgba(245, 248, 252, 0.08) 100%);
             pointer-events: none;
         }
 
@@ -375,6 +370,7 @@
             max-width: 1040px;
             margin: 0 auto;
             padding: 0 0 26px;
+            perspective: 1200px;
         }
 
         .dashboard-shell {
@@ -387,6 +383,9 @@
                 rgba(255, 255, 255, 0.08);
             box-shadow: var(--shadow-dark);
             backdrop-filter: blur(22px);
+            transform: rotateX(2deg);
+            transform-origin: center bottom;
+            animation: mockupDrift 9s ease-in-out infinite;
         }
 
         .dashboard-shell::before {
@@ -396,6 +395,16 @@
             background:
                 linear-gradient(90deg, rgba(25, 213, 255, 0.18), transparent 28%, rgba(31, 209, 124, 0.12) 70%, transparent);
             pointer-events: none;
+        }
+
+        @keyframes mockupDrift {
+            0%,
+            100% {
+                transform: rotateX(2deg) translateY(0);
+            }
+            50% {
+                transform: rotateX(1deg) translateY(-8px);
+            }
         }
 
         .window-bar {
@@ -746,6 +755,12 @@
             animation-delay: -4.2s;
         }
 
+        .floating-card.card-resident {
+            left: 34%;
+            top: -18px;
+            animation-delay: -5.3s;
+        }
+
         @keyframes floatCard {
             0%,
             100% {
@@ -915,16 +930,11 @@
         }
 
         .modules {
-            background: #f5f8fc;
+            background:
+                radial-gradient(circle at 16% 10%, rgba(25, 213, 255, 0.13), transparent 28%),
+                linear-gradient(180deg, #f5f8fc, #ffffff 62%, #f6f9fd);
         }
 
-        .module-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 14px;
-        }
-
-        .module-card,
         .benefit-card,
         .trust-card,
         .quote-card,
@@ -936,39 +946,73 @@
             background: var(--paper);
         }
 
-        .module-card {
-            position: relative;
-            min-height: 240px;
-            overflow: hidden;
-            padding: 22px;
-            box-shadow: 0 18px 44px rgba(13, 22, 35, 0.07);
-            transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+        .module-studio {
+            display: grid;
+            gap: 18px;
+            align-items: stretch;
         }
 
-        .module-card::after {
+        .module-tabs {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .module-tab {
+            position: relative;
+            display: grid;
+            grid-template-columns: 42px 1fr;
+            gap: 14px;
+            width: 100%;
+            min-height: 102px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.76);
+            color: var(--ink);
+            padding: 16px;
+            text-align: left;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 16px 42px rgba(13, 22, 35, 0.06);
+            transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background 220ms ease;
+        }
+
+        .module-tab::after {
             content: "";
             position: absolute;
-            right: -40px;
-            bottom: -44px;
-            width: 140px;
-            height: 140px;
-            border: 1px solid rgba(23, 107, 255, 0.12);
-            border-radius: 32px;
-            transform: rotate(12deg);
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(25, 213, 255, 0.16), transparent 42%, rgba(31, 209, 124, 0.08));
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 220ms ease;
         }
 
-        .module-card:hover {
+        .module-tab:hover,
+        .module-tab:focus-visible {
             transform: translateY(-4px);
             border-color: rgba(23, 107, 255, 0.22);
             box-shadow: 0 24px 60px rgba(13, 22, 35, 0.11);
         }
 
+        .module-tab[aria-selected="true"] {
+            border-color: rgba(23, 107, 255, 0.34);
+            background: #ffffff;
+            box-shadow: 0 26px 70px rgba(23, 107, 255, 0.14);
+        }
+
+        .module-tab[aria-selected="true"]::after {
+            opacity: 1;
+        }
+
         .module-icon {
+            position: relative;
+            z-index: 1;
             display: grid;
             width: 42px;
             height: 42px;
             place-items: center;
-            border-radius: 7px;
+            border-radius: var(--radius-sm);
             background: #ecf7ff;
             color: var(--blue);
             font-size: 12px;
@@ -976,17 +1020,205 @@
             letter-spacing: 0.02em;
         }
 
-        .module-card h3 {
-            margin: 22px 0 10px;
+        .module-tab[aria-selected="true"] .module-icon {
+            background: linear-gradient(135deg, rgba(25, 213, 255, 0.22), rgba(23, 107, 255, 0.16));
+            color: #0757df;
+        }
+
+        .module-tab h3 {
+            position: relative;
+            z-index: 1;
+            margin: 0 0 6px;
             color: var(--ink);
-            font-size: 21px;
+            font-size: 17px;
             line-height: 1.15;
         }
 
-        .module-card p {
+        .module-tab p {
+            position: relative;
+            z-index: 1;
             margin: 0;
             color: var(--muted);
-            line-height: 1.65;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .module-preview {
+            position: relative;
+            min-height: 620px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 249, 255, 0.96)),
+                var(--paper);
+            box-shadow: 0 34px 90px rgba(13, 22, 35, 0.13);
+            padding: clamp(18px, 3vw, 28px);
+        }
+
+        .module-preview::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 78% 16%, rgba(25, 213, 255, 0.22), transparent 28%),
+                radial-gradient(circle at 22% 82%, rgba(31, 209, 124, 0.13), transparent 30%);
+            pointer-events: none;
+        }
+
+        .module-preview-inner {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: 18px;
+        }
+
+        .module-preview-copy {
+            max-width: 580px;
+        }
+
+        .module-preview-kicker {
+            display: inline-flex;
+            margin-bottom: 12px;
+            border-radius: 999px;
+            background: rgba(23, 107, 255, 0.08);
+            color: var(--blue);
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .module-preview h3 {
+            margin: 0 0 12px;
+            color: var(--ink);
+            font-size: clamp(28px, 4vw, 48px);
+            line-height: 1;
+        }
+
+        .module-preview p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .module-device {
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+                #0b1119;
+            color: var(--paper);
+            box-shadow: 0 30px 80px rgba(8, 11, 16, 0.28);
+        }
+
+        .module-device-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            padding: 12px 14px;
+            color: rgba(255, 255, 255, 0.58);
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .module-device-body {
+            display: grid;
+            gap: 12px;
+            padding: 14px;
+        }
+
+        .module-stat-card,
+        .module-live-card,
+        .module-chart-card {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.07);
+            padding: 14px;
+        }
+
+        .module-stat-card strong {
+            display: block;
+            color: var(--cyan);
+            font-size: clamp(34px, 7vw, 58px);
+            line-height: 1;
+            margin-bottom: 7px;
+        }
+
+        .module-stat-card span {
+            color: rgba(255, 255, 255, 0.56);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .module-table-row {
+            display: grid;
+            grid-template-columns: 34px 1fr auto;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .module-table-row:first-child {
+            border-top: 0;
+        }
+
+        .module-table-row b {
+            display: block;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 12px;
+        }
+
+        .module-table-row small,
+        .module-table-row em {
+            color: rgba(255, 255, 255, 0.48);
+            font-size: 11px;
+            font-style: normal;
+        }
+
+        .module-row-icon {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            place-items: center;
+            border-radius: 10px;
+            background: rgba(25, 213, 255, 0.11);
+            color: var(--cyan);
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .module-mini-chart {
+            display: flex;
+            align-items: end;
+            gap: 8px;
+            height: 132px;
+            min-height: 132px;
+        }
+
+        .module-mini-chart span {
+            flex: 1;
+            min-width: 10px;
+            border-radius: 999px 999px 5px 5px;
+            background: linear-gradient(180deg, rgba(25, 213, 255, 0.96), rgba(23, 107, 255, 0.32));
+            transition: height 280ms ease;
+        }
+
+        .module-preview.is-guardias .module-stat-card strong,
+        .module-preview.is-incidencias .module-stat-card strong {
+            color: #8ef7bd;
+        }
+
+        .module-preview.is-vehiculos .module-stat-card strong,
+        .module-preview.is-hardware .module-stat-card strong {
+            color: #9bbfff;
         }
 
         .flow {
@@ -1434,6 +1666,18 @@
             opacity: 1;
             transform: translateY(0);
             transition: opacity 600ms ease, transform 600ms ease;
+            animation: contentRise 680ms ease both;
+        }
+
+        @keyframes contentRise {
+            from {
+                opacity: 0.86;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1471,7 +1715,7 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .module-grid {
+            .module-tabs {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
@@ -1538,8 +1782,25 @@
                 display: block;
             }
 
-            .module-grid {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+            .module-studio {
+                grid-template-columns: 0.78fr 1.22fr;
+            }
+
+            .module-tabs {
+                grid-template-columns: 1fr;
+            }
+
+            .module-preview {
+                position: sticky;
+                top: 96px;
+            }
+
+            .module-device-body {
+                grid-template-columns: 0.92fr 1.08fr;
+            }
+
+            .module-live-card {
+                grid-row: span 2;
             }
 
             .steps {
@@ -1581,12 +1842,38 @@
             .chip-grid {
                 grid-template-columns: 1fr;
             }
+
+            .module-tab {
+                grid-template-columns: 36px 1fr;
+                min-height: auto;
+                padding: 14px;
+            }
+
+            .module-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .module-preview {
+                min-height: auto;
+                padding: 14px;
+            }
+
+            .module-device-body {
+                padding: 10px;
+            }
+
+            .module-table-row {
+                grid-template-columns: 32px 1fr;
+            }
+
+            .module-table-row em {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <a class="skip-link" href="#contenido">Saltar al contenido</a>
-
     <div class="page-shell">
         <header class="site-header" aria-label="Navegación principal">
             <nav class="nav">
@@ -1623,17 +1910,21 @@
                     </div>
 
                     <div class="hero-stage reveal" aria-label="Vista conceptual del panel OS-Gate">
+                        <div class="floating-card card-resident">
+                            <span class="float-icon">RE</span>
+                            <span><strong>Residente verificado</strong><span>Perfil activo y vehículo asociado</span></span>
+                        </div>
                         <div class="floating-card card-qr">
                             <span class="float-icon">QR</span>
-                            <span><strong>Visita autorizada</strong><span>Código temporal validado</span></span>
+                            <span><strong>QR escaneado</strong><span>Código temporal validado</span></span>
                         </div>
                         <div class="floating-card card-car">
                             <span class="float-icon">RF</span>
-                            <span><strong>Acceso vehicular</strong><span>Lectura UHF/RFID activa</span></span>
+                            <span><strong>Vehículo detectado</strong><span>Lectura UHF/RFID activa</span></span>
                         </div>
                         <div class="floating-card card-guard">
-                            <span class="float-icon">GD</span>
-                            <span><strong>Guardia en caseta</strong><span>Flujo operativo guiado</span></span>
+                            <span class="float-icon">OK</span>
+                            <span><strong>Acceso autorizado</strong><span>Flujo operativo guiado</span></span>
                         </div>
                         <div class="floating-card card-incident">
                             <span class="float-icon">IN</span>
@@ -1798,47 +2089,156 @@
                         <p class="section-copy">OS-Gate integra los módulos que una comunidad privada necesita para operar accesos, residentes, seguridad y comunicación con orden profesional.</p>
                     </div>
 
-                    <div class="module-grid">
-                        <article class="module-card reveal">
-                            <span class="module-icon">AC</span>
-                            <h3>Accesos</h3>
-                            <p>Validación de entradas y salidas con bitácora digital, permisos, historial y trazabilidad operativa.</p>
-                        </article>
-                        <article class="module-card reveal">
-                            <span class="module-icon">RE</span>
-                            <h3>Residentes</h3>
-                            <p>Registro, administración y control de residentes, unidades, permisos y datos relevantes.</p>
-                        </article>
-                        <article class="module-card reveal">
-                            <span class="module-icon">GD</span>
-                            <h3>Guardias</h3>
-                            <p>Flujo de caseta para validar visitas, levantar eventos, registrar novedades y operar turnos.</p>
-                        </article>
-                        <article class="module-card reveal">
-                            <span class="module-icon">VH</span>
-                            <h3>Vehículos</h3>
-                            <p>Gestión de autos autorizados, placas, accesos vehiculares y compatibilidad con lectores.</p>
-                        </article>
-                        <article class="module-card reveal">
-                            <span class="module-icon">QR</span>
-                            <h3>Visitas</h3>
-                            <p>Control de visitantes con códigos QR, autorizaciones temporales y registro de ingreso.</p>
-                        </article>
-                        <article class="module-card reveal">
-                            <span class="module-icon">IN</span>
-                            <h3>Incidencias</h3>
-                            <p>Reportes con seguimiento para seguridad, mantenimiento, convivencia y operación diaria.</p>
-                        </article>
-                        <article class="module-card reveal">
-                            <span class="module-icon">CO</span>
-                            <h3>Comunicados</h3>
-                            <p>Canal formal para avisos a residentes, mantenimientos, reglamentos y comunicación institucional.</p>
-                        </article>
-                        <article class="module-card reveal">
-                            <span class="module-icon">HW</span>
-                            <h3>Dispositivos</h3>
-                            <p>Integración con lectores, portones, torniquetes y equipos de caseta según el entorno.</p>
-                        </article>
+                    <div class="module-studio reveal">
+                        <div class="module-tabs" role="tablist" aria-label="Módulos de OS-Gate">
+                            <button class="module-tab" id="tab-accesos" type="button" role="tab" aria-selected="true" aria-controls="module-panel"
+                                data-module="accesos"
+                                data-kicker="Control de acceso"
+                                data-title="Accesos con trazabilidad desde caseta."
+                                data-copy="Valida entradas y salidas con bitácora digital, permisos, historial operativo y reglas claras para residentes, visitas, proveedores y personal externo."
+                                data-stat="418"
+                                data-stat-label="movimientos registrados hoy"
+                                data-lines="AC|Acceso autorizado|Residente verificado|QR|QR escaneado|Visita temporal|PR|Proveedor registrado|Motivo capturado"
+                                data-bars="44,68,56,86,64,78,94">
+                                <span class="module-icon">AC</span>
+                                <span><h3>Accesos</h3><p>Entradas, salidas, permisos, historial y trazabilidad.</p></span>
+                            </button>
+                            <button class="module-tab" id="tab-residentes" type="button" role="tab" aria-selected="false" aria-controls="module-panel"
+                                data-module="residentes"
+                                data-kicker="Administración de residentes"
+                                data-title="Residentes, unidades y permisos en orden."
+                                data-copy="Centraliza datos de residentes, casas o departamentos, vehículos, contactos, permisos activos y registros relevantes para operar con información confiable."
+                                data-stat="326"
+                                data-stat-label="residentes administrados"
+                                data-lines="RE|Residente verificado|Perfil activo|UN|Unidad actualizada|Datos completos|VH|Vehículo asociado|Permiso vigente"
+                                data-bars="58,62,76,70,82,88,74">
+                                <span class="module-icon">RE</span>
+                                <span><h3>Residentes</h3><p>Perfiles, unidades, permisos y datos operativos.</p></span>
+                            </button>
+                            <button class="module-tab" id="tab-guardias" type="button" role="tab" aria-selected="false" aria-controls="module-panel"
+                                data-module="guardias"
+                                data-kicker="Flujo para caseta"
+                                data-title="Guardias con herramientas claras para operar."
+                                data-copy="Diseña un flujo de caseta para validar visitas, registrar novedades, documentar eventos, consultar permisos y reducir improvisación durante el turno."
+                                data-stat="12"
+                                data-stat-label="eventos activos en turno"
+                                data-lines="GD|Turno iniciado|Caseta principal|BT|Bitácora capturada|Novedad documentada|AL|Alerta revisada|Seguimiento abierto"
+                                data-bars="38,52,84,66,74,61,89">
+                                <span class="module-icon">GD</span>
+                                <span><h3>Guardias</h3><p>Validación, novedades, bitácora y turnos.</p></span>
+                            </button>
+                            <button class="module-tab" id="tab-vehiculos" type="button" role="tab" aria-selected="false" aria-controls="module-panel"
+                                data-module="vehiculos"
+                                data-kicker="Acceso vehicular"
+                                data-title="Vehículos identificados antes de llegar a caseta."
+                                data-copy="Gestiona placas, residentes asociados, permisos vehiculares y compatibilidad con lectores UHF/RFID para accesos más fluidos y auditables."
+                                data-stat="96%"
+                                data-stat-label="validación vehicular automatizada"
+                                data-lines="RF|Vehículo detectado|UHF/RFID activo|PL|Placa verificada|Unidad asociada|AC|Carril liberado|Acceso autorizado"
+                                data-bars="62,75,88,72,96,83,91">
+                                <span class="module-icon">VH</span>
+                                <span><h3>Vehículos</h3><p>Placas, lectores, carriles y permisos vehiculares.</p></span>
+                            </button>
+                            <button class="module-tab" id="tab-visitas" type="button" role="tab" aria-selected="false" aria-controls="module-panel"
+                                data-module="visitas"
+                                data-kicker="Control de visitas"
+                                data-title="Invitados autorizados con QR y registro."
+                                data-copy="Permite gestionar visitas temporales, validar códigos QR, registrar entradas y conservar historial para residentes, administración y seguridad."
+                                data-stat="74"
+                                data-stat-label="visitas programadas"
+                                data-lines="QR|QR escaneado|Código válido|VI|Visita ingresó|Autorización temporal|RE|Residente notificado|Registro completo"
+                                data-bars="46,58,73,91,65,78,82">
+                                <span class="module-icon">QR</span>
+                                <span><h3>Visitas</h3><p>QR, autorizaciones temporales y registro de ingreso.</p></span>
+                            </button>
+                            <button class="module-tab" id="tab-incidencias" type="button" role="tab" aria-selected="false" aria-controls="module-panel"
+                                data-module="incidencias"
+                                data-kicker="Seguimiento operativo"
+                                data-title="Incidencias documentadas, asignadas y visibles."
+                                data-copy="Registra eventos de seguridad, mantenimiento o convivencia con evidencia, estado y seguimiento para mejorar la respuesta operativa."
+                                data-stat="18"
+                                data-stat-label="incidencias con seguimiento"
+                                data-lines="IN|Incidencia registrada|Evidencia adjunta|MT|Mantenimiento asignado|Prioridad media|OK|Seguimiento actualizado|Administración informada"
+                                data-bars="34,48,66,54,79,88,62">
+                                <span class="module-icon">IN</span>
+                                <span><h3>Incidencias</h3><p>Reportes, evidencia, estado y trazabilidad.</p></span>
+                            </button>
+                            <button class="module-tab" id="tab-comunicados" type="button" role="tab" aria-selected="false" aria-controls="module-panel"
+                                data-module="comunicados"
+                                data-kicker="Comunicación institucional"
+                                data-title="Comunicados formales sin ruido operativo."
+                                data-copy="Publica avisos de administración, mantenimientos, reglamentos o novedades relevantes en un canal claro para residentes."
+                                data-stat="92%"
+                                data-stat-label="alcance de comunicado reciente"
+                                data-lines="CO|Comunicado publicado|Mantenimiento programado|LE|Lectura confirmada|Residentes notificados|AD|Aviso destacado|Canal institucional"
+                                data-bars="52,70,64,81,92,76,86">
+                                <span class="module-icon">CO</span>
+                                <span><h3>Comunicados</h3><p>Avisos oficiales, reglas y comunicación ordenada.</p></span>
+                            </button>
+                            <button class="module-tab" id="tab-hardware" type="button" role="tab" aria-selected="false" aria-controls="module-panel"
+                                data-module="hardware"
+                                data-kicker="Integración física"
+                                data-title="Hardware conectado a la operación diaria."
+                                data-copy="Integra lectores QR, UHF/RFID, portones, torniquetes, tablets o dispositivos compatibles según la infraestructura real de la comunidad."
+                                data-stat="6"
+                                data-stat-label="tipos de integración disponibles"
+                                data-lines="HW|Lector conectado|UHF/RFID operativo|QR|Scanner listo|Caseta principal|PT|Portón sincronizado|Validación activa"
+                                data-bars="60,72,84,57,91,68,80">
+                                <span class="module-icon">HW</span>
+                                <span><h3>Hardware</h3><p>Lectores, portones, torniquetes y equipos de caseta.</p></span>
+                            </button>
+                        </div>
+
+                        <section class="module-preview is-accesos" id="module-panel" role="tabpanel" aria-labelledby="tab-accesos">
+                            <div class="module-preview-inner">
+                                <div class="module-preview-copy">
+                                    <span class="module-preview-kicker" id="module-kicker">Control de acceso</span>
+                                    <h3 id="module-title">Accesos con trazabilidad desde caseta.</h3>
+                                    <p id="module-copy">Valida entradas y salidas con bitácora digital, permisos, historial operativo y reglas claras para residentes, visitas, proveedores y personal externo.</p>
+                                </div>
+
+                                <div class="module-device" aria-label="Preview dinámico del módulo seleccionado">
+                                    <div class="module-device-bar">
+                                        <span>OS-Gate Live Module</span>
+                                        <span id="module-device-label">Accesos</span>
+                                    </div>
+                                    <div class="module-device-body">
+                                        <div class="module-stat-card">
+                                            <strong id="module-stat">418</strong>
+                                            <span id="module-stat-label">movimientos registrados hoy</span>
+                                        </div>
+                                        <div class="module-live-card" id="module-live-list">
+                                            <div class="module-table-row">
+                                                <span class="module-row-icon">AC</span>
+                                                <span><b>Acceso autorizado</b><small>Residente verificado</small></span>
+                                                <em>08:42</em>
+                                            </div>
+                                            <div class="module-table-row">
+                                                <span class="module-row-icon">QR</span>
+                                                <span><b>QR escaneado</b><small>Visita temporal</small></span>
+                                                <em>09:13</em>
+                                            </div>
+                                            <div class="module-table-row">
+                                                <span class="module-row-icon">PR</span>
+                                                <span><b>Proveedor registrado</b><small>Motivo capturado</small></span>
+                                                <em>09:28</em>
+                                            </div>
+                                        </div>
+                                        <div class="module-chart-card">
+                                            <div class="module-mini-chart" id="module-chart" aria-hidden="true">
+                                                <span style="height: 44%;"></span>
+                                                <span style="height: 68%;"></span>
+                                                <span style="height: 56%;"></span>
+                                                <span style="height: 86%;"></span>
+                                                <span style="height: 64%;"></span>
+                                                <span style="height: 78%;"></span>
+                                                <span style="height: 94%;"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </section>
@@ -1936,7 +2336,7 @@
                                 <h2>Una implementación diseñada para tu residencial</h2>
                                 <p>Cada comunidad opera distinto. Por eso evaluamos tus accesos, residentes, dispositivos y necesidades operativas para ofrecer una instalación y mensualidad ajustadas a tu entorno.</p>
                                 <div class="cta-actions" style="justify-content: flex-start; margin: 26px 0 0;">
-                                    <a class="button button-dark" href="#cotizacion">Agendar diagnóstico <span class="arrow" aria-hidden="true"></span></a>
+                                    <a class="button button-dark" href="https://wa.me/5646950032?text=Hola%2C%20quiero%20agendar%20un%20diagn%C3%B3stico%20para%20OS-Gate." target="_blank" rel="noopener noreferrer">Agendar diagnóstico <span class="arrow" aria-hidden="true"></span></a>
                                 </div>
                             </div>
 
@@ -2066,12 +2466,98 @@
 
     <script>
         const faqButtons = document.querySelectorAll(".faq-question");
+        const moduleTabs = document.querySelectorAll(".module-tab");
+        const modulePanel = document.getElementById("module-panel");
+        const moduleKicker = document.getElementById("module-kicker");
+        const moduleTitle = document.getElementById("module-title");
+        const moduleCopy = document.getElementById("module-copy");
+        const moduleStat = document.getElementById("module-stat");
+        const moduleStatLabel = document.getElementById("module-stat-label");
+        const moduleDeviceLabel = document.getElementById("module-device-label");
+        const moduleLiveList = document.getElementById("module-live-list");
+        const moduleChart = document.getElementById("module-chart");
 
         faqButtons.forEach((button) => {
             button.addEventListener("click", () => {
                 const isExpanded = button.getAttribute("aria-expanded") === "true";
                 faqButtons.forEach((item) => item.setAttribute("aria-expanded", "false"));
                 button.setAttribute("aria-expanded", String(!isExpanded));
+            });
+        });
+
+        const updateModulePreview = (tab) => {
+            const dataset = tab.dataset;
+            const moduleName = dataset.module || "accesos";
+            const readableName = tab.querySelector("h3")?.textContent || "Accesos";
+            const lines = (dataset.lines || "").split("|");
+            const bars = (dataset.bars || "").split(",");
+
+            moduleTabs.forEach((item) => item.setAttribute("aria-selected", String(item === tab)));
+            modulePanel?.setAttribute("aria-labelledby", tab.id);
+            modulePanel?.classList.remove(
+                "is-accesos",
+                "is-residentes",
+                "is-guardias",
+                "is-vehiculos",
+                "is-visitas",
+                "is-incidencias",
+                "is-comunicados",
+                "is-hardware"
+            );
+            modulePanel?.classList.add(`is-${moduleName}`);
+
+            if (moduleKicker) moduleKicker.textContent = dataset.kicker || readableName;
+            if (moduleTitle) moduleTitle.textContent = dataset.title || readableName;
+            if (moduleCopy) moduleCopy.textContent = dataset.copy || "";
+            if (moduleStat) moduleStat.textContent = dataset.stat || "";
+            if (moduleStatLabel) moduleStatLabel.textContent = dataset.statLabel || "";
+            if (moduleDeviceLabel) moduleDeviceLabel.textContent = readableName;
+
+            if (moduleLiveList && lines.length >= 9) {
+                moduleLiveList.replaceChildren();
+                for (let index = 0; index < 9; index += 3) {
+                    const row = document.createElement("div");
+                    const icon = document.createElement("span");
+                    const text = document.createElement("span");
+                    const title = document.createElement("b");
+                    const detail = document.createElement("small");
+                    const time = document.createElement("em");
+
+                    row.className = "module-table-row";
+                    icon.className = "module-row-icon";
+                    icon.textContent = lines[index];
+                    title.textContent = lines[index + 1];
+                    detail.textContent = lines[index + 2];
+                    time.textContent = index === 0 ? "Ahora" : index === 3 ? "09:13" : "09:28";
+
+                    text.append(title, detail);
+                    row.append(icon, text, time);
+                    moduleLiveList.append(row);
+                }
+            }
+
+            if (moduleChart && bars.length) {
+                moduleChart.querySelectorAll("span").forEach((bar, index) => {
+                    bar.style.height = `${bars[index] || 64}%`;
+                });
+            }
+        };
+
+        moduleTabs.forEach((tab, index) => {
+            tab.addEventListener("click", () => updateModulePreview(tab));
+            tab.addEventListener("keydown", (event) => {
+                if (!["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft", "Home", "End"].includes(event.key)) {
+                    return;
+                }
+
+                event.preventDefault();
+                let nextIndex = index;
+                if (event.key === "ArrowDown" || event.key === "ArrowRight") nextIndex = (index + 1) % moduleTabs.length;
+                if (event.key === "ArrowUp" || event.key === "ArrowLeft") nextIndex = (index - 1 + moduleTabs.length) % moduleTabs.length;
+                if (event.key === "Home") nextIndex = 0;
+                if (event.key === "End") nextIndex = moduleTabs.length - 1;
+                moduleTabs[nextIndex].focus();
+                updateModulePreview(moduleTabs[nextIndex]);
             });
         });
 
