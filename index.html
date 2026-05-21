@@ -2,336 +2,2095 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OS-Gate | Sistema Premium de Control Residencial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OS-Gate centraliza accesos, residentes, guardias, visitas, vehículos e incidencias en una plataforma operativa para residenciales y comunidades privadas modernas.">
+    <meta name="theme-color" content="#080b10">
+    <title>OS-Gate | Control residencial inteligente, seguro y conectado</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #080b10;
+            --graphite: #121821;
+            --graphite-2: #1b2430;
+            --muted: #5e6a7d;
+            --soft: #edf2f7;
+            --paper: #ffffff;
+            --paper-2: #f7f9fc;
+            --line: rgba(18, 24, 33, 0.1);
+            --line-dark: rgba(255, 255, 255, 0.12);
+            --blue: #176bff;
+            --cyan: #19d5ff;
+            --green: #1fd17c;
+            --amber: #f7b955;
+            --danger: #ff6b7a;
+            --radius: 8px;
+            --shadow-soft: 0 24px 70px rgba(12, 18, 28, 0.13);
+            --shadow-dark: 0 34px 90px rgba(0, 0, 0, 0.38);
+            --container: min(1180px, calc(100% - 40px));
+            --section: clamp(76px, 11vw, 132px);
+        }
 
-    <script src="https://cdn.tailwindcss.com"></script>
+        * {
+            box-sizing: border-box;
+        }
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        slate: {
-                            50: '#f8fafc',
-                            100: '#f1f5f9',
-                            300: '#cbd5e1',
-                            500: '#64748b',
-                            800: '#1e293b',
-                            900: '#0f172a',
-                        },
-                        teal: {
-                            600: '#0d9488',
-                            700: '#0f766e',
-                        }
-                    }
-                }
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            letter-spacing: 0;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::selection {
+            background: rgba(25, 213, 255, 0.28);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .skip-link {
+            position: fixed;
+            left: 16px;
+            top: 16px;
+            z-index: 100;
+            transform: translateY(-120%);
+            border-radius: var(--radius);
+            background: var(--paper);
+            color: var(--ink);
+            padding: 10px 14px;
+            box-shadow: var(--shadow-soft);
+            transition: transform 180ms ease;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        .page-shell {
+            overflow: hidden;
+        }
+
+        .container {
+            width: var(--container);
+            margin: 0 auto;
+        }
+
+        .site-header {
+            position: fixed;
+            inset: 16px 0 auto;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            width: var(--container);
+            margin: 0 auto;
+            padding: 10px 10px 10px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            border-radius: var(--radius);
+            background: rgba(8, 11, 16, 0.72);
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(18px);
+            pointer-events: auto;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-width: max-content;
+            color: var(--paper);
+            font-weight: 800;
+        }
+
+        .brand-mark {
+            position: relative;
+            display: grid;
+            width: 30px;
+            height: 30px;
+            place-items: center;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 7px;
+            background:
+                linear-gradient(135deg, rgba(25, 213, 255, 0.95), rgba(23, 107, 255, 0.72) 52%, rgba(31, 209, 124, 0.9));
+            box-shadow: 0 14px 32px rgba(23, 107, 255, 0.32);
+        }
+
+        .brand-mark::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.86);
+            border-radius: 3px;
+        }
+
+        .brand small {
+            display: block;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .nav-links a {
+            border-radius: 7px;
+            padding: 9px 11px;
+            transition: color 180ms ease, background 180ms ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a:focus-visible {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--paper);
+        }
+
+        .client-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--paper);
+            padding: 9px 12px;
+            font-size: 13px;
+            font-weight: 800;
+            transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+        }
+
+        .client-link:hover,
+        .client-link:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(25, 213, 255, 0.4);
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .hero {
+            position: relative;
+            min-height: 100svh;
+            padding: 116px 0 64px;
+            background:
+                linear-gradient(180deg, rgba(8, 11, 16, 0.86), rgba(8, 11, 16, 0.95) 58%, #0c1118),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 96px),
+                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 96px),
+                radial-gradient(circle at 50% -20%, rgba(25, 213, 255, 0.24), transparent 42%),
+                #080b10;
+            color: var(--paper);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(125deg, transparent 0 44%, rgba(23, 107, 255, 0.18) 44% 45%, transparent 45% 100%),
+                linear-gradient(65deg, transparent 0 60%, rgba(31, 209, 124, 0.12) 60% 61%, transparent 61% 100%);
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .hero-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: clamp(34px, 6vw, 70px);
+        }
+
+        .hero-copy {
+            max-width: 880px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.78);
+            padding: 8px 12px 8px 8px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            backdrop-filter: blur(14px);
+        }
+
+        .eyebrow-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            background:
+                linear-gradient(135deg, var(--green), var(--cyan));
+            box-shadow: 0 0 20px rgba(25, 213, 255, 0.48);
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin-top: 0;
+        }
+
+        h1 {
+            margin-bottom: 22px;
+            color: var(--paper);
+            font-size: clamp(44px, 8vw, 92px);
+            font-weight: 800;
+            letter-spacing: 0;
+            line-height: 0.96;
+        }
+
+        .hero-subtitle {
+            max-width: 760px;
+            margin: 0 auto 30px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: clamp(17px, 2.1vw, 22px);
+            line-height: 1.55;
+        }
+
+        .hero-actions,
+        .cta-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 52px;
+            border-radius: 7px;
+            padding: 14px 18px;
+            font-size: 15px;
+            font-weight: 800;
+            transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+
+        .button:hover,
+        .button:focus-visible {
+            transform: translateY(-2px);
+        }
+
+        .button-primary {
+            border: 1px solid rgba(25, 213, 255, 0.6);
+            background:
+                linear-gradient(135deg, #19d5ff, #176bff 52%, #1fd17c);
+            color: #041018;
+            box-shadow: 0 22px 52px rgba(23, 107, 255, 0.32);
+        }
+
+        .button-primary:hover,
+        .button-primary:focus-visible {
+            box-shadow: 0 26px 62px rgba(25, 213, 255, 0.34);
+        }
+
+        .button-secondary {
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--paper);
+        }
+
+        .button-secondary:hover,
+        .button-secondary:focus-visible {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.13);
+        }
+
+        .button-dark {
+            border: 1px solid rgba(8, 11, 16, 0.12);
+            background: var(--ink);
+            color: var(--paper);
+            box-shadow: 0 18px 42px rgba(8, 11, 16, 0.2);
+        }
+
+        .button-dark:hover,
+        .button-dark:focus-visible {
+            box-shadow: 0 22px 54px rgba(8, 11, 16, 0.28);
+        }
+
+        .arrow {
+            display: inline-grid;
+            width: 18px;
+            height: 18px;
+            place-items: center;
+        }
+
+        .arrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            transform: rotate(45deg);
+        }
+
+        .hero-stage {
+            position: relative;
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 0 26px;
+        }
+
+        .dashboard-shell {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: var(--radius);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)),
+                rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow-dark);
+            backdrop-filter: blur(22px);
+        }
+
+        .dashboard-shell::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(25, 213, 255, 0.18), transparent 28%, rgba(31, 209, 124, 0.12) 70%, transparent);
+            pointer-events: none;
+        }
+
+        .window-bar {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 44px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 14px;
+            color: rgba(255, 255, 255, 0.54);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 7px;
+        }
+
+        .window-dots span {
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.32);
+        }
+
+        .dashboard {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: 12px;
+            min-height: 540px;
+            padding: 14px;
+        }
+
+        .dash-sidebar,
+        .dash-panel,
+        .dash-card,
+        .dash-feed,
+        .phone-mock {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            background: rgba(8, 11, 16, 0.48);
+        }
+
+        .dash-sidebar {
+            display: none;
+            padding: 16px;
+        }
+
+        .side-line {
+            height: 10px;
+            margin-bottom: 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .side-line.is-active {
+            background: linear-gradient(90deg, var(--cyan), var(--blue));
+            box-shadow: 0 0 18px rgba(25, 213, 255, 0.22);
+        }
+
+        .dashboard-main {
+            display: grid;
+            gap: 12px;
+        }
+
+        .dash-panel {
+            padding: 16px;
+        }
+
+        .dash-top {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .dash-title {
+            margin-bottom: 4px;
+            color: var(--paper);
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .dash-subtitle {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.52);
+            font-size: 12px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            align-self: flex-start;
+            border: 1px solid rgba(31, 209, 124, 0.32);
+            border-radius: 999px;
+            background: rgba(31, 209, 124, 0.09);
+            color: #9cf4c8;
+            padding: 8px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .status-pill::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: var(--green);
+            box-shadow: 0 0 16px var(--green);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .dash-card {
+            padding: 14px;
+        }
+
+        .dash-card strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--paper);
+            font-size: clamp(20px, 6vw, 31px);
+            line-height: 1;
+        }
+
+        .dash-card span {
+            display: block;
+            color: rgba(255, 255, 255, 0.52);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .dash-card.accent-cyan strong {
+            color: var(--cyan);
+        }
+
+        .dash-card.accent-green strong {
+            color: #78f1b5;
+        }
+
+        .dash-card.accent-blue strong {
+            color: #83b4ff;
+        }
+
+        .dash-row {
+            display: grid;
+            gap: 12px;
+        }
+
+        .dash-feed {
+            padding: 14px;
+        }
+
+        .feed-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.76);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .feed-item {
+            display: grid;
+            grid-template-columns: 36px 1fr auto;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .feed-item:first-of-type {
+            border-top: 0;
+        }
+
+        .feed-icon {
+            display: grid;
+            width: 36px;
+            height: 36px;
+            place-items: center;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .feed-text strong {
+            display: block;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 12px;
+        }
+
+        .feed-text span,
+        .feed-time {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 11px;
+        }
+
+        .chart {
+            display: flex;
+            align-items: end;
+            gap: 7px;
+            min-height: 130px;
+            padding-top: 10px;
+        }
+
+        .chart span {
+            flex: 1;
+            min-width: 8px;
+            border-radius: 999px 999px 3px 3px;
+            background: linear-gradient(180deg, rgba(25, 213, 255, 0.9), rgba(23, 107, 255, 0.38));
+            box-shadow: 0 0 22px rgba(25, 213, 255, 0.18);
+        }
+
+        .phone-mock {
+            display: none;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .phone-screen {
+            min-height: 240px;
+            border-radius: 7px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)),
+                #0b1119;
+            padding: 12px;
+        }
+
+        .qr-tile {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            width: 106px;
+            height: 106px;
+            margin: 10px auto 16px;
+            border-radius: 7px;
+            background: var(--paper);
+            padding: 8px;
+        }
+
+        .qr-tile span {
+            border-radius: 2px;
+            background: #0d1723;
+        }
+
+        .qr-tile span:nth-child(2n) {
+            background: #176bff;
+        }
+
+        .qr-tile span:nth-child(3n) {
+            opacity: 0.18;
+        }
+
+        .mini-line {
+            height: 9px;
+            margin: 0 auto 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .mini-line:nth-child(2) {
+            width: 76%;
+        }
+
+        .mini-line:nth-child(3) {
+            width: 58%;
+        }
+
+        .floating-card {
+            position: absolute;
+            z-index: 3;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            width: max-content;
+            max-width: 220px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: var(--radius);
+            background: rgba(8, 11, 16, 0.62);
+            box-shadow: 0 24px 56px rgba(0, 0, 0, 0.28);
+            color: rgba(255, 255, 255, 0.78);
+            padding: 12px;
+            backdrop-filter: blur(18px);
+            animation: floatCard 7s ease-in-out infinite;
+        }
+
+        .floating-card strong {
+            display: block;
+            color: var(--paper);
+            font-size: 13px;
+        }
+
+        .floating-card span {
+            display: block;
+            font-size: 11px;
+        }
+
+        .float-icon {
+            display: grid;
+            width: 36px;
+            height: 36px;
+            place-items: center;
+            border-radius: 7px;
+            background: rgba(25, 213, 255, 0.11);
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .floating-card.card-qr {
+            left: -20px;
+            top: 18%;
+        }
+
+        .floating-card.card-car {
+            right: -18px;
+            top: 24%;
+            animation-delay: -1.4s;
+        }
+
+        .floating-card.card-guard {
+            left: 6%;
+            bottom: 4%;
+            animation-delay: -2.8s;
+        }
+
+        .floating-card.card-incident {
+            right: 8%;
+            bottom: -2%;
+            animation-delay: -4.2s;
+        }
+
+        @keyframes floatCard {
+            0%,
+            100% {
+                transform: translate3d(0, 0, 0);
+            }
+            50% {
+                transform: translate3d(0, -10px, 0);
             }
         }
-    </script>
+
+        section {
+            position: relative;
+            padding: var(--section) 0;
+        }
+
+        .section-head {
+            display: grid;
+            gap: 16px;
+            max-width: 760px;
+            margin-bottom: clamp(30px, 5vw, 54px);
+        }
+
+        .section-head.center {
+            margin-right: auto;
+            margin-left: auto;
+            text-align: center;
+        }
+
+        .kicker {
+            margin: 0;
+            color: var(--blue);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            margin-bottom: 0;
+            color: var(--ink);
+            font-size: clamp(32px, 5vw, 58px);
+            font-weight: 800;
+            line-height: 1.04;
+        }
+
+        .section-copy {
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: clamp(16px, 2vw, 19px);
+            line-height: 1.7;
+        }
+
+        .split {
+            display: grid;
+            gap: clamp(28px, 5vw, 64px);
+            align-items: center;
+        }
+
+        .problem {
+            background:
+                linear-gradient(180deg, var(--paper) 0, #f8fbff 100%);
+        }
+
+        .problem-board {
+            display: grid;
+            gap: 12px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--paper);
+            box-shadow: var(--shadow-soft);
+            padding: 14px;
+        }
+
+        .manual-card {
+            display: grid;
+            gap: 10px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: linear-gradient(180deg, #fff, #f9fbfd);
+            padding: 18px;
+        }
+
+        .manual-card span {
+            display: inline-flex;
+            width: max-content;
+            border-radius: 999px;
+            background: rgba(255, 107, 122, 0.1);
+            color: #c83f4e;
+            padding: 6px 9px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .manual-card strong {
+            color: var(--ink);
+            font-size: 18px;
+        }
+
+        .manual-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .solution {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .solution::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 96px),
+                linear-gradient(140deg, transparent 0 42%, rgba(25, 213, 255, 0.12) 42% 43%, transparent 43% 100%);
+            pointer-events: none;
+        }
+
+        .solution .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .solution .section-title {
+            color: var(--paper);
+        }
+
+        .solution .section-copy {
+            color: rgba(255, 255, 255, 0.68);
+        }
+
+        .operating-map {
+            display: grid;
+            gap: 12px;
+        }
+
+        .map-card {
+            display: grid;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.07);
+            padding: 18px;
+            box-shadow: 0 20px 56px rgba(0, 0, 0, 0.18);
+            backdrop-filter: blur(14px);
+        }
+
+        .map-card span {
+            color: var(--cyan);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .map-card strong {
+            color: var(--paper);
+            font-size: 18px;
+        }
+
+        .map-card p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.58);
+            line-height: 1.65;
+        }
+
+        .modules {
+            background: #f5f8fc;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .module-card,
+        .benefit-card,
+        .trust-card,
+        .quote-card,
+        .faq-item,
+        .step-card,
+        .hardware-panel {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--paper);
+        }
+
+        .module-card {
+            position: relative;
+            min-height: 240px;
+            overflow: hidden;
+            padding: 22px;
+            box-shadow: 0 18px 44px rgba(13, 22, 35, 0.07);
+            transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+        }
+
+        .module-card::after {
+            content: "";
+            position: absolute;
+            right: -40px;
+            bottom: -44px;
+            width: 140px;
+            height: 140px;
+            border: 1px solid rgba(23, 107, 255, 0.12);
+            border-radius: 32px;
+            transform: rotate(12deg);
+        }
+
+        .module-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(23, 107, 255, 0.22);
+            box-shadow: 0 24px 60px rgba(13, 22, 35, 0.11);
+        }
+
+        .module-icon {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            border-radius: 7px;
+            background: #ecf7ff;
+            color: var(--blue);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+        }
+
+        .module-card h3 {
+            margin: 22px 0 10px;
+            color: var(--ink);
+            font-size: 21px;
+            line-height: 1.15;
+        }
+
+        .module-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .flow {
+            background: var(--paper);
+        }
+
+        .steps {
+            display: grid;
+            gap: 14px;
+            counter-reset: steps;
+        }
+
+        .step-card {
+            position: relative;
+            display: grid;
+            gap: 12px;
+            padding: 22px;
+            overflow: hidden;
+            counter-increment: steps;
+        }
+
+        .step-card::before {
+            content: "0" counter(steps);
+            color: rgba(23, 107, 255, 0.2);
+            font-size: 44px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .step-card h3 {
+            margin: 0;
+            color: var(--ink);
+            font-size: 20px;
+        }
+
+        .step-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .hardware {
+            background:
+                linear-gradient(180deg, #f8fbff, var(--paper));
+        }
+
+        .hardware-layout {
+            display: grid;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .hardware-panel {
+            overflow: hidden;
+            padding: 22px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .hardware-visual {
+            min-height: 320px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background:
+                linear-gradient(180deg, rgba(8, 11, 16, 0.82), rgba(8, 11, 16, 0.96)),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 44px),
+                #0b1017;
+            padding: 18px;
+            color: var(--paper);
+        }
+
+        .lane {
+            position: relative;
+            display: grid;
+            align-content: end;
+            min-height: 280px;
+            overflow: hidden;
+            border-radius: 7px;
+            background:
+                linear-gradient(90deg, transparent 0 48%, rgba(255, 255, 255, 0.12) 48% 49%, transparent 49% 100%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+            padding: 18px;
+        }
+
+        .gate {
+            position: absolute;
+            left: 16%;
+            right: 16%;
+            top: 34%;
+            height: 8px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--cyan), var(--green));
+            box-shadow: 0 0 28px rgba(25, 213, 255, 0.32);
+        }
+
+        .reader {
+            position: absolute;
+            right: 16%;
+            top: 18%;
+            display: grid;
+            width: 58px;
+            height: 82px;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .car {
+            width: 128px;
+            height: 58px;
+            margin: 0 auto 16px;
+            border-radius: 18px 18px 10px 10px;
+            background: linear-gradient(135deg, #f9fbff, #9fc2ff);
+            box-shadow: 0 18px 44px rgba(23, 107, 255, 0.25);
+        }
+
+        .signal {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: max-content;
+            margin: 0 auto;
+            border-radius: 999px;
+            background: rgba(31, 209, 124, 0.14);
+            color: #9cf4c8;
+            padding: 8px 10px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .signal::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--green);
+            box-shadow: 0 0 18px var(--green);
+        }
+
+        .chip-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .hardware-chip {
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: #f8fbff;
+            padding: 13px;
+            color: var(--graphite);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .hardware-note {
+            margin: 18px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .benefits {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .benefits .section-title {
+            color: var(--paper);
+        }
+
+        .benefits .section-copy {
+            color: rgba(255, 255, 255, 0.68);
+        }
+
+        .benefit-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .benefit-card {
+            border-color: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.07);
+            padding: 20px;
+        }
+
+        .benefit-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--paper);
+            font-size: 18px;
+        }
+
+        .benefit-card p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.62);
+            line-height: 1.65;
+        }
+
+        .quote {
+            background: #f5f8fc;
+        }
+
+        .quote-card {
+            position: relative;
+            overflow: hidden;
+            padding: clamp(26px, 5vw, 54px);
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(240, 248, 255, 0.92)),
+                var(--paper);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .quote-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--blue), var(--green));
+        }
+
+        .quote-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .quote-card h2 {
+            margin-bottom: 16px;
+            color: var(--ink);
+            font-size: clamp(31px, 4.6vw, 54px);
+            line-height: 1.05;
+        }
+
+        .quote-card p {
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.75;
+        }
+
+        .quote-metrics {
+            display: grid;
+            gap: 10px;
+        }
+
+        .quote-metric {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--paper);
+            padding: 16px;
+        }
+
+        .quote-metric strong {
+            display: block;
+            color: var(--blue);
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .quote-metric span {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .trust {
+            background: var(--paper);
+        }
+
+        .trust-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .trust-card {
+            padding: 22px;
+        }
+
+        .trust-card span {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            margin-bottom: 18px;
+            border-radius: 7px;
+            background: #eef8ff;
+            color: var(--blue);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .trust-card h3 {
+            margin: 0 0 10px;
+            color: var(--ink);
+            font-size: 20px;
+        }
+
+        .trust-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .faq {
+            background: #f5f8fc;
+        }
+
+        .faq-list {
+            display: grid;
+            gap: 12px;
+            max-width: 880px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            overflow: hidden;
+            box-shadow: 0 14px 34px rgba(13, 22, 35, 0.05);
+        }
+
+        .faq-question {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            border: 0;
+            background: transparent;
+            color: var(--ink);
+            padding: 18px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .faq-question span {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .faq-plus {
+            position: relative;
+            flex: 0 0 auto;
+            width: 22px;
+            height: 22px;
+        }
+
+        .faq-plus::before,
+        .faq-plus::after {
+            content: "";
+            position: absolute;
+            inset: 10px 3px auto;
+            height: 2px;
+            border-radius: 999px;
+            background: var(--blue);
+            transition: transform 180ms ease;
+        }
+
+        .faq-plus::after {
+            transform: rotate(90deg);
+        }
+
+        .faq-question[aria-expanded="true"] .faq-plus::after {
+            transform: rotate(0deg);
+        }
+
+        .faq-answer {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 220ms ease;
+        }
+
+        .faq-question[aria-expanded="true"] + .faq-answer {
+            grid-template-rows: 1fr;
+        }
+
+        .faq-answer div {
+            overflow: hidden;
+        }
+
+        .faq-answer p {
+            margin: 0;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            padding: 0 18px 18px;
+            line-height: 1.7;
+        }
+
+        .final-cta {
+            background:
+                linear-gradient(180deg, rgba(8, 11, 16, 0.96), rgba(8, 11, 16, 1)),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 78px);
+            color: var(--paper);
+            text-align: center;
+        }
+
+        .final-cta h2 {
+            max-width: 800px;
+            margin: 0 auto 18px;
+            color: var(--paper);
+            font-size: clamp(34px, 5vw, 64px);
+            line-height: 1.04;
+        }
+
+        .final-cta p {
+            max-width: 660px;
+            margin: 0 auto 30px;
+            color: rgba(255, 255, 255, 0.66);
+            font-size: 18px;
+            line-height: 1.7;
+        }
+
+        .site-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: #080b10;
+            color: rgba(255, 255, 255, 0.52);
+            padding: 26px 0;
+        }
+
+        .footer-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .footer-row a {
+            color: rgba(255, 255, 255, 0.72);
+            font-weight: 800;
+        }
+
+        .reveal,
+        .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 600ms ease, transform 600ms ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .reveal {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @media (min-width: 560px) {
+            :root {
+                --container: min(1180px, calc(100% - 56px));
+            }
+
+            .hero-actions,
+            .cta-actions {
+                flex-direction: row;
+                align-items: center;
+                max-width: none;
+            }
+
+            .metrics,
+            .benefit-grid,
+            .trust-grid,
+            .quote-metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .module-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .steps {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 760px) {
+            .nav-links {
+                display: flex;
+            }
+
+            .dashboard {
+                grid-template-columns: 150px 1fr;
+                min-height: 480px;
+                padding: 16px;
+            }
+
+            .dash-sidebar {
+                display: block;
+            }
+
+            .dash-top {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .dash-row {
+                grid-template-columns: 1.3fr 0.7fr;
+            }
+
+            .floating-card {
+                display: flex;
+            }
+
+            .split,
+            .hardware-layout,
+            .quote-content {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .quote-content {
+                gap: 44px;
+            }
+
+            .footer-row {
+                flex-direction: row;
+                text-align: left;
+            }
+        }
+
+        @media (min-width: 960px) {
+            .hero {
+                padding-top: 132px;
+            }
+
+            .dashboard {
+                grid-template-columns: 176px 1fr 188px;
+            }
+
+            .phone-mock {
+                display: block;
+            }
+
+            .module-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .steps {
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+            }
+
+            .benefit-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .trust-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 420px) {
+            :root {
+                --container: min(100% - 28px, 1180px);
+            }
+
+            .brand small,
+            .nav-links {
+                display: none;
+            }
+
+            .client-link {
+                padding-inline: 10px;
+            }
+
+            .hero {
+                padding-top: 102px;
+            }
+
+            .dashboard {
+                min-height: auto;
+            }
+
+            .metrics,
+            .chip-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-teal-600 selection:text-white">
+<body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-    <header class="bg-slate-900 py-24 lg:py-32 px-6 text-center relative overflow-hidden">
-        <!-- Top Navigation Area -->
-        <div class="absolute top-0 left-0 w-full px-6 py-4 flex justify-end z-20">
-            <a href="login.php" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors border border-slate-700">
-                <i class="ph ph-sign-in"></i>
-                Ya soy cliente
-            </a>
-        </div>
-
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full opacity-10 pointer-events-none">
-            <div class="absolute inset-0 bg-gradient-to-b from-teal-600 to-transparent blur-3xl rounded-full"></div>
-        </div>
-
-        <div class="relative z-10 max-w-4xl mx-auto">
-            <span class="inline-block py-1 px-3 rounded-full bg-teal-900/50 text-teal-400 text-sm font-semibold mb-6 border border-teal-700/50">
-                <i class="ph-fill ph-shield-check mr-1"></i> Tecnología Anti-Caos
-            </span>
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 tracking-tight">
-                La inteligencia que tu residencial necesita. <br class="hidden md:block">
-                <span class="text-teal-400">El control que tú mereces.</span>
-            </h1>
-            <p class="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto font-light">
-                Automatiza el acceso vehicular, gestiona la paquetería y empodera a tu administración con un ecosistema en la nube respaldado por hardware inteligente 100% libre de fallas humanas.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="#modulos" class="w-full sm:w-auto bg-transparent border-2 border-slate-700 text-white hover:bg-slate-800 font-semibold py-4 px-8 rounded-lg transition-all duration-300 text-center">
-                    Ver Módulos
+    <div class="page-shell">
+        <header class="site-header" aria-label="Navegación principal">
+            <nav class="nav">
+                <a class="brand" href="#inicio" aria-label="OS-Gate inicio">
+                    <span class="brand-mark" aria-hidden="true"></span>
+                    <span>
+                        OS-Gate
+                        <small>Control residencial</small>
+                    </span>
                 </a>
-            </div>
-        </div>
-    </header>
 
-    <!-- Sección de Módulos (Enriquecida) -->
-    <section id="modulos" class="py-24 px-6 max-w-7xl mx-auto">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Todo tu condominio en una sola pantalla</h2>
-            <p class="text-slate-500 max-w-2xl mx-auto text-lg">Digitalizamos las tareas operativas más pesadas para que la vida en comunidad vuelva a ser pacífica.</p>
-        </div>
+                <div class="nav-links" aria-label="Secciones">
+                    <a href="#modulos">Módulos</a>
+                    <a href="#como-funciona">Implementación</a>
+                    <a href="#integracion">Integración</a>
+                    <a href="#cotizacion">Cotización</a>
+                </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                <a class="client-link" href="login.php">Ya soy cliente</a>
+            </nav>
+        </header>
 
-            <!-- Acceso Express / UHF -->
-            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
-                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="ph ph-car-profile text-3xl" style="stroke-width: 1.5px;"></i>
-                </div>
-                <span class="bg-teal-50 text-teal-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Fluidez de acceso</span>
-                <h3 class="text-xl font-bold mb-3 text-slate-900">Acceso Express (UHF)</h3>
-                <p class="text-slate-500 text-sm leading-relaxed mb-3">Entrada continua sin bajar la ventanilla. Lectura RFID UHF de largo alcance que identifica a los residentes a metros de distancia.</p>
-                <div class="mt-auto pt-4 border-t border-slate-50">
-                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Adiós a las filas en horas pico. Algoritmos anti-colisión protegen los vehículos contra cierres accidentales de la pluma.</p>
-                </div>
-            </div>
-
-            <!-- Control de Visitas / QR -->
-            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
-                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="ph ph-qr-code text-3xl" style="stroke-width: 1.5px;"></i>
-                </div>
-                <span class="bg-purple-50 text-purple-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Control Dinámico</span>
-                <h3 class="text-xl font-bold mb-3 text-slate-900">Accesos y Visitas</h3>
-                <p class="text-slate-500 text-sm leading-relaxed mb-3">Genera códigos QR temporales automatizados para invitados esporádicos, trabajadores del hogar o servicios contratistas.</p>
-                <div class="mt-auto pt-4 border-t border-slate-50">
-                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Erradica accesos no autorizados y da al residente el poder de auto-gestionar sus invitaciones con un tap.</p>
-                </div>
-            </div>
-
-            <!-- Paquetería -->
-            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
-                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="ph ph-package text-3xl" style="stroke-width: 1.5px;"></i>
-                </div>
-                <span class="bg-blue-50 text-blue-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Organización total</span>
-                <h3 class="text-xl font-bold mb-3 text-slate-900">Gestión de Paquetería</h3>
-                <p class="text-slate-500 text-sm leading-relaxed mb-3">Registro fotográfico digital inmediato y entregas en caseta 100% seguras, documentadas de forma inmutable.</p>
-                <div class="mt-auto pt-4 border-t border-slate-50">
-                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Elimina el caos logístico. Notificaciones push al instante al residente para recolección validada. Cero extravíos.</p>
-                </div>
-            </div>
-
-            <!-- Incidencias -->
-            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
-                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="ph ph-warning-circle text-3xl" style="stroke-width: 1.5px;"></i>
-                </div>
-                <span class="bg-orange-50 text-orange-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Respuesta rápida</span>
-                <h3 class="text-xl font-bold mb-3 text-slate-900">Reporte de Incidencias</h3>
-                <p class="text-slate-500 text-sm leading-relaxed mb-3">Canal directo y formal para que los residentes reporten anomalías, fallas en áreas comunes o emergencias.</p>
-                <div class="mt-auto pt-4 border-t border-slate-50">
-                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Centraliza reportes para la Administración con seguimiento en tiempo real, priorizando presupuesto y mantenimiento.</p>
-                </div>
-            </div>
-
-            <!-- Finanzas -->
-            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
-                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="ph ph-chart-line-up text-3xl" style="stroke-width: 1.5px;"></i>
-                </div>
-                <span class="bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Finanzas Sanas</span>
-                <h3 class="text-xl font-bold mb-3 text-slate-900">Control de Pagos</h3>
-                <p class="text-slate-500 text-sm leading-relaxed mb-3">Módulo especializado que facilita la conciliación de cuotas, envío de recibos y recordatorios automatizados.</p>
-                <div class="mt-auto pt-4 border-t border-slate-50">
-                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Visibilidad total para la Mesa Directiva y el Contador. Reduce drásticamente la morosidad y horas administrativas.</p>
-                </div>
-            </div>
-
-            <!-- Bitácora Operativa -->
-            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
-                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="ph ph-shield-check text-3xl" style="stroke-width: 1.5px;"></i>
-                </div>
-                <span class="bg-slate-100 text-slate-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Seguridad 24/7</span>
-                <h3 class="text-xl font-bold mb-3 text-slate-900">Bitácora Operativa</h3>
-                <p class="text-slate-500 text-sm leading-relaxed mb-3">Reemplaza el cuaderno de papel por una bitácora digital inalterable para el registro de rondines, turnos y novedades.</p>
-                <div class="mt-auto pt-4 border-t border-slate-50">
-                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Supervisión estricta de la comandancia que brinda verdadera paz mental al residente y auditoría a la Administración.</p>
-                </div>
-            </div>
-
-            <!-- Comunicados -->
-            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
-                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="ph ph-megaphone text-3xl" style="stroke-width: 1.5px;"></i>
-                </div>
-                <span class="bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Cero Desinformación</span>
-                <h3 class="text-xl font-bold mb-3 text-slate-900">Comunicación Institucional</h3>
-                <p class="text-slate-500 text-sm leading-relaxed mb-3">Canal oficial e instantáneo para notificar a la comunidad sobre mantenimientos, cuotas o asambleas.</p>
-                <div class="mt-auto pt-4 border-t border-slate-50">
-                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Elimina el ruido y debates interminables de los grupos de chat convencionales, manteniendo la formalidad.</p>
-                </div>
-            </div>
-
-            <!-- Amenidades -->
-            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
-                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="ph ph-calendar-check text-3xl" style="stroke-width: 1.5px;"></i>
-                </div>
-                <span class="bg-rose-50 text-rose-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Convivencia</span>
-                <h3 class="text-xl font-bold mb-3 text-slate-900">Reserva de Amenidades</h3>
-                <p class="text-slate-500 text-sm leading-relaxed mb-3">Gestión automatizada de espacios comunes (Casa Club, Asadores). Previene dobles reservas y aplica reglamentos de aforo.</p>
-                <div class="mt-auto pt-4 border-t border-slate-50">
-                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> El residente reserva desde la app y genera accesos en el mismo flujo. La administración asegura el cobro si aplica.</p>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Resto de la Landing Page original -->
-    <section class="bg-slate-900 text-white py-24">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Hardware que piensa, observa y protege</h2>
-                <p class="text-slate-400 max-w-2xl mx-auto text-lg">Nuestro sistema físico implementa lazos de seguridad críticos para evitar accidentes y daños estructurales.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-400 shadow-[0_0_30px_rgba(13,148,136,0.2)]">
-                        <i class="ph ph-traffic-signal text-4xl" style="stroke-width: 1.5px;"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Semáforo Inteligente</h3>
-                    <p class="text-slate-400 leading-relaxed">Control visual absoluto. Sincronizado milimétricamente con el portón para indicar el momento exacto y seguro de avance.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-400 shadow-[0_0_30px_rgba(13,148,136,0.2)]">
-                        <i class="ph ph-broadcast text-4xl text-teal-600" style="stroke-width: 1.5px;"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Cierre Anti-Aplastamiento</h3>
-                    <p class="text-slate-400 leading-relaxed">Sensores de proximidad activos. El portón tiene estrictamente bloqueado el cierre si detecta que un vehículo sigue en la línea de fuego.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-400 shadow-[0_0_30px_rgba(13,148,136,0.2)]">
-                        <i class="ph ph-queue text-4xl" style="stroke-width: 1.5px;"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Espera Activa Antirráfaga</h3>
-                    <p class="text-slate-400 leading-relaxed">Cero filas. Detecta tráfico en cola; si pasan varios autos autorizados seguidos, mantiene la puerta abierta hasta que la zona se despeje.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="bg-slate-50 py-24 px-6 border-t border-slate-200">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">El Centro de Mando a tu medida</h2>
-                <p class="text-slate-500 max-w-2xl mx-auto text-lg">Interfaces dedicadas y permisos específicos para que cada actor del residencial tenga las herramientas que necesita.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Admin -->
-                <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8">
-                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-                        <div class="w-12 h-12 bg-slate-900 text-white rounded-lg flex items-center justify-center">
-                            <i class="ph ph-crown text-2xl" style="stroke-width: 1.5px;"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Admin Residencial</h3>
-                            <p class="text-sm text-slate-500">Control total y auditoría</p>
+        <main id="contenido">
+            <section class="hero" id="inicio">
+                <div class="container hero-grid">
+                    <div class="hero-copy reveal">
+                        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> Plataforma operativa para comunidades privadas</p>
+                        <h1>Control residencial inteligente, seguro y conectado.</h1>
+                        <p class="hero-subtitle">OS-Gate centraliza accesos, residentes, guardias, visitas, vehículos e incidencias en una sola plataforma diseñada para comunidades privadas modernas.</p>
+                        <div class="hero-actions" aria-label="Acciones principales">
+                            <a class="button button-primary" href="#cotizacion">Solicitar cotización <span class="arrow" aria-hidden="true"></span></a>
+                            <a class="button button-secondary" href="#como-funciona">Ver cómo funciona</a>
                         </div>
                     </div>
-                    <ul class="space-y-4 text-slate-700">
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Altas, bajas y bloqueos de residentes al instante.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Visualización de bitácoras de acceso en tiempo real.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Revisión de reportes de incidencias y métricas.</span>
-                        </li>
-                    </ul>
-                </div>
 
-                <!-- Seguridad -->
-                <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8 relative transform md:-translate-y-4 shadow-md">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-teal-600 rounded-t-xl"></div>
-                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-                        <div class="w-12 h-12 bg-teal-600 text-white rounded-lg flex items-center justify-center">
-                            <i class="ph ph-shield text-2xl" style="stroke-width: 1.5px;"></i>
+                    <div class="hero-stage reveal" aria-label="Vista conceptual del panel OS-Gate">
+                        <div class="floating-card card-qr">
+                            <span class="float-icon">QR</span>
+                            <span><strong>Visita autorizada</strong><span>Código temporal validado</span></span>
                         </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Seguridad / Caseta</h3>
-                            <p class="text-sm text-slate-500">Operación en campo</p>
+                        <div class="floating-card card-car">
+                            <span class="float-icon">RF</span>
+                            <span><strong>Acceso vehicular</strong><span>Lectura UHF/RFID activa</span></span>
+                        </div>
+                        <div class="floating-card card-guard">
+                            <span class="float-icon">GD</span>
+                            <span><strong>Guardia en caseta</strong><span>Flujo operativo guiado</span></span>
+                        </div>
+                        <div class="floating-card card-incident">
+                            <span class="float-icon">IN</span>
+                            <span><strong>Incidencia registrada</strong><span>Seguimiento con evidencia</span></span>
+                        </div>
+
+                        <div class="dashboard-shell">
+                            <div class="window-bar">
+                                <span class="window-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                                <span>OS-Gate Command Center</span>
+                            </div>
+                            <div class="dashboard">
+                                <aside class="dash-sidebar" aria-hidden="true">
+                                    <div class="side-line is-active"></div>
+                                    <div class="side-line" style="width: 76%;"></div>
+                                    <div class="side-line" style="width: 84%;"></div>
+                                    <div class="side-line" style="width: 62%;"></div>
+                                    <div class="side-line" style="width: 90%;"></div>
+                                    <div class="side-line" style="width: 70%;"></div>
+                                </aside>
+
+                                <div class="dashboard-main">
+                                    <section class="dash-panel" aria-label="Indicadores de operación">
+                                        <div class="dash-top">
+                                            <div>
+                                                <p class="dash-title">Operación del residencial</p>
+                                                <p class="dash-subtitle">Accesos, guardias, residentes y eventos en tiempo real</p>
+                                            </div>
+                                            <span class="status-pill">Operación estable</span>
+                                        </div>
+
+                                        <div class="metrics">
+                                            <div class="dash-card accent-cyan"><strong>418</strong><span>Entradas del día</span></div>
+                                            <div class="dash-card accent-green"><strong>96%</strong><span>Accesos validados</span></div>
+                                            <div class="dash-card accent-blue"><strong>74</strong><span>Visitas programadas</span></div>
+                                            <div class="dash-card"><strong>12</strong><span>Incidencias abiertas</span></div>
+                                        </div>
+                                    </section>
+
+                                    <div class="dash-row">
+                                        <section class="dash-feed" aria-label="Bitácora digital reciente">
+                                            <div class="feed-head">
+                                                <span>Bitácora digital</span>
+                                                <span>Hoy</span>
+                                            </div>
+                                            <div class="feed-item">
+                                                <span class="feed-icon">AC</span>
+                                                <span class="feed-text"><strong>Residente ingresó por carril norte</strong><span>Vehículo autorizado, placa verificada</span></span>
+                                                <span class="feed-time">08:42</span>
+                                            </div>
+                                            <div class="feed-item">
+                                                <span class="feed-icon">VI</span>
+                                                <span class="feed-text"><strong>Visita validada con QR</strong><span>Autorización temporal de residente</span></span>
+                                                <span class="feed-time">09:13</span>
+                                            </div>
+                                            <div class="feed-item">
+                                                <span class="feed-icon">PR</span>
+                                                <span class="feed-text"><strong>Proveedor registrado en caseta</strong><span>Identificación y motivo capturados</span></span>
+                                                <span class="feed-time">09:28</span>
+                                            </div>
+                                        </section>
+
+                                        <section class="dash-feed" aria-label="Trazabilidad operativa">
+                                            <div class="feed-head">
+                                                <span>Trazabilidad</span>
+                                                <span>Semana</span>
+                                            </div>
+                                            <div class="chart" aria-hidden="true">
+                                                <span style="height: 42%;"></span>
+                                                <span style="height: 68%;"></span>
+                                                <span style="height: 54%;"></span>
+                                                <span style="height: 84%;"></span>
+                                                <span style="height: 62%;"></span>
+                                                <span style="height: 76%;"></span>
+                                                <span style="height: 94%;"></span>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+
+                                <aside class="phone-mock" aria-label="Representación de QR móvil">
+                                    <div class="phone-screen">
+                                        <div class="qr-tile" aria-hidden="true">
+                                            <span></span><span></span><span></span><span></span><span></span>
+                                            <span></span><span></span><span></span><span></span><span></span>
+                                            <span></span><span></span><span></span><span></span><span></span>
+                                            <span></span><span></span><span></span><span></span><span></span>
+                                            <span></span><span></span><span></span><span></span><span></span>
+                                        </div>
+                                        <div class="mini-line"></div>
+                                        <div class="mini-line"></div>
+                                        <div class="mini-line"></div>
+                                    </div>
+                                </aside>
+                            </div>
                         </div>
                     </div>
-                    <ul class="space-y-4 text-slate-700">
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Registro rápido de paquetería con escaneo simple.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Validación de códigos QR para visitantes eventuales.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Levantamiento de bitácora y alertas urgentes.</span>
-                        </li>
-                    </ul>
                 </div>
+            </section>
 
-                <!-- Residente -->
-                <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8">
-                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-                        <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center">
-                            <i class="ph ph-house text-2xl" style="stroke-width: 1.5px;"></i>
+            <section class="problem" id="problema">
+                <div class="container split">
+                    <div class="section-head reveal">
+                        <p class="kicker">El problema</p>
+                        <h2 class="section-title">La operación residencial no puede depender de libretas y mensajes dispersos.</h2>
+                        <p class="section-copy">Muchas comunidades siguen administrando accesos con cuadernos, grupos de chat, llamadas a caseta y controles manuales que dejan poca trazabilidad. El resultado es una operación frágil: filas, errores, autorizaciones confusas e información difícil de auditar.</p>
+                    </div>
+
+                    <div class="problem-board reveal">
+                        <article class="manual-card">
+                            <span>Caseta</span>
+                            <strong>Registros incompletos</strong>
+                            <p>Los accesos quedan en papel o en capturas aisladas, sin un historial consistente para administración.</p>
+                        </article>
+                        <article class="manual-card">
+                            <span>Residentes</span>
+                            <strong>Autorizaciones por chat</strong>
+                            <p>Las visitas, proveedores y servicios terminan dependiendo de mensajes difíciles de validar en tiempo real.</p>
+                        </article>
+                        <article class="manual-card">
+                            <span>Administración</span>
+                            <strong>Poca visibilidad</strong>
+                            <p>La dirección del residencial opera sin indicadores claros sobre accesos, incidencias y desempeño de guardias.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="solution" id="solucion">
+                <div class="container split">
+                    <div class="section-head reveal">
+                        <p class="kicker">La solución</p>
+                        <h2 class="section-title">OS-Gate no es solo un sistema de acceso. Es una plataforma operativa para residenciales modernos.</h2>
+                        <p class="section-copy">Unifica el control de entradas, residentes, guardias, vehículos, visitas, proveedores, comunicados e incidencias para que cada evento importante quede registrado y cada rol opere con información clara.</p>
+                    </div>
+
+                    <div class="operating-map reveal">
+                        <article class="map-card">
+                            <span>01</span>
+                            <strong>Control en tiempo real</strong>
+                            <p>La caseta valida accesos y registra movimientos con flujos diseñados para operación diaria.</p>
+                        </article>
+                        <article class="map-card">
+                            <span>02</span>
+                            <strong>Administración centralizada</strong>
+                            <p>El panel administrativo concentra residentes, vehículos, guardias, reportes y trazabilidad.</p>
+                        </article>
+                        <article class="map-card">
+                            <span>03</span>
+                            <strong>Implementación acompañada</strong>
+                            <p>La solución se ajusta a los accesos, dispositivos y necesidades reales de cada comunidad.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="modules" id="modulos">
+                <div class="container">
+                    <div class="section-head center reveal">
+                        <p class="kicker">Módulos del sistema</p>
+                        <h2 class="section-title">Una plataforma para cada punto crítico de operación.</h2>
+                        <p class="section-copy">OS-Gate integra los módulos que una comunidad privada necesita para operar accesos, residentes, seguridad y comunicación con orden profesional.</p>
+                    </div>
+
+                    <div class="module-grid">
+                        <article class="module-card reveal">
+                            <span class="module-icon">AC</span>
+                            <h3>Accesos</h3>
+                            <p>Validación de entradas y salidas con bitácora digital, permisos, historial y trazabilidad operativa.</p>
+                        </article>
+                        <article class="module-card reveal">
+                            <span class="module-icon">RE</span>
+                            <h3>Residentes</h3>
+                            <p>Registro, administración y control de residentes, unidades, permisos y datos relevantes.</p>
+                        </article>
+                        <article class="module-card reveal">
+                            <span class="module-icon">GD</span>
+                            <h3>Guardias</h3>
+                            <p>Flujo de caseta para validar visitas, levantar eventos, registrar novedades y operar turnos.</p>
+                        </article>
+                        <article class="module-card reveal">
+                            <span class="module-icon">VH</span>
+                            <h3>Vehículos</h3>
+                            <p>Gestión de autos autorizados, placas, accesos vehiculares y compatibilidad con lectores.</p>
+                        </article>
+                        <article class="module-card reveal">
+                            <span class="module-icon">QR</span>
+                            <h3>Visitas</h3>
+                            <p>Control de visitantes con códigos QR, autorizaciones temporales y registro de ingreso.</p>
+                        </article>
+                        <article class="module-card reveal">
+                            <span class="module-icon">IN</span>
+                            <h3>Incidencias</h3>
+                            <p>Reportes con seguimiento para seguridad, mantenimiento, convivencia y operación diaria.</p>
+                        </article>
+                        <article class="module-card reveal">
+                            <span class="module-icon">CO</span>
+                            <h3>Comunicados</h3>
+                            <p>Canal formal para avisos a residentes, mantenimientos, reglamentos y comunicación institucional.</p>
+                        </article>
+                        <article class="module-card reveal">
+                            <span class="module-icon">HW</span>
+                            <h3>Dispositivos</h3>
+                            <p>Integración con lectores, portones, torniquetes y equipos de caseta según el entorno.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="flow" id="como-funciona">
+                <div class="container">
+                    <div class="section-head center reveal">
+                        <p class="kicker">Cómo funciona</p>
+                        <h2 class="section-title">De diagnóstico a operación con un proceso claro.</h2>
+                        <p class="section-copy">La implementación se diseña para el residencial, no alrededor de soluciones cerradas. Primero entendemos la operación; después configuramos la plataforma y el hardware necesario.</p>
+                    </div>
+
+                    <div class="steps">
+                        <article class="step-card reveal">
+                            <h3>Evaluamos el residencial</h3>
+                            <p>Revisamos accesos, flujo vehicular, caseta, número de unidades y operación actual.</p>
+                        </article>
+                        <article class="step-card reveal">
+                            <h3>Definimos módulos y hardware</h3>
+                            <p>Seleccionamos lectores, dispositivos, permisos y flujos de acuerdo con cada necesidad.</p>
+                        </article>
+                        <article class="step-card reveal">
+                            <h3>Instalamos y configuramos</h3>
+                            <p>Preparamos la plataforma, usuarios, catálogos, dispositivos y reglas de acceso.</p>
+                        </article>
+                        <article class="step-card reveal">
+                            <h3>Capacitamos al equipo</h3>
+                            <p>Administración y guardias reciben guía para operar el sistema con claridad.</p>
+                        </article>
+                        <article class="step-card reveal">
+                            <h3>Acompañamos la operación</h3>
+                            <p>La mensualidad cubre uso, soporte, mantenimiento y continuidad operativa.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="hardware" id="integracion">
+                <div class="container hardware-layout">
+                    <div class="section-head reveal">
+                        <p class="kicker">Hardware e integración</p>
+                        <h2 class="section-title">Conecta el software con los accesos físicos de tu comunidad.</h2>
+                        <p class="section-copy">OS-Gate puede adaptarse a la infraestructura existente o integrarse con nuevos dispositivos de control de acceso según el residencial, la caseta y el tipo de entrada.</p>
+                    </div>
+
+                    <div class="hardware-panel reveal">
+                        <div class="hardware-visual" aria-label="Representación de integración con portón y lector vehicular">
+                            <div class="lane">
+                                <span class="reader">UHF</span>
+                                <span class="gate"></span>
+                                <span class="car" aria-hidden="true"></span>
+                                <span class="signal">Acceso validado</span>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Residente Autónomo</h3>
-                            <p class="text-sm text-slate-500">Comodidad diaria</p>
+
+                        <div class="chip-grid" aria-label="Compatibilidades de integración">
+                            <span class="hardware-chip">Lectores QR</span>
+                            <span class="hardware-chip">Lectores UHF/RFID</span>
+                            <span class="hardware-chip">Portones automáticos</span>
+                            <span class="hardware-chip">Torniquetes</span>
+                            <span class="hardware-chip">Control de acceso</span>
+                            <span class="hardware-chip">Tablets para caseta</span>
+                        </div>
+
+                        <p class="hardware-note">La implementación depende del tamaño del residencial, cantidad de accesos, número de casas o departamentos, flujo operativo y hardware requerido.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="benefits" id="beneficios">
+                <div class="container">
+                    <div class="section-head center reveal">
+                        <p class="kicker">Beneficios</p>
+                        <h2 class="section-title">Más control, menos fricción y mejor trazabilidad.</h2>
+                        <p class="section-copy">El objetivo es que administración, guardias y residentes operen con menos improvisación y más información confiable.</p>
+                    </div>
+
+                    <div class="benefit-grid">
+                        <article class="benefit-card reveal"><strong>Mayor control y seguridad</strong><p>Cada acceso relevante queda asociado a un residente, visitante, vehículo o proveedor.</p></article>
+                        <article class="benefit-card reveal"><strong>Menos errores manuales</strong><p>Los flujos digitales reducen registros incompletos, autorizaciones confusas y duplicidad de información.</p></article>
+                        <article class="benefit-card reveal"><strong>Historial de accesos</strong><p>La bitácora digital permite consultar eventos, entradas, salidas y novedades con trazabilidad.</p></article>
+                        <article class="benefit-card reveal"><strong>Mejor operación para guardias</strong><p>La caseta trabaja con pantallas claras para validar, registrar y escalar eventos de forma ordenada.</p></article>
+                        <article class="benefit-card reveal"><strong>Comunicación más ordenada</strong><p>Los comunicados institucionales evitan que información crítica se pierda en canales informales.</p></article>
+                        <article class="benefit-card reveal"><strong>Escalable a más módulos</strong><p>La plataforma puede crecer con nuevas necesidades operativas, dispositivos y roles de administración.</p></article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="quote" id="cotizacion">
+                <div class="container">
+                    <div class="quote-card reveal">
+                        <div class="quote-content">
+                            <div>
+                                <p class="kicker">Cotización personalizada</p>
+                                <h2>Una implementación diseñada para tu residencial</h2>
+                                <p>Cada comunidad opera distinto. Por eso evaluamos tus accesos, residentes, dispositivos y necesidades operativas para ofrecer una instalación y mensualidad ajustadas a tu entorno.</p>
+                                <div class="cta-actions" style="justify-content: flex-start; margin: 26px 0 0;">
+                                    <a class="button button-dark" href="#cotizacion">Agendar diagnóstico <span class="arrow" aria-hidden="true"></span></a>
+                                </div>
+                            </div>
+
+                            <div class="quote-metrics" aria-label="Elementos evaluados para cotización">
+                                <div class="quote-metric"><strong>Accesos y casetas</strong><span>Número de entradas, salidas, carriles, turnos y puntos de validación.</span></div>
+                                <div class="quote-metric"><strong>Residentes y unidades</strong><span>Casas, departamentos, vehículos, perfiles y estructura de administración.</span></div>
+                                <div class="quote-metric"><strong>Hardware requerido</strong><span>Lectores, tablets, portones, torniquetes o dispositivos compatibles.</span></div>
+                                <div class="quote-metric"><strong>Soporte operativo</strong><span>Capacitación, mantenimiento, acompañamiento y uso mensual del sistema.</span></div>
+                            </div>
                         </div>
                     </div>
-                    <ul class="space-y-4 text-slate-700">
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Notificaciones push de entrega de paquetes.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Generación de invitaciones y accesos recurrentes.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
-                            <span>Envío directo de quejas, fugas o incidencias.</span>
-                        </li>
-                    </ul>
                 </div>
-            </div>
-        </div>
-    </section>
+            </section>
 
-    <footer id="contacto" class="bg-slate-900 pt-24 pb-12 px-6 text-center">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Deja de pelear con sistemas viejos y filas interminables.</h2>
-            <p class="text-slate-400 text-lg mb-10">Lleva tu residencial al estándar moderno de seguridad, eficiencia y plusvalía hoy mismo.</p>
-            <a href="login.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold py-4 px-10 rounded-lg shadow-[0_0_20px_rgba(13,148,136,0.3)] hover:shadow-[0_0_30px_rgba(13,148,136,0.5)] transition-all duration-300 transform hover:-translate-y-1 mb-16 text-lg">
-                Iniciar Sesión en OS-Gate
-            </a>
-            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
-                <p>&copy; 2026 OS-Gate Control Residencial Premium. Todos los derechos reservados.</p>
-                <div class="flex gap-6">
-                    <a href="#" class="hover:text-teal-400 transition-colors">Política de Privacidad</a>
-                    <a href="#" class="hover:text-teal-400 transition-colors">Términos de Servicio</a>
+            <section class="trust" id="confianza">
+                <div class="container">
+                    <div class="section-head center reveal">
+                        <p class="kicker">Enfoque profesional</p>
+                        <h2 class="section-title">Tecnología acompañada por operación, soporte y capacitación.</h2>
+                        <p class="section-copy">La plataforma importa, pero también importa que el residencial pueda adoptarla con claridad desde la administración hasta la caseta.</p>
+                    </div>
+
+                    <div class="trust-grid">
+                        <article class="trust-card reveal">
+                            <span>SP</span>
+                            <h3>Soporte</h3>
+                            <p>Acompañamiento para mantener la operación funcionando y resolver dudas del equipo.</p>
+                        </article>
+                        <article class="trust-card reveal">
+                            <span>CP</span>
+                            <h3>Capacitación</h3>
+                            <p>Entrenamiento para administración y guardias con flujos claros para el uso diario.</p>
+                        </article>
+                        <article class="trust-card reveal">
+                            <span>SO</span>
+                            <h3>Seguridad operativa</h3>
+                            <p>Registros, permisos y trazabilidad para que los eventos importantes no queden sueltos.</p>
+                        </article>
+                        <article class="trust-card reveal">
+                            <span>ES</span>
+                            <h3>Escalabilidad</h3>
+                            <p>Una base preparada para crecer con más módulos, accesos, dispositivos y necesidades.</p>
+                        </article>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </footer>
+            </section>
 
+            <section class="faq" id="faq">
+                <div class="container">
+                    <div class="section-head center reveal">
+                        <p class="kicker">FAQ</p>
+                        <h2 class="section-title">Preguntas frecuentes</h2>
+                    </div>
+
+                    <div class="faq-list">
+                        <article class="faq-item reveal">
+                            <button class="faq-question" type="button" aria-expanded="false">
+                                <span>¿OS-Gate requiere instalación?</span>
+                                <span class="faq-plus" aria-hidden="true"></span>
+                            </button>
+                            <div class="faq-answer"><div><p>Sí. La implementación se configura de acuerdo con los accesos, usuarios, módulos y dispositivos que requiere cada residencial.</p></div></div>
+                        </article>
+                        <article class="faq-item reveal">
+                            <button class="faq-question" type="button" aria-expanded="false">
+                                <span>¿Se puede usar con portones existentes?</span>
+                                <span class="faq-plus" aria-hidden="true"></span>
+                            </button>
+                            <div class="faq-answer"><div><p>En muchos casos sí. Primero se evalúa el equipo instalado para confirmar compatibilidad, condiciones eléctricas y forma de integración.</p></div></div>
+                        </article>
+                        <article class="faq-item reveal">
+                            <button class="faq-question" type="button" aria-expanded="false">
+                                <span>¿Funciona con lectores UHF/RFID?</span>
+                                <span class="faq-plus" aria-hidden="true"></span>
+                            </button>
+                            <div class="faq-answer"><div><p>Sí. OS-Gate puede integrarse con lectores UHF/RFID y otros dispositivos compatibles para control vehicular o peatonal.</p></div></div>
+                        </article>
+                        <article class="faq-item reveal">
+                            <button class="faq-question" type="button" aria-expanded="false">
+                                <span>¿Tiene app o panel para guardias?</span>
+                                <span class="faq-plus" aria-hidden="true"></span>
+                            </button>
+                            <div class="faq-answer"><div><p>Cuenta con flujo para guardia y paneles operativos para validar visitas, accesos, incidencias y registros de caseta.</p></div></div>
+                        </article>
+                        <article class="faq-item reveal">
+                            <button class="faq-question" type="button" aria-expanded="false">
+                                <span>¿El costo depende del número de casas?</span>
+                                <span class="faq-plus" aria-hidden="true"></span>
+                            </button>
+                            <div class="faq-answer"><div><p>Depende del tamaño del residencial, cantidad de accesos, número de casas o departamentos, módulos activos y hardware requerido.</p></div></div>
+                        </article>
+                        <article class="faq-item reveal">
+                            <button class="faq-question" type="button" aria-expanded="false">
+                                <span>¿Incluye soporte?</span>
+                                <span class="faq-plus" aria-hidden="true"></span>
+                            </button>
+                            <div class="faq-answer"><div><p>Sí. La mensualidad contempla operación, soporte, mantenimiento y uso del sistema de acuerdo con la implementación definida.</p></div></div>
+                        </article>
+                        <article class="faq-item reveal">
+                            <button class="faq-question" type="button" aria-expanded="false">
+                                <span>¿Puedo solicitar una demo?</span>
+                                <span class="faq-plus" aria-hidden="true"></span>
+                            </button>
+                            <div class="faq-answer"><div><p>Sí. El primer paso recomendado es un diagnóstico para entender tu residencial y mostrar cómo OS-Gate se ajusta a esa operación.</p></div></div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="final-cta">
+                <div class="container reveal">
+                    <h2>Moderniza la operación de tu residencial con OS-Gate</h2>
+                    <p>Centraliza accesos, residentes, visitas, vehículos, guardias e incidencias en una plataforma preparada para comunidades privadas modernas.</p>
+                    <div class="cta-actions">
+                        <a class="button button-primary" href="#cotizacion">Solicitar cotización <span class="arrow" aria-hidden="true"></span></a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="container footer-row">
+                <span>&copy; 2026 OS-Gate. Plataforma de control residencial.</span>
+                <a href="login.php">Acceso a clientes</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const faqButtons = document.querySelectorAll(".faq-question");
+
+        faqButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const isExpanded = button.getAttribute("aria-expanded") === "true";
+                faqButtons.forEach((item) => item.setAttribute("aria-expanded", "false"));
+                button.setAttribute("aria-expanded", String(!isExpanded));
+            });
+        });
+
+        const revealElements = document.querySelectorAll(".reveal");
+
+        if ("IntersectionObserver" in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("is-visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            revealElements.forEach((element) => observer.observe(element));
+        } else {
+            revealElements.forEach((element) => element.classList.add("is-visible"));
+        }
+    </script>
 </body>
 </html>
