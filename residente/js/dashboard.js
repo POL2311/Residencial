@@ -4,7 +4,8 @@
         name: document.getElementById('residentName'),
         addr: document.getElementById('residentAddress'),
         btnEdit: document.getElementById('btnEditAddress'),
-        cars: document.getElementById('carsContainer'),
+        profileDropdownBtn: document.getElementById('profileDropdownBtn'),
+        profileDropdownMenu: document.getElementById('profileDropdownMenu'),
         notificationsButton: document.getElementById('residentNotificationsButton'),
         notificationsBadge: document.getElementById('residentNotificationsBadge'),
         body: document.getElementById('dashboardBody'),
@@ -374,7 +375,7 @@
     }
 
     async function loadContext() {
-        if (!els.name || !els.addr || !els.cars) return;
+        if (!els.name || !els.addr ) return;
         try {
             const res = await fetch(`${API}contexto.php`, {
                 headers: { 'Accept': 'application/json' },
@@ -395,7 +396,6 @@
             if (els.name) els.name.textContent = data.user?.name || 'Residente';
             if (data.setup_incomplete) {
                 els.addr.textContent = data.setup_message || 'Configuración pendiente';
-                renderCars([]);
                 updateNotificationsUI();
                 applyViewVisibility();
                 setActiveButtons(state.currentView || 'home');
@@ -410,7 +410,6 @@
                 els.addr.textContent = String(data.direccion || '').trim() || '—';
             }
 
-            renderCars(data.autos || []);
             updateNotificationsUI();
             applyViewVisibility();
             setActiveButtons(state.currentView || 'home');
@@ -418,7 +417,6 @@
             console.warn('loadContext() fallo:', e);
             if (els.name) els.name.textContent = 'Residente';
             els.addr.textContent = '—';
-            els.cars.innerHTML = `<span class="rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs text-slate-500">Sin autos registrados</span>`;
             currentNotificationMeta = null;
             state.serviceProfile = null;
             state.enabledViews = new Set();
@@ -462,29 +460,6 @@
         }
     }
 
-    function renderCars(autos) {
-        if (!els.cars) return;
-        if (!autos || autos.length === 0) {
-            els.cars.innerHTML = `<span class="rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs text-slate-500">Sin autos registrados</span>`;
-            return;
-        }
-        els.cars.innerHTML = '';
-        autos.slice(0, 6).forEach((a) => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'inline-flex h-10 min-w-[2.5rem] items-center justify-center rounded-full border border-slate-200 bg-white/80 px-2 text-[#436C81] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20';
-            btn.title = a.placas || 'Auto';
-            btn.innerHTML = `
-              <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none">
-                <path d="M7 16l-1 3m11-3l1 3M5 16h14l-1.5-6.5A2 2 0 0 0 15.55 8H8.45a2 2 0 0 0-1.95 1.5L5 16Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M7.5 16.5h.01M16.5 16.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-              </svg>
-            `;
-            btn.addEventListener('click', () => openCarModal(a));
-            els.cars.appendChild(btn);
-        });
-    }
-
     function openCarModal(auto) {
         if (!els.modal || !els.modalBody) return;
         els.modalBody.innerHTML = `
@@ -511,7 +486,6 @@
 
     window.ResidenteDashboard = {
         loadContext,
-        renderCars,
         openCarModal,
         closeCarModal,
         loadView: navigateTo,
@@ -527,6 +501,17 @@
         els.notificationsButton?.setAttribute('data-view', 'comunicados');
 
         document.addEventListener('click', (e) => {
+            if (els.profileDropdownMenu && els.profileDropdownBtn) {
+                if (!els.profileDropdownBtn.contains(e.target) && !els.profileDropdownMenu.contains(e.target)) {
+                    els.profileDropdownMenu.classList.add('hidden');
+                }
+            }
+            if (e.target.closest('#profileDropdownBtn')) {
+                e.preventDefault();
+                els.profileDropdownMenu.classList.toggle('hidden');
+                return;
+            }
+
             if (e.target.closest('#btnOpenMobileMoreSheet')) {
                 e.preventDefault();
                 if (state.moreSheetOpen) closeMoreSheet();

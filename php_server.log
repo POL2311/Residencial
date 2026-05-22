@@ -1,0 +1,4 @@
+[Fri May 22 03:06:29 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Fri May 22 03:06:32 2026] [::1]:43584 Accepted
+[Fri May 22 03:06:32 2026] [::1]:43584 [200]: GET /residente/templates/views/incidencias.html
+[Fri May 22 03:06:32 2026] [::1]:43584 Closing

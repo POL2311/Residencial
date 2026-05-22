@@ -16,6 +16,9 @@
     mobileMoreBackdrop: document.getElementById('mobileMoreBackdrop'),
     mobileMoreClose: document.getElementById('btnCloseMobileMoreSheet'),
 
+    profileDropdownBtn: document.getElementById('profileDropdownBtn'),
+    profileDropdownMenu: document.getElementById('profileDropdownMenu'),
+
     modal: document.getElementById('carModal'),
     modalBody: document.getElementById('carModalBody'),
     modalClose: document.getElementById('btnCloseCarModal'),
@@ -849,6 +852,18 @@
       showFooterNavigationIfAllowed();
       syncDockModalState();
     });
+
+    if (els.profileDropdownBtn && els.profileDropdownMenu) {
+      els.profileDropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        els.profileDropdownMenu.classList.toggle('hidden');
+      });
+      document.addEventListener('click', (e) => {
+        if (!els.profileDropdownBtn.contains(e.target) && !els.profileDropdownMenu.contains(e.target)) {
+          els.profileDropdownMenu.classList.add('hidden');
+        }
+      });
+    }
 
     initShellHeader();
     initModalWatcher();

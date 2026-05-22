@@ -34,10 +34,9 @@
         services: $('homeServices'),
         servicesPrev: $('homeSrvPrev'),
         servicesNext: $('homeSrvNext'),
-        tipsModal: $('residentTipsModal'),
-        tipsModalBody: $('residentTipsModalBody'),
-        btnCloseTipsModal: $('btnCloseResidentTipsModal'),
-        btnDismissTipsModal: $('btnDismissResidentTipsModal'),
+        tipsBanner: $('residentTipsBanner'),
+        tipsBannerBody: $('residentTipsBannerBody'),
+        btnDismissTipsBanner: $('btnDismissResidentTipsBanner'),
         actions: root.querySelectorAll('[data-home-nav]'),
     };
 
@@ -295,11 +294,11 @@
 
     function renderTips(items) {
         state.tips = items || [];
-        if (!els.tipsModalBody) return;
-        els.tipsModalBody.innerHTML = state.tips.map((item) => `
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.title || '')}</div>
-              <p class="mt-2 text-sm text-slate-600">${escapeHtml(item.text || '')}</p>
+        if (!els.tipsBannerBody) return;
+        els.tipsBannerBody.innerHTML = state.tips.map((item) => `
+            <div class="mb-2 last:mb-0">
+              <strong class="font-semibold">${escapeHtml(item.title || '')}:</strong>
+              ${escapeHtml(item.text || '')}
             </div>
         `).join('');
     }
@@ -355,10 +354,9 @@
         return `residentTipsDismissed:${todayKey()}`;
     }
 
-    function closeTipsModal() {
-        if (!els.tipsModal) return;
-        els.tipsModal.classList.add('hidden');
-        document.body.style.overflow = '';
+    function closeTipsBanner() {
+        if (!els.tipsBanner) return;
+        els.tipsBanner.classList.add('hidden');
         try {
             window.localStorage.setItem(tipsDismissKey(), '1');
         } catch (_) {
@@ -366,8 +364,8 @@
         }
     }
 
-    function maybeOpenTipsModal() {
-        if (!els.tipsModal || !state.tips.length) return;
+    function maybeShowTipsBanner() {
+        if (!els.tipsBanner || !state.tips.length) return;
         let dismissed = false;
         try {
             dismissed = window.localStorage.getItem(tipsDismissKey()) === '1';
@@ -375,8 +373,7 @@
             dismissed = false;
         }
         if (dismissed) return;
-        els.tipsModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+        els.tipsBanner.classList.remove('hidden');
     }
 
     function bindActions() {
@@ -412,11 +409,7 @@
             els.services?.scrollBy({ left: 320, behavior: 'smooth' });
         });
 
-        els.btnCloseTipsModal?.addEventListener('click', closeTipsModal);
-        els.btnDismissTipsModal?.addEventListener('click', closeTipsModal);
-        els.tipsModal?.addEventListener('click', (event) => {
-            if (event.target === els.tipsModal) closeTipsModal();
-        });
+        els.btnDismissTipsBanner?.addEventListener('click', closeTipsBanner);
     }
 
     async function loadHome() {
@@ -447,7 +440,7 @@
         }
 
         renderTips(home.tips || []);
-        maybeOpenTipsModal();
+        maybeShowTipsBanner();
     }
 
     bindActions();

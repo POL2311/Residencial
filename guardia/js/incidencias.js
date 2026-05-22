@@ -226,75 +226,71 @@
       els.list.innerHTML = `
         <div class="space-y-3">
           ${items.map(i => `
-            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                <div class="min-w-0">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <div>
-                      <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Título</div>
-                      <div class="font-semibold text-slate-800 text-base">
-                        ${safeText(i.titulo)}
-                      </div>
-                    </div>
-
-                    <span class="text-[11px] px-2 py-0.5 rounded-full border ${badgePrioridad(i.prioridad)}">
-                      ${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}
-                    </span>
-
-                    <span class="text-[11px] px-2 py-0.5 rounded-full border ${badgeEstado(i.estado)}">
-                      ${escapeHtml(`Estado: ${humanizeValue(i.estado, '')}`.trim())}
-                    </span>
+            <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                   </div>
-
-                  <div class="app-mobile-secondary text-sm text-slate-600 mt-3 space-y-2">
-                    <div>
-                      <span class="text-slate-500">Descripción:</span>
-                      <span class="whitespace-pre-wrap font-medium text-slate-700">${safeText(i.descripcion, 'Sin descripción')}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500">${safeText(i.unidad_clave, '') ? 'Unidad:' : 'Área:'}</span>
-                      <span class="font-medium text-slate-700">${safeText(i.unidad_clave || i.area_nombre || '—')}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500">Tipo:</span>
-                      <span class="font-medium text-slate-700">${escapeHtml(humanizeValue(i.tipo))}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500">Fecha:</span>
-                      <span class="font-medium text-slate-700">${safeText(i.created_at, '—')}</span>
-                    </div>
-                  </div>
-                  <div class="mt-3 text-xs text-slate-500 md:hidden">
-                    ${escapeHtml(humanizeValue(i.tipo))} · ${safeText(i.created_at, '—')}
+                  <div>
+                    <h3 class="text-base font-semibold text-slate-800">${safeText(i.titulo)}</h3>
+                    <p class="text-xs text-slate-500">Tipo: ${escapeHtml(humanizeValue(i.tipo) || '—')}</p>
                   </div>
                 </div>
+                <div class="flex flex-col items-end gap-1">
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${badgePrioridad(i.prioridad)}">
+                    Prioridad: ${escapeHtml(humanizeValue(i.prioridad, ''))}
+                  </span>
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeEstado(i.estado)}">
+                    Estado: ${escapeHtml(humanizeValue(i.estado, ''))}
+                  </span>
+                </div>
+              </div>
 
-                <div class="shrink-0 flex flex-col items-end gap-2">
-                  <div class="app-mobile-actions flex gap-2">
-                    <button
-                      type="button"
-                      class="js-edit-inc rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs hover:bg-slate-50"
-                      data-inc='${escapeHtml(JSON.stringify(i))}'>
-                      Editar
-                    </button>
+              <div class="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+                <p class="whitespace-pre-wrap">${safeText(i.descripcion, 'Sin descripción')}</p>
+              </div>
 
-                    <button
-                      type="button"
-                      class="js-del-inc rounded-lg bg-rose-600 text-white px-3 py-2 text-xs hover:bg-rose-700"
-                      data-id="${escapeHtml(String(i.id))}"
-                      data-title="${safeText(i.titulo, '')}">
-                      Eliminar
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    class="app-mobile-more hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    data-more-inc='${escapeHtml(JSON.stringify(i))}'>
-                    Ver más
+              <div class="mt-4 hidden space-y-2 text-sm text-slate-600">
+                <div class="flex items-center gap-2">
+                  <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span>${safeText(i.unidad_clave, '') ? 'Unidad:' : 'Área:'} <span class="font-medium text-slate-700">${safeText(i.unidad_clave || i.area_nombre || '—')}</span></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>Fecha: <span class="font-medium text-slate-700">${safeText(i.created_at, '—')}</span></span>
+                </div>
+                <div class="mt-4 flex gap-2 justify-end">
+                  <button type="button" class="js-edit-inc rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors" data-inc='${escapeHtml(JSON.stringify(i))}'>
+                    Editar
+                  </button>
+                  <button type="button" class="js-del-inc rounded-xl bg-rose-50 text-rose-600 border border-rose-200 px-4 py-2 text-xs font-medium hover:bg-rose-100 transition-colors" data-id="${escapeHtml(String(i.id))}" data-title="${safeText(i.titulo, '')}">
+                    Eliminar
                   </button>
                 </div>
               </div>
-            </div>
+
+              <div class="mt-4 border-t border-slate-100 pt-3 text-center">
+                <button type="button" class="text-sm font-medium text-[#4E7287] hover:text-[#3a5666] transition-colors" onclick="
+                  const details = this.parentElement.previousElementSibling;
+                  if (details.classList.contains('hidden')) {
+                    details.classList.remove('hidden');
+                    this.textContent = 'Ver menos';
+                  } else {
+                    details.classList.add('hidden');
+                    this.textContent = 'Ver más';
+                  }
+                ">
+                  Ver más
+                </button>
+              </div>
+            </article>
           `).join('')}
         </div>
       `;
