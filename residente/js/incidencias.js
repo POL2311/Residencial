@@ -72,34 +72,65 @@
         const json = await api({ action: 'list' });
         const items = json.data?.items || [];
         els.list.innerHTML = items.length ? items.map((item) => `
-          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm mb-4">
             <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="text-xs uppercase tracking-wide text-slate-400">Título</div>
-                <div class="mt-1 text-sm font-semibold text-slate-800">${escapeHtml(item.titulo)}</div>
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-base font-semibold text-slate-800">${escapeHtml(item.titulo)}</h3>
+                  <p class="text-xs text-slate-500">Tipo: ${escapeHtml(item.tipo || '—')}</p>
+                </div>
               </div>
-              <div class="flex flex-wrap gap-2 justify-end">
-                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${priorityBadge(item.prioridad)}">Prioridad: ${escapeHtml(item.prioridad)}</span>
-                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${badge(item.estado)}">Estado: ${escapeHtml(item.estado)}</span>
+              <div class="flex flex-col items-end gap-1">
+                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${priorityBadge(item.prioridad)}">
+                  Prioridad: ${escapeHtml(item.prioridad)}
+                </span>
+                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${badge(item.estado)}">
+                  Estado: ${escapeHtml(item.estado)}
+                </span>
               </div>
             </div>
-            <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-600">
-              <div>
-                <span class="text-slate-500">Tipo:</span>
-                <span class="font-medium text-slate-700">${escapeHtml(item.tipo || '—')}</span>
+
+            <div class="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+              <p class="whitespace-pre-wrap">${escapeHtml(item.descripcion || 'Sin descripción')}</p>
+            </div>
+
+            <div class="mt-4 hidden space-y-2 text-sm text-slate-600">
+              <div class="flex items-center gap-2">
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Fecha: <span class="font-medium text-slate-700">${escapeHtml(item.created_at || '—')}</span></span>
               </div>
-              <div>
-                <span class="text-slate-500">Fecha:</span>
-                <span class="font-medium text-slate-700">${escapeHtml(item.created_at || '—')}</span>
-              </div>
-              <div>
-                <span class="text-slate-500">Descripción:</span>
-                <span class="whitespace-pre-wrap font-medium text-slate-700">${escapeHtml(item.descripcion || 'Sin descripción')}</span>
-              </div>
-              ${item.guardia_nombre ? `<div><span class="text-slate-500">Atendida por:</span> <span class="font-medium text-slate-700">${escapeHtml(item.guardia_nombre)}</span></div>` : ''}
+              ${item.guardia_nombre ? `
+              <div class="flex items-center gap-2">
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span>Atendida por: <span class="font-medium text-slate-700">${escapeHtml(item.guardia_nombre)}</span></span>
+              </div>` : ''}
+            </div>
+
+            <div class="mt-4 border-t border-slate-100 pt-3 text-center">
+              <button type="button" class="text-sm font-medium text-[#EF5A5A] hover:text-[#d94848] transition-colors" onclick="
+                const details = this.parentElement.previousElementSibling;
+                if (details.classList.contains('hidden')) {
+                  details.classList.remove('hidden');
+                  this.textContent = 'Ver menos';
+                } else {
+                  details.classList.add('hidden');
+                  this.textContent = 'Ver más';
+                }
+              ">
+                Ver más
+              </button>
             </div>
           </article>
-        `).join('') : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Aun no has reportado incidencias.</div>`;
+        `).join('') : `<div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">Aun no has reportado incidencias.</div>`;
     }
 
     els.btnNew?.addEventListener('click', () => els.modal.classList.remove('hidden'));

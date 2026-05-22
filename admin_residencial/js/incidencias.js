@@ -603,100 +603,108 @@
     const totalPages = Math.max(1, Math.ceil(filtradas.length / state.perPage));
     if (state.page > totalPages) state.page = 1;
 
-    if (filtradas.length) {
-      const header = document.createElement('div');
-      header.className =
-        'hidden md:grid grid-cols-9 gap-4 rounded-2xl border border-slate-200 bg-white/70 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 shadow-sm';
-
-      header.innerHTML = `
-        <div class="col-span-2">Título</div>
-        <div>Unidad</div>
-        <div class="col-span-2">Residente</div>
-        <div>Guardia</div>
-        <div>Prioridad</div>
-        <div>Estado</div>
-        <div class="text-right">Acciones</div>
-      `;
-      els.list.appendChild(header);
-    }
-
     const visibles = paginate(filtradas, state.page, state.perPage);
 
     if (!visibles.length) {
       els.list.innerHTML += `
-        <div class="rounded-2xl border bg-slate-50 p-4 text-sm text-slate-600">
+        <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
           No hay incidencias para mostrar.
         </div>`;
       return;
     }
 
+    const container = document.createElement('div');
+    container.className = 'space-y-4';
+
     visibles.forEach((i) => {
-      const card = document.createElement('div');
-      card.className = 'rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm';
+      const card = document.createElement('article');
+      card.className = 'rounded-3xl border border-slate-200 bg-white p-5 shadow-sm';
 
       card.innerHTML = `
-        <div class="space-y-3 md:hidden">
-          <div>
-            <div class="text-xs text-slate-500">Título</div>
-            <div class="font-semibold">${escapeHtml(i.titulo || '—')}</div>
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-slate-800">${escapeHtml(i.titulo || '—')}</h3>
+              <p class="text-xs text-slate-500">Tipo: ${escapeHtml(humanizeValue(i.tipo) || '—')}</p>
+            </div>
           </div>
-
-          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Descripción</span><div class="whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</div></div>
-          <div><span class="text-xs text-slate-500">Tipo</span><div>${escapeHtml(humanizeValue(i.tipo))}</div></div>
-          <div><span class="text-xs text-slate-500">Fecha</span><div>${escapeHtml(fmtDate(i.created_at))}</div></div>
-          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || 'General')}</div></div>
-          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Contexto</span><div>${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</div></div>
-          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Relación</span><div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div></div>
-          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Guardia</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
-
-          <div class="flex gap-2">
-            <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}</span>
-            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)}">${escapeHtml(`Estado: ${humanizeValue(i.estado, '')}`.trim())}</span>
-          </div>
-
-          <div class="flex gap-2 pt-2">
-            <button data-edit="${i.id}" class="app-mobile-actions flex-1 rounded-full bg-slate-100 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200">Editar</button>
-            <button data-del="${i.id}" class="app-mobile-actions flex-1 rounded-full bg-rose-100 px-3 py-2 text-sm text-rose-700 hover:bg-rose-200">Eliminar</button>
-            <button data-more="${i.id}" class="app-mobile-more hidden flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Ver más</button>
+          <div class="flex flex-col items-end gap-1">
+            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${badgePrioridad(i.prioridad)}">
+              Prioridad: ${escapeHtml(humanizeValue(i.prioridad, ''))}
+            </span>
+            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeEstado(i.estado)}">
+              Estado: ${escapeHtml(humanizeValue(i.estado, ''))}
+            </span>
           </div>
         </div>
 
-        <div class="hidden md:grid grid-cols-9 gap-4 items-center">
-          <div class="col-span-2">
-            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Título</div>
-            <div class="font-semibold text-slate-800">${escapeHtml(i.titulo || '—')}</div>
-            <div class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">Descripción</div>
-            <div class="text-xs text-slate-600 whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</div>
+        <div class="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+          <p class="whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</p>
+        </div>
+
+        <div class="mt-4 hidden space-y-2 text-sm text-slate-600">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="flex items-center gap-2">
+              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span>Contexto: <span class="font-medium text-slate-700">${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span>Relación: <span class="font-medium text-slate-700">${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span>Guardia: <span class="font-medium text-slate-700">${escapeHtml(i.guardia_nombre || '—')}</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>Fecha: <span class="font-medium text-slate-700">${escapeHtml(fmtDate(i.created_at))}</span></span>
+            </div>
           </div>
-          <div>
-            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Contexto</div>
-            <div>${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</div>
-            <div class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">Tipo</div>
-            <div class="text-xs text-slate-600">${escapeHtml(humanizeValue(i.tipo))}</div>
+
+          <div class="mt-4 flex gap-2 justify-end">
+            <button data-edit="${i.id}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+              Editar
+            </button>
+            <button data-del="${i.id}" class="rounded-xl bg-rose-50 text-rose-600 border border-rose-200 px-4 py-2 text-xs font-medium hover:bg-rose-100 transition-colors">
+              Eliminar
+            </button>
           </div>
-          <div class="col-span-2">
-            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Relación</div>
-            <div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div>
-          </div>
-          <div>
-            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Guardia</div>
-            <div>${escapeHtml(i.guardia_nombre || '—')}</div>
-          </div>
-          <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}</span></div>
-          <div>
-            <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(i.estado)}">${escapeHtml(`Estado: ${humanizeValue(i.estado, '')}`.trim())}</span>
-            <div class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">Fecha</div>
-            <div class="text-[11px] text-slate-500">${escapeHtml(fmtDate(i.created_at))}</div>
-          </div>
-          <div class="flex justify-end gap-2">
-            <button data-edit="${i.id}" class="inline-flex items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-200">Editar</button>
-            <button data-del="${i.id}" class="inline-flex items-center justify-center rounded-full bg-rose-100 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-200">Eliminar</button>
-          </div>
+        </div>
+
+        <div class="mt-4 border-t border-slate-100 pt-3 text-center">
+          <button type="button" class="text-sm font-medium text-[#4E7287] hover:text-[#3a5666] transition-colors" onclick="
+            const details = this.parentElement.previousElementSibling;
+            if (details.classList.contains('hidden')) {
+              details.classList.remove('hidden');
+              this.textContent = 'Ver menos';
+            } else {
+              details.classList.add('hidden');
+              this.textContent = 'Ver más';
+            }
+          ">
+            Ver más
+          </button>
         </div>
       `;
 
-      els.list.appendChild(card);
+      container.appendChild(card);
     });
+
+    els.list.appendChild(container);
 
     if (totalPages > 1) {
       const nav = document.createElement('div');
