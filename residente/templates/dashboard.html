@@ -51,6 +51,14 @@
     #dashboardViewMount input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
     #dashboardViewMount input[type="date"],
     #dashboardViewMount input[type="time"],
+    #dashboardViewMount input[type="datetime-local"] {
+      width: 90% !important;
+      margin-left: 5% !important;
+      margin-right: 5% !important;
+      box-sizing: border-box !important;
+    }
+    #dashboardViewMount input[type="date"],
+    #dashboardViewMount input[type="time"],
     #dashboardViewMount input[type="datetime-local"],
     #dashboardViewMount select,
     #dashboardViewMount textarea {
@@ -541,7 +549,7 @@
 
 <div id="carModal" class="hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm">
   <div class="min-h-full flex items-end md:items-center justify-center p-3 md:p-4">
-    <div class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
+    <div class="flex max-h-[80dvh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
       <div class="px-4 py-3 border-b flex items-center justify-between">
         <div class="text-sm font-semibold text-slate-800">Auto</div>
         <button id="btnCloseCarModal"
