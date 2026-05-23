@@ -111,7 +111,7 @@
               Revisa que estén en <b>Publicado</b>, con <b>fecha de publicación</b> menor o igual a hoy y que la <b>expiración</b> no esté vencida.
             </div>
             <button id="homeGoComunicados"
-              class="app-admin-primary mt-4 inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold">
+              class="mt-4 inline-flex items-center justify-center rounded-2xl bg-[#2E5D73] px-6 py-3 text-sm font-medium text-white shadow-sm hover:opacity-95">
               Ir a Comunicados
             </button>
           </div>
@@ -306,7 +306,7 @@
           <div class="mt-4 flex flex-wrap gap-2">
             ${telDigits ? `
               <a href="tel:${escapeHtml(telDigits)}"
-                class="app-admin-ghost inline-flex items-center rounded-xl px-3 py-2 text-sm">
+                class="inline-flex items-center rounded-2xl bg-white border border-slate-200 px-3 py-2 text-slate-700 hover:bg-slate-50 transition-colors text-sm">
                 Llamar
               </a>
             ` : ''}

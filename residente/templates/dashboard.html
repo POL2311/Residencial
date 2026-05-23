@@ -433,37 +433,42 @@
         <div class="px-4 py-4 sm:px-5 sm:py-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="relative flex-1 min-w-0">
-              <button id="profileDropdownBtn" type="button" class="flex min-w-0 items-center gap-3 text-left w-full sm:w-auto rounded-2xl p-1 -ml-1 transition-colors hover:bg-slate-50/80">
-                <div class="h-11 w-11 shrink-0 rounded-full bg-[#E9E3D9] p-0.5 shadow sm:h-12 sm:w-12">
+              <div class="flex min-w-0 items-start gap-3">
+                <div class="h-11 w-11 shrink-0 rounded-[1.1rem] bg-[#E9E3D9] p-0.5 shadow sm:h-12 sm:w-12">
                   <img
                     id="systemLogoImg"
                     src="../../assets/img/logo_asher.png"
                     alt="Perfil"
-                    class="h-full w-full rounded-full object-cover"
+                    class="h-full w-full rounded-[0.95rem] object-cover"
                     loading="lazy"
                   />
                 </div>
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-1">
-                    <div id="residentName" class="truncate text-sm font-semibold text-slate-800">—</div>
-                    <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                    </svg>
+                <div class="min-w-0">
+                  <div class="text-[10px] uppercase tracking-[0.24em] text-slate-400">Administración de servicio</div>
+                  <div class="flex items-center gap-2">
+                    <div id="residentName" class="mt-1 truncate text-xl font-semibold leading-tight text-slate-900 sm:text-2xl">—</div>
+                    <div class="relative">
+                      <button id="profileDropdownBtn" type="button" class="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+
+                      <!-- Dropdown Menu -->
+                      <div id="profileDropdownMenu" class="absolute left-0 top-full mt-2 hidden w-48 origin-top-left rounded-2xl border border-slate-200/60 bg-white/95 py-1.5 shadow-xl backdrop-blur-xl z-[9999]">
+                        <a href="../../logout.php" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                          </svg>
+                          Cerrar sesión
+                        </a>
+                      </div>
+                    </div>
                   </div>
                   <div id="residentAddress" class="truncate text-[13px] text-slate-500">—</div>
                 </div>
-              </button>
-
-              <!-- Dropdown Menu -->
-              <div id="profileDropdownMenu" class="absolute left-0 top-full mt-2 hidden w-48 origin-top-left rounded-2xl border border-slate-200/60 bg-white/95 py-1.5 shadow-xl backdrop-blur-xl z-[9999]">
-                <a href="../../logout.php" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                  </svg>
-                  Cerrar sesión
-                </a>
               </div>
             </div>
 
@@ -589,7 +594,7 @@
   </footer>
 </div>
 
-<div id="carModal" class="hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm">
+<div id="carModal" class="hidden fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[60] bg-black/60 backdrop-blur-sm">
   <div class="min-h-full flex items-end md:items-center justify-center p-3 md:p-4">
     <div class="flex max-h-[80dvh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
       <div class="px-4 py-3 border-b flex items-center justify-between">

@@ -112,7 +112,7 @@
             <div class="mt-1 text-sm text-slate-500">${escapeHtml(item.ubicacion || 'Sin ubicación')} · ${item.capacidad ? `${escapeHtml(item.capacidad)} personas` : 'Sin capacidad'}</div>
             <p class="mt-3 text-sm leading-6 text-slate-600">${escapeHtml(item.descripcion || 'Sin descripción')}</p>
           </div>
-          <button type="button" data-edit-amenidad="${item.id}" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Editar</button>
+          <button type="button" data-edit-amenidad="${item.id}" class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Editar</button>
         </div>
       </article>
     `).join('');
@@ -142,7 +142,7 @@
             ${pending ? `
               <div class="grid gap-2 sm:grid-cols-2 lg:w-56">
                 <button type="button" data-review="approve" data-id="${item.id}" class="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Aprobar</button>
-                <button type="button" data-review="reject" data-id="${item.id}" class="rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50">Rechazar</button>
+                <button type="button" data-review="reject" data-id="${item.id}" class="rounded-2xl border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50">Rechazar</button>
               </div>
             ` : ''}
           </div>

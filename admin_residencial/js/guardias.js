@@ -143,7 +143,7 @@
   function servicioSummaryHTML(g) {
     const absenceHTML = Number(g.absence_today || 0) === 1
       ? `
-        <div class="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+        <div class="mt-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
           Ausente hoy${g.absence_today_reason ? ` · ${escapeHtml(g.absence_today_reason)}` : ''}
         </div>
       `
@@ -482,7 +482,7 @@
     layer.id = 'guardiasUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmGuardia"
-           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+           class="hidden fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
         <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
           <div class="p-6">
             <div class="flex items-start gap-4">
@@ -871,7 +871,7 @@
 
   function openTurnoModal(guardia, turnos = [], exceptions = []) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[10020] p-4';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] bg-black/50 flex items-center justify-center z-[10020] p-4';
     modal.innerHTML = `
       <div class="w-full max-w-5xl rounded-3xl bg-white shadow-2xl overflow-hidden">
         <div class="flex items-center justify-between border-b px-5 py-4">
@@ -890,23 +890,23 @@
 
               <div>
                 <label class="block text-sm font-medium mb-1">Nombre del turno</label>
-                <input name="nombre_turno" class="w-full rounded-xl border px-3 py-2" placeholder="Ej. Matutino" required>
+                <input name="nombre_turno" class="w-full rounded-2xl border px-3 py-2" placeholder="Ej. Matutino" required>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="block text-sm font-medium mb-1">Hora inicio</label>
-                  <input type="time" name="hora_inicio" class="w-full rounded-xl border px-3 py-2" required>
+                  <input type="time" name="hora_inicio" class="w-full rounded-2xl border px-3 py-2" required>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1">Hora fin</label>
-                  <input type="time" name="hora_fin" class="w-full rounded-xl border px-3 py-2" required>
+                  <input type="time" name="hora_fin" class="w-full rounded-2xl border px-3 py-2" required>
                 </div>
               </div>
 
               <div>
                 <label class="block text-sm font-medium mb-1">Días</label>
-                <input name="dias_semana" class="w-full rounded-xl border px-3 py-2"
+                <input name="dias_semana" class="w-full rounded-2xl border px-3 py-2"
                   placeholder="LUN,MAR,MIE,JUE,VIE" required>
                 <div class="text-[11px] text-slate-500 mt-1">Formato: LUN,MAR,MIE,JUE,VIE</div>
               </div>
@@ -917,7 +917,7 @@
               </label>
 
               <div class="flex justify-end gap-2 pt-2">
-                <button type="button" class="js-reset-turno-form px-4 py-2 rounded-xl border">Limpiar</button>
+                <button type="button" class="js-reset-turno-form px-4 py-2 rounded-2xl border">Limpiar</button>
                 <button type="submit" class="px-4 py-2 rounded-xl bg-[#2E5D73] text-white">Guardar turno</button>
               </div>
             </form>
@@ -936,27 +936,27 @@
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="block text-sm font-medium mb-1">Fecha inicio</label>
-                    <input type="date" name="fecha_inicio" class="w-full rounded-xl border px-3 py-2" required>
+                    <input type="date" name="fecha_inicio" class="w-full rounded-2xl border px-3 py-2" required>
                   </div>
                   <div>
                     <label class="block text-sm font-medium mb-1">Fecha fin</label>
-                    <input type="date" name="fecha_fin" class="w-full rounded-xl border px-3 py-2" required>
+                    <input type="date" name="fecha_fin" class="w-full rounded-2xl border px-3 py-2" required>
                   </div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1">Motivo</label>
-                  <input name="motivo" class="w-full rounded-xl border px-3 py-2" placeholder="Ej. Permiso, incapacidad, ausencia" required maxlength="120">
+                  <input name="motivo" class="w-full rounded-2xl border px-3 py-2" placeholder="Ej. Permiso, incapacidad, ausencia" required maxlength="120">
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1">Notas</label>
-                  <textarea name="notas" rows="2" class="w-full rounded-xl border px-3 py-2" placeholder="Opcional"></textarea>
+                  <textarea name="notas" rows="2" class="w-full rounded-2xl border px-3 py-2" placeholder="Opcional"></textarea>
                 </div>
                 <label class="flex items-center gap-2 text-sm">
                   <input type="checkbox" name="activo" checked>
                   Dejar esta excepción como activa
                 </label>
                 <div class="flex justify-end gap-2 pt-2">
-                  <button type="button" class="js-reset-exception-form px-4 py-2 rounded-xl border">Limpiar</button>
+                  <button type="button" class="js-reset-exception-form px-4 py-2 rounded-2xl border">Limpiar</button>
                   <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 text-white">Guardar excepción</button>
                 </div>
               </form>

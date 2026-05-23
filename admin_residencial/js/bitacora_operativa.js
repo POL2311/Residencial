@@ -40,7 +40,7 @@
 
     let current = Math.max(0, Math.min(startIndex, urls.length - 1));
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-50 bg-black/70 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="min-h-full flex items-center justify-center">
         <div class="w-full max-w-4xl rounded-3xl bg-white shadow-2xl">
@@ -164,7 +164,7 @@
             ${Array.isArray(item.evidencias) && item.evidencias.length ? `
               <div class="mt-3 flex flex-wrap gap-2">
                 ${item.evidencias.slice(0, 3).map((url, index) => `
-                  <button type="button" class="js-bitacora-evidence block h-16 w-16 overflow-hidden rounded-xl border border-slate-200 bg-slate-100" data-item-id="${item.id}" data-evidence-index="${index}">
+                  <button type="button" class="js-bitacora-evidence block h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100" data-item-id="${item.id}" data-evidence-index="${index}">
                     <img src="${escapeHtml(resolvePublicUrl(url))}" alt="Evidencia" class="h-full w-full object-cover" loading="lazy" />
                   </button>
                 `).join('')}

@@ -1,20 +1,20 @@
 <div id="adminAutosView" class="space-y-5">
   <div id="adminAutosAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
 
-  <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+  <section class="rounded-[2rem] border border-slate-200/40 bg-white/60 backdrop-blur-xl p-5 shadow-sm">
     <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
       <div>
-        <div class="app-admin-kicker">Control vehicular</div>
-        <h2 class="app-admin-title">Autos</h2>
-        <p class="app-admin-subtitle">Consulta autos, tags y movimientos detectados por lector con una vista más clara para operación.</p>
+        <div class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Control vehicular</div>
+        <h2 class="text-3xl font-semibold text-slate-700">Autos</h2>
+        <p class="mt-1 text-sm text-slate-500">Consulta autos, tags y movimientos detectados por lector con una vista más clara para operación.</p>
       </div>
-      <button id="btnRefreshAdminAutos" type="button" class="app-admin-ghost rounded-xl px-4 py-2 text-sm font-medium">
+      <button id="btnRefreshAdminAutos" type="button" class="rounded-2xl bg-white border border-slate-200 px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium">
         Refrescar
       </button>
     </div>
   </section>
 
-  <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+  <section class="rounded-[2rem] border border-slate-200/40 bg-white/60 backdrop-blur-xl p-5 shadow-sm">
     <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
       <div>
         <div class="text-sm font-semibold text-slate-800">Autos registrados</div>
@@ -24,14 +24,14 @@
     <div id="adminAutosList" class="space-y-3"></div>
   </section>
 
-  <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+  <section class="rounded-[2rem] border border-slate-200/40 bg-white/60 backdrop-blur-xl p-5 shadow-sm">
     <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
       <div>
         <div class="text-sm font-semibold text-slate-800">Accesos de residentes</div>
         <div class="text-xs text-slate-500">Histórico de ingresos y egresos detectados por tag.</div>
       </div>
       <div class="flex flex-col gap-2 sm:flex-row">
-        <select id="residentAccessTypeFilter" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700">
+        <select id="residentAccessTypeFilter" class="rounded-2xl bg-white border border-slate-200 px-4 py-2 hover:bg-slate-50 transition-colors text-sm text-slate-700">
           <option value="">Todos</option>
           <option value="ingreso">Ingresos</option>
           <option value="egreso">Egresos</option>
@@ -41,18 +41,18 @@
     <div id="residentAccessList" class="space-y-3"></div>
   </section>
 
-  <div id="adminAutoEditModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+  <div id="adminAutoEditModal" class="hidden fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-50 bg-black/60 backdrop-blur-sm">
     <div class="min-h-full flex items-end md:items-center justify-center p-3 md:p-4">
       <div class="flex max-h-[80dvh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
         <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
           <div id="adminAutoEditModalTitle" class="text-sm font-semibold text-slate-800">Editar auto</div>
-          <button id="btnCloseAdminAutoModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+          <button id="btnCloseAdminAutoModal" type="button" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
         </div>
         <form id="adminAutoEditForm" class="min-h-0 flex-1 overflow-y-auto p-4 flex flex-col gap-3">
           <div id="adminAutoEditBody" class="space-y-3"></div>
           <div class="mt-auto flex justify-end gap-2 pt-2 border-t border-slate-100">
-            <button id="btnCancelAdminAutoModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
-            <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">Guardar</button>
+            <button id="btnCancelAdminAutoModal" type="button" class="rounded-2xl bg-white border border-slate-200 px-4 py-2 hover:bg-slate-50 transition-colors text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="rounded-2xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">Guardar</button>
           </div>
         </form>
       </div>
