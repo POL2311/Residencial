@@ -76,7 +76,7 @@
 
     modal = document.createElement('div');
     modal.id = 'personalQrModal';
-    modal.className = 'fixed inset-0 w-screen h-[100dvh] z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
@@ -140,7 +140,7 @@
 
     modal = document.createElement('div');
     modal.id = 'personalDetailsModal';
-    modal.className = 'fixed inset-0 w-screen h-[100dvh] z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">

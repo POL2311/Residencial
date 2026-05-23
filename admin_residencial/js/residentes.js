@@ -104,7 +104,7 @@
     layer.id = 'residentesUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirm"
-           class="hidden fixed inset-0 w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
+           class="hidden fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
         <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
           <div class="p-6">
             <div class="flex items-start gap-4">
@@ -275,7 +275,7 @@
         const wrap = document.createElement('div');
         wrap.innerHTML = `
           <div id="friendlyPrompt"
-               class="hidden fixed inset-0 w-screen h-[100dvh] z-[10005] items-center justify-center bg-black/50 p-4">
+               class="hidden fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[10005] items-center justify-center bg-black/50 p-4">
             <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
               <div class="p-6">
                 <div class="flex items-start gap-4">
@@ -1138,7 +1138,7 @@
 
   function openAddPagoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 w-screen h-[100dvh] bg-black/40 flex items-center justify-center z-50';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] bg-black/40 flex items-center justify-center z-50';
 
     modal.innerHTML = `
       <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">
@@ -1257,7 +1257,7 @@
 
   function openAddAutoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 w-screen h-[100dvh] bg-black/40 flex items-center justify-center z-50';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] bg-black/40 flex items-center justify-center z-50';
 
     modal.innerHTML = `
       <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">

@@ -66,7 +66,7 @@
 
         modal = document.createElement('div');
         modal.id = 'residentComunicadoImageModal';
-        modal.className = 'hidden fixed inset-0 w-screen h-[100dvh] z-50 bg-black/70 p-4 backdrop-blur-sm';
+        modal.className = 'hidden fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-50 bg-black/70 p-4 backdrop-blur-sm';
         modal.innerHTML = `
           <div class="min-h-full flex items-center justify-center">
             <div class="w-full max-w-4xl rounded-3xl bg-white shadow-2xl overflow-hidden">

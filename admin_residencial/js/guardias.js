@@ -482,7 +482,7 @@
     layer.id = 'guardiasUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmGuardia"
-           class="hidden fixed inset-0 w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
+           class="hidden fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
         <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
           <div class="p-6">
             <div class="flex items-start gap-4">
@@ -871,7 +871,7 @@
 
   function openTurnoModal(guardia, turnos = [], exceptions = []) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 w-screen h-[100dvh] bg-black/50 flex items-center justify-center z-[10020] p-4';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] bg-black/50 flex items-center justify-center z-[10020] p-4';
     modal.innerHTML = `
       <div class="w-full max-w-5xl rounded-3xl bg-white shadow-2xl overflow-hidden">
         <div class="flex items-center justify-between border-b px-5 py-4">

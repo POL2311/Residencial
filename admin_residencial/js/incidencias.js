@@ -239,7 +239,7 @@
 
   function openIncidenciaDetail(inc) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 w-screen h-[100dvh] z-[9998] bg-black/60 p-3 md:p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[9998] bg-black/60 p-3 md:p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="flex min-h-full items-center justify-center">
         <div class="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
@@ -302,7 +302,7 @@
     layer.id = 'incidenciasUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmIncidencia"
-           class="hidden fixed inset-0 w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
+           class="hidden fixed inset-0 w-screen h-[100dvh] w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
         <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
           <div class="p-6">
             <div class="flex items-start gap-4">
