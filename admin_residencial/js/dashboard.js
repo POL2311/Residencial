@@ -345,12 +345,10 @@
 
   function syncDockModalState() {
     if (state.accessBlocked) {
-      document.body.classList.remove('dashboard-modal-open');
       hideFooterNavigation();
       return;
     }
     const hasModal = hasActiveModal();
-    document.body.classList.toggle('dashboard-modal-open', hasModal);
     els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
     if (els.mobileDockLayer) {
       els.mobileDockLayer.style.display = hasModal ? 'none' : '';

@@ -102,15 +102,7 @@
 
     function syncDockModalState() {
         const hasModal = hasActiveModal();
-        document.body.classList.toggle('dashboard-modal-open', hasModal);
         els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
-        if (els.mobileDockLayer) {
-            els.mobileDockLayer.style.display = hasModal ? 'none' : '';
-            els.mobileDockLayer.setAttribute('aria-hidden', hasModal ? 'true' : 'false');
-        }
-        if (els.footer) {
-            els.footer.style.pointerEvents = hasModal ? 'none' : '';
-        }
         if (hasModal) {
             closeMoreSheet();
         } else if (!state.moreSheetOpen) {

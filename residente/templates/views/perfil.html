@@ -221,10 +221,10 @@
   </section>
 
   <!-- MODAL (ÚNICO) -->
-  <div id="modal" class="app-modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="app-modal-viewport min-h-full flex items-center justify-center">
-      <div class="app-modal-card w-full md:max-w-lg flex-col bg-white shadow-2xl">
-        <div class="app-modal-header px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+  <div id="modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+    <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
+      <div class="flex max-h-[92vh] w-full md:max-w-lg flex-col bg-white md:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
           <div id="modalTitle" class="text-sm font-semibold text-slate-800">—</div>
           <button id="btnCloseModal" type="button"
                   class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
@@ -232,9 +232,9 @@
 
         <form id="modalForm" class="flex min-h-0 flex-1 flex-col">
           <input type="hidden" id="modalAction" name="action" value="">
-          <div id="modalBody" class="app-modal-body p-4 space-y-3"></div>
+          <div id="modalBody" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
 
-          <div class="app-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button id="btnCancelModal" type="button"
                     class="text-sm px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50">
               Cancelar
@@ -246,6 +246,7 @@
           </div>
         </form>
 
+        <div class="h-2 md:hidden"></div>
       </div>
     </div>
   </div>

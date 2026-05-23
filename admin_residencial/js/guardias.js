@@ -873,9 +873,9 @@
 
   function openTurnoModal(guardia, turnos = [], exceptions = []) {
     const modal = document.createElement('div');
-    modal.className = 'app-modal-overlay app-admin-modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-[10020]';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-[10020] p-3 md:p-4';
     modal.innerHTML = `
-      <div class="app-modal-card app-admin-modal-card w-full max-w-5xl bg-white shadow-2xl">
+      <div class="app-admin-modal-card w-full max-w-5xl rounded-t-3xl md:rounded-3xl bg-white shadow-2xl">
         <div class="app-admin-modal-header flex items-center justify-between border-b px-5 py-4">
           <div>
             <h3 class="text-lg font-semibold text-slate-900">Turnos de guardia</h3>
