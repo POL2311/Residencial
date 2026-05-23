@@ -114,9 +114,11 @@ try {
                 'service_matrix' => service_profile_frontend_matrix(),
                 'service_presets' => array_map(static function (string $preset): array {
                     $defaults = service_profile_defaults($preset);
+                    $meta = service_profile_preset_metadata()[$preset] ?? [];
                     return [
                         'key' => $preset,
-                        'label' => ucfirst($preset),
+                        'label' => (string)($meta['label'] ?? ucfirst($preset)),
+                        'description' => (string)($meta['description'] ?? ''),
                         'defaults' => $defaults,
                     ];
                 }, service_profile_allowed_presets()),

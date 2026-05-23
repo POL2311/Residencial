@@ -51,7 +51,39 @@ if (!function_exists('service_profile_all_flags')) {
 if (!function_exists('service_profile_allowed_presets')) {
     function service_profile_allowed_presets(): array
     {
-        return ['residencial', 'empresa', 'obra', 'comercio', 'servicio'];
+        return ['residencial', 'empresa', 'obra', 'comercio', 'servicio', 'retailops'];
+    }
+}
+
+if (!function_exists('service_profile_preset_metadata')) {
+    function service_profile_preset_metadata(): array
+    {
+        return [
+            'residencial' => [
+                'label' => 'Residencial',
+                'description' => 'Operación residencial para residentes, guardias, accesos, comunicados, pagos y servicios.',
+            ],
+            'empresa' => [
+                'label' => 'Empresa',
+                'description' => 'Control operativo para oficinas, empleados, accesos e incidencias.',
+            ],
+            'obra' => [
+                'label' => 'Obra',
+                'description' => 'Control de obra para personal, materiales, accesos e incidencias.',
+            ],
+            'comercio' => [
+                'label' => 'Comercio',
+                'description' => 'Control operativo para comercios con accesos, guardias e incidencias.',
+            ],
+            'servicio' => [
+                'label' => 'Servicio',
+                'description' => 'Operación ligera para servicios con guardias, accesos, incidencias y bitácora.',
+            ],
+            'retailops' => [
+                'label' => 'RetailOps',
+                'description' => 'Control operativo para tiendas, clubes, proveedores, contratistas, bitácoras, accesos, incidencias y materiales.',
+            ],
+        ];
     }
 }
 
@@ -159,6 +191,22 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_control_acceso' => 1,
                 'habilita_incidencias' => 1,
                 'habilita_bitacora_operativa' => 1,
+            ]),
+            'retailops' => array_merge($base, [
+                'habilita_admin_operativo' => 1,
+                'habilita_guardia' => 1,
+                'habilita_unidades' => 1,
+                'habilita_guardias_catalogo' => 1,
+                'habilita_guardias_admin_actions' => 1,
+                'habilita_comunicados' => 1,
+                'habilita_control_acceso' => 1,
+                'habilita_incidencias' => 1,
+                'habilita_personal_recurrente' => 1,
+                'habilita_visitantes_rapidos' => 1,
+                'habilita_materiales' => 1,
+                'habilita_solicitudes_pendientes' => 1,
+                'habilita_bitacora_operativa' => 1,
+                'habilita_herramientas' => 1,
             ]),
             default => array_merge($base, [
                 'habilita_admin_operativo' => 1,

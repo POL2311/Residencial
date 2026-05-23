@@ -6,7 +6,7 @@ require_once __DIR__ . '/api_helpers.php';
 if (!function_exists('operational_allowed_modes')) {
     function operational_allowed_modes(): array
     {
-        return ['residencial', 'empresa', 'obra', 'comercio', 'servicio'];
+        return ['residencial', 'empresa', 'obra', 'comercio', 'servicio', 'retailops'];
     }
 }
 

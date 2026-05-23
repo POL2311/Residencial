@@ -54,6 +54,7 @@
     'materiales',
     'solicitudes_pendientes',
     'bitacora_operativa',
+    'herramientas',
   ]);
 
   let currentViewScript = null;
@@ -81,6 +82,7 @@
     'materiales',
     'solicitudes_pendientes',
     'bitacora_operativa',
+    'herramientas',
     'perfil',
     'reglamento',
   ]);
@@ -109,15 +111,18 @@
   }
 
   function modeLabel(mode) {
-    const key = String(mode || 'residencial').trim().toLowerCase();
-    const map = {
-      residencial: 'Residencial',
-      empresa: 'Empresa',
-      obra: 'Obra',
-      comercio: 'Comercio',
-      servicio: 'Servicio',
-    };
-    return map[key] || 'Residencial';
+    return window.OSGateLabels?.presetLabel?.(mode) || 'Residencial';
+  }
+
+  function currentDisplayMode() {
+    const mode = String(state.operationalMode || '').trim();
+    const preset = String(state.serviceProfile?.preset_servicio || '').trim();
+    if (mode && mode !== 'residencial') return mode;
+    return preset || mode || 'residencial';
+  }
+
+  function applyVisualLabels(root = document) {
+    window.OSGateLabels?.apply?.(root, currentDisplayMode());
   }
 
   function resolveServiceDisplayName(data = {}, ctx = {}) {
@@ -169,6 +174,7 @@
       materiales: 'habilita_materiales',
       solicitudes_pendientes: 'habilita_solicitudes_pendientes',
       bitacora_operativa: 'habilita_bitacora_operativa',
+      herramientas: 'habilita_herramientas',
     };
 
     const flag = moduleFlagByView[view];
@@ -212,6 +218,7 @@
       materiales: BASE + 'js/materiales.js',
       solicitudes_pendientes: BASE + 'js/solicitudes_pendientes.js',
       bitacora_operativa: BASE + 'js/bitacora_operativa.js',
+      herramientas: BASE + 'js/herramientas.js',
     };
 
     if (currentViewScript) {
@@ -241,7 +248,7 @@
 
     wrap.innerHTML = `
       <div class="rounded-[1.75rem] border border-amber-200 bg-white p-5 shadow-sm">
-        <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-500">Admin residencial</div>
+        <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-500">Admin operativo</div>
         <h2 class="mt-2 text-2xl font-semibold text-slate-900">Acceso operativo no disponible</h2>
         <p class="mt-2 text-sm leading-6 text-slate-600">${escapeHtml(message || 'Tu cuenta está asignada, pero este servicio ya no tiene módulos compatibles para tu rol.')}</p>
         <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
@@ -491,6 +498,7 @@
       const html = await res.text();
       if (token !== state.navToken) return;
       wrap.innerHTML = html;
+      applyVisualLabels(wrap);
     } catch (e) {
       if (token !== state.navToken) return;
       wrap.innerHTML = `
@@ -564,6 +572,7 @@
       els.addr.textContent = resolveServiceDisplayName(data, ctx);
 
       toggleOperationalButtons();
+      applyVisualLabels(document);
       showFooterNavigationIfAllowed();
     } catch (e) {
       console.warn('loadContext() falló:', e);
@@ -576,6 +585,7 @@
       state.accessBlocked = true;
       debugLogContext([], state.enabledViews);
       toggleOperationalButtons();
+      applyVisualLabels(document);
       hideFooterNavigation();
     }
   }
@@ -620,7 +630,7 @@
     }
 
     if (els.modeBadge) {
-      const preset = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial');
+      const preset = currentDisplayMode();
       els.modeBadge.textContent = `Servicio ${modeLabel(preset).toLowerCase()}`;
     }
     if (els.modeHint) {
@@ -857,7 +867,7 @@
 
       // If context loaded but there are no operable modules, keep a blocked controlled state.
       if (!state.enabledViews.size && state.contextLoad === 'ok') {
-        renderAccessBlocked('Este servicio aún no tiene módulos operables para Admin residencial.');
+        renderAccessBlocked('Este servicio aún no tiene módulos operables para Admin operativo.');
         toggleOperationalButtons();
         return;
       }

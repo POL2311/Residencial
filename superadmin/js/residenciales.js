@@ -29,6 +29,7 @@
         modalError: document.getElementById('residencialModalError'),
         planSelectModal: document.getElementById('resPlanSelect'),
         createPreset: document.getElementById('resServicePreset'),
+        createPresetDescription: document.getElementById('resServicePresetDescription'),
         createRoleFields: document.getElementById('resServiceRoleFields'),
         createModuleFields: document.getElementById('resServiceModuleFields'),
         createModuleHint: document.getElementById('resServiceModuleHint'),
@@ -38,6 +39,7 @@
         serviceForm: document.getElementById('serviceProfileForm'),
         serviceId: document.getElementById('serviceProfileResidencialId'),
         servicePreset: document.getElementById('serviceProfilePreset'),
+        servicePresetDescription: document.getElementById('serviceProfilePresetDescription'),
         serviceRoleFields: document.getElementById('serviceProfileRoleFields'),
         serviceModuleFields: document.getElementById('serviceProfileModuleFields'),
         serviceModuleHint: document.getElementById('serviceProfileModuleHint'),
@@ -253,13 +255,30 @@
         return 'bg-rose-50 text-rose-700 border border-rose-200';
     }
 
+    function getPresetMeta(preset) {
+        const key = String(preset || 'residencial').toLowerCase();
+        return servicePresets.find((item) => String(item.key || '').toLowerCase() === key) || null;
+    }
+
     function presetLabel(preset) {
-        const key = String(preset || 'residencial');
-        return key.charAt(0).toUpperCase() + key.slice(1);
+        const meta = getPresetMeta(preset);
+        if (meta?.label) return meta.label;
+        return window.OSGateLabels?.presetLabel?.(preset) || String(preset || 'residencial').replace(/^\w/, (c) => c.toUpperCase());
     }
 
     function modeLabel(mode) {
         return presetLabel(mode || 'residencial');
+    }
+
+    function presetDescription(preset) {
+        const meta = getPresetMeta(preset);
+        if (meta?.description) return meta.description;
+        return window.OSGateLabels?.presetDescription?.(preset) || '';
+    }
+
+    function syncPresetDescription(select, target) {
+        if (!select || !target) return;
+        target.textContent = presetDescription(select.value);
     }
 
     function enabledSummary(profile, fieldGroup) {
@@ -588,7 +607,9 @@
         if (els.createPreset) {
             applyPresetToForm(els.form, els.createPreset.value || 'residencial');
             syncServiceModuleVisibility(els.form);
+            syncPresetDescription(els.createPreset, els.createPresetDescription);
         }
+        syncPresetDescription(els.servicePreset, els.servicePresetDescription);
     }
 
     function openCreateModal() {
@@ -602,6 +623,7 @@
         if (els.createPreset) {
             els.createPreset.value = 'residencial';
             applyPresetToForm(els.form, 'residencial');
+            syncPresetDescription(els.createPreset, els.createPresetDescription);
         }
         syncServiceModuleVisibility(els.form);
         els.modal.classList.remove('hidden');
@@ -671,6 +693,7 @@
         els.serviceModalName.textContent = `${item.nombre} · ${presetLabel(item.service_profile?.preset_servicio || item.modo_operacion || 'residencial')}`;
         if (els.servicePreset) {
             els.servicePreset.value = item.service_profile?.preset_servicio || item.modo_operacion || 'residencial';
+            syncPresetDescription(els.servicePreset, els.servicePresetDescription);
         }
         if (els.serviceAdvancedToggle) els.serviceAdvancedToggle.checked = false;
 
@@ -842,12 +865,14 @@
         const modeField = els.form?.querySelector('[name="modo_operacion"]');
         if (modeField) modeField.value = nextPreset;
         applyPresetToForm(els.form, e.target.value || 'residencial');
+        syncPresetDescription(els.createPreset, els.createPresetDescription);
         syncServiceModuleVisibility(els.form);
     });
     els.form?.querySelector('[name="modo_operacion"]')?.addEventListener('change', (e) => {
         if (els.createPreset) {
             els.createPreset.value = e.target.value || 'residencial';
             applyPresetToForm(els.form, els.createPreset.value);
+            syncPresetDescription(els.createPreset, els.createPresetDescription);
             syncServiceModuleVisibility(els.form);
         }
     });
@@ -901,6 +926,7 @@
     els.serviceModal?.addEventListener('click', (e) => { if (e.target === els.serviceModal) closeServiceModal(); });
     els.servicePreset?.addEventListener('change', (e) => {
         applyPresetToForm(els.serviceForm, e.target.value || 'residencial');
+        syncPresetDescription(els.servicePreset, els.servicePresetDescription);
         syncServiceModuleVisibility(els.serviceForm, { markDirty: true });
     });
     els.serviceAdvancedToggle?.addEventListener('change', () => syncServiceModuleVisibility(els.serviceForm));

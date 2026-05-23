@@ -19,6 +19,159 @@ admin_module_required('home', 'El inicio no está habilitado para este cliente.'
 $user = current_user();
 $userId = (int)($user['id'] ?? 0);
 
+function admin_home_count(PDO $pdo, string $sql, array $params): int
+{
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int)($stmt->fetchColumn() ?: 0);
+    } catch (Throwable $e) {
+        return 0;
+    }
+}
+
+function admin_home_retailops_dashboard(PDO $pdo, int $residencialId): array
+{
+    $personasDentro = tableExists($pdo, 'personas_recurrentes')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM personas_recurrentes
+            WHERE residencial_id = :rid
+              AND activo = 1
+              AND esta_dentro = 1
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $visitantesDentro = tableExists($pdo, 'visitantes_rapidos')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM visitantes_rapidos
+            WHERE residencial_id = :rid
+              AND esta_dentro = 1
+              AND estado IN ('activo', 'en_curso')
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $materialesEnProceso = tableExists($pdo, 'permisos_materiales')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM permisos_materiales
+            WHERE residencial_id = :rid
+              AND estado = 'en_proceso'
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $ingresosDia = tableExists($pdo, 'bitacora_operativa')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM bitacora_operativa
+            WHERE residencial_id = :rid
+              AND DATE(fecha_hora) = CURDATE()
+              AND tipo_evento = 'entrada'
+              AND resultado = 'permitido'
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $incidentesAbiertos = tableExists($pdo, 'incidencias')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM incidencias
+            WHERE residencial_id = :rid
+              AND estado IN ('abierta', 'en_proceso')
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $materialesAutorizados = tableExists($pdo, 'permisos_materiales')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM permisos_materiales
+            WHERE residencial_id = :rid
+              AND estado IN ('aprobado', 'en_proceso')
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $herramientasPrestadas = tableExists($pdo, 'prestamos_herramientas')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM prestamos_herramientas
+            WHERE residencial_id = :rid
+              AND estado = 'prestado'
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $rechazosBitacora = tableExists($pdo, 'bitacora_operativa')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM bitacora_operativa
+            WHERE residencial_id = :rid
+              AND DATE(fecha_hora) = CURDATE()
+              AND resultado = 'denegado'
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $rechazosAccesos = tableExists($pdo, 'accesos_guardia')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM accesos_guardia ag
+            LEFT JOIN visitas v ON v.id = ag.visita_id
+            LEFT JOIN usuarios_residenciales ur ON ur.user_id = ag.guardia_id AND ur.residencial_id = :rid_guardia
+            WHERE DATE(ag.fecha_hora) = CURDATE()
+              AND ag.resultado = 'denegado'
+              AND (v.residencial_id = :rid_visita OR ur.residencial_id = :rid_asignado)
+        ", [
+            'rid_guardia' => $residencialId,
+            'rid_visita' => $residencialId,
+            'rid_asignado' => $residencialId,
+        ])
+        : 0;
+
+    $eventos = [];
+    if (tableExists($pdo, 'bitacora_operativa')) {
+        try {
+            $stmt = $pdo->prepare("
+                SELECT
+                    b.id,
+                    b.tipo_origen,
+                    b.tipo_evento,
+                    b.resultado,
+                    b.observaciones,
+                    b.fecha_hora,
+                    g.name AS guardia_nombre,
+                    p.nombre AS persona_nombre,
+                    vr.nombre_visitante,
+                    pm.tipo_movimiento AS permiso_tipo_movimiento,
+                    a.nombre AS area_nombre
+                FROM bitacora_operativa b
+                LEFT JOIN users g ON g.id = b.guardia_id
+                LEFT JOIN personas_recurrentes p ON p.id = b.persona_recurrente_id
+                LEFT JOIN visitantes_rapidos vr ON vr.id = b.visitante_rapido_id
+                LEFT JOIN permisos_materiales pm ON pm.id = b.permiso_material_id
+                LEFT JOIN areas_operativas a ON a.id = b.area_id
+                WHERE b.residencial_id = :rid
+                ORDER BY b.fecha_hora DESC, b.id DESC
+                LIMIT 8
+            ");
+            $stmt->execute(['rid' => $residencialId]);
+            $eventos = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable $e) {
+            $eventos = [];
+        }
+    }
+
+    $personasDentroAhora = $personasDentro + $visitantesDentro;
+
+    return [
+        'personas_dentro' => $personasDentroAhora,
+        'ingresos_dia' => $ingresosDia,
+        'salidas_pendientes' => $personasDentroAhora + $materialesEnProceso,
+        'incidentes_abiertos' => $incidentesAbiertos,
+        'materiales_autorizados' => $materialesAutorizados,
+        'herramientas_prestadas' => $herramientasPrestadas,
+        'accesos_rechazados' => $rechazosBitacora + $rechazosAccesos,
+        'ultimos_eventos' => $eventos,
+    ];
+}
+
 try {
     comunicados_schema_ensure($pdo);
 
@@ -135,10 +288,17 @@ try {
         $servicios[] = $item;
     }
 
+    $presetServicio = (string)($serviceProfile['preset_servicio'] ?? 'residencial');
+    $modoOperacion = (string)($operationalMode ?? 'residencial');
+    $retailopsDashboard = ($presetServicio === 'retailops' || $modoOperacion === 'retailops')
+        ? admin_home_retailops_dashboard($pdo, $residencialId)
+        : null;
+
     json_out(true, [
         'banners' => $banners,
         'servicios' => $servicios,
+        'retailops_dashboard' => $retailopsDashboard,
     ]);
 } catch (Throwable $e) {
-    app_json_exception($e, 'No pudimos cargar el inicio del residencial.');
+    app_json_exception($e, 'No pudimos cargar el inicio del servicio.');
 }

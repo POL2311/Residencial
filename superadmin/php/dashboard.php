@@ -12,6 +12,7 @@ require_role(['super_admin']);
 $pageTitle = 'Panel Super Admin';
 
 $toastV = @filemtime(__DIR__ . '/../../assets/js/app-toast.js') ?: time();
+$labelsV = @filemtime(__DIR__ . '/../../assets/js/osgate-labels.js') ?: time();
 $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 ?>
 <!doctype html>
@@ -27,6 +28,7 @@ $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
   <?php include __DIR__ . '/../templates/dashboard.html'; ?>
 
   <script src="../../assets/js/app-toast.js?v=<?= (int)$toastV ?>" defer></script>
+  <script src="../../assets/js/osgate-labels.js?v=<?= (int)$labelsV ?>" defer></script>
   <script src="../js/dashboard.js?v=<?= (int)$dashV ?>" defer></script>
 </body>
 </html>

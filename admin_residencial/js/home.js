@@ -1,4 +1,8 @@
 (function () {
+  const root = document.getElementById('residentHomeView');
+  if (!root || root.dataset.bound === '1') return;
+  root.dataset.bound = '1';
+
   function basePath() {
     const p = location.pathname;
     const i = p.indexOf('/admin_residencial/');
@@ -47,6 +51,10 @@
     srvPrev: document.getElementById('homeSrvPrev'),
     srvNext: document.getElementById('homeSrvNext'),
     btnAllCom: document.getElementById('btnVerTodosComunicados'),
+    residentialContent: document.getElementById('residentialHomeContent'),
+    retailBlock: document.getElementById('retailOpsHomeBlock'),
+    retailCards: document.getElementById('retailOpsCards'),
+    retailEvents: document.getElementById('retailOpsEvents'),
   };
 
   if (!els.comTrack || !els.srvScroller) return;
@@ -54,6 +62,7 @@
   const state = {
     banners: [],
     servicios: [],
+    retailopsDashboard: null,
     currentSlide: 0,
     autoSlide: null,
   };
@@ -331,13 +340,95 @@
     });
   }
 
+  function retailCard(label, value, tone, action) {
+    const toneMap = {
+      slate: 'text-slate-900 bg-slate-50 border-slate-200',
+      emerald: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+      amber: 'text-amber-700 bg-amber-50 border-amber-200',
+      rose: 'text-rose-700 bg-rose-50 border-rose-200',
+      sky: 'text-sky-700 bg-sky-50 border-sky-200',
+    };
+    return `
+      <button type="button" ${action ? `data-retailops-action="${escapeHtml(action)}"` : ''}
+        class="min-h-[7.5rem] rounded-[1.5rem] border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneMap[tone] || toneMap.slate}">
+        <div class="text-xs font-medium uppercase tracking-[0.16em] opacity-70">${escapeHtml(label)}</div>
+        <div class="mt-3 text-3xl font-semibold">${escapeHtml(value ?? 0)}</div>
+      </button>
+    `;
+  }
+
+  function renderRetailOpsDashboard() {
+    const data = state.retailopsDashboard;
+    const showRetail = !!data;
+    els.retailBlock?.classList.toggle('hidden', !showRetail);
+    els.residentialContent?.classList.toggle('hidden', showRetail);
+    stopAutoSlide();
+
+    if (!showRetail) {
+      return false;
+    }
+
+    const cards = [
+      ['Personas dentro ahora', data.personas_dentro, 'emerald', 'personal_recurrente'],
+      ['Ingresos del día', data.ingresos_dia, 'sky', 'bitacora_operativa'],
+      ['Salidas pendientes', data.salidas_pendientes, 'amber', 'bitacora_operativa'],
+      ['Incidentes abiertos', data.incidentes_abiertos, 'rose', 'incidencias'],
+      ['Materiales autorizados', data.materiales_autorizados, 'slate', 'materiales'],
+      ['Herramientas prestadas', data.herramientas_prestadas, 'amber', 'herramientas'],
+      ['Accesos rechazados', data.accesos_rechazados, 'rose', 'bitacora_operativa'],
+      ['Últimos eventos', (data.ultimos_eventos || []).length, 'sky', 'bitacora_operativa'],
+    ];
+
+    if (els.retailCards) {
+      els.retailCards.innerHTML = cards.map((card) => retailCard(...card)).join('');
+    }
+
+    const events = Array.isArray(data.ultimos_eventos) ? data.ultimos_eventos : [];
+    if (els.retailEvents) {
+      if (!events.length) {
+        els.retailEvents.innerHTML = `
+          <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+            Aún no hay eventos operativos registrados.
+          </div>
+        `;
+      } else {
+        els.retailEvents.innerHTML = events.map((event) => {
+          const actor = event.persona_nombre || event.nombre_visitante || event.guardia_nombre || 'Operación';
+          const area = event.area_nombre ? ` · ${event.area_nombre}` : '';
+          return `
+            <article class="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div class="font-semibold text-slate-800">${escapeHtml(actor)}${escapeHtml(area)}</div>
+                  <div class="mt-1 text-sm text-slate-500">
+                    ${escapeHtml(event.tipo_origen || 'evento')} · ${escapeHtml(event.tipo_evento || '—')} · ${escapeHtml(event.resultado || '—')}
+                  </div>
+                  ${event.observaciones ? `<div class="mt-2 text-sm text-slate-600">${escapeHtml(event.observaciones)}</div>` : ''}
+                </div>
+                <div class="text-xs text-slate-400">${escapeHtml(event.fecha_hora || '')}</div>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+    }
+
+    return true;
+  }
+
   async function loadHome() {
     try {
       const json = await fetchJSON(API);
       state.banners = json.banners || [];
       state.servicios = json.servicios || [];
+      state.retailopsDashboard = json.retailops_dashboard || null;
       state.currentSlide = 0;
 
+      if (renderRetailOpsDashboard()) {
+        return;
+      }
+
+      els.residentialContent?.classList.remove('hidden');
       renderBanners();
       renderServicios();
       startAutoSlide();
@@ -368,6 +459,13 @@
     window.AdminResidencialDashboard?.navigate?.('comunicados');
   });
 
+  root.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-retailops-action]');
+    if (!button) return;
+    const view = button.getAttribute('data-retailops-action');
+    if (view) window.AdminResidencialDashboard?.navigate?.(view);
+  });
+
   bindSwipe(els.comSlider, {
     onPrev: prevSlide,
     onNext: nextSlide,
@@ -375,4 +473,7 @@
   });
 
   loadHome();
+  const dashboardMode = String(window.AdminResidencialDashboard?.getOperationalMode?.() || '').trim();
+  const dashboardPreset = String(window.AdminResidencialDashboard?.getServiceProfile?.()?.preset_servicio || '').trim();
+  window.OSGateLabels?.apply?.(root, dashboardMode && dashboardMode !== 'residencial' ? dashboardMode : dashboardPreset || dashboardMode);
 })();

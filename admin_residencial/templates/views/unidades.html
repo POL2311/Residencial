@@ -6,8 +6,8 @@
   <!-- HEADER -->
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <div class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Operación del residencial</div>
-      <h1 class="mt-1 text-2xl font-semibold text-slate-800">Unidades</h1>
+      <div class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Operación del servicio</div>
+      <h1 class="mt-1 text-2xl font-semibold text-slate-800" data-os-label="units">Unidades</h1>
     </div>
 
     <button
@@ -28,12 +28,12 @@
   <input
     id="unidadSearch"
     type="text"
-    placeholder="Buscar Unidad"
+    placeholder="Buscar unidad o área"
     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm"
   />
 </div>
   <div class="hidden md:grid grid-cols-4 gap-4 rounded-2xl border border-slate-200 bg-white/70 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 shadow-sm">
-  <div>Unidad</div>
+  <div data-os-label="units">Unidad</div>
   <div>Detalle</div>
   <div class="text-center">Titular</div>
   <div class="text-right">Acciones</div>

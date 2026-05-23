@@ -45,6 +45,7 @@
     personas_dentro: BASE + 'js/personas_dentro.js',
     materiales_autorizados: BASE + 'js/materiales_autorizados.js',
     bitacora_hoy: BASE + 'js/bitacora_hoy.js',
+    herramientas: BASE + 'js/herramientas.js',
   };
 
   const state = {
@@ -65,7 +66,7 @@
     moreSheetOpen: false,
   };
   const PRIMARY_DOCK_VIEWS = new Set(['home', 'accesos', 'incidencias', 'autos']);
-  const SECONDARY_DOCK_VIEWS = new Set(['paqueteria', 'personas_dentro', 'materiales_autorizados', 'bitacora_hoy', 'perfil']);
+  const SECONDARY_DOCK_VIEWS = new Set(['paqueteria', 'personas_dentro', 'materiales_autorizados', 'bitacora_hoy', 'herramientas', 'perfil']);
 
   function escapeHtml(s) {
     return String(s ?? '')
@@ -86,6 +87,21 @@
       .replace(/\s*Respuesta:\s*.+$/gi, '')
       .trim();
     return msg || fallback;
+  }
+
+  function currentDisplayMode() {
+    const mode = String(state.operationalMode || '').trim();
+    const preset = String(state.serviceProfile?.preset_servicio || '').trim();
+    if (mode && mode !== 'residencial') return mode;
+    return preset || mode || 'residencial';
+  }
+
+  function applyVisualLabels(root = document) {
+    window.OSGateLabels?.apply?.(root, currentDisplayMode());
+    if (window.OSGateLabels?.isRetailLike?.(currentDisplayMode())) {
+      root.querySelectorAll('[data-view="home"] .mobile-dock-item-label, [data-view="home"] .mobile-more-item-title, [data-view="home"] .desktop-more-item-title')
+        .forEach((el) => { el.textContent = 'Inicio'; });
+    }
   }
 
   function showShellHeader() {
@@ -221,7 +237,7 @@
     }
 
     if (els.modeBadge) {
-      const label = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial');
+      const label = window.OSGateLabels?.presetLabel?.(currentDisplayMode()) || currentDisplayMode();
       els.modeBadge.textContent = `Servicio: ${label}`;
     }
   }
@@ -501,6 +517,7 @@
       if (token !== state.navToken) return false;
 
       wrap.innerHTML = html;
+      applyVisualLabels(wrap);
       return true;
     } catch (e) {
       if (token === state.navToken) {
@@ -701,7 +718,7 @@
 
     const rawName = String(data.user?.name || 'Guardia').trim();
     const cleanedName = /^guardia\d+$/i.test(rawName) ? 'Guardia' : rawName.replace(/\d+\s*$/, '').trim() || 'Guardia';
-    const serviceLabel = String(state.serviceProfile?.preset_servicio || state.operationalMode || 'residencial').trim() || 'residencial';
+    const serviceLabel = window.OSGateLabels?.presetLabel?.(currentDisplayMode()) || currentDisplayMode();
 
     if (nameEl) nameEl.textContent = cleanedName;
     if (ctxEl) ctxEl.textContent = `Servicio: ${serviceLabel}`;
@@ -753,6 +770,7 @@
       } : null;
       state.enabledViews = state.canOperate ? buildEnabledViews() : new Set();
       updateHeaderContext(state.context);
+      applyVisualLabels(document);
       if (!state.canOperate) {
         if (els.ctx) els.ctx.textContent = 'Activacion pendiente';
         if (els.hint) {
@@ -761,6 +779,7 @@
         }
       }
       toggleOperationalButtons();
+      applyVisualLabels(document);
       updateNotificationsBadge();
       return state.context;
     } catch (e) {
@@ -832,7 +851,7 @@
         if (els.modalBody) {
           els.modalBody.innerHTML = `
             <div class="text-sm text-slate-600">
-              No hay reglamento público registrado para este residencial.
+              No hay políticas o reglamento público registrado para este servicio.
             </div>
           `;
         }
