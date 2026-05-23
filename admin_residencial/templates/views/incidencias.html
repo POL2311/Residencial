@@ -50,11 +50,11 @@
   <div id="incidenciasList" class="space-y-3 app-mobile-scroll-list"></div>
 
   <!-- Modal Nueva -->
-  <div id="incidenciaModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-end md:items-center justify-center z-50 hidden p-3 md:p-4">
-    <div class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden bg-white rounded-2xl shadow-2xl">
-      <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
-        <h2 class="text-base font-semibold">Reportar incidencia</h2>
-        <button id="btnCloseIncidenciaModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" class="h-4 w-4 m-auto"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <div id="incidenciaModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 backdrop-blur-sm p-3 md:items-center md:p-4">
+    <div class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden bg-white rounded-2xl shadow-xl">
+      <div class="flex items-center justify-between border-b px-4 py-3">
+        <h2 class="text-base font-semibold text-slate-800">Reportar incidencia</h2>
+        <button id="btnCloseIncidenciaModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center justify-center">✕</button>
       </div>
 
       <form id="incidenciaForm" class="flex min-h-0 flex-1 flex-col">
@@ -160,11 +160,11 @@
   </div>
 
   <!-- Modal Editar -->
-  <div id="incidenciaEditModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-end md:items-center justify-center z-50 hidden p-3 md:p-4">
-    <div class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden bg-white rounded-2xl shadow-2xl">
-      <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
-        <h2 class="text-base font-semibold">Actualizar incidencia</h2>
-        <button id="btnCloseEditIncModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center"><svg viewBox="0 0 24 24" fill="none" class="h-4 w-4 m-auto"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <div id="incidenciaEditModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 backdrop-blur-sm p-3 md:items-center md:p-4">
+    <div class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden bg-white rounded-2xl shadow-xl">
+      <div class="flex items-center justify-between border-b px-4 py-3">
+        <h2 class="text-base font-semibold text-slate-800">Actualizar incidencia</h2>
+        <button id="btnCloseEditIncModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center justify-center">✕</button>
       </div>
 
       <form id="incidenciaEditForm" class="flex min-h-0 flex-1 flex-col">

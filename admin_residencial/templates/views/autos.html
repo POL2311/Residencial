@@ -42,15 +42,15 @@
   </section>
 
   <div id="adminAutoEditModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="flex min-h-full items-end justify-center p-0 md:items-center md:p-4">
-      <div class="w-full rounded-t-2xl bg-white shadow-2xl md:max-w-lg md:rounded-2xl">
+    <div class="min-h-full flex items-end md:items-center justify-center p-3 md:p-4">
+      <div class="flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
         <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
           <div id="adminAutoEditModalTitle" class="text-sm font-semibold text-slate-800">Editar auto</div>
-          <button id="btnCloseAdminAutoModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200"><svg viewBox="0 0 24 24" fill="none" class="h-4 w-4 m-auto"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button id="btnCloseAdminAutoModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
         </div>
-        <form id="adminAutoEditForm" class="space-y-3 p-4">
+        <form id="adminAutoEditForm" class="min-h-0 flex-1 overflow-y-auto p-4 flex flex-col gap-3">
           <div id="adminAutoEditBody" class="space-y-3"></div>
-          <div class="flex justify-end gap-2 pt-2">
+          <div class="mt-auto flex justify-end gap-2 pt-2 border-t border-slate-100">
             <button id="btnCancelAdminAutoModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
             <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">Guardar</button>
           </div>
