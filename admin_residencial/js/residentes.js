@@ -104,7 +104,7 @@
     layer.id = 'residentesUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirm"
-           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+           class="hidden fixed inset-0 w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
         <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
           <div class="p-6">
             <div class="flex items-start gap-4">
@@ -275,7 +275,7 @@
         const wrap = document.createElement('div');
         wrap.innerHTML = `
           <div id="friendlyPrompt"
-               class="hidden fixed inset-0 z-[10005] items-center justify-center bg-black/50 p-4">
+               class="hidden fixed inset-0 w-screen h-[100dvh] z-[10005] items-center justify-center bg-black/50 p-4">
             <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
               <div class="p-6">
                 <div class="flex items-start gap-4">
@@ -1138,7 +1138,7 @@
 
   function openAddPagoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-50';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] bg-black/40 flex items-center justify-center z-50';
 
     modal.innerHTML = `
       <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">
@@ -1157,20 +1157,20 @@
             <div>
               <label class="text-xs text-slate-500">Monto *</label>
               <input name="monto" type="number" step="0.01" required
-                class="w-full mt-1 rounded-xl border px-4 py-2"
+                class="w-full mt-1 rounded-2xl border px-4 py-2"
                 placeholder="Ej. 850.00">
             </div>
             <div>
               <label class="text-xs text-slate-500">Fecha *</label>
               <input name="fecha" type="date" required
-                class="w-full mt-1 rounded-xl border px-4 py-2">
+                class="w-full mt-1 rounded-2xl border px-4 py-2">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="text-xs text-slate-500">Método</label>
-              <select name="metodo" class="w-full mt-1 rounded-xl border px-4 py-2">
+              <select name="metodo" class="w-full mt-1 rounded-2xl border px-4 py-2">
                 <option value="efectivo">Efectivo</option>
                 <option value="transferencia">Transferencia</option>
                 <option value="tarjeta">Tarjeta</option>
@@ -1179,7 +1179,7 @@
             <div>
               <label class="text-xs text-slate-500">Concepto</label>
               <input name="concepto"
-                class="w-full mt-1 rounded-xl border px-4 py-2"
+                class="w-full mt-1 rounded-2xl border px-4 py-2"
                 placeholder="Ej. Mantenimiento enero"
                 maxlength="120">
             </div>
@@ -1190,7 +1190,7 @@
 
           <div class="flex justify-end gap-3 pt-6">
             <button type="button" id="cancelAddPago"
-              class="px-5 py-2 rounded-xl border hover:bg-slate-100">
+              class="px-5 py-2 rounded-2xl border hover:bg-slate-100">
               Cancelar
             </button>
             <button class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
@@ -1257,7 +1257,7 @@
 
   function openAddAutoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-50';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] bg-black/40 flex items-center justify-center z-50';
 
     modal.innerHTML = `
       <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">
@@ -1276,7 +1276,7 @@
             <div>
               <label class="text-xs text-slate-500">Placas *</label>
               <input name="placas" required
-                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                class="w-full mt-1 rounded-2xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
                 placeholder="Ej. ABC-123"
                 maxlength="15">
             </div>
@@ -1284,7 +1284,7 @@
             <div>
               <label class="text-xs text-slate-500">Modelo</label>
               <input name="modelo"
-                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                class="w-full mt-1 rounded-2xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
                 placeholder="Ej. Versa 2020"
                 maxlength="80">
             </div>
@@ -1294,7 +1294,7 @@
             <div>
               <label class="text-xs text-slate-500">Color</label>
               <input name="color"
-                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                class="w-full mt-1 rounded-2xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
                 placeholder="Ej. Blanco"
                 maxlength="40">
             </div>
@@ -1302,7 +1302,7 @@
             <div>
               <label class="text-xs text-slate-500">Tag ID</label>
               <input name="tag_id"
-                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                class="w-full mt-1 rounded-2xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
                 placeholder="Ej. TAG-001"
                 maxlength="120">
             </div>
@@ -1312,7 +1312,7 @@
             <div>
               <label class="text-xs text-slate-500">Casa asignada</label>
               <input disabled
-                class="w-full mt-1 rounded-xl border bg-slate-100 px-4 py-2"
+                class="w-full mt-1 rounded-2xl border bg-slate-100 px-4 py-2"
                 value="${escapeHtml(residente.unidad_clave || '—')}">
             </div>
           </div>
@@ -1323,7 +1323,7 @@
 
           <div class="flex justify-end gap-3 pt-6">
             <button type="button" id="cancelAddAuto"
-              class="px-5 py-2 rounded-xl border hover:bg-slate-100">
+              class="px-5 py-2 rounded-2xl border hover:bg-slate-100">
               Cancelar
             </button>
             <button class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">

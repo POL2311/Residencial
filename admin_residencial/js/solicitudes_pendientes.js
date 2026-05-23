@@ -59,7 +59,7 @@
             </div>
             <div class="grid gap-2 sm:grid-cols-2">
               <button type="button" class="js-approve rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700" data-id="${item.id}">Aprobar</button>
-              <button type="button" class="js-cancel rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Cancelar</button>
+              <button type="button" class="js-cancel rounded-2xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Cancelar</button>
             </div>
           </div>
         </div>

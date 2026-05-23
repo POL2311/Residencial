@@ -4,17 +4,17 @@
        class="hidden rounded-xl px-4 py-3 text-sm"></div>
 
   <!-- HEADER -->
-  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+  <div class="rounded-[2rem] border border-slate-200/40 bg-white/60 backdrop-blur-xl p-5 shadow-sm">
     <div>
-      <div class="app-admin-kicker">Comunicación interna</div>
-      <h1 class="app-admin-title">Comunicados</h1>
-      <p class="app-admin-subtitle">
+      <div class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Comunicación interna</div>
+      <h1 class="text-3xl font-semibold text-slate-700">Comunicados</h1>
+      <p class="mt-1 text-sm text-slate-500">
         Administra avisos, borradores y publicaciones activas del residencial.
       </p>
     </div>
     <div class="mt-4 flex justify-end">
       <button id="btnAddComunicado"
-        class="app-admin-primary rounded-full px-5 py-2.5 text-sm font-semibold">
+        class="shrink-0 rounded-2xl bg-[#2E5D73] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-95">
         + Nuevo comunicado
       </button>
     </div>
@@ -70,13 +70,13 @@
 
   <!-- MODAL -->
   <div id="comunicadoModal"
-       class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 backdrop-blur-sm p-3 md:items-center md:p-4">
+       class="fixed inset-0 w-screen h-[100dvh] z-50 hidden items-end justify-center bg-black/60 backdrop-blur-sm p-3 md:items-center md:p-4">
     <div class="flex max-h-[80dvh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
 
       <div class="flex items-center justify-between border-b px-4 py-3">
         <h2 id="comunicadoModalTitle" class="text-lg font-semibold text-slate-800">Comunicado</h2>
         <button id="btnCloseComModal" type="button"
-                class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">
+                class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">
           ✕
         </button>
       </div>
@@ -110,7 +110,7 @@
             class="w-full rounded-lg border bg-white px-3 py-2 text-sm" />
           <div class="mt-2 flex items-center gap-3">
             <img id="comunicadoImagePreview" alt=""
-                 class="hidden h-14 w-14 rounded-xl border border-slate-200 object-cover" />
+                 class="hidden h-14 w-14 rounded-2xl border border-slate-200 object-cover" />
             <div class="text-xs text-slate-500">
               Si subes una nueva imagen al editar, reemplazará la actual.
             </div>
@@ -151,7 +151,7 @@
             Cancelar
           </button>
           <button
-            class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-95">
+            class="rounded-2xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-95">
             Guardar comunicado
           </button>
         </div>

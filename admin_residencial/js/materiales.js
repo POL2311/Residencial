@@ -75,7 +75,7 @@
 
     modal = document.createElement('div');
     modal.id = 'permisoQrModal';
-    modal.className = 'fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
@@ -131,7 +131,7 @@
 
     modal = document.createElement('div');
     modal.id = 'permisoDetailsModal';
-    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
@@ -186,7 +186,7 @@
           <div class="text-xs uppercase tracking-wide text-slate-400">Materiales</div>
           <div class="mt-3 space-y-2">
             ${(item.items || []).map((material) => `
-              <div class="rounded-xl bg-white px-3 py-2 text-sm text-slate-700">
+              <div class="rounded-2xl bg-white px-3 py-2 text-sm text-slate-700">
                 ${escapeHtml(material.material_nombre)} <span class="text-slate-400">·</span> ${escapeHtml(material.cantidad_texto)}
               </div>
             `).join('') || '<div class="text-slate-500">Sin materiales capturados.</div>'}
@@ -201,10 +201,10 @@
           <div class="mt-2 break-all text-xs text-slate-500">${escapeHtml(item.qr_payload || 'Sin QR generado')}</div>
         </div>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+          <button type="button" data-detail-edit="${item.id}" class="rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
           <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
-          <button type="button" data-detail-approve="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Aprobar</button>
-          <button type="button" data-detail-cancel="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Cancelar</button>
+          <button type="button" data-detail-approve="${item.id}" class="rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Aprobar</button>
+          <button type="button" data-detail-cancel="${item.id}" class="rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Cancelar</button>
           <button type="button" data-detail-delete="${item.id}" class="rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white hover:bg-rose-700 sm:col-span-2 lg:col-span-1">Eliminar</button>
         </div>
       </div>
@@ -240,7 +240,7 @@
 
     modal = document.createElement('div');
     modal.id = 'catalogoDetailsModal';
-    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
@@ -294,7 +294,7 @@
           <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.descripcion || 'Sin descripción')}</div>
         </div>
         <div class="grid gap-3 sm:grid-cols-2">
-          <button type="button" data-catalog-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+          <button type="button" data-catalog-edit="${item.id}" class="rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
           <button type="button" data-catalog-delete="${item.id}" class="rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white hover:bg-rose-700">Eliminar</button>
         </div>
       </div>
@@ -424,7 +424,7 @@
     if (!els.permisoItemsList) return;
     if (!state.permisoDraftItems.length) {
       els.permisoItemsList.innerHTML = `
-        <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+        <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
           Aún no agregas materiales a este permiso.
         </div>
       `;
@@ -441,7 +441,7 @@
             </div>
             <div class="flex items-center gap-2">
               ${item.material_id ? '<span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] text-slate-600">Catálogo</span>' : '<span class="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] text-sky-700">Manual</span>'}
-              <button type="button" class="permiso-item-remove rounded-xl border px-3 py-1.5 text-xs hover:bg-slate-50" data-index="${index}">Quitar</button>
+              <button type="button" class="permiso-item-remove rounded-2xl border px-3 py-1.5 text-xs hover:bg-slate-50" data-index="${index}">Quitar</button>
             </div>
           </div>
         </div>
@@ -477,7 +477,7 @@
             <div class="mt-1 text-sm text-slate-500 line-clamp-2">${escapeHtml(item.descripcion || 'Sin descripción')}</div>
           </div>
           <div class="w-[150px] shrink-0">
-            <button type="button" class="js-cat-more rounded-xl border px-3 py-2 text-xs hover:bg-white" data-id="${item.id}">Ver más</button>
+            <button type="button" class="js-cat-more rounded-2xl border px-3 py-2 text-xs hover:bg-white" data-id="${item.id}">Ver más</button>
           </div>
         </div>
       </div>
@@ -511,7 +511,7 @@
             </div>
           </div>
           <div class="lg:w-[180px] shrink-0">
-            <button type="button" class="js-perm-more rounded-xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Ver más</button>
+            <button type="button" class="js-perm-more rounded-2xl border px-3 py-2 text-sm hover:bg-white" data-id="${item.id}">Ver más</button>
           </div>
         </div>
       </div>

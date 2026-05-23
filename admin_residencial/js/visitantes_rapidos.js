@@ -51,7 +51,7 @@
 
     modal = document.createElement('div');
     modal.id = 'visitanteQrModal';
-    modal.className = 'fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
@@ -107,7 +107,7 @@
 
     modal = document.createElement('div');
     modal.id = 'visitanteDetailsModal';
-    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.className = 'fixed inset-0 w-screen h-[100dvh] z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
@@ -165,9 +165,9 @@
           <div class="mt-2 break-all text-xs text-slate-500">${escapeHtml(item.qr_payload || 'Sin QR generado')}</div>
         </div>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
+          <button type="button" data-detail-edit="${item.id}" class="rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
           <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
-          <button type="button" data-detail-cancel="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50 sm:col-span-2 lg:col-span-1">Cancelar</button>
+          <button type="button" data-detail-cancel="${item.id}" class="rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50 sm:col-span-2 lg:col-span-1">Cancelar</button>
         </div>
       </div>
     `;
@@ -241,7 +241,7 @@
             <div class="mt-1 text-sm text-slate-500">Área: <b>${escapeHtml(item.area_nombre || 'Sin área')}</b> · Placa: ${escapeHtml(item.placa_vehiculo || '—')}</div>
           </div>
           <div class="lg:w-[180px]">
-            <button type="button" class="js-more rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Ver más</button>
+            <button type="button" class="js-more rounded-2xl border px-3 py-2 text-sm hover:bg-slate-50" data-id="${item.id}">Ver más</button>
           </div>
         </div>
       </div>

@@ -128,7 +128,7 @@
 
         const wrapper = document.createElement('div');
         wrapper.innerHTML = `
-            <div id="superadminServiceConfirm" class="hidden fixed inset-0 z-[10080] items-center justify-center bg-black/55 p-4">
+            <div id="superadminServiceConfirm" class="hidden fixed inset-0 w-screen h-[100dvh] z-[10080] items-center justify-center bg-black/55 p-4">
               <div class="w-full max-w-md overflow-hidden rounded-[1.75rem] bg-white shadow-2xl">
                 <div class="p-6">
                   <div class="flex items-start gap-4">

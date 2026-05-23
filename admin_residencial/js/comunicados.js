@@ -232,7 +232,7 @@
     layer.id = 'comunicadosUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmComunicado"
-           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+           class="hidden fixed inset-0 w-screen h-[100dvh] z-[9999] items-center justify-center bg-black/50 p-4">
         <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
           <div class="p-6">
             <div class="flex items-start gap-4">
