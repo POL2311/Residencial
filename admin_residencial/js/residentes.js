@@ -1138,10 +1138,10 @@
 
   function openAddPagoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'app-admin-modal-overlay fixed inset-0 bg-black/40 flex items-end md:items-center justify-center z-50 p-3 md:p-4';
+    modal.className = 'app-modal-overlay app-admin-modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50';
 
     modal.innerHTML = `
-      <div class="app-admin-modal-card app-admin-modal-body bg-white rounded-t-3xl md:rounded-3xl w-full max-w-xl p-6 md:p-8 shadow-2xl relative">
+      <div class="app-modal-card app-modal-body app-admin-modal-card app-admin-modal-body bg-white w-full max-w-xl p-6 md:p-8 shadow-2xl relative">
         <button id="closeAddPago"
           class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100">
           ✕
@@ -1257,10 +1257,10 @@
 
   function openAddAutoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'app-admin-modal-overlay fixed inset-0 bg-black/40 flex items-end md:items-center justify-center z-50 p-3 md:p-4';
+    modal.className = 'app-modal-overlay app-admin-modal-overlay fixed inset-0 bg-black/40 flex items-center justify-center z-50';
 
     modal.innerHTML = `
-      <div class="app-admin-modal-card app-admin-modal-body bg-white rounded-t-3xl md:rounded-3xl w-full max-w-xl p-6 md:p-8 shadow-2xl relative">
+      <div class="app-modal-card app-modal-body app-admin-modal-card app-admin-modal-body bg-white w-full max-w-xl p-6 md:p-8 shadow-2xl relative">
         <button id="closeAddAuto"
           class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100 flex items-center justify-center">
           ✕

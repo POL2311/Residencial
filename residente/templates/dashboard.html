@@ -65,6 +65,130 @@
         inset 0 1px 0 rgba(255,255,255,0.76);
       background: rgba(255,255,255,0.95);
     }
+    body.dashboard-modal-open {
+      overflow: hidden;
+    }
+    body.dashboard-modal-open #shellHeader {
+      opacity: 0;
+      transform: translateY(-0.85rem) scale(0.985);
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 220ms ease;
+    }
+    body.dashboard-modal-open .mobile-dock-layer {
+      display: none !important;
+    }
+    .app-modal-overlay,
+    .app-admin-modal-overlay {
+      z-index: 10000 !important;
+      padding: 0 !important;
+      background: rgba(15, 23, 42, 0.72) !important;
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+    }
+    .app-modal-overlay:not(.hidden),
+    .app-admin-modal-overlay:not(.hidden) {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .app-modal-viewport,
+    .app-modal-overlay > .min-h-full,
+    .app-admin-modal-overlay > .min-h-full {
+      display: flex !important;
+      min-height: 100%;
+      width: 100%;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: calc(1rem + env(safe-area-inset-top, 0px)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    .app-modal-overlay > .app-modal-card,
+    .app-modal-overlay > .app-admin-modal-card,
+    .app-admin-modal-overlay > .app-modal-card,
+    .app-admin-modal-overlay > .app-admin-modal-card {
+      margin: calc(1rem + env(safe-area-inset-top, 0px)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+    }
+    .app-modal-card,
+    .app-admin-modal-card {
+      display: flex;
+      width: min(100%, calc(100vw - 2rem));
+      max-height: min(80vh, calc(100vh - 2rem));
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(226, 232, 240, 0.92);
+      border-radius: 1.55rem !important;
+      box-shadow:
+        0 28px 70px rgba(15, 23, 42, 0.24),
+        0 8px 24px rgba(15, 23, 42, 0.12),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    @supports (height: 100dvh) {
+      .app-modal-card,
+      .app-admin-modal-card {
+        max-height: min(80dvh, calc(100dvh - 2rem));
+      }
+    }
+    .app-modal-header,
+    .app-modal-footer,
+    .app-admin-modal-header,
+    .app-admin-modal-footer {
+      flex: 0 0 auto;
+    }
+    .app-modal-body,
+    .app-admin-modal-body {
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    .app-modal-footer,
+    .app-admin-modal-footer {
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    }
+    #dashboardViewMount input[type="date"],
+    #dashboardViewMount input[type="time"],
+    .app-modal-overlay input[type="date"],
+    .app-modal-overlay input[type="time"],
+    .app-admin-modal-overlay input[type="date"],
+    .app-admin-modal-overlay input[type="time"] {
+      -webkit-appearance: none;
+      appearance: none;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      min-height: 2.75rem;
+      height: 2.75rem;
+      padding: 0.625rem 0.875rem;
+      color: rgb(15 23 42);
+      font-size: 0.875rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+      text-align: left;
+      white-space: nowrap;
+    }
+    #dashboardViewMount input[type="date"]::-webkit-date-and-time-value,
+    #dashboardViewMount input[type="time"]::-webkit-date-and-time-value,
+    .app-modal-overlay input[type="date"]::-webkit-date-and-time-value,
+    .app-modal-overlay input[type="time"]::-webkit-date-and-time-value,
+    .app-admin-modal-overlay input[type="date"]::-webkit-date-and-time-value,
+    .app-admin-modal-overlay input[type="time"]::-webkit-date-and-time-value {
+      min-height: 1.25rem;
+      margin: 0;
+      padding: 0;
+      text-align: left;
+    }
+    #dashboardViewMount input[type="date"]::-webkit-calendar-picker-indicator,
+    #dashboardViewMount input[type="time"]::-webkit-calendar-picker-indicator,
+    .app-modal-overlay input[type="date"]::-webkit-calendar-picker-indicator,
+    .app-modal-overlay input[type="time"]::-webkit-calendar-picker-indicator,
+    .app-admin-modal-overlay input[type="date"]::-webkit-calendar-picker-indicator,
+    .app-admin-modal-overlay input[type="time"]::-webkit-calendar-picker-indicator {
+      margin-left: 0.35rem;
+      cursor: pointer;
+      opacity: 0.72;
+    }
     #dashboardViewMount button,
     #dashboardViewMount a {
       transition:
@@ -337,6 +461,31 @@
         padding-top: 0.65rem;
         padding-bottom: 7.1rem;
       }
+      .app-modal-viewport,
+      .app-modal-overlay > .min-h-full,
+      .app-admin-modal-overlay > .min-h-full {
+        padding: calc(0.9rem + env(safe-area-inset-top, 0px)) 1rem calc(0.9rem + env(safe-area-inset-bottom, 0px)) !important;
+      }
+      .app-modal-overlay > .app-modal-card,
+      .app-modal-overlay > .app-admin-modal-card,
+      .app-admin-modal-overlay > .app-modal-card,
+      .app-admin-modal-overlay > .app-admin-modal-card {
+        margin: calc(0.9rem + env(safe-area-inset-top, 0px)) 1rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
+      }
+      .app-modal-card,
+      .app-admin-modal-card {
+        max-height: min(80vh, calc(100vh - 1.25rem));
+      }
+      @supports (height: 100dvh) {
+        .app-modal-card,
+        .app-admin-modal-card {
+          max-height: min(80dvh, calc(100dvh - 1.25rem));
+        }
+      }
+      .app-modal-footer,
+      .app-admin-modal-footer {
+        padding-bottom: calc(0.9rem + env(safe-area-inset-bottom, 0px));
+      }
     }
     @media (min-width: 750px) {
       .desktop-more-popover {
@@ -524,10 +673,10 @@
   </footer>
 </div>
 
-<div id="carModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-  <div class="min-h-full flex items-center justify-center p-4">
-    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
-      <div class="px-4 py-3 border-b flex items-center justify-between">
+<div id="carModal" class="app-modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+  <div class="app-modal-viewport min-h-full flex items-center justify-center">
+    <div class="app-modal-card w-full max-w-md bg-white shadow-xl">
+      <div class="app-modal-header px-4 py-3 border-b flex items-center justify-between">
         <div class="text-sm font-semibold text-slate-800">Auto</div>
         <button id="btnCloseCarModal"
                 type="button"
@@ -535,7 +684,7 @@
           ✕
         </button>
       </div>
-      <div class="p-4">
+      <div class="app-modal-body p-4">
         <div id="carModalBody" class="space-y-2 text-sm text-slate-700"></div>
       </div>
     </div>

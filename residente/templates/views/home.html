@@ -77,10 +77,10 @@
     </div>
   </section>
 
-  <div id="residentTipsModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm">
-    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
-      <div class="flex max-h-[88vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-lg sm:rounded-3xl">
-        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="residentTipsModal" class="app-modal-overlay hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm">
+    <div class="app-modal-viewport flex min-h-full items-center justify-center">
+      <div class="app-modal-card w-full flex-col bg-white shadow-2xl sm:max-w-lg">
+        <div class="app-modal-header flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <div>
             <div class="text-lg font-semibold text-slate-800">Consejos útiles</div>
             <p class="mt-1 text-sm text-slate-500">Te los mostraremos solo una vez por día.</p>
@@ -90,8 +90,8 @@
             ✕
           </button>
         </div>
-        <div id="residentTipsModalBody" class="flex-1 space-y-3 overflow-y-auto px-5 py-4"></div>
-        <div class="border-t border-slate-100 bg-white px-5 py-4">
+        <div id="residentTipsModalBody" class="app-modal-body space-y-3 px-5 py-4"></div>
+        <div class="app-modal-footer border-t border-slate-100 bg-white px-5 py-4">
           <button id="btnDismissResidentTipsModal" type="button"
             class="w-full rounded-2xl bg-[#2E5D73] px-4 py-3 text-sm font-medium text-white hover:opacity-95">
             Entendido
