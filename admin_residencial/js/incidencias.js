@@ -239,15 +239,15 @@
 
   function openIncidenciaDetail(inc) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-[9998] bg-black/60 p-3 md:p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] bg-black/60 p-3 md:p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="flex min-h-full items-center justify-center">
-        <div class="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
-          <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div class="app-admin-modal-card w-full max-w-lg rounded-3xl bg-white shadow-2xl">
+          <div class="app-admin-modal-header flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <div class="text-lg font-semibold text-slate-900">Detalle de incidencia</div>
             <button type="button" class="js-inc-detail-close h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
           </div>
-          <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+          <div class="app-admin-modal-body space-y-4 p-5">
             <div>
               <div class="text-xs text-slate-500">Título</div>
               <div class="text-xl font-semibold text-slate-900">${escapeHtml(inc.titulo || '—')}</div>
@@ -302,9 +302,9 @@
     layer.id = 'incidenciasUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmIncidencia"
-           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
-        <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
-          <div class="p-6">
+           class="app-admin-modal-overlay hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+        <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
+          <div class="app-admin-modal-body p-6">
             <div class="flex items-start gap-4">
               <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
                 !
@@ -319,7 +319,7 @@
               </div>
             </div>
 
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button id="friendlyConfirmIncidenciaCancel"
                       type="button"
                       class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">

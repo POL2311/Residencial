@@ -16,13 +16,13 @@
   <div id="visitantesList" class="space-y-3"></div>
 
   <div id="visitantesModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 p-0 md:items-center md:p-4">
-    <div class="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
-      <div class="flex items-center justify-between border-b bg-slate-50 px-4 py-3">
+    <div class="app-admin-modal-card w-full max-w-2xl rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
+      <div class="app-admin-modal-header flex items-center justify-between border-b bg-slate-50 px-4 py-3">
         <h2 id="visitantesModalTitle" class="text-base font-semibold">Nuevo acceso rápido</h2>
         <button id="btnVisitantesClose" type="button" class="h-9 w-9 rounded-full border bg-white hover:bg-slate-100">✕</button>
       </div>
       <form id="visitantesForm" class="flex min-h-0 flex-1 flex-col">
-        <div class="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+        <div class="app-admin-modal-body space-y-3 px-4 py-4">
           <input type="hidden" name="id" />
           <div id="visitantesFormError" class="hidden rounded-xl bg-rose-100 px-4 py-3 text-sm text-rose-700"></div>
 
@@ -68,7 +68,7 @@
             <textarea name="notas_admin" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm"></textarea>
           </div>
         </div>
-        <div class="flex flex-col-reverse gap-2 border-t bg-white px-4 py-3 sm:flex-row sm:justify-end">
+        <div class="app-admin-modal-footer flex flex-col-reverse gap-2 border-t bg-white px-4 py-3 sm:flex-row sm:justify-end">
           <button id="btnVisitantesCancel" type="button" class="rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">Cancelar</button>
           <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Guardar</button>
         </div>

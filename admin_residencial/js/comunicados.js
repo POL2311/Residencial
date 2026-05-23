@@ -232,9 +232,9 @@
     layer.id = 'comunicadosUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmComunicado"
-           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
-        <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
-          <div class="p-6">
+           class="app-admin-modal-overlay hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+        <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
+          <div class="app-admin-modal-body p-6">
             <div class="flex items-start gap-4">
               <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
                 !
@@ -249,7 +249,7 @@
               </div>
             </div>
 
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button id="friendlyConfirmComunicadoCancel"
                       type="button"
                       class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">

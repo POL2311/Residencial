@@ -104,9 +104,9 @@
     layer.id = 'residentesUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirm"
-           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
-        <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
-          <div class="p-6">
+           class="app-admin-modal-overlay hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+        <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
+          <div class="app-admin-modal-body p-6">
             <div class="flex items-start gap-4">
               <div id="friendlyConfirmIcon"
                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
@@ -122,7 +122,7 @@
               </div>
             </div>
 
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button id="friendlyConfirmCancel"
                       type="button"
                       class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
@@ -275,9 +275,9 @@
         const wrap = document.createElement('div');
         wrap.innerHTML = `
           <div id="friendlyPrompt"
-               class="hidden fixed inset-0 z-[10005] items-center justify-center bg-black/50 p-4">
-            <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
-              <div class="p-6">
+               class="app-admin-modal-overlay hidden fixed inset-0 z-[10005] items-center justify-center bg-black/50 p-4">
+            <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
+              <div class="app-admin-modal-body p-6">
                 <div class="flex items-start gap-4">
                   <div id="friendlyPromptIcon"
                        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
@@ -297,7 +297,7 @@
                   </div>
                 </div>
 
-                <div class="mt-6 flex justify-end gap-3">
+                <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                   <button id="friendlyPromptCancel"
                           type="button"
                           class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
@@ -1138,10 +1138,10 @@
 
   function openAddPagoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-50';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 bg-black/40 flex items-end md:items-center justify-center z-50 p-3 md:p-4';
 
     modal.innerHTML = `
-      <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">
+      <div class="app-admin-modal-card app-admin-modal-body bg-white rounded-t-3xl md:rounded-3xl w-full max-w-xl p-6 md:p-8 shadow-2xl relative">
         <button id="closeAddPago"
           class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100">
           ✕
@@ -1153,7 +1153,7 @@
         </p>
 
         <form id="addPagoForm" class="space-y-5">
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="text-xs text-slate-500">Monto *</label>
               <input name="monto" type="number" step="0.01" required
@@ -1167,7 +1167,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="text-xs text-slate-500">Método</label>
               <select name="metodo" class="w-full mt-1 rounded-xl border px-4 py-2">
@@ -1188,7 +1188,7 @@
           <input type="hidden" name="user_id" value="${escapeHtml(residente.user_id)}">
           <input type="hidden" name="action" value="create">
 
-          <div class="flex justify-end gap-3 pt-6">
+          <div class="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end">
             <button type="button" id="cancelAddPago"
               class="px-5 py-2 rounded-xl border hover:bg-slate-100">
               Cancelar
@@ -1257,10 +1257,10 @@
 
   function openAddAutoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-50';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 bg-black/40 flex items-end md:items-center justify-center z-50 p-3 md:p-4';
 
     modal.innerHTML = `
-      <div class="bg-white rounded-3xl w-full max-w-xl p-8 shadow-2xl relative">
+      <div class="app-admin-modal-card app-admin-modal-body bg-white rounded-t-3xl md:rounded-3xl w-full max-w-xl p-6 md:p-8 shadow-2xl relative">
         <button id="closeAddAuto"
           class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100 flex items-center justify-center">
           ✕
@@ -1272,7 +1272,7 @@
         </p>
 
         <form id="addAutoForm" class="space-y-5">
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="text-xs text-slate-500">Placas *</label>
               <input name="placas" required
@@ -1290,7 +1290,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="text-xs text-slate-500">Color</label>
               <input name="color"
@@ -1321,7 +1321,7 @@
           <input type="hidden" name="unidad_id" value="${escapeHtml(residente.unidad_id)}">
           <input type="hidden" name="action" value="create">
 
-          <div class="flex justify-end gap-3 pt-6">
+          <div class="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end">
             <button type="button" id="cancelAddAuto"
               class="px-5 py-2 rounded-xl border hover:bg-slate-100">
               Cancelar

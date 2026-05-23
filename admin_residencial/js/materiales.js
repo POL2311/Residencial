@@ -75,17 +75,17 @@
 
     modal = document.createElement('div');
     modal.id = 'permisoQrModal';
-    modal.className = 'fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
     modal.innerHTML = `
-      <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+      <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
+        <div class="app-admin-modal-header flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
           <div>
             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">QR del permiso</div>
             <h3 id="permisoQrTitle" class="mt-1 text-xl font-semibold text-slate-900">Permiso registrado</h3>
           </div>
           <button type="button" id="permisoQrClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
         </div>
-        <div class="px-5 py-6 text-center">
+        <div class="app-admin-modal-body px-5 py-6 text-center">
           <div class="mx-auto inline-flex rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
             <img id="permisoQrImage" src="" alt="QR permiso" class="h-72 w-72 max-w-full rounded-2xl object-contain" />
           </div>
@@ -131,17 +131,17 @@
 
     modal = document.createElement('div');
     modal.id = 'permisoDetailsModal';
-    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
     modal.innerHTML = `
-      <div class="w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+      <div class="app-admin-modal-card w-full max-w-3xl rounded-3xl bg-white shadow-2xl">
+        <div class="app-admin-modal-header flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
           <div>
             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del permiso</div>
             <h3 id="permisoDetailsTitle" class="mt-1 text-xl font-semibold text-slate-900">Permiso registrado</h3>
           </div>
           <button type="button" id="permisoDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
         </div>
-        <div id="permisoDetailsBody" class="max-h-[75vh] overflow-y-auto px-5 py-5"></div>
+        <div id="permisoDetailsBody" class="app-admin-modal-body px-5 py-5"></div>
       </div>
     `;
     document.body.appendChild(modal);
@@ -240,17 +240,17 @@
 
     modal = document.createElement('div');
     modal.id = 'catalogoDetailsModal';
-    modal.className = 'fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
     modal.innerHTML = `
-      <div class="w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+      <div class="app-admin-modal-card w-full max-w-xl rounded-3xl bg-white shadow-2xl">
+        <div class="app-admin-modal-header flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
           <div>
             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del material</div>
             <h3 id="catalogoDetailsTitle" class="mt-1 text-xl font-semibold text-slate-900">Material</h3>
           </div>
           <button type="button" id="catalogoDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
         </div>
-        <div id="catalogoDetailsBody" class="max-h-[75vh] overflow-y-auto px-5 py-5"></div>
+        <div id="catalogoDetailsBody" class="app-admin-modal-body px-5 py-5"></div>
       </div>
     `;
     document.body.appendChild(modal);

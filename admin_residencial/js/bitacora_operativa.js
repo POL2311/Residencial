@@ -40,15 +40,15 @@
 
     let current = Math.max(0, Math.min(startIndex, urls.length - 1));
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="min-h-full flex items-center justify-center">
-        <div class="w-full max-w-4xl rounded-3xl bg-white shadow-2xl">
-          <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div class="app-admin-modal-card w-full max-w-4xl rounded-3xl bg-white shadow-2xl">
+          <div class="app-admin-modal-header flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <div class="text-sm font-semibold text-slate-800">Evidencias del movimiento</div>
             <button type="button" class="js-evidence-close h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
           </div>
-          <div class="space-y-4 p-5">
+          <div class="app-admin-modal-body space-y-4 p-5">
             <div class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950/95">
               <img id="adminBitacoraGalleryImage" src="" alt="Evidencia" class="h-[60vh] w-full object-contain" />
             </div>

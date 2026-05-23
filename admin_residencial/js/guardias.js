@@ -17,6 +17,7 @@
     modal: document.getElementById('guardiaModal'),
     form: document.getElementById('guardiaForm'),
     btnClose: document.getElementById('btnCloseGuardiaModal'),
+    btnCancel: document.getElementById('btnCancelGuardiaModal'),
     modalError: document.getElementById('guardiaModalError'),
   };
 
@@ -482,9 +483,9 @@
     layer.id = 'guardiasUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmGuardia"
-           class="hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
-        <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
-          <div class="p-6">
+           class="app-admin-modal-overlay hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
+        <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
+          <div class="app-admin-modal-body p-6">
             <div class="flex items-start gap-4">
               <div id="friendlyConfirmGuardiaIcon"
                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
@@ -500,7 +501,7 @@
               </div>
             </div>
 
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button id="friendlyConfirmGuardiaCancel"
                       type="button"
                       class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
@@ -634,6 +635,7 @@
 
   els.btnAdd?.addEventListener('click', openCreateModal);
   els.btnClose?.addEventListener('click', closeModal);
+  els.btnCancel?.addEventListener('click', closeModal);
 
   els.modal?.addEventListener('click', (e) => {
     if (e.target === els.modal) closeModal();
@@ -647,7 +649,7 @@
       button: submitBtn,
       scope: els.form,
       label: 'Guardando...',
-      lock: [els.btnClose].filter(Boolean),
+      lock: [els.btnClose, els.btnCancel].filter(Boolean),
     }, async () => {
       try {
         const fd = new FormData(els.form);
@@ -871,10 +873,10 @@
 
   function openTurnoModal(guardia, turnos = [], exceptions = []) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[10020] p-4';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-[10020] p-3 md:p-4';
     modal.innerHTML = `
-      <div class="w-full max-w-5xl rounded-3xl bg-white shadow-2xl overflow-hidden">
-        <div class="flex items-center justify-between border-b px-5 py-4">
+      <div class="app-admin-modal-card w-full max-w-5xl rounded-t-3xl md:rounded-3xl bg-white shadow-2xl">
+        <div class="app-admin-modal-header flex items-center justify-between border-b px-5 py-4">
           <div>
             <h3 class="text-lg font-semibold text-slate-900">Turnos de guardia</h3>
             <p class="text-sm text-slate-500">${escapeHtml(guardia.name)} · ${escapeHtml(guardia.email || '')}</p>
@@ -882,7 +884,7 @@
           <button class="js-close-turno-modal h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200">✕</button>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-6 p-5 max-h-[82vh] overflow-y-auto">
+        <div class="app-admin-modal-body grid gap-6 p-5 lg:grid-cols-2">
           <div>
             <form id="guardiaTurnoForm" class="space-y-3">
               <input type="hidden" name="turno_id">
@@ -1149,6 +1151,7 @@
 
   els.btnAdd?.addEventListener('click', openCreateModal);
   els.btnClose?.addEventListener('click', closeModal);
+  els.btnCancel?.addEventListener('click', closeModal);
 
   els.modal?.addEventListener('click', (e) => {
     if (e.target === els.modal) closeModal();
@@ -1162,7 +1165,7 @@
       button: submitBtn,
       scope: els.form,
       label: 'Guardando...',
-      lock: [els.btnClose].filter(Boolean),
+      lock: [els.btnClose, els.btnCancel].filter(Boolean),
     }, async () => {
       try {
         const fd = new FormData(els.form);

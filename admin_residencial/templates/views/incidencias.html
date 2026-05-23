@@ -51,14 +51,14 @@
 
   <!-- Modal Nueva -->
   <div id="incidenciaModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-end md:items-center justify-center z-50 hidden p-3 md:p-4">
-    <div class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden bg-white rounded-2xl shadow-2xl">
-      <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
+    <div class="app-admin-modal-card w-full max-w-md bg-white rounded-2xl shadow-2xl">
+      <div class="app-admin-modal-header flex justify-between items-center border-b px-4 py-3 bg-slate-50">
         <h2 class="text-base font-semibold">Reportar incidencia</h2>
         <button id="btnCloseIncidenciaModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">✕</button>
       </div>
 
       <form id="incidenciaForm" class="flex min-h-0 flex-1 flex-col">
-        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <div class="app-admin-modal-body px-4 py-4 space-y-3">
         <div id="incidenciaAddError" class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
         <div id="incidenciaScopeWrap" class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
@@ -145,7 +145,7 @@
         </div>
 
         </div>
-        <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div class="app-admin-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" id="btnCancelIncidenciaAdd"
             class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-50">
             Cancelar
@@ -161,14 +161,14 @@
 
   <!-- Modal Editar -->
   <div id="incidenciaEditModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-end md:items-center justify-center z-50 hidden p-3 md:p-4">
-    <div class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden bg-white rounded-2xl shadow-2xl">
-      <div class="flex justify-between items-center border-b px-4 py-3 bg-slate-50">
+    <div class="app-admin-modal-card w-full max-w-md bg-white rounded-2xl shadow-2xl">
+      <div class="app-admin-modal-header flex justify-between items-center border-b px-4 py-3 bg-slate-50">
         <h2 class="text-base font-semibold">Actualizar incidencia</h2>
         <button id="btnCloseEditIncModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">✕</button>
       </div>
 
       <form id="incidenciaEditForm" class="flex min-h-0 flex-1 flex-col">
-        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <div class="app-admin-modal-body px-4 py-4 space-y-3">
         <div id="incidenciaEditError" class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
         <input type="hidden" name="id" />
@@ -199,7 +199,7 @@
         </div>
 
         </div>
-        <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div class="app-admin-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button type="button" id="btnCancelIncidenciaEdit"
             class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-50">
             Cancelar
