@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OS-Gate | Sistema Premium de Control Residencial</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            300: '#cbd5e1',
+                            500: '#64748b',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        teal: {
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-teal-600 selection:text-white">
+
+    <header class="bg-slate-900 py-24 lg:py-32 px-6 text-center relative overflow-hidden">
+        <!-- Top Navigation Area -->
+        <div class="absolute top-0 left-0 w-full px-6 py-4 flex justify-end z-20">
+            <a href="login.php" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors border border-slate-700">
+                <i class="ph ph-sign-in"></i>
+                Ya soy cliente
+            </a>
+        </div>
+
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full opacity-10 pointer-events-none">
+            <div class="absolute inset-0 bg-gradient-to-b from-teal-600 to-transparent blur-3xl rounded-full"></div>
+        </div>
+
+        <div class="relative z-10 max-w-4xl mx-auto">
+            <span class="inline-block py-1 px-3 rounded-full bg-teal-900/50 text-teal-400 text-sm font-semibold mb-6 border border-teal-700/50">
+                <i class="ph-fill ph-shield-check mr-1"></i> Tecnología Anti-Caos
+            </span>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 tracking-tight">
+                La inteligencia que tu residencial necesita. <br class="hidden md:block">
+                <span class="text-teal-400">El control que tú mereces.</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto font-light">
+                Automatiza el acceso vehicular, gestiona la paquetería y empodera a tu administración con un ecosistema en la nube respaldado por hardware inteligente 100% libre de fallas humanas.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="#modulos" class="w-full sm:w-auto bg-transparent border-2 border-slate-700 text-white hover:bg-slate-800 font-semibold py-4 px-8 rounded-lg transition-all duration-300 text-center">
+                    Ver Módulos
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección de Módulos (Enriquecida) -->
+    <section id="modulos" class="py-24 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Todo tu condominio en una sola pantalla</h2>
+            <p class="text-slate-500 max-w-2xl mx-auto text-lg">Digitalizamos las tareas operativas más pesadas para que la vida en comunidad vuelva a ser pacífica.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+
+            <!-- Acceso Express / UHF -->
+            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
+                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i class="ph ph-car-profile text-3xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <span class="bg-teal-50 text-teal-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Fluidez de acceso</span>
+                <h3 class="text-xl font-bold mb-3 text-slate-900">Acceso Express (UHF)</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-3">Entrada continua sin bajar la ventanilla. Lectura RFID UHF de largo alcance que identifica a los residentes a metros de distancia.</p>
+                <div class="mt-auto pt-4 border-t border-slate-50">
+                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Adiós a las filas en horas pico. Algoritmos anti-colisión protegen los vehículos contra cierres accidentales de la pluma.</p>
+                </div>
+            </div>
+
+            <!-- Control de Visitas / QR -->
+            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
+                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i class="ph ph-qr-code text-3xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <span class="bg-purple-50 text-purple-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Control Dinámico</span>
+                <h3 class="text-xl font-bold mb-3 text-slate-900">Accesos y Visitas</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-3">Genera códigos QR temporales automatizados para invitados esporádicos, trabajadores del hogar o servicios contratistas.</p>
+                <div class="mt-auto pt-4 border-t border-slate-50">
+                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Erradica accesos no autorizados y da al residente el poder de auto-gestionar sus invitaciones con un tap.</p>
+                </div>
+            </div>
+
+            <!-- Paquetería -->
+            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
+                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i class="ph ph-package text-3xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <span class="bg-blue-50 text-blue-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Organización total</span>
+                <h3 class="text-xl font-bold mb-3 text-slate-900">Gestión de Paquetería</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-3">Registro fotográfico digital inmediato y entregas en caseta 100% seguras, documentadas de forma inmutable.</p>
+                <div class="mt-auto pt-4 border-t border-slate-50">
+                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Elimina el caos logístico. Notificaciones push al instante al residente para recolección validada. Cero extravíos.</p>
+                </div>
+            </div>
+
+            <!-- Incidencias -->
+            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
+                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i class="ph ph-warning-circle text-3xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <span class="bg-orange-50 text-orange-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Respuesta rápida</span>
+                <h3 class="text-xl font-bold mb-3 text-slate-900">Reporte de Incidencias</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-3">Canal directo y formal para que los residentes reporten anomalías, fallas en áreas comunes o emergencias.</p>
+                <div class="mt-auto pt-4 border-t border-slate-50">
+                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Centraliza reportes para la Administración con seguimiento en tiempo real, priorizando presupuesto y mantenimiento.</p>
+                </div>
+            </div>
+
+            <!-- Finanzas -->
+            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
+                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i class="ph ph-chart-line-up text-3xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <span class="bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Finanzas Sanas</span>
+                <h3 class="text-xl font-bold mb-3 text-slate-900">Control de Pagos</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-3">Módulo especializado que facilita la conciliación de cuotas, envío de recibos y recordatorios automatizados.</p>
+                <div class="mt-auto pt-4 border-t border-slate-50">
+                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Visibilidad total para la Mesa Directiva y el Contador. Reduce drásticamente la morosidad y horas administrativas.</p>
+                </div>
+            </div>
+
+            <!-- Bitácora Operativa -->
+            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
+                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i class="ph ph-shield-check text-3xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <span class="bg-slate-100 text-slate-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Seguridad 24/7</span>
+                <h3 class="text-xl font-bold mb-3 text-slate-900">Bitácora Operativa</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-3">Reemplaza el cuaderno de papel por una bitácora digital inalterable para el registro de rondines, turnos y novedades.</p>
+                <div class="mt-auto pt-4 border-t border-slate-50">
+                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Supervisión estricta de la comandancia que brinda verdadera paz mental al residente y auditoría a la Administración.</p>
+                </div>
+            </div>
+
+            <!-- Comunicados -->
+            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
+                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i class="ph ph-megaphone text-3xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <span class="bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Cero Desinformación</span>
+                <h3 class="text-xl font-bold mb-3 text-slate-900">Comunicación Institucional</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-3">Canal oficial e instantáneo para notificar a la comunidad sobre mantenimientos, cuotas o asambleas.</p>
+                <div class="mt-auto pt-4 border-t border-slate-50">
+                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> Elimina el ruido y debates interminables de los grupos de chat convencionales, manteniendo la formalidad.</p>
+                </div>
+            </div>
+
+            <!-- Amenidades -->
+            <div class="bg-white border border-slate-100 shadow-sm hover:shadow-md rounded-xl p-8 hover:-translate-y-1 transition-transform duration-300 group flex flex-col">
+                <div class="w-14 h-14 bg-slate-50 rounded-lg flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i class="ph ph-calendar-check text-3xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <span class="bg-rose-50 text-rose-700 rounded-full text-xs font-semibold px-3 py-1 inline-block mb-4 self-start">Convivencia</span>
+                <h3 class="text-xl font-bold mb-3 text-slate-900">Reserva de Amenidades</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-3">Gestión automatizada de espacios comunes (Casa Club, Asadores). Previene dobles reservas y aplica reglamentos de aforo.</p>
+                <div class="mt-auto pt-4 border-t border-slate-50">
+                    <p class="text-xs text-slate-400 font-medium"><strong class="text-slate-600">Beneficio:</strong> El residente reserva desde la app y genera accesos en el mismo flujo. La administración asegura el cobro si aplica.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Resto de la Landing Page original -->
+    <section class="bg-slate-900 text-white py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Hardware que piensa, observa y protege</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto text-lg">Nuestro sistema físico implementa lazos de seguridad críticos para evitar accidentes y daños estructurales.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-400 shadow-[0_0_30px_rgba(13,148,136,0.2)]">
+                        <i class="ph ph-traffic-signal text-4xl" style="stroke-width: 1.5px;"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Semáforo Inteligente</h3>
+                    <p class="text-slate-400 leading-relaxed">Control visual absoluto. Sincronizado milimétricamente con el portón para indicar el momento exacto y seguro de avance.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-400 shadow-[0_0_30px_rgba(13,148,136,0.2)]">
+                        <i class="ph ph-broadcast text-4xl text-teal-600" style="stroke-width: 1.5px;"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Cierre Anti-Aplastamiento</h3>
+                    <p class="text-slate-400 leading-relaxed">Sensores de proximidad activos. El portón tiene estrictamente bloqueado el cierre si detecta que un vehículo sigue en la línea de fuego.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-400 shadow-[0_0_30px_rgba(13,148,136,0.2)]">
+                        <i class="ph ph-queue text-4xl" style="stroke-width: 1.5px;"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Espera Activa Antirráfaga</h3>
+                    <p class="text-slate-400 leading-relaxed">Cero filas. Detecta tráfico en cola; si pasan varios autos autorizados seguidos, mantiene la puerta abierta hasta que la zona se despeje.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-slate-50 py-24 px-6 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">El Centro de Mando a tu medida</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto text-lg">Interfaces dedicadas y permisos específicos para que cada actor del residencial tenga las herramientas que necesita.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Admin -->
+                <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8">
+                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                        <div class="w-12 h-12 bg-slate-900 text-white rounded-lg flex items-center justify-center">
+                            <i class="ph ph-crown text-2xl" style="stroke-width: 1.5px;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Admin Residencial</h3>
+                            <p class="text-sm text-slate-500">Control total y auditoría</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Altas, bajas y bloqueos de residentes al instante.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Visualización de bitácoras de acceso en tiempo real.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Revisión de reportes de incidencias y métricas.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Seguridad -->
+                <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8 relative transform md:-translate-y-4 shadow-md">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-teal-600 rounded-t-xl"></div>
+                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                        <div class="w-12 h-12 bg-teal-600 text-white rounded-lg flex items-center justify-center">
+                            <i class="ph ph-shield text-2xl" style="stroke-width: 1.5px;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Seguridad / Caseta</h3>
+                            <p class="text-sm text-slate-500">Operación en campo</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Registro rápido de paquetería con escaneo simple.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Validación de códigos QR para visitantes eventuales.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Levantamiento de bitácora y alertas urgentes.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Residente -->
+                <div class="bg-white border border-slate-100 shadow-sm rounded-xl p-8">
+                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                        <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center">
+                            <i class="ph ph-house text-2xl" style="stroke-width: 1.5px;"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Residente Autónomo</h3>
+                            <p class="text-sm text-slate-500">Comodidad diaria</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Notificaciones push de entrega de paquetes.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Generación de invitaciones y accesos recurrentes.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-teal-600 mt-1 text-lg"></i>
+                            <span>Envío directo de quejas, fugas o incidencias.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contacto" class="bg-slate-900 pt-24 pb-12 px-6 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Deja de pelear con sistemas viejos y filas interminables.</h2>
+            <p class="text-slate-400 text-lg mb-10">Lleva tu residencial al estándar moderno de seguridad, eficiencia y plusvalía hoy mismo.</p>
+            <a href="login.php" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold py-4 px-10 rounded-lg shadow-[0_0_20px_rgba(13,148,136,0.3)] hover:shadow-[0_0_30px_rgba(13,148,136,0.5)] transition-all duration-300 transform hover:-translate-y-1 mb-16 text-lg">
+                Iniciar Sesión en OS-Gate
+            </a>
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
+                <p>&copy; 2026 OS-Gate Control Residencial Premium. Todos los derechos reservados.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-teal-400 transition-colors">Política de Privacidad</a>
+                    <a href="#" class="hover:text-teal-400 transition-colors">Términos de Servicio</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

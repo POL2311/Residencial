@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Módulos y Beneficios OS-Gate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* tailwind slate-50 */
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        osgate: {
+                            navy: '#0f172a', /* slate-900 */
+                            teal: '#0d9488', /* teal-600 */
+                            tealHover: '#0f766e', /* teal-700 */
+                            blue: '#2E5D73', /* corporate active */
+                            indicator: '#0052FF' /* subtle indicator */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="text-slate-900 antialiased selection:bg-osgate-teal selection:text-white">
+
+    <main class="max-w-6xl mx-auto px-6 py-20 sm:px-12">
+
+        <!-- Header Section -->
+        <header class="text-center max-w-3xl mx-auto mb-20">
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-osgate-navy mb-6">
+                Infraestructura Operativa para su Residencial
+            </h1>
+            <p class="text-lg text-slate-600 leading-relaxed">
+                OS-Gate es el Sistema Operativo integral diseñado para brindar <strong class="font-semibold text-osgate-navy">control absoluto y cero fricción</strong>. Diseñado estratégicamente para optimizar la labor de la Mesa Directiva, transparentar las finanzas para el Contador y elevar la calidad de vida de cada Residente.
+            </p>
+        </header>
+
+        <!-- Modules Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+
+            <!-- Acceso Vehicular UHF -->
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 p-4 bg-white rounded-2xl shadow-sm text-osgate-teal">
+                    <i class="ph ph-car-profile text-4xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-osgate-navy mb-3">Acceso Vehicular Automatizado (UHF Inteligente)</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para la Administración</span>
+                            Control total del flujo vehicular sin necesidad de personal extra. El sistema es inteligente e incorpora tecnología de lectura dinámica con <strong class="text-osgate-navy">algoritmos anti-colisión</strong> que previenen incidentes y daños a los vehículos, sincronizando las barreras con precisión milimétrica.
+                        </p>
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Residente</span>
+                            Acceso instantáneo y fluido sin bajar la ventanilla, con la total tranquilidad de que el sistema protege su vehículo contra cierres accidentales de la pluma.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accesos Inteligentes -->
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 p-4 bg-white rounded-2xl shadow-sm text-osgate-teal">
+                    <i class="ph ph-qr-code text-4xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-osgate-navy mb-3">Control de Accesos Dinámico</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para la Administración</span>
+                            Erradica la vulnerabilidad de accesos no autorizados. Trazabilidad digital y absoluta de quién entra y quién sale en tiempo real (visitas esporádicas y personal recurrente).
+                        </p>
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Residente</span>
+                            Cero filas en caseta. Auto-gestión de invitaciones mediante códigos QR desde su smartphone con un tap, garantizando privacidad, rapidez y una experiencia premium para sus invitados.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paquetería -->
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 p-4 bg-white rounded-2xl shadow-sm text-osgate-teal">
+                    <i class="ph ph-package text-4xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-osgate-navy mb-3">Recepción y Gestión de Paquetería</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para la Administración</span>
+                            Elimina el caos logístico en la caseta y reduce la responsabilidad por paquetes perdidos. Todo ingreso queda registrado fotográficamente y documentado de forma inmutable.
+                        </p>
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Residente</span>
+                            Notificaciones push inmediatas al recibir compras y recolección segura mediante validación en la app. Cero extravíos y total certeza de sus envíos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finanzas -->
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 p-4 bg-white rounded-2xl shadow-sm text-osgate-teal">
+                    <i class="ph ph-chart-line-up text-4xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-osgate-navy mb-3">Control de Finanzas y Pagos</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Contador y Mesa Directiva</span>
+                            Visibilidad financiera centralizada. Módulo especializado que facilita la conciliación de cuotas, envío de recibos y recordatorios automatizados, reduciendo drásticamente la morosidad y ahorrando horas de trabajo administrativo.
+                        </p>
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Residente</span>
+                            Transparencia total. Facilidad para consultar su estado de cuenta mensual, reportar transferencias y mantener su saldo al día desde la palma de su mano.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incidencias -->
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 p-4 bg-white rounded-2xl shadow-sm text-osgate-teal">
+                    <i class="ph ph-warning-circle text-4xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-osgate-navy mb-3">Reporte y Seguimiento de Incidencias</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para la Administración</span>
+                            Centraliza y categoriza los reportes de mantenimiento y convivencia en un panel unificado, permitiendo priorizar tareas, asignar presupuesto y mantener un histórico auditable.
+                        </p>
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Residente</span>
+                            Canal directo, formal e ininterrumpido para reportar anomalías (alumbrado, áreas verdes, ruido), con la certeza de que su solicitud está ingresada y puede monitorear su progreso.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bitácora y Guardias -->
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 p-4 bg-white rounded-2xl shadow-sm text-osgate-teal">
+                    <i class="ph ph-shield-check text-4xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-osgate-navy mb-3">Bitácora Operativa de Seguridad</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para la Administración</span>
+                            Supervisión estricta y en tiempo real de la comandancia. Reemplaza el cuaderno de papel por una bitácora digital inalterable; control absoluto de rondines, cambios de turno y novedades del perímetro.
+                        </p>
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Residente</span>
+                            Paz mental garantizada al saber que el equipo de seguridad cuenta con herramientas tecnológicas para operar de forma estructurada, vigilada y profesional 24/7.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comunicados -->
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 p-4 bg-white rounded-2xl shadow-sm text-osgate-teal">
+                    <i class="ph ph-megaphone text-4xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-osgate-navy mb-3">Comunicación Institucional</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para la Administración</span>
+                            Canal oficial e instantáneo para notificar a la comunidad sobre mantenimientos o asambleas. Elimina el ruido, la desinformación y los debates interminables de los grupos de chat convencionales.
+                        </p>
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Residente</span>
+                            Acceso a información relevante, oficial y oportuna directamente en la plataforma, sin interrupciones invasivas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amenidades -->
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="flex-shrink-0 p-4 bg-white rounded-2xl shadow-sm text-osgate-teal">
+                    <i class="ph ph-calendar-check text-4xl" style="stroke-width: 1.5px;"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-osgate-navy mb-3">Reservación de Amenidades</h3>
+                    <div class="space-y-4 text-slate-600">
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para la Administración</span>
+                            Gestión automatizada de espacios comunes (Casa Club, Asadores). Previene dobles reservas, aplica reglamentos de aforo automáticamente e integra cobros asociados.
+                        </p>
+                        <p>
+                            <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Para el Residente</span>
+                            Disfrute de sus instalaciones sin complicaciones. Reserva desde la aplicación, validación instantánea y generación de accesos para sus invitados al evento en un mismo flujo.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CTA Section (Optional integration end) -->
+        <div class="mt-24 text-center">
+            <p class="text-sm uppercase tracking-widest text-slate-400 font-semibold mb-6">Un estándar superior en administración residencial</p>
+            <div class="inline-flex items-center justify-center bg-osgate-teal text-white font-medium px-8 py-4 rounded-xl hover:bg-osgate-tealHover transition-colors duration-200 cursor-pointer shadow-sm">
+                Aprobar Implementación OS-Gate
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>
