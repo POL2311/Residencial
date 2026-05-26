@@ -671,13 +671,15 @@ function res_seed_ensure_visit(PDO $pdo, int $rid, array $visit, array &$stats):
     return $id;
 }
 
-function res_seed_ensure_guard_access(PDO $pdo, int $guardId, int $visitId, array $access, array &$stats): void
+function res_seed_ensure_guard_access(PDO $pdo, int $guardId, ?int $visitId, array $access, array &$stats): void
 {
     if (!res_seed_table_exists($pdo, 'accesos_guardia')) {
         res_seed_warn('No existe accesos_guardia; se omite historial de accesos Guardia.');
         return;
     }
     $cols = res_seed_table_columns($pdo, 'accesos_guardia');
+    $hasVisitColumn = res_seed_has_col($cols, 'visita_id');
+    $visitColumnAllowsNull = !$hasVisitColumn || strtoupper((string)($cols['visita_id']['Null'] ?? 'YES')) === 'YES';
     $metadata = [
         'demo_seed' => RES_DEMO_SEED_KEY,
         'demo_key' => $access['demo_key'],
@@ -699,16 +701,55 @@ function res_seed_ensure_guard_access(PDO $pdo, int $guardId, int $visitId, arra
         }
     }
 
+    if ($hasVisitColumn) {
+        if ($visitId !== null && $visitId > 0) {
+            if (!res_seed_table_exists($pdo, 'visitas')) {
+                res_seed_warn("No existe visitas; se omite acceso Guardia demo {$access['demo_key']}.");
+                res_seed_bump($stats, 'accesos_guardia', 'skipped');
+                return;
+            }
+
+            $validVisitId = res_seed_fetch_id(
+                $pdo,
+                "SELECT id FROM visitas WHERE id = :id LIMIT 1",
+                ['id' => $visitId]
+            );
+            if ($validVisitId <= 0) {
+                res_seed_warn("La visita {$visitId} no existe; se omite acceso Guardia demo {$access['demo_key']}.");
+                res_seed_bump($stats, 'accesos_guardia', 'skipped');
+                return;
+            }
+        } else {
+            $visitId = null;
+            if (!$visitColumnAllowsNull) {
+                res_seed_warn("accesos_guardia.visita_id es NOT NULL; se omite acceso Guardia demo {$access['demo_key']} y queda solo en bitacora.");
+                res_seed_bump($stats, 'accesos_guardia', 'skipped');
+                return;
+            }
+        }
+    } else {
+        $visitId = null;
+    }
+
     if (!$hasMeta) {
+        $where = ["guardia_id = :gid", "tipo_evento = :tipo", "resultado = :resultado"];
+        $params = [
+            'gid' => $guardId,
+            'tipo' => $access['tipo_evento'],
+            'resultado' => $access['resultado'],
+        ];
+        if ($hasVisitColumn) {
+            if ($visitId === null) {
+                $where[] = 'visita_id IS NULL';
+            } else {
+                $where[] = 'visita_id = :vid';
+                $params['vid'] = $visitId;
+            }
+        }
         $existing = res_seed_fetch_id(
             $pdo,
-            "SELECT id FROM accesos_guardia WHERE visita_id = :vid AND guardia_id = :gid AND tipo_evento = :tipo AND resultado = :resultado LIMIT 1",
-            [
-                'vid' => $visitId,
-                'gid' => $guardId,
-                'tipo' => $access['tipo_evento'],
-                'resultado' => $access['resultado'],
-            ]
+            "SELECT id FROM accesos_guardia WHERE " . implode(' AND ', $where) . " LIMIT 1",
+            $params
         );
         if ($existing > 0) {
             res_seed_bump($stats, 'accesos_guardia', 'reused');
@@ -1318,11 +1359,12 @@ try {
     $guardAccesses = [
         ['demo_key' => 'visita-carlos-entrada', 'visit_id' => $visitIds['carlos'], 'tipo_evento' => 'entrada', 'resultado' => 'permitido', 'observaciones' => 'Visita Carlos autorizada entrada.', 'unidad_id' => $unitIds['CASA-101'], 'residente_id' => $residentUsers['Carlos Hernández Ruiz'], 'fecha_hora' => "{$today} 10:15:00", 'servicio_codigo' => $codigo],
         ['demo_key' => 'visita-carlos-salida', 'visit_id' => $visitIds['carlos'], 'tipo_evento' => 'salida', 'resultado' => 'permitido', 'observaciones' => 'Visita Carlos salida.', 'unidad_id' => $unitIds['CASA-101'], 'residente_id' => $residentUsers['Carlos Hernández Ruiz'], 'fecha_hora' => "{$today} 13:25:00", 'servicio_codigo' => $codigo],
-        ['demo_key' => 'codigo-invalido-rechazado', 'visit_id' => 0, 'tipo_evento' => 'entrada', 'resultado' => 'denegado', 'observaciones' => 'Intento rechazado por código vencido o incorrecto.', 'unidad_id' => null, 'residente_id' => null, 'origen_acceso' => 'codigo_manual', 'fecha_hora' => "{$today} 14:10:00", 'servicio_codigo' => $codigo],
+        ['demo_key' => 'codigo-invalido-rechazado', 'visit_id' => null, 'tipo_evento' => 'entrada', 'resultado' => 'denegado', 'observaciones' => 'Intento rechazado por código vencido o incorrecto.', 'unidad_id' => null, 'residente_id' => null, 'origen_acceso' => 'codigo_manual', 'fecha_hora' => "{$today} 14:10:00", 'servicio_codigo' => $codigo],
         ['demo_key' => 'paqueteria-registrada-acceso', 'visit_id' => $visitIds['ana'], 'tipo_evento' => 'entrada', 'resultado' => 'permitido', 'observaciones' => 'Paquetería registrada para CASA-102.', 'unidad_id' => $unitIds['CASA-102'], 'residente_id' => $residentUsers['Ana Martínez López'], 'fecha_hora' => "{$today} 12:05:00", 'servicio_codigo' => $codigo],
     ];
     foreach ($guardAccesses as $access) {
-        res_seed_ensure_guard_access($pdo, $guardId, (int)$access['visit_id'], $access, $stats);
+        $visitId = $access['visit_id'] !== null ? (int)$access['visit_id'] : null;
+        res_seed_ensure_guard_access($pdo, $guardId, $visitId, $access, $stats);
     }
 
     $comunicados = [
@@ -1459,7 +1501,8 @@ try {
         $updated = (int)($values['updated'] ?? 0);
         $reused = (int)($values['reused'] ?? 0);
         $dry = (int)($values['dry_run'] ?? 0);
-        echo sprintf("- %-26s creados=%d actualizados=%d reutilizados=%d dry_run=%d\n", $bucket, $created, $updated, $reused, $dry);
+        $skipped = (int)($values['skipped'] ?? 0);
+        echo sprintf("- %-26s creados=%d actualizados=%d reutilizados=%d omitidos=%d dry_run=%d\n", $bucket, $created, $updated, $reused, $skipped, $dry);
     }
     echo "\nComandos:\n";
     echo "  php scripts/seed_residencial_demo.php --dry-run\n";
