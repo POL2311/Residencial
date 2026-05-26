@@ -432,7 +432,15 @@ try {
         $horaInicio = os_time_or_null($_POST['hora_inicio'] ?? null);
         $horaFin = os_time_or_null($_POST['hora_fin'] ?? null);
         $prioridad = os_priority((string)($_POST['prioridad'] ?? 'media'));
-        $estatus = os_status((string)($_POST['estatus'] ?? 'programada'));
+        $requestedStatus = strtolower(clean_str((string)($_POST['estatus'] ?? 'programada')));
+        $estatus = os_status($requestedStatus);
+
+        if ($estatus === 'cerrada') {
+            json_out(false, ['error' => 'Para cerrar una orden usa la acción Cerrar.'], 422);
+        }
+        if ($estatus === 'cancelada') {
+            json_out(false, ['error' => 'Para cancelar una orden usa la acción Cancelar.'], 422);
+        }
 
         if (!$fecha || $tipoServicio === '') {
             json_out(false, ['error' => 'Captura tipo de servicio y fecha programada.'], 422);
@@ -461,6 +469,9 @@ try {
             if (!$current) {
                 $pdo->rollBack();
                 json_out(false, ['error' => 'Orden no encontrada.'], 404);
+            }
+            if (in_array((string)$current['estatus'], ['cerrada', 'cancelada'], true)) {
+                $estatus = (string)$current['estatus'];
             }
             $stmt = $pdo->prepare("
                 UPDATE ordenes_servicio

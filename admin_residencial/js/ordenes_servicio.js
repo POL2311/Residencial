@@ -214,13 +214,16 @@
   }
 
   function rowActions(item) {
+    const status = String(item.estatus || '');
+    const canClose = ['en_proceso', 'pendiente_validacion'].includes(status);
+    const canCancel = !['cerrada', 'cancelada'].includes(status);
     return `
       <div class="flex flex-wrap gap-2">
         <button type="button" data-os-detail="${item.id}" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600">Detalle</button>
         <button type="button" data-os-edit="${item.id}" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600">Editar</button>
         <button type="button" data-os-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-3 py-2 text-xs font-semibold text-white">QR</button>
-        ${!['cerrada', 'cancelada'].includes(item.estatus) ? `<button type="button" data-os-close="${item.id}" class="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700">Cerrar</button>` : ''}
-        ${item.estatus !== 'cancelada' ? `<button type="button" data-os-cancel="${item.id}" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700">Cancelar</button>` : ''}
+        ${canClose ? `<button type="button" data-os-close="${item.id}" class="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700">Cerrar</button>` : ''}
+        ${canCancel ? `<button type="button" data-os-cancel="${item.id}" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700">Cancelar</button>` : ''}
       </div>
     `;
   }
@@ -285,6 +288,16 @@
 
   function openForm(order = null) {
     els.form?.reset();
+    const statusField = els.form?.elements.estatus || null;
+    const statusReadonly = els.form?.querySelector('[data-os-status-readonly]') || null;
+    if (statusField) {
+      statusField.disabled = false;
+      statusField.classList.remove('hidden');
+    }
+    if (statusReadonly) {
+      statusReadonly.textContent = '';
+      statusReadonly.classList.add('hidden');
+    }
     fillFormSelects(order || {});
     if (els.modalTitle) els.modalTitle.textContent = order ? `Editar ${order.folio}` : 'Nueva orden';
     if (order && els.form) {
@@ -294,6 +307,16 @@
       });
       if (els.form.elements.hora_inicio && order.hora_inicio) els.form.elements.hora_inicio.value = String(order.hora_inicio).slice(0, 5);
       if (els.form.elements.hora_fin && order.hora_fin) els.form.elements.hora_fin.value = String(order.hora_fin).slice(0, 5);
+      if (['cerrada', 'cancelada'].includes(String(order.estatus || ''))) {
+        if (statusField) {
+          statusField.disabled = true;
+          statusField.classList.add('hidden');
+        }
+        if (statusReadonly) {
+          statusReadonly.textContent = statusText(order.estatus);
+          statusReadonly.classList.remove('hidden');
+        }
+      }
     } else if (els.form?.elements.fecha_programada) {
       els.form.elements.fecha_programada.value = new Date().toISOString().slice(0, 10);
     }
@@ -367,7 +390,7 @@
                 ${eventos.map((event) => `<div class="rounded-xl bg-slate-50 px-3 py-2 text-sm"><div class="font-semibold text-slate-800">${escapeHtml(event.tipo_evento || '')}</div><div class="text-xs text-slate-400">${escapeHtml(event.fecha_hora || '')} · ${escapeHtml(event.resultado || '')}</div><div class="mt-1 text-slate-600">${escapeHtml(event.observaciones || '')}</div></div>`).join('') || '<div class="text-sm text-slate-400">Sin eventos registrados.</div>'}
               </div>
             </div>
-            ${!['cerrada', 'cancelada'].includes(order.estatus) ? `<form data-os-close-form="${order.id}" class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><h4 class="text-sm font-semibold text-emerald-800">Cerrar orden</h4><textarea name="observaciones_cierre" rows="3" class="mt-3 w-full rounded-xl border border-emerald-200 px-3 py-2 text-sm" placeholder="Observaciones de cierre"></textarea><button class="mt-3 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" type="submit">Cerrar orden</button></form>` : ''}
+            ${['en_proceso', 'pendiente_validacion'].includes(String(order.estatus || '')) ? `<form data-os-close-form="${order.id}" class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><h4 class="text-sm font-semibold text-emerald-800">Cerrar orden</h4><textarea name="observaciones_cierre" rows="3" class="mt-3 w-full rounded-xl border border-emerald-200 px-3 py-2 text-sm" placeholder="Observaciones de cierre"></textarea><button class="mt-3 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" type="submit">Cerrar orden</button></form>` : ''}
           </section>
         </div>
       `;
