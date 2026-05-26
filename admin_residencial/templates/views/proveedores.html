@@ -1,0 +1,229 @@
+<div id="proveedoresView" class="space-y-5">
+  <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="app-admin-kicker" data-os-label="external_companies">Empresas externas</div>
+    <div class="mt-2 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h1 class="app-admin-title" data-os-label="providers">Proveedores</h1>
+        <p class="app-admin-subtitle max-w-3xl">
+          Administra contratistas, empresas externas, personal autorizado asociado y documentos operativos.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button id="proveedoresRefresh" type="button" class="app-admin-ghost rounded-full px-4 py-2 text-sm font-semibold">Actualizar</button>
+        <button id="proveedoresNew" type="button" class="app-admin-primary rounded-full px-4 py-2 text-sm font-semibold">Nuevo proveedor</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="proveedoresAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <section class="grid gap-3 md:grid-cols-4" id="proveedoresStats"></section>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="grid gap-3 lg:grid-cols-12">
+      <div class="lg:col-span-7">
+        <label for="proveedoresSearch" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Búsqueda</label>
+        <input id="proveedoresSearch" type="search" placeholder="Nombre, razón social, servicio o contacto" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+      </div>
+      <div class="lg:col-span-3">
+        <label for="proveedoresStatusFilter" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="status">Estado</label>
+        <select id="proveedoresStatusFilter" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
+          <option value="">Todos</option>
+          <option value="activo">Activo</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="bloqueado">Bloqueado</option>
+        </select>
+      </div>
+      <div class="flex items-end lg:col-span-2">
+        <button id="proveedoresClearFilters" type="button" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600">Limpiar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+        <div>
+          <h2 class="text-base font-semibold text-slate-800" data-os-label="providers">Proveedores</h2>
+          <p id="proveedoresCount" class="text-xs text-slate-500">0 registros</p>
+        </div>
+      </div>
+      <div id="proveedoresList" class="divide-y divide-slate-100"></div>
+      <div id="proveedoresEmpty" class="hidden p-6 text-sm text-slate-500">No hay proveedores con los filtros actuales.</div>
+    </div>
+
+    <div id="proveedorDetail" class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div id="proveedorDetailEmpty" class="p-6 text-sm text-slate-500">
+        Selecciona un proveedor para ver personal asociado, documentos y eventos recientes.
+      </div>
+      <div id="proveedorDetailBody" class="hidden"></div>
+    </div>
+  </section>
+
+  <div id="proveedorModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="providers">Proveedores</div>
+          <h2 id="proveedorModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nuevo proveedor</h2>
+        </div>
+        <button type="button" data-close-provider-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <form id="proveedorForm" class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <input type="hidden" name="id" />
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre comercial</label>
+            <input name="nombre_comercial" required maxlength="160" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Razón social</label>
+            <input name="razon_social" maxlength="180" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+        </div>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo de servicio</label>
+            <input name="tipo_servicio" maxlength="120" placeholder="Mantenimiento, seguridad, limpieza..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="status">Estado</label>
+            <select name="estatus" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
+              <option value="activo">Activo</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="bloqueado">Bloqueado</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid gap-3 md:grid-cols-3">
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Contacto</label>
+            <input name="contacto_nombre" maxlength="120" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Teléfono</label>
+            <input name="contacto_telefono" maxlength="40" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Email</label>
+            <input name="contacto_email" type="email" maxlength="160" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Notas</label>
+          <textarea name="notas" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></textarea>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-600"><input name="activo" type="checkbox" value="1" checked /> Proveedor activo</label>
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <button type="button" data-close-provider-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar proveedor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="proveedorPersonModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="associated_personnel">Personal asociado</div>
+          <h2 class="mt-1 text-xl font-semibold text-slate-900">Asociar personal</h2>
+        </div>
+        <button type="button" data-close-person-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <form id="proveedorPersonForm" class="space-y-4 p-5">
+        <input type="hidden" name="proveedor_id" />
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="authorized_person">Personal autorizado</label>
+          <select name="persona_recurrente_id" required class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></select>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Rol / función</label>
+          <input name="rol" maxlength="120" placeholder="Técnico, supervisor, contratista..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+        </div>
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <button type="button" data-close-person-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Asociar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="proveedorDocModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Documentos</div>
+          <h2 id="proveedorDocModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nuevo documento</h2>
+        </div>
+        <button type="button" data-close-doc-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <form id="proveedorDocForm" class="space-y-4 p-5">
+        <input type="hidden" name="id" />
+        <input type="hidden" name="proveedor_id" />
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo de documento</label>
+          <input name="tipo_documento" required maxlength="120" placeholder="Contrato, INE, seguro, constancia..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">URL / ruta de archivo</label>
+          <input name="archivo_url" maxlength="255" placeholder="assets/uploads/..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+        </div>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimiento</label>
+            <input name="fecha_vencimiento" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="status">Estado</label>
+            <select name="estatus" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
+              <option value="pendiente">Pendiente</option>
+              <option value="vigente">Vigente</option>
+              <option value="vencido">Vencido</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <button type="button" data-close-doc-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar documento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="proveedorComplianceModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="compliance">Cumplimiento</div>
+          <h2 id="proveedorComplianceTitle" class="mt-1 text-xl font-semibold text-slate-900">Cambiar semáforo</h2>
+        </div>
+        <button type="button" data-close-compliance-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <form id="proveedorComplianceForm" class="space-y-4 p-5">
+        <input type="hidden" name="id" />
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="traffic_light">Semáforo</label>
+          <select name="estatus_cumplimiento" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
+            <option value="autorizado">Autorizado</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="bloqueado">Bloqueado</option>
+            <option value="documento_vencido">Documento vencido</option>
+            <option value="fuera_de_horario">Fuera de horario</option>
+          </select>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="block_reason">Motivo de bloqueo</label>
+          <textarea name="motivo_bloqueo" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" placeholder="Documentación vencida, revisión pendiente, fuera de política..."></textarea>
+        </div>
+        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Si un proveedor queda bloqueado, todo su personal asociado se considera bloqueado operativamente.
+        </div>
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <button type="button" data-close-compliance-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar semáforo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -295,7 +295,8 @@
 
       if (state.actionSource !== 'code' || !state.current) return false;
 
-      if (state.currentKind === 'persona_recurrente') return true;
+      if (state.currentKind === 'persona_recurrente') return state.current?.puede_ingresar !== false;
+      if (state.currentKind === 'orden_servicio') return state.current?.puede_ingresar !== false;
 
       return !!state.currentEval?.permitido;
     }
@@ -468,6 +469,18 @@
 
     function renderPersonaResult(persona) {
       if (!els.modalBody) return;
+      const compliance = persona?.cumplimiento || {};
+      const status = compliance.cumplimiento_estado || persona?.cumplimiento_estado || 'autorizado';
+      const label = compliance.cumplimiento_label || persona?.cumplimiento_label || 'Autorizado';
+      const motivo = compliance.cumplimiento_motivo || persona?.cumplimiento_motivo || '';
+      const provider = compliance.proveedor_nombre || persona?.proveedor_nombre || '';
+      const canEnter = persona?.puede_ingresar !== false;
+      const needsConfirmation = persona?.requiere_confirmacion === true;
+      const badgeClass = status === 'bloqueado'
+        ? 'border-rose-200 bg-rose-50 text-rose-700'
+        : (status === 'autorizado'
+          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          : 'border-amber-200 bg-amber-50 text-amber-700');
       els.modalBody.innerHTML = `
         <div class="space-y-4">
           <div class="font-semibold text-base text-slate-800">Personal recurrente identificado</div>
@@ -479,12 +492,22 @@
               <div class="text-lg font-semibold text-slate-800">${safeText(persona?.nombre)}</div>
               <div class="mt-1 text-sm text-slate-600">${safeText(persona?.empresa || 'Sin empresa')} · ${safeText(persona?.puesto || 'Sin puesto')}</div>
               <div class="mt-1 text-sm text-slate-500">Área: <b>${safeText(persona?.area_nombre || 'Sin área')}</b> · ${safeText(persona?.telefono || 'Sin teléfono')}</div>
-              <div class="mt-3 inline-flex rounded-full px-3 py-1 text-xs ${persona?.esta_dentro ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-700'}">${persona?.esta_dentro ? 'Actualmente dentro' : 'Actualmente fuera'}</div>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <div class="inline-flex rounded-full px-3 py-1 text-xs ${persona?.esta_dentro ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-700'}">${persona?.esta_dentro ? 'Actualmente dentro' : 'Actualmente fuera'}</div>
+                <div class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}">${safeText(label)}</div>
+              </div>
             </div>
           </div>
+          ${provider ? `<div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">Proveedor: <b>${safeText(provider)}</b></div>` : ''}
+          ${motivo ? `<div class="rounded-xl border ${canEnter ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-rose-200 bg-rose-50 text-rose-700'} px-3 py-2 text-sm">${safeText(canEnter && needsConfirmation ? `Acceso con advertencia: ${motivo}` : motivo)}</div>` : ''}
+          ${canEnter ? '' : `<div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">Acceso bloqueado. No se puede registrar entrada ni salida.</div>`}
         </div>
       `;
-      showDynamicForm({ pin: true, evidence: false });
+      if (canEnter) {
+        showDynamicForm({ pin: true, evidence: false });
+      } else {
+        resetDynamicForm();
+      }
     }
 
     function renderVisitanteOperativoResult(item) {
@@ -539,6 +562,49 @@
       }
     }
 
+    function renderOrdenServicioResult(item) {
+      if (!els.modalBody) return;
+      const schedule = item?.schedule || {};
+      const compliance = item?.cumplimiento || {};
+      const canEnter = item?.puede_ingresar !== false;
+      const needsConfirmation = item?.requiere_confirmacion === true;
+      const complianceStatus = compliance.cumplimiento_estado || 'autorizado';
+      const badgeClass = complianceStatus === 'bloqueado'
+        ? 'border-rose-200 bg-rose-50 text-rose-700'
+        : (complianceStatus === 'autorizado'
+          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          : 'border-amber-200 bg-amber-50 text-amber-700');
+      const scheduleMessage = schedule.motivo || '';
+      els.modalBody.innerHTML = `
+        <div class="space-y-4">
+          <div class="font-semibold text-base ${canEnter ? 'text-emerald-700' : 'text-rose-700'}">
+            ${canEnter ? 'Orden lista para validación' : 'Orden con restricciones'}
+          </div>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 text-sm">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Folio</div><div class="mt-1 font-medium text-slate-800">${safeText(item?.folio)}</div></div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Servicio</div><div class="mt-1 font-medium text-slate-800">${safeText(item?.tipo_servicio)}</div></div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Proveedor</div><div class="mt-1 font-medium text-slate-800">${safeText(item?.proveedor_nombre || 'Sin proveedor')}</div></div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Persona</div><div class="mt-1 font-medium text-slate-800">${safeText(item?.persona_nombre || 'Sin persona')}</div></div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Área</div><div class="mt-1 font-medium text-slate-800">${safeText(item?.area_nombre || 'Sin área')}</div></div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3"><div class="text-xs uppercase tracking-wide text-slate-400">Horario</div><div class="mt-1 font-medium text-slate-800">${safeText(item?.fecha_programada)} · ${safeText([item?.hora_inicio, item?.hora_fin].filter(Boolean).join(' - ') || 'Sin horario')}</div></div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}">${safeText(compliance.cumplimiento_label || 'Autorizado')}</span>
+            <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${item?.estatus === 'en_proceso' ? 'border-sky-200 bg-sky-50 text-sky-700' : 'border-slate-200 bg-slate-50 text-slate-700'}">${safeText(item?.estatus || 'programada')}</span>
+          </div>
+          ${scheduleMessage ? `<div class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">${safeText(scheduleMessage)}</div>` : ''}
+          ${compliance.cumplimiento_motivo ? `<div class="rounded-xl border ${canEnter ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-rose-200 bg-rose-50 text-rose-700'} px-3 py-2 text-sm">${safeText(compliance.cumplimiento_motivo)}</div>` : ''}
+          ${needsConfirmation && canEnter ? '<div class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">Requiere confirmación manual del operador.</div>' : ''}
+          ${canEnter ? '' : '<div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">No se puede registrar entrada ni salida.</div>'}
+        </div>
+      `;
+      if (canEnter) {
+        showDynamicForm({ pin: false, evidence: false });
+      } else {
+        resetDynamicForm();
+      }
+    }
+
     async function buscar(code) {
       const cleanCode = String(code || '').trim();
       enableActions(false);
@@ -561,13 +627,16 @@
         state.currentKind = data.kind || 'visita_residencial';
         state.actionSource = 'code';
         state.currentEval = null;
-        openActionModal(state.currentKind === 'persona_recurrente' ? 'Acceso de personal recurrente' : 'Validación de acceso');
+        openActionModal(state.currentKind === 'persona_recurrente' ? 'Acceso de personal recurrente' : (state.currentKind === 'orden_servicio' ? 'Orden de servicio' : 'Validación de acceso'));
 
         if (state.currentKind === 'persona_recurrente') {
           state.current = data.persona || null;
-          feedback(true);
+          feedback(state.current?.puede_ingresar !== false);
           renderPersonaResult(state.current);
-          updateStatusUI('ok', 'PIN requerido');
+          updateStatusUI(
+            state.current?.puede_ingresar === false ? 'error' : (state.current?.requiere_confirmacion ? 'idle' : 'ok'),
+            state.current?.puede_ingresar === false ? 'Acceso bloqueado' : (state.current?.requiere_confirmacion ? 'Advertencia de cumplimiento' : 'PIN requerido')
+          );
         } else if (state.currentKind === 'visitante_rapido') {
           state.current = data.visitante_rapido || null;
           state.currentEval = state.current?.eval || null;
@@ -580,6 +649,14 @@
           feedback(!!state.current?.eval?.permitido);
           renderPermisoResult(state.current);
           updateStatusUI(state.current?.eval?.permitido ? 'ok' : 'error', state.current?.eval?.permitido ? 'Listo para validar' : 'Con restricciones');
+        } else if (state.currentKind === 'orden_servicio') {
+          state.current = data.orden_servicio || null;
+          feedback(state.current?.puede_ingresar !== false);
+          renderOrdenServicioResult(state.current);
+          updateStatusUI(
+            state.current?.puede_ingresar === false ? 'error' : (state.current?.requiere_confirmacion ? 'idle' : 'ok'),
+            state.current?.puede_ingresar === false ? 'Orden bloqueada' : (state.current?.requiere_confirmacion ? 'Advertencia de orden' : 'Listo para validar')
+          );
         } else {
           state.current = data.visita || null;
           const ev = data.eval || {};
@@ -662,6 +739,7 @@
         action = 'confirm_persona_recurrente';
         fd.set('persona_id', String(state.current.id));
         fd.set('pin', els.pin?.value?.trim() || '');
+        if (state.current?.requiere_confirmacion) fd.set('cumplimiento_confirmado', '1');
       } else if (state.currentKind === 'visitante_rapido') {
         action = 'confirm_visitante_rapido';
         fd.set('visitante_id', String(state.current.id));
@@ -670,6 +748,10 @@
         action = 'confirm_permiso_material';
         fd.set('permiso_material_id', String(state.current.id));
         if (els.evidence?.files?.[0]) fd.append('evidencia', els.evidence.files[0]);
+      } else if (state.currentKind === 'orden_servicio') {
+        action = 'confirm_orden_servicio';
+        fd.set('orden_id', String(state.current.id));
+        if (state.current?.requiere_confirmacion) fd.set('cumplimiento_confirmado', '1');
       } else {
         fd.set('code', state.current.codigo_acceso);
       }
@@ -699,6 +781,9 @@
           state.current = json.data?.permiso_material || state.current;
           state.currentEval = state.current?.eval || { permitido: !!json.permitido, motivo: json.message || '' };
           renderPermisoResult(state.current);
+        } else if (state.currentKind === 'orden_servicio') {
+          state.current = json.data?.orden_servicio || state.current;
+          renderOrdenServicioResult(state.current);
         } else {
           state.currentEval = { permitido: !!json.permitido, motivo: json.message || '' };
           if (els.modalBody) {

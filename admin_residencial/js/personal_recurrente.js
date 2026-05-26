@@ -19,7 +19,11 @@
     formError: document.getElementById('personalFormError'),
   };
 
-  const state = { items: [], areas: [] };
+  const state = {
+    items: [],
+    areas: [],
+    mode: window.AdminResidencialDashboard?.getOperationalMode?.() || 'residencial',
+  };
   const syncDashboardOverlayState = () => window.AdminResidencialDashboard?.syncOverlayState?.();
   const withPendingAction = window.AdminResidencialDashboard?.withPendingAction || (async (_options, task) => task());
 
@@ -68,6 +72,35 @@
 
   function qrPreview(payload) {
     return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(payload)}`;
+  }
+
+  function isOperationalMode() {
+    return String(state.mode || 'residencial') !== 'residencial';
+  }
+
+  function statusText(status = '') {
+    const map = {
+      autorizado: 'Autorizado',
+      pendiente: 'Pendiente',
+      bloqueado: 'Bloqueado',
+      documento_vencido: 'Documento vencido',
+      fuera_de_horario: 'Fuera de horario',
+    };
+    return map[String(status || '').toLowerCase()] || status || '—';
+  }
+
+  function statusClass(status = '') {
+    const value = String(status || '').toLowerCase();
+    if (value === 'bloqueado') return 'border-rose-200 bg-rose-50 text-rose-700';
+    if (value === 'pendiente' || value === 'documento_vencido' || value === 'fuera_de_horario') return 'border-amber-200 bg-amber-50 text-amber-700';
+    return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+  }
+
+  function toggleComplianceFields() {
+    root.querySelectorAll('.personal-compliance-fields').forEach((el) => {
+      el.classList.toggle('hidden', !isOperationalMode());
+    });
+    window.OSGateLabels?.apply?.(root, state.mode);
   }
 
   function ensureQrModal() {
@@ -194,6 +227,8 @@
           <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Teléfono</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.telefono || 'Sin teléfono')}</div></div>
           <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Estado</div><div class="mt-1 font-semibold text-slate-900">${item.activo ? 'Activo' : 'Inactivo'}</div></div>
           <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Presencia</div><div class="mt-1 font-semibold text-slate-900">${item.esta_dentro ? 'Dentro' : 'Fuera'}</div></div>
+          ${isOperationalMode() ? `<div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Cumplimiento</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(statusText(item.cumplimiento_efectivo?.cumplimiento_estado || item.estatus_cumplimiento))}</div></div>` : ''}
+          ${isOperationalMode() ? `<div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Proveedor</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.proveedor_nombre || 'Sin proveedor')}</div></div>` : ''}
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Última entrada</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.ultima_entrada_at || '—')}</div></div>
@@ -265,6 +300,7 @@
                 <h3 class="text-lg font-semibold text-slate-800">${escapeHtml(item.nombre)}</h3>
                 <span class="rounded-full px-2.5 py-1 text-xs ${item.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">${item.activo ? 'Activo' : 'Inactivo'}</span>
                 <span class="rounded-full px-2.5 py-1 text-xs ${item.esta_dentro ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'}">${item.esta_dentro ? 'Dentro' : 'Fuera'}</span>
+                ${isOperationalMode() ? `<span class="rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClass(item.cumplimiento_efectivo?.cumplimiento_estado || item.estatus_cumplimiento)}">${escapeHtml(statusText(item.cumplimiento_efectivo?.cumplimiento_estado || item.estatus_cumplimiento))}</span>` : ''}
               </div>
               <div class="mt-1 text-sm text-slate-600">
                 ${escapeHtml(item.empresa || 'Sin empresa')} · ${escapeHtml(item.puesto || 'Sin puesto')}
@@ -272,6 +308,8 @@
               <div class="mt-1 text-sm text-slate-500">
                 Área: <b>${escapeHtml(item.area_nombre || 'Sin área')}</b> · ${escapeHtml(item.telefono || 'Sin teléfono')}
               </div>
+              ${isOperationalMode() && item.proveedor_nombre ? `<div class="mt-1 text-sm text-slate-500">Proveedor: ${escapeHtml(item.proveedor_nombre)}</div>` : ''}
+              ${isOperationalMode() && item.cumplimiento_efectivo?.cumplimiento_motivo ? `<div class="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">${escapeHtml(item.cumplimiento_efectivo.cumplimiento_motivo)}</div>` : ''}
             </div>
           </div>
           <div class="lg:w-[180px]">
@@ -300,7 +338,10 @@
       els.form.notas.value = item?.notas || '';
       els.form.pin.value = '';
       els.form.activo.checked = item ? Boolean(Number(item.activo)) : true;
+      if (els.form.estatus_cumplimiento) els.form.estatus_cumplimiento.value = item?.estatus_cumplimiento || 'autorizado';
+      if (els.form.motivo_bloqueo) els.form.motivo_bloqueo.value = item?.motivo_bloqueo || '';
       renderAreas(item?.area_id || '');
+      toggleComplianceFields();
     }
     els.modal?.classList.remove('hidden');
     els.modal?.classList.add('flex');
@@ -320,7 +361,9 @@
     ]);
     state.items = personal.data?.items || [];
     state.areas = meta.data?.areas || [];
+    state.mode = meta.data?.context?.modo_operacion || state.mode;
     renderAreas();
+    toggleComplianceFields();
     render();
   }
 

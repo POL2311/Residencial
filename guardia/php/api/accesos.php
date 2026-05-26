@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../../config/resident_access.php';
 require_once __DIR__ . '/../../../config/operational_mode.php';
 require_once __DIR__ . '/../../../config/image_uploads.php';
 require_once __DIR__ . '/../../../config/service_profile.php';
+require_once __DIR__ . '/../../../config/compliance_helpers.php';
 
 require_login();
 require_role(['guardia', 'super_admin']);
@@ -134,6 +135,7 @@ function qr_payload_prefix_map(): array
         'op:pr:' => 'persona_recurrente',
         'op:vr:' => 'visitante_rapido',
         'op:pm:' => 'permiso_material',
+        'op:so:' => 'orden_servicio',
     ];
 }
 
@@ -225,6 +227,150 @@ function fetch_permiso_material_by_token(PDO $pdo, int $rid, string $token): ?ar
     return $row;
 }
 
+function fetch_orden_servicio_by_token(PDO $pdo, int $rid, string $token, bool $forUpdate = false): ?array
+{
+    if (!operational_table_exists($pdo, 'ordenes_servicio')) {
+        return null;
+    }
+    $sql = "
+        SELECT
+            os.*,
+            p.nombre_comercial AS proveedor_nombre,
+            p.estatus_cumplimiento AS proveedor_cumplimiento,
+            p.motivo_bloqueo AS proveedor_motivo,
+            pr.nombre AS persona_nombre,
+            pr.empresa AS persona_empresa,
+            pr.puesto AS persona_puesto,
+            pr.estatus_cumplimiento AS persona_cumplimiento,
+            pr.motivo_bloqueo AS persona_motivo,
+            a.nombre AS area_nombre
+        FROM ordenes_servicio os
+        LEFT JOIN proveedores p ON p.id = os.proveedor_id AND p.residencial_id = os.residencial_id
+        LEFT JOIN personas_recurrentes pr ON pr.id = os.persona_recurrente_id AND pr.residencial_id = os.residencial_id
+        LEFT JOIN areas_operativas a ON a.id = os.area_id AND a.residencial_id = os.residencial_id
+        WHERE os.residencial_id = :rid
+          AND os.qr_token = :token
+        LIMIT 1
+    ";
+    if ($forUpdate) {
+        $sql .= " FOR UPDATE";
+    }
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['rid' => $rid, 'token' => $token]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ?: null;
+}
+
+function orden_servicio_compliance(PDO $pdo, int $rid, array $row): array
+{
+    $providerStatus = compliance_normalize_status((string)($row['proveedor_cumplimiento'] ?? 'autorizado'));
+    $providerPayload = !empty($row['proveedor_id']) ? [
+        'id' => (int)$row['proveedor_id'],
+        'nombre' => (string)($row['proveedor_nombre'] ?? ''),
+        'estatus_cumplimiento' => $providerStatus,
+        'motivo_bloqueo' => (string)($row['proveedor_motivo'] ?? ''),
+    ] : null;
+
+    $candidates = [[
+        'status' => $providerStatus,
+        'motivo' => (string)($row['proveedor_motivo'] ?? ''),
+        'source' => 'proveedor',
+        'provider' => $providerPayload,
+    ]];
+
+    if (!empty($row['persona_recurrente_id'])) {
+        $personCompliance = compliance_effective_for_person($pdo, $rid, (int)$row['persona_recurrente_id'], [
+            'id' => (int)$row['persona_recurrente_id'],
+            'estatus_cumplimiento' => (string)($row['persona_cumplimiento'] ?? 'autorizado'),
+            'motivo_bloqueo' => (string)($row['persona_motivo'] ?? ''),
+        ]);
+        $candidates[] = [
+            'status' => $personCompliance['cumplimiento_estado'],
+            'motivo' => $personCompliance['cumplimiento_motivo'],
+            'source' => $personCompliance['cumplimiento_origen'] ?? 'persona',
+            'provider' => $personCompliance['proveedor_id'] ? [
+                'id' => (int)$personCompliance['proveedor_id'],
+                'nombre' => (string)$personCompliance['proveedor_nombre'],
+            ] : $providerPayload,
+        ];
+    }
+
+    $winner = compliance_pick_worst($candidates);
+    $status = compliance_normalize_status((string)$winner['status']);
+    $provider = is_array($winner['provider']) ? $winner['provider'] : $providerPayload;
+    return [
+        'cumplimiento_estado' => $status,
+        'cumplimiento_label' => compliance_label($status),
+        'cumplimiento_motivo' => trim((string)$winner['motivo']),
+        'cumplimiento_origen' => (string)$winner['source'],
+        'proveedor_id' => $provider ? (int)($provider['id'] ?? 0) : null,
+        'proveedor_nombre' => $provider ? (string)($provider['nombre'] ?? '') : (string)($row['proveedor_nombre'] ?? ''),
+        'puede_ingresar' => !compliance_is_blocking($status),
+        'requiere_confirmacion' => compliance_requires_confirmation($status),
+    ];
+}
+
+function orden_servicio_schedule_eval(array $row): array
+{
+    $today = date('Y-m-d');
+    $now = date('H:i:s');
+    $warnings = [];
+    $permitido = true;
+    $estatus = (string)($row['estatus'] ?? 'programada');
+
+    if (in_array($estatus, ['cerrada', 'cancelada'], true)) {
+        $permitido = false;
+        $warnings[] = $estatus === 'cerrada' ? 'La orden ya está cerrada.' : 'La orden fue cancelada.';
+    }
+    if ($permitido && (string)($row['fecha_programada'] ?? '') !== $today) {
+        $warnings[] = 'La orden no está programada para hoy.';
+    }
+    if ($permitido && !empty($row['hora_inicio']) && $now < (string)$row['hora_inicio']) {
+        $warnings[] = 'La orden está fuera de horario: aún no inicia.';
+    }
+    if ($permitido && !empty($row['hora_fin']) && $now > (string)$row['hora_fin']) {
+        $warnings[] = 'La orden está fuera de horario: ya terminó.';
+    }
+
+    return [
+        'permitido' => $permitido,
+        'horario_validado' => empty($warnings),
+        'requiere_confirmacion' => $permitido && !empty($warnings),
+        'motivo' => implode(' ', $warnings),
+        'fecha_actual' => $today,
+        'hora_actual' => $now,
+    ];
+}
+
+function normalize_orden_servicio_scan(PDO $pdo, int $rid, array $row): array
+{
+    $schedule = orden_servicio_schedule_eval($row);
+    $compliance = orden_servicio_compliance($pdo, $rid, $row);
+    $canEnter = (bool)$schedule['permitido'] && (bool)$compliance['puede_ingresar'];
+    return [
+        'id' => (int)$row['id'],
+        'folio' => (string)$row['folio'],
+        'qr_token' => (string)$row['qr_token'],
+        'tipo_servicio' => (string)($row['tipo_servicio'] ?? ''),
+        'descripcion' => (string)($row['descripcion'] ?? ''),
+        'fecha_programada' => (string)$row['fecha_programada'],
+        'hora_inicio' => (string)($row['hora_inicio'] ?? ''),
+        'hora_fin' => (string)($row['hora_fin'] ?? ''),
+        'estatus' => (string)($row['estatus'] ?? 'programada'),
+        'prioridad' => (string)($row['prioridad'] ?? 'media'),
+        'proveedor_id' => $row['proveedor_id'] !== null ? (int)$row['proveedor_id'] : null,
+        'proveedor_nombre' => (string)($row['proveedor_nombre'] ?? ''),
+        'persona_recurrente_id' => $row['persona_recurrente_id'] !== null ? (int)$row['persona_recurrente_id'] : null,
+        'persona_nombre' => (string)($row['persona_nombre'] ?? ''),
+        'area_id' => $row['area_id'] !== null ? (int)$row['area_id'] : null,
+        'area_nombre' => (string)($row['area_nombre'] ?? ''),
+        'schedule' => $schedule,
+        'cumplimiento' => $compliance,
+        'puede_ingresar' => $canEnter,
+        'requiere_confirmacion' => $canEnter && ((bool)$schedule['requiere_confirmacion'] || (bool)$compliance['requiere_confirmacion']),
+    ];
+}
+
 function find_operational_scan(PDO $pdo, int $rid, string $code): ?array
 {
     $decoded = decode_operational_code($code);
@@ -239,7 +385,7 @@ function find_operational_scan(PDO $pdo, int $rid, string $code): ?array
     if ($preferredType) {
         $try[] = $preferredType;
     }
-    foreach (['persona_recurrente', 'visitante_rapido', 'permiso_material'] as $type) {
+    foreach (['persona_recurrente', 'visitante_rapido', 'permiso_material', 'orden_servicio'] as $type) {
         if (!in_array($type, $try, true)) {
             $try[] = $type;
         }
@@ -253,6 +399,8 @@ function find_operational_scan(PDO $pdo, int $rid, string $code): ?array
             $row = fetch_visitante_rapido_by_token($pdo, $rid, $token);
         } elseif ($type === 'permiso_material') {
             $row = fetch_permiso_material_by_token($pdo, $rid, $token);
+        } elseif ($type === 'orden_servicio') {
+            $row = fetch_orden_servicio_by_token($pdo, $rid, $token);
         }
 
         if ($row) {
@@ -263,8 +411,20 @@ function find_operational_scan(PDO $pdo, int $rid, string $code): ?array
     return null;
 }
 
-function normalize_persona_scan(array $row): array
+function normalize_persona_scan(array $row, ?PDO $pdo = null, ?int $rid = null): array
 {
+    $compliance = ($pdo && $rid)
+        ? compliance_effective_for_person($pdo, $rid, (int)$row['id'], $row)
+        : [
+            'cumplimiento_estado' => compliance_normalize_status((string)($row['estatus_cumplimiento'] ?? 'autorizado')),
+            'cumplimiento_label' => compliance_label((string)($row['estatus_cumplimiento'] ?? 'autorizado')),
+            'cumplimiento_motivo' => (string)($row['motivo_bloqueo'] ?? ''),
+            'proveedor_id' => null,
+            'proveedor_nombre' => '',
+            'puede_ingresar' => !compliance_is_blocking((string)($row['estatus_cumplimiento'] ?? 'autorizado')),
+            'requiere_confirmacion' => compliance_requires_confirmation((string)($row['estatus_cumplimiento'] ?? 'autorizado')),
+        ];
+
     return [
         'id' => (int)$row['id'],
         'nombre' => (string)$row['nombre'],
@@ -277,6 +437,14 @@ function normalize_persona_scan(array $row): array
         'area_nombre' => (string)($row['area_nombre'] ?? ''),
         'activo' => (int)$row['activo'],
         'esta_dentro' => (int)$row['esta_dentro'],
+        'cumplimiento' => $compliance,
+        'cumplimiento_estado' => $compliance['cumplimiento_estado'],
+        'cumplimiento_label' => $compliance['cumplimiento_label'],
+        'cumplimiento_motivo' => $compliance['cumplimiento_motivo'],
+        'proveedor_id' => $compliance['proveedor_id'],
+        'proveedor_nombre' => $compliance['proveedor_nombre'],
+        'puede_ingresar' => $compliance['puede_ingresar'],
+        'requiere_confirmacion' => $compliance['requiere_confirmacion'],
         'ultima_entrada_at' => (string)($row['ultima_entrada_at'] ?? ''),
         'ultima_salida_at' => (string)($row['ultima_salida_at'] ?? ''),
     ];
@@ -434,19 +602,23 @@ try {
                 'persona_recurrente' => 'personal_recurrente',
                 'visitante_rapido' => 'visitantes_rapidos',
                 'permiso_material' => 'materiales',
+                'orden_servicio' => 'ordenes_servicio',
             ];
             $requiredModule = $moduleByType[$scan['type']] ?? '';
             if ($requiredModule === '' || $isSuperAdmin || service_profile_module_allowed_for_role_and_service($serviceProfile, 'guardia', $requiredModule)) {
                 $payload = ['kind' => $scan['type']];
                 if ($scan['type'] === 'persona_recurrente') {
-                    $payload['persona'] = normalize_persona_scan($scan['item']);
+                    $payload['persona'] = normalize_persona_scan($scan['item'], $pdo, $residencialId);
                     $payload['requires_pin'] = true;
                 } elseif ($scan['type'] === 'visitante_rapido') {
                     $payload['visitante_rapido'] = normalize_visitante_scan($scan['item']);
                     $payload['requires_evidence'] = true;
-                } else {
+                } elseif ($scan['type'] === 'permiso_material') {
                     $payload['permiso_material'] = normalize_permiso_scan($scan['item']);
                     $payload['requires_evidence'] = true;
+                } else {
+                    $payload['orden_servicio'] = normalize_orden_servicio_scan($pdo, $residencialId, $scan['item']);
+                    $payload['requires_confirmation'] = (bool)$payload['orden_servicio']['requiere_confirmacion'];
                 }
                 out(true, ['data' => $payload]);
             }
@@ -746,6 +918,7 @@ try {
         $pin = preg_replace('/\D+/', '', (string)($_POST['pin'] ?? ''));
         $tipoEvento = strv($_POST['tipo_evento'] ?? 'entrada', 20);
         $observaciones = strv($_POST['observaciones'] ?? '', 500);
+        $cumplimientoConfirmado = operational_bool_int($_POST['cumplimiento_confirmado'] ?? 0) === 1;
 
         if ($personaId <= 0 || $pin === '') {
             out(false, ['error' => 'Debes seleccionar una persona y capturar su PIN.'], 422);
@@ -772,12 +945,23 @@ try {
             out(false, ['error' => 'No encontramos a la persona seleccionada.'], 404);
         }
 
-        $permitido = (int)$row['activo'] === 1 && password_verify($pin, (string)$row['pin_hash']);
+        $compliance = compliance_effective_for_person($pdo, $residencialId, $personaId, $row);
+        $pinValido = password_verify($pin, (string)$row['pin_hash']);
+        $permitido = (int)$row['activo'] === 1 && $pinValido && (bool)$compliance['puede_ingresar'];
         $motivo = '';
         if ((int)$row['activo'] !== 1) {
             $motivo = 'La persona está inactiva.';
-        } elseif (!$permitido) {
+        } elseif (!$pinValido) {
             $motivo = 'PIN incorrecto.';
+        } elseif (!(bool)$compliance['puede_ingresar']) {
+            $motivo = sprintf(
+                'Acceso bloqueado: %s%s',
+                $compliance['proveedor_nombre'] ? 'proveedor ' . $compliance['proveedor_nombre'] . ' está bloqueado.' : 'persona bloqueada.',
+                $compliance['cumplimiento_motivo'] ? ' Motivo: ' . $compliance['cumplimiento_motivo'] : ''
+            );
+        } elseif ((bool)$compliance['requiere_confirmacion'] && !$cumplimientoConfirmado) {
+            $motivo = 'El acceso requiere confirmación manual por cumplimiento.';
+            $permitido = false;
         }
 
         if ($permitido) {
@@ -802,17 +986,40 @@ try {
             }
         }
 
+        $tipoOrigenBitacora = 'persona_recurrente';
+        $tipoEventoBitacora = $tipoEvento;
+        $resultadoBitacora = $permitido ? 'permitido' : 'denegado';
+        $observacionesBitacora = $permitido ? $observaciones : trim(($motivo ?: 'Acceso denegado.') . ' ' . $observaciones);
+
+        if (!$pinValido || (int)$row['activo'] !== 1) {
+            $tipoOrigenBitacora = 'persona_recurrente';
+        } elseif (!(bool)$compliance['puede_ingresar']) {
+            $tipoOrigenBitacora = 'cumplimiento';
+            $tipoEventoBitacora = 'acceso_bloqueado_cumplimiento';
+            $resultadoBitacora = 'rechazado';
+        } elseif ($permitido && (bool)$compliance['requiere_confirmacion']) {
+            $tipoOrigenBitacora = 'cumplimiento';
+            $tipoEventoBitacora = 'acceso_advertencia_cumplimiento';
+            $resultadoBitacora = 'permitido';
+            $observacionesBitacora = trim(($compliance['cumplimiento_motivo'] ?: 'Acceso con advertencia de cumplimiento.') . ' ' . $observaciones);
+        }
+
         operational_write_bitacora($pdo, [
             'residencial_id' => $residencialId,
             'guardia_id' => $guardiaId,
-            'tipo_origen' => 'persona_recurrente',
+            'tipo_origen' => $tipoOrigenBitacora,
             'origen_id' => $personaId,
-            'tipo_evento' => $tipoEvento,
-            'resultado' => $permitido ? 'permitido' : 'denegado',
+            'tipo_evento' => $tipoEventoBitacora,
+            'resultado' => $resultadoBitacora,
             'persona_recurrente_id' => $personaId,
             'area_id' => $row['area_id'] !== null ? (int)$row['area_id'] : null,
-            'observaciones' => $permitido ? $observaciones : trim('PIN inválido. ' . $observaciones),
-            'metadata_json' => ['pin_valid' => $permitido],
+            'observaciones' => $observacionesBitacora,
+            'metadata_json' => [
+                'pin_valid' => $pinValido,
+                'cumplimiento' => $compliance,
+                'cumplimiento_confirmado' => $cumplimientoConfirmado,
+                'tipo_movimiento_solicitado' => $tipoEvento,
+            ],
         ]);
 
         $pdo->commit();
@@ -822,11 +1029,142 @@ try {
                 ? ($tipoEvento === 'salida' ? 'Salida registrada correctamente.' : 'Entrada registrada correctamente.')
                 : ($motivo ?: 'Acceso denegado.'),
             'permitido' => $permitido,
+            'cumplimiento' => $compliance,
             'data' => [
                 'kind' => 'persona_recurrente',
                 'persona' => normalize_persona_scan(array_merge($row, [
                     'esta_dentro' => $permitido ? ($tipoEvento === 'salida' ? 0 : 1) : (int)$row['esta_dentro'],
-                ])),
+                ]), $pdo, $residencialId),
+            ],
+        ]);
+    }
+
+    if ($method === 'POST' && $action === 'confirm_orden_servicio') {
+        guardia_require_module_access($serviceProfile, $isSuperAdmin, 'ordenes_servicio', 'El módulo de órdenes de servicio no está habilitado para este cliente.');
+
+        $orderId = intv_safe($_POST['orden_id'] ?? 0, 0);
+        $tipoEvento = strv($_POST['tipo_evento'] ?? 'entrada', 20);
+        $observaciones = strv($_POST['observaciones'] ?? '', 500);
+        $confirmado = operational_bool_int($_POST['cumplimiento_confirmado'] ?? 0) === 1;
+
+        if ($orderId <= 0 || !in_array($tipoEvento, ['entrada', 'salida'], true)) {
+            out(false, ['error' => 'Orden o movimiento inválido.'], 422);
+        }
+
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("
+            SELECT
+                os.*,
+                p.nombre_comercial AS proveedor_nombre,
+                p.estatus_cumplimiento AS proveedor_cumplimiento,
+                p.motivo_bloqueo AS proveedor_motivo,
+                pr.nombre AS persona_nombre,
+                pr.empresa AS persona_empresa,
+                pr.puesto AS persona_puesto,
+                pr.estatus_cumplimiento AS persona_cumplimiento,
+                pr.motivo_bloqueo AS persona_motivo,
+                a.nombre AS area_nombre
+            FROM ordenes_servicio os
+            LEFT JOIN proveedores p ON p.id = os.proveedor_id AND p.residencial_id = os.residencial_id
+            LEFT JOIN personas_recurrentes pr ON pr.id = os.persona_recurrente_id AND pr.residencial_id = os.residencial_id
+            LEFT JOIN areas_operativas a ON a.id = os.area_id AND a.residencial_id = os.residencial_id
+            WHERE os.id = :id
+              AND os.residencial_id = :rid
+            LIMIT 1
+            FOR UPDATE
+        ");
+        $stmt->execute(['id' => $orderId, 'rid' => $residencialId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        if (!$row) {
+            $pdo->rollBack();
+            out(false, ['error' => 'Orden de servicio no encontrada.'], 404);
+        }
+
+        $schedule = orden_servicio_schedule_eval($row);
+        $compliance = orden_servicio_compliance($pdo, $residencialId, $row);
+        $permitido = (bool)$schedule['permitido'] && (bool)$compliance['puede_ingresar'];
+        $warning = ((bool)$schedule['requiere_confirmacion'] || (bool)$compliance['requiere_confirmacion']);
+        $motivo = trim(($schedule['motivo'] ?? '') . ' ' . ($compliance['cumplimiento_motivo'] ?? ''));
+
+        if ((string)$row['estatus'] === 'programada' && $tipoEvento !== 'entrada') {
+            $permitido = false;
+            $motivo = 'La orden debe registrar entrada antes de salida.';
+        } elseif ((string)$row['estatus'] === 'en_proceso' && $tipoEvento !== 'salida') {
+            $permitido = false;
+            $motivo = 'La orden ya está en proceso; corresponde registrar salida.';
+        } elseif (in_array((string)$row['estatus'], ['pendiente_validacion', 'cerrada', 'cancelada'], true)) {
+            $permitido = false;
+            $motivo = 'La orden no acepta movimientos desde Guardia en su estado actual.';
+        }
+
+        if ($permitido && $warning && !$confirmado) {
+            $permitido = false;
+            $motivo = $motivo ?: 'La orden requiere confirmación manual.';
+        }
+
+        if ($permitido) {
+            if ($tipoEvento === 'entrada') {
+                $up = $pdo->prepare("
+                    UPDATE ordenes_servicio
+                    SET estatus='en_proceso',
+                        inicio_real_at = COALESCE(inicio_real_at, NOW()),
+                        updated_at=NOW()
+                    WHERE id=:id AND residencial_id=:rid
+                ");
+                $up->execute(['id' => $orderId, 'rid' => $residencialId]);
+                $row['estatus'] = 'en_proceso';
+                $row['inicio_real_at'] = $row['inicio_real_at'] ?: date('Y-m-d H:i:s');
+            } else {
+                $up = $pdo->prepare("
+                    UPDATE ordenes_servicio
+                    SET estatus='pendiente_validacion',
+                        updated_at=NOW()
+                    WHERE id=:id AND residencial_id=:rid
+                ");
+                $up->execute(['id' => $orderId, 'rid' => $residencialId]);
+                $row['estatus'] = 'pendiente_validacion';
+            }
+        }
+
+        $tipoEventoBitacora = $permitido
+            ? ($warning ? 'orden_servicio_advertencia' : 'orden_servicio_' . $tipoEvento)
+            : 'orden_servicio_rechazada';
+        $resultado = $permitido ? 'permitido' : 'rechazado';
+
+        operational_write_bitacora($pdo, [
+            'residencial_id' => $residencialId,
+            'guardia_id' => $guardiaId,
+            'tipo_origen' => 'orden_servicio',
+            'origen_id' => $orderId,
+            'tipo_evento' => $tipoEventoBitacora,
+            'resultado' => $resultado,
+            'persona_recurrente_id' => ($row['persona_recurrente_id'] ?? null) !== null ? (int)$row['persona_recurrente_id'] : null,
+            'area_id' => ($row['area_id'] ?? null) !== null ? (int)$row['area_id'] : null,
+            'observaciones' => trim(($permitido ? '' : ($motivo ?: 'Orden rechazada.') . ' ') . $observaciones),
+            'metadata_json' => [
+                'folio' => (string)($row['folio'] ?? ''),
+                'proveedor_id' => ($row['proveedor_id'] ?? null) !== null ? (int)$row['proveedor_id'] : null,
+                'proveedor_nombre' => (string)($row['proveedor_nombre'] ?? ''),
+                'persona_recurrente_id' => ($row['persona_recurrente_id'] ?? null) !== null ? (int)$row['persona_recurrente_id'] : null,
+                'area_id' => ($row['area_id'] ?? null) !== null ? (int)$row['area_id'] : null,
+                'semaforo_estado' => $compliance['cumplimiento_estado'],
+                'horario_validado' => (bool)$schedule['horario_validado'],
+                'cumplimiento_confirmado' => $confirmado,
+                'tipo_movimiento_solicitado' => $tipoEvento,
+                'qr_token' => (string)($row['qr_token'] ?? ''),
+            ],
+        ]);
+
+        $pdo->commit();
+
+        out(true, [
+            'message' => $permitido
+                ? ($tipoEvento === 'salida' ? 'Salida de orden registrada. Pendiente validación de admin.' : 'Entrada de orden registrada.')
+                : ($motivo ?: 'Orden rechazada.'),
+            'permitido' => $permitido,
+            'data' => [
+                'kind' => 'orden_servicio',
+                'orden_servicio' => normalize_orden_servicio_scan($pdo, $residencialId, $row),
             ],
         ]);
     }

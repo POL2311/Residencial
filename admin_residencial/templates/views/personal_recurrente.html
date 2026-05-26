@@ -60,6 +60,23 @@
             </div>
           </div>
 
+          <div class="personal-compliance-fields hidden grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-xs text-slate-600" data-os-label="traffic_light">Semáforo</label>
+              <select name="estatus_cumplimiento" class="w-full rounded-xl border px-3 py-2 text-sm">
+                <option value="autorizado">Autorizado</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="bloqueado">Bloqueado</option>
+                <option value="documento_vencido">Documento vencido</option>
+                <option value="fuera_de_horario">Fuera de horario</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs text-slate-600" data-os-label="block_reason">Motivo de bloqueo</label>
+              <input name="motivo_bloqueo" type="text" maxlength="255" class="w-full rounded-xl border px-3 py-2 text-sm" placeholder="Opcional salvo bloqueo" />
+            </div>
+          </div>
+
           <div>
             <label class="mb-1 block text-xs text-slate-600">Foto</label>
             <input name="foto" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" class="w-full rounded-xl border px-3 py-2 text-sm" />

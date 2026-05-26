@@ -39,6 +39,8 @@ if (!function_exists('service_profile_module_flags')) {
             'habilita_herramientas',
             'habilita_reportes_operativos',
             'habilita_rondines',
+            'habilita_proveedores',
+            'habilita_ordenes_servicio',
         ];
     }
 }
@@ -127,6 +129,8 @@ if (!function_exists('service_profile_labels')) {
                 'habilita_herramientas' => 'Herramientas',
                 'habilita_reportes_operativos' => 'Reportes operativos',
                 'habilita_rondines' => 'Rondines',
+                'habilita_proveedores' => 'Proveedores',
+                'habilita_ordenes_servicio' => 'Órdenes de servicio',
             ],
         ];
     }
@@ -162,6 +166,8 @@ if (!function_exists('service_profile_defaults')) {
             'habilita_herramientas' => 0,
             'habilita_reportes_operativos' => 0,
             'habilita_rondines' => 0,
+            'habilita_proveedores' => 0,
+            'habilita_ordenes_servicio' => 0,
         ];
 
         return match ($preset) {
@@ -215,6 +221,8 @@ if (!function_exists('service_profile_defaults')) {
                 'habilita_herramientas' => 1,
                 'habilita_reportes_operativos' => 1,
                 'habilita_rondines' => 1,
+                'habilita_proveedores' => 1,
+                'habilita_ordenes_servicio' => 1,
             ]),
             default => array_merge($base, [
                 'habilita_admin_operativo' => 1,
@@ -276,6 +284,8 @@ if (!function_exists('service_profile_schema_ensure')) {
                     habilita_herramientas TINYINT(1) NOT NULL DEFAULT 0,
                     habilita_reportes_operativos TINYINT(1) NOT NULL DEFAULT 0,
                     habilita_rondines TINYINT(1) NOT NULL DEFAULT 0,
+                    habilita_proveedores TINYINT(1) NOT NULL DEFAULT 0,
+                    habilita_ordenes_servicio TINYINT(1) NOT NULL DEFAULT 0,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     PRIMARY KEY (id),
@@ -334,6 +344,36 @@ if (!function_exists('service_profile_schema_ensure')) {
                 UPDATE residenciales_servicio_config rsc
                 JOIN residenciales r ON r.id = rsc.residencial_id
                 SET rsc.habilita_rondines = 1
+                WHERE rsc.preset_servicio = 'retailops'
+                   OR r.modo_operacion = 'retailops'
+            ");
+        }
+
+        if (!operational_column_exists($pdo, 'residenciales_servicio_config', 'habilita_proveedores')) {
+            $pdo->exec("
+                ALTER TABLE residenciales_servicio_config
+                ADD COLUMN habilita_proveedores TINYINT(1) NOT NULL DEFAULT 0
+                AFTER habilita_rondines
+            ");
+            $pdo->exec("
+                UPDATE residenciales_servicio_config rsc
+                JOIN residenciales r ON r.id = rsc.residencial_id
+                SET rsc.habilita_proveedores = 1
+                WHERE rsc.preset_servicio = 'retailops'
+                   OR r.modo_operacion = 'retailops'
+            ");
+        }
+
+        if (!operational_column_exists($pdo, 'residenciales_servicio_config', 'habilita_ordenes_servicio')) {
+            $pdo->exec("
+                ALTER TABLE residenciales_servicio_config
+                ADD COLUMN habilita_ordenes_servicio TINYINT(1) NOT NULL DEFAULT 0
+                AFTER habilita_proveedores
+            ");
+            $pdo->exec("
+                UPDATE residenciales_servicio_config rsc
+                JOIN residenciales r ON r.id = rsc.residencial_id
+                SET rsc.habilita_ordenes_servicio = 1
                 WHERE rsc.preset_servicio = 'retailops'
                    OR r.modo_operacion = 'retailops'
             ");
@@ -632,6 +672,18 @@ if (!function_exists('service_profile_module_catalog')) {
                 'support_only' => false,
                 'depends_on' => ['habilita_bitacora_operativa'],
             ],
+            'habilita_proveedores' => [
+                'module' => 'proveedores',
+                'roles' => ['admin_residencial'],
+                'support_only' => false,
+                'depends_on' => ['habilita_personal_recurrente'],
+            ],
+            'habilita_ordenes_servicio' => [
+                'module' => 'ordenes_servicio',
+                'roles' => ['admin_residencial', 'guardia'],
+                'support_only' => false,
+                'depends_on' => ['habilita_proveedores', 'habilita_personal_recurrente', 'habilita_control_acceso', 'habilita_bitacora_operativa'],
+            ],
         ];
     }
 }
@@ -828,8 +880,8 @@ if (!function_exists('service_profile_role_module_matrix')) {
     function service_profile_role_module_matrix(): array
     {
         return [
-            'admin_residencial' => ['home', 'perfil', 'reglamento', 'contexto', 'unidades', 'residentes', 'guardias', 'guardias_admin_actions', 'incidencias', 'comunicados', 'autos', 'personal_recurrente', 'visitantes_rapidos', 'materiales', 'solicitudes_pendientes', 'bitacora_operativa', 'herramientas', 'reportes_operativos', 'rondines'],
-            'guardia' => ['home', 'perfil', 'reglamento', 'contexto', 'accesos', 'autos', 'incidencias', 'paqueteria', 'personal_recurrente', 'visitantes_rapidos', 'materiales', 'bitacora_operativa', 'herramientas', 'rondines'],
+            'admin_residencial' => ['home', 'perfil', 'reglamento', 'contexto', 'unidades', 'residentes', 'guardias', 'guardias_admin_actions', 'incidencias', 'comunicados', 'autos', 'personal_recurrente', 'visitantes_rapidos', 'materiales', 'solicitudes_pendientes', 'bitacora_operativa', 'herramientas', 'reportes_operativos', 'rondines', 'proveedores', 'ordenes_servicio'],
+            'guardia' => ['home', 'perfil', 'reglamento', 'contexto', 'accesos', 'autos', 'incidencias', 'paqueteria', 'personal_recurrente', 'visitantes_rapidos', 'materiales', 'bitacora_operativa', 'herramientas', 'rondines', 'ordenes_servicio'],
             'residente' => ['home', 'perfil', 'reglamento', 'contexto', 'visitas', 'incidencias', 'paqueteria', 'autos', 'pagos', 'comunicados', 'servicios'],
         ];
     }
@@ -858,6 +910,8 @@ if (!function_exists('service_profile_role_view_matrix')) {
                 'herramientas' => 'herramientas',
                 'reportes_operativos' => 'reportes_operativos',
                 'rondines' => 'rondines',
+                'proveedores' => 'proveedores',
+                'ordenes_servicio' => 'ordenes_servicio',
             ],
             'guardia' => [
                 'home' => 'home',
@@ -928,6 +982,8 @@ if (!function_exists('service_profile_module_enabled')) {
             'herramientas' => (int)($profile['habilita_herramientas'] ?? 0) === 1,
             'reportes_operativos' => (int)($profile['habilita_reportes_operativos'] ?? 0) === 1,
             'rondines' => (int)($profile['habilita_rondines'] ?? 0) === 1,
+            'proveedores' => (int)($profile['habilita_proveedores'] ?? 0) === 1,
+            'ordenes_servicio' => (int)($profile['habilita_ordenes_servicio'] ?? 0) === 1,
             default => true,
         };
 

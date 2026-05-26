@@ -183,6 +183,10 @@ if (!function_exists('operational_schema_ensure')) {
                     pin_hash VARCHAR(255) NOT NULL,
                     activo TINYINT(1) NOT NULL DEFAULT 1,
                     esta_dentro TINYINT(1) NOT NULL DEFAULT 0,
+                    estatus_cumplimiento VARCHAR(40) NOT NULL DEFAULT 'autorizado',
+                    motivo_bloqueo VARCHAR(255) DEFAULT NULL,
+                    cumplimiento_actualizado_at DATETIME DEFAULT NULL,
+                    cumplimiento_actualizado_por INT(11) DEFAULT NULL,
                     ultima_entrada_at DATETIME DEFAULT NULL,
                     ultima_salida_at DATETIME DEFAULT NULL,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -192,7 +196,9 @@ if (!function_exists('operational_schema_ensure')) {
                     KEY idx_personas_recurrentes_residencial (residencial_id),
                     KEY idx_personas_recurrentes_area (area_id),
                     KEY idx_personas_recurrentes_activo (activo),
-                    KEY idx_personas_recurrentes_dentro (esta_dentro)
+                    KEY idx_personas_recurrentes_dentro (esta_dentro),
+                    KEY idx_personas_recurrentes_cumplimiento (estatus_cumplimiento),
+                    KEY idx_personas_recurrentes_cumplimiento_por (cumplimiento_actualizado_por)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
             ");
         }
@@ -210,6 +216,32 @@ if (!function_exists('operational_schema_ensure')) {
                 ALTER TABLE personas_recurrentes
                 ADD CONSTRAINT fk_personas_recurrentes_area
                 FOREIGN KEY (area_id) REFERENCES areas_operativas(id)
+                ON DELETE SET NULL
+            ");
+        }
+        if (!operational_column_exists($pdo, 'personas_recurrentes', 'estatus_cumplimiento')) {
+            $pdo->exec("ALTER TABLE personas_recurrentes ADD COLUMN estatus_cumplimiento VARCHAR(40) NOT NULL DEFAULT 'autorizado' AFTER esta_dentro");
+        }
+        if (!operational_column_exists($pdo, 'personas_recurrentes', 'motivo_bloqueo')) {
+            $pdo->exec("ALTER TABLE personas_recurrentes ADD COLUMN motivo_bloqueo VARCHAR(255) DEFAULT NULL AFTER estatus_cumplimiento");
+        }
+        if (!operational_column_exists($pdo, 'personas_recurrentes', 'cumplimiento_actualizado_at')) {
+            $pdo->exec("ALTER TABLE personas_recurrentes ADD COLUMN cumplimiento_actualizado_at DATETIME DEFAULT NULL AFTER motivo_bloqueo");
+        }
+        if (!operational_column_exists($pdo, 'personas_recurrentes', 'cumplimiento_actualizado_por')) {
+            $pdo->exec("ALTER TABLE personas_recurrentes ADD COLUMN cumplimiento_actualizado_por INT(11) DEFAULT NULL AFTER cumplimiento_actualizado_at");
+        }
+        if (!operational_index_exists($pdo, 'personas_recurrentes', 'idx_personas_recurrentes_cumplimiento')) {
+            $pdo->exec("ALTER TABLE personas_recurrentes ADD KEY idx_personas_recurrentes_cumplimiento (estatus_cumplimiento)");
+        }
+        if (!operational_index_exists($pdo, 'personas_recurrentes', 'idx_personas_recurrentes_cumplimiento_por')) {
+            $pdo->exec("ALTER TABLE personas_recurrentes ADD KEY idx_personas_recurrentes_cumplimiento_por (cumplimiento_actualizado_por)");
+        }
+        if (!operational_foreign_key_exists($pdo, 'personas_recurrentes', 'fk_personas_recurrentes_cumplimiento_por')) {
+            $pdo->exec("
+                ALTER TABLE personas_recurrentes
+                ADD CONSTRAINT fk_personas_recurrentes_cumplimiento_por
+                FOREIGN KEY (cumplimiento_actualizado_por) REFERENCES users(id)
                 ON DELETE SET NULL
             ");
         }
@@ -919,6 +951,265 @@ if (!function_exists('operational_schema_ensure')) {
                 ALTER TABLE rondines_eventos
                 ADD CONSTRAINT fk_rondines_eventos_guardia
                 FOREIGN KEY (guardia_id) REFERENCES users(id)
+                ON DELETE SET NULL
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'proveedores')) {
+            $pdo->exec("
+                CREATE TABLE proveedores (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    residencial_id INT(11) NOT NULL,
+                    nombre_comercial VARCHAR(180) NOT NULL,
+                    razon_social VARCHAR(220) DEFAULT NULL,
+                    tipo_servicio VARCHAR(120) DEFAULT NULL,
+                    contacto_nombre VARCHAR(150) DEFAULT NULL,
+                    contacto_telefono VARCHAR(40) DEFAULT NULL,
+                    contacto_email VARCHAR(160) DEFAULT NULL,
+                    estatus VARCHAR(30) NOT NULL DEFAULT 'activo',
+                    estatus_cumplimiento VARCHAR(40) NOT NULL DEFAULT 'autorizado',
+                    motivo_bloqueo VARCHAR(255) DEFAULT NULL,
+                    cumplimiento_actualizado_at DATETIME DEFAULT NULL,
+                    cumplimiento_actualizado_por INT(11) DEFAULT NULL,
+                    notas TEXT DEFAULT NULL,
+                    activo TINYINT(1) NOT NULL DEFAULT 1,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_proveedores_residencial (residencial_id),
+                    KEY idx_proveedores_estatus (estatus),
+                    KEY idx_proveedores_activo (activo),
+                    KEY idx_proveedores_cumplimiento (estatus_cumplimiento),
+                    KEY idx_proveedores_cumplimiento_por (cumplimiento_actualizado_por)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'proveedores', 'fk_proveedores_residencial')) {
+            $pdo->exec("
+                ALTER TABLE proveedores
+                ADD CONSTRAINT fk_proveedores_residencial
+                FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_column_exists($pdo, 'proveedores', 'estatus_cumplimiento')) {
+            $pdo->exec("ALTER TABLE proveedores ADD COLUMN estatus_cumplimiento VARCHAR(40) NOT NULL DEFAULT 'autorizado' AFTER estatus");
+        }
+        if (!operational_column_exists($pdo, 'proveedores', 'motivo_bloqueo')) {
+            $pdo->exec("ALTER TABLE proveedores ADD COLUMN motivo_bloqueo VARCHAR(255) DEFAULT NULL AFTER estatus_cumplimiento");
+        }
+        if (!operational_column_exists($pdo, 'proveedores', 'cumplimiento_actualizado_at')) {
+            $pdo->exec("ALTER TABLE proveedores ADD COLUMN cumplimiento_actualizado_at DATETIME DEFAULT NULL AFTER motivo_bloqueo");
+        }
+        if (!operational_column_exists($pdo, 'proveedores', 'cumplimiento_actualizado_por')) {
+            $pdo->exec("ALTER TABLE proveedores ADD COLUMN cumplimiento_actualizado_por INT(11) DEFAULT NULL AFTER cumplimiento_actualizado_at");
+        }
+        if (!operational_index_exists($pdo, 'proveedores', 'idx_proveedores_cumplimiento')) {
+            $pdo->exec("ALTER TABLE proveedores ADD KEY idx_proveedores_cumplimiento (estatus_cumplimiento)");
+        }
+        if (!operational_index_exists($pdo, 'proveedores', 'idx_proveedores_cumplimiento_por')) {
+            $pdo->exec("ALTER TABLE proveedores ADD KEY idx_proveedores_cumplimiento_por (cumplimiento_actualizado_por)");
+        }
+        if (!operational_foreign_key_exists($pdo, 'proveedores', 'fk_proveedores_cumplimiento_por')) {
+            $pdo->exec("
+                ALTER TABLE proveedores
+                ADD CONSTRAINT fk_proveedores_cumplimiento_por
+                FOREIGN KEY (cumplimiento_actualizado_por) REFERENCES users(id)
+                ON DELETE SET NULL
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'proveedor_personas')) {
+            $pdo->exec("
+                CREATE TABLE proveedor_personas (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    proveedor_id INT(11) NOT NULL,
+                    persona_recurrente_id INT(11) NOT NULL,
+                    rol VARCHAR(120) DEFAULT NULL,
+                    activo TINYINT(1) NOT NULL DEFAULT 1,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    UNIQUE KEY uq_proveedor_personas_proveedor_persona (proveedor_id, persona_recurrente_id),
+                    KEY idx_proveedor_personas_proveedor (proveedor_id),
+                    KEY idx_proveedor_personas_persona (persona_recurrente_id),
+                    KEY idx_proveedor_personas_activo (activo)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'proveedor_personas', 'fk_proveedor_personas_proveedor')) {
+            $pdo->exec("
+                ALTER TABLE proveedor_personas
+                ADD CONSTRAINT fk_proveedor_personas_proveedor
+                FOREIGN KEY (proveedor_id) REFERENCES proveedores(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'proveedor_personas', 'fk_proveedor_personas_persona')) {
+            $pdo->exec("
+                ALTER TABLE proveedor_personas
+                ADD CONSTRAINT fk_proveedor_personas_persona
+                FOREIGN KEY (persona_recurrente_id) REFERENCES personas_recurrentes(id)
+                ON DELETE CASCADE
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'proveedor_documentos')) {
+            $pdo->exec("
+                CREATE TABLE proveedor_documentos (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    proveedor_id INT(11) NOT NULL,
+                    tipo_documento VARCHAR(120) NOT NULL,
+                    archivo_url VARCHAR(255) DEFAULT NULL,
+                    fecha_vencimiento DATE DEFAULT NULL,
+                    estatus VARCHAR(30) NOT NULL DEFAULT 'pendiente',
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_proveedor_documentos_proveedor (proveedor_id),
+                    KEY idx_proveedor_documentos_estatus (estatus),
+                    KEY idx_proveedor_documentos_vencimiento (fecha_vencimiento)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_column_exists($pdo, 'proveedor_documentos', 'fecha_vencimiento')) {
+            $pdo->exec("ALTER TABLE proveedor_documentos ADD COLUMN fecha_vencimiento DATE DEFAULT NULL AFTER archivo_url");
+        }
+        if (!operational_column_exists($pdo, 'proveedor_documentos', 'estatus')) {
+            $pdo->exec("ALTER TABLE proveedor_documentos ADD COLUMN estatus VARCHAR(40) NOT NULL DEFAULT 'pendiente' AFTER fecha_vencimiento");
+        }
+        if (!operational_index_exists($pdo, 'proveedor_documentos', 'idx_proveedor_documentos_estatus')) {
+            $pdo->exec("ALTER TABLE proveedor_documentos ADD KEY idx_proveedor_documentos_estatus (estatus)");
+        }
+        if (!operational_index_exists($pdo, 'proveedor_documentos', 'idx_proveedor_documentos_vencimiento')) {
+            $pdo->exec("ALTER TABLE proveedor_documentos ADD KEY idx_proveedor_documentos_vencimiento (fecha_vencimiento)");
+        }
+        if (!operational_foreign_key_exists($pdo, 'proveedor_documentos', 'fk_proveedor_documentos_proveedor')) {
+            $pdo->exec("
+                ALTER TABLE proveedor_documentos
+                ADD CONSTRAINT fk_proveedor_documentos_proveedor
+                FOREIGN KEY (proveedor_id) REFERENCES proveedores(id)
+                ON DELETE CASCADE
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'ordenes_servicio')) {
+            $pdo->exec("
+                CREATE TABLE ordenes_servicio (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    residencial_id INT(11) NOT NULL,
+                    proveedor_id INT(11) DEFAULT NULL,
+                    persona_recurrente_id INT(11) DEFAULT NULL,
+                    area_id INT(11) DEFAULT NULL,
+                    folio VARCHAR(50) NOT NULL,
+                    tipo_servicio VARCHAR(120) DEFAULT NULL,
+                    descripcion TEXT DEFAULT NULL,
+                    fecha_programada DATE NOT NULL,
+                    hora_inicio TIME DEFAULT NULL,
+                    hora_fin TIME DEFAULT NULL,
+                    qr_token VARCHAR(120) NOT NULL,
+                    estatus VARCHAR(40) NOT NULL DEFAULT 'programada',
+                    prioridad VARCHAR(40) NOT NULL DEFAULT 'media',
+                    creado_por INT(11) DEFAULT NULL,
+                    cerrado_por INT(11) DEFAULT NULL,
+                    inicio_real_at DATETIME DEFAULT NULL,
+                    cierre_at DATETIME DEFAULT NULL,
+                    observaciones_cierre TEXT DEFAULT NULL,
+                    activo TINYINT(1) NOT NULL DEFAULT 1,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    UNIQUE KEY uq_ordenes_servicio_residencial_folio (residencial_id, folio),
+                    UNIQUE KEY uq_ordenes_servicio_qr_token (qr_token),
+                    KEY idx_ordenes_servicio_residencial (residencial_id),
+                    KEY idx_ordenes_servicio_proveedor (proveedor_id),
+                    KEY idx_ordenes_servicio_persona (persona_recurrente_id),
+                    KEY idx_ordenes_servicio_area (area_id),
+                    KEY idx_ordenes_servicio_estatus (estatus),
+                    KEY idx_ordenes_servicio_fecha (fecha_programada),
+                    KEY idx_ordenes_servicio_creado_por (creado_por),
+                    KEY idx_ordenes_servicio_cerrado_por (cerrado_por)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'ordenes_servicio', 'fk_ordenes_servicio_residencial')) {
+            $pdo->exec("
+                ALTER TABLE ordenes_servicio
+                ADD CONSTRAINT fk_ordenes_servicio_residencial
+                FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'ordenes_servicio', 'fk_ordenes_servicio_proveedor')) {
+            $pdo->exec("
+                ALTER TABLE ordenes_servicio
+                ADD CONSTRAINT fk_ordenes_servicio_proveedor
+                FOREIGN KEY (proveedor_id) REFERENCES proveedores(id)
+                ON DELETE SET NULL
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'ordenes_servicio', 'fk_ordenes_servicio_persona')) {
+            $pdo->exec("
+                ALTER TABLE ordenes_servicio
+                ADD CONSTRAINT fk_ordenes_servicio_persona
+                FOREIGN KEY (persona_recurrente_id) REFERENCES personas_recurrentes(id)
+                ON DELETE SET NULL
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'ordenes_servicio', 'fk_ordenes_servicio_area')) {
+            $pdo->exec("
+                ALTER TABLE ordenes_servicio
+                ADD CONSTRAINT fk_ordenes_servicio_area
+                FOREIGN KEY (area_id) REFERENCES areas_operativas(id)
+                ON DELETE SET NULL
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'ordenes_servicio', 'fk_ordenes_servicio_creado_por')) {
+            $pdo->exec("
+                ALTER TABLE ordenes_servicio
+                ADD CONSTRAINT fk_ordenes_servicio_creado_por
+                FOREIGN KEY (creado_por) REFERENCES users(id)
+                ON DELETE SET NULL
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'ordenes_servicio', 'fk_ordenes_servicio_cerrado_por')) {
+            $pdo->exec("
+                ALTER TABLE ordenes_servicio
+                ADD CONSTRAINT fk_ordenes_servicio_cerrado_por
+                FOREIGN KEY (cerrado_por) REFERENCES users(id)
+                ON DELETE SET NULL
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'ordenes_servicio_evidencias')) {
+            $pdo->exec("
+                CREATE TABLE ordenes_servicio_evidencias (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    orden_id INT(11) NOT NULL,
+                    tipo VARCHAR(40) NOT NULL DEFAULT 'general',
+                    archivo_url VARCHAR(255) DEFAULT NULL,
+                    descripcion TEXT DEFAULT NULL,
+                    created_by INT(11) DEFAULT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_ordenes_servicio_evidencias_orden (orden_id),
+                    KEY idx_ordenes_servicio_evidencias_tipo (tipo),
+                    KEY idx_ordenes_servicio_evidencias_created_by (created_by)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'ordenes_servicio_evidencias', 'fk_ordenes_servicio_evidencias_orden')) {
+            $pdo->exec("
+                ALTER TABLE ordenes_servicio_evidencias
+                ADD CONSTRAINT fk_ordenes_servicio_evidencias_orden
+                FOREIGN KEY (orden_id) REFERENCES ordenes_servicio(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'ordenes_servicio_evidencias', 'fk_ordenes_servicio_evidencias_created_by')) {
+            $pdo->exec("
+                ALTER TABLE ordenes_servicio_evidencias
+                ADD CONSTRAINT fk_ordenes_servicio_evidencias_created_by
+                FOREIGN KEY (created_by) REFERENCES users(id)
                 ON DELETE SET NULL
             ");
         }

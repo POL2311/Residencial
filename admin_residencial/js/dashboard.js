@@ -57,6 +57,8 @@
     'herramientas',
     'reportes_operativos',
     'rondines',
+    'proveedores',
+    'ordenes_servicio',
   ]);
 
   let currentViewScript = null;
@@ -87,6 +89,8 @@
     'herramientas',
     'reportes_operativos',
     'rondines',
+    'proveedores',
+    'ordenes_servicio',
     'perfil',
     'reglamento',
   ]);
@@ -189,6 +193,8 @@
       herramientas: 'habilita_herramientas',
       reportes_operativos: 'habilita_reportes_operativos',
       rondines: 'habilita_rondines',
+      proveedores: 'habilita_proveedores',
+      ordenes_servicio: 'habilita_ordenes_servicio',
     };
 
     const flag = moduleFlagByView[view];
@@ -237,6 +243,8 @@
       herramientas: BASE + 'js/herramientas.js',
       reportes_operativos: BASE + 'js/reportes_operativos.js',
       rondines: BASE + 'js/rondines.js',
+      proveedores: BASE + 'js/proveedores.js',
+      ordenes_servicio: BASE + 'js/ordenes_servicio.js',
     };
 
     if (currentViewScript) {
