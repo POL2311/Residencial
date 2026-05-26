@@ -1,9 +1,10 @@
 <?php
 
 $DB_HOST = 'localhost';
-$DB_NAME = 'caroli93_residencial_app'; 
-$DB_USER = 'caroli93_root';     
-$DB_PASS = 'residencial_app123456';       
+$DB_NAME = 'miinvit3_residencial_app';
+$DB_USER = 'miinvit3_adminmafious';     
+$DB_PASS = 'Madafaka985*mg';
+    
 
 try {
     $pdo = new PDO(
