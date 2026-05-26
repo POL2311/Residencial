@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Onboarding - OS-Gate</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        osgate: {
+                            blue: '#2E5D73',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Step transitions */
+        .step-container {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .step-container.active {
+            display: block;
+            animation: fadeIn 0.4s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Radio/Checkbox card hidden inputs */
+        .card-input-element {
+            display: none;
+        }
+
+        .card-input-label {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .card-input-element:checked + .card-input-label {
+            border-color: #0d9488; /* teal-600 */
+            background-color: #f0fdfa; /* teal-50 */
+        }
+
+        .card-input-element:checked + .card-input-label .check-icon {
+            opacity: 1;
+            color: #0d9488;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col items-center py-10 px-4 sm:px-6">
+
+    <!-- Header / Logo Area -->
+    <div class="w-full max-w-3xl mb-8 flex justify-center">
+        <div class="flex items-center gap-2 text-slate-900">
+            <!-- Simulated Logo -->
+            <i class="ph-fill ph-hexagon text-3xl text-osgate-blue"></i>
+            <span class="text-2xl font-bold tracking-tight">OS-Gate</span>
+        </div>
+    </div>
+
+    <!-- Main Form Container -->
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+
+        <!-- Progress Header -->
+        <div class="px-8 py-6 border-b border-slate-100 bg-white">
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <h2 class="text-xl font-semibold text-slate-800" id="step-title">Datos del Residencial</h2>
+                    <p class="text-sm text-slate-500 mt-1" id="step-desc">Información general para preparar tu entorno.</p>
+                </div>
+                <div class="text-sm font-medium text-teal-600 bg-teal-50 px-3 py-1 rounded-full">
+                    Paso <span id="current-step-display">1</span> de 4
+                </div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-100 rounded-full h-1.5 mt-4">
+                <div id="progress-bar" class="bg-teal-600 h-1.5 rounded-full transition-all duration-500 ease-out" style="width: 25%"></div>
+            </div>
+        </div>
+
+        <!-- Form Form -->
+        <form id="onboarding-form" class="p-8" onsubmit="event.preventDefault();">
+
+            <!-- STEP 1: Datos del Residencial -->
+            <div id="step-1" class="step-container active">
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Total casas -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Número total de casas</label>
+                            <input type="number" placeholder="Ej. 120" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all duration-200">
+                        </div>
+                        <!-- Casas habitadas -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Número de casas habitadas</label>
+                            <input type="number" placeholder="Ej. 95" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all duration-200">
+                        </div>
+                    </div>
+
+                    <!-- Promedio de autos -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Promedio de autos por residente</label>
+                        <div class="relative">
+                            <select class="w-full rounded-xl border border-slate-300 px-4 py-3 text-base text-slate-800 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all duration-200 appearance-none bg-white">
+                                <option value="" disabled selected>Selecciona una opción</option>
+                                <option value="1">1 auto</option>
+                                <option value="2">2 autos</option>
+                                <option value="3">3 autos</option>
+                                <option value="mas_3">Más de 3 autos</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                <i class="ph ph-caret-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Infraestructura de Caseta -->
+            <div id="step-2" class="step-container">
+                <div class="space-y-8">
+                    <!-- Tipo de acceso -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-4">Tipo de acceso principal</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Option 1 -->
+                            <div>
+                                <input type="radio" name="tipo_acceso" id="acceso_motor" class="card-input-element" value="motor">
+                                <label for="acceso_motor" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
+                                    <div class="absolute top-3 right-3 text-slate-300 group-hover:text-teal-600 transition-colors">
+                                        <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-teal-100/50 transition-colors">
+                                        <i class="ph ph-garage text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-800">Portón con motor</span>
+                                </label>
+                            </div>
+                            <!-- Option 2 -->
+                            <div>
+                                <input type="radio" name="tipo_acceso" id="acceso_sin_motor" class="card-input-element" value="sin_motor">
+                                <label for="acceso_sin_motor" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
+                                    <div class="absolute top-3 right-3 text-slate-300 group-hover:text-teal-600 transition-colors">
+                                        <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-teal-100/50 transition-colors">
+                                        <i class="ph ph-door text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-800">Portón sin motor</span>
+                                </label>
+                            </div>
+                            <!-- Option 3 -->
+                            <div>
+                                <input type="radio" name="tipo_acceso" id="acceso_plumas" class="card-input-element" value="plumas">
+                                <label for="acceso_plumas" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
+                                    <div class="absolute top-3 right-3 text-slate-300 group-hover:text-teal-600 transition-colors">
+                                        <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-teal-100/50 transition-colors">
+                                        <i class="ph ph-boom-tube text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-800">Barreras / Plumas</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medidas -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Medidas aproximadas del acceso</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="relative">
+                                <input type="text" placeholder="Ej. 4.5" class="w-full rounded-xl border border-slate-300 pl-4 pr-12 py-3 text-base text-slate-800 placeholder-slate-400 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all duration-200">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                                    <span class="text-slate-400 text-sm">Ancho (m)</span>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <input type="text" placeholder="Ej. 2.5" class="w-full rounded-xl border border-slate-300 pl-4 pr-12 py-3 text-base text-slate-800 placeholder-slate-400 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all duration-200">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                                    <span class="text-slate-400 text-sm">Alto (m)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Equipamiento y Tags -->
+            <div id="step-3" class="step-container">
+                <div class="space-y-8">
+                    <!-- Tipo de Tag -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-4">Tipo de Tag preferido</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Option 1 -->
+                            <div>
+                                <input type="radio" name="tipo_tag" id="tag_sticker" class="card-input-element" value="sticker">
+                                <label for="tag_sticker" class="card-input-label block w-full border border-slate-200 rounded-xl p-5 hover:border-teal-600 hover:shadow-md h-full relative flex items-start gap-4">
+                                    <div class="mt-1 w-10 h-10 rounded-full bg-slate-50 flex-shrink-0 flex items-center justify-center group-hover:bg-teal-100/50">
+                                        <i class="ph ph-sticker text-xl text-slate-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-base font-semibold text-slate-800 mb-1">Sticker UHF Inastillable</h4>
+                                        <p class="text-xs text-slate-500 leading-relaxed">Adhesivo de alta seguridad que se destruye al intentar despegarlo del vehículo.</p>
+                                    </div>
+                                    <div class="text-slate-300">
+                                        <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
+                                    </div>
+                                </label>
+                            </div>
+                            <!-- Option 2 -->
+                            <div>
+                                <input type="radio" name="tipo_tag" id="tag_tarjeta" class="card-input-element" value="tarjeta">
+                                <label for="tag_tarjeta" class="card-input-label block w-full border border-slate-200 rounded-xl p-5 hover:border-teal-600 hover:shadow-md h-full relative flex items-start gap-4">
+                                    <div class="mt-1 w-10 h-10 rounded-full bg-slate-50 flex-shrink-0 flex items-center justify-center group-hover:bg-teal-100/50">
+                                        <i class="ph ph-identification-card text-xl text-slate-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-base font-semibold text-slate-800 mb-1">Tarjeta PVC UHF</h4>
+                                        <p class="text-xs text-slate-500 leading-relaxed">Tarjeta física portátil, ideal para residentes que usan múltiples vehículos.</p>
+                                    </div>
+                                    <div class="text-slate-300">
+                                        <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cantidad Tags -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Número de tags asignados por residente (inicial)</label>
+                        <input type="number" placeholder="Ej. 2" class="w-full sm:w-1/2 rounded-xl border border-slate-300 px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all duration-200">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: Módulos del Sistema -->
+            <div id="step-4" class="step-container">
+                <div class="space-y-6">
+
+                    <!-- Alert/Info -->
+                    <div class="bg-teal-50 border border-teal-100 rounded-xl p-4 flex gap-3 items-start">
+                        <i class="ph-fill ph-lightbulb text-teal-600 text-xl flex-shrink-0 mt-0.5"></i>
+                        <p class="text-sm text-teal-800 leading-relaxed">
+                            Todos los módulos están incluidos en tu póliza sin costo extra. Selecciona los que deseas activar para personalizar la configuración inicial de tu caseta.
+                        </p>
+                    </div>
+
+                    <!-- Checkboxes Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3">
+
+                        <!-- Module 1 -->
+                        <div>
+                            <input type="checkbox" id="mod_express" class="card-input-element" checked>
+                            <label for="mod_express" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-wifi-high text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Acceso Express (UHF)</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 2 -->
+                        <div>
+                            <input type="checkbox" id="mod_visitas" class="card-input-element" checked>
+                            <label for="mod_visitas" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-qr-code text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Accesos y Visitas (QR)</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 3 -->
+                        <div>
+                            <input type="checkbox" id="mod_paquetes" class="card-input-element">
+                            <label for="mod_paquetes" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-package text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Gestión de Paquetería</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 4 -->
+                        <div>
+                            <input type="checkbox" id="mod_incidencias" class="card-input-element">
+                            <label for="mod_incidencias" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-warning-octagon text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Reporte de Incidencias</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 5 -->
+                        <div>
+                            <input type="checkbox" id="mod_pagos" class="card-input-element">
+                            <label for="mod_pagos" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-currency-circle-dollar text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Control de Pagos</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 6 -->
+                        <div>
+                            <input type="checkbox" id="mod_bitacora" class="card-input-element">
+                            <label for="mod_bitacora" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-notebook text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Bitácora Operativa</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 7 -->
+                        <div>
+                            <input type="checkbox" id="mod_comunicacion" class="card-input-element">
+                            <label for="mod_comunicacion" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-megaphone text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Comunicación Institucional</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 8 -->
+                        <div>
+                            <input type="checkbox" id="mod_amenidades" class="card-input-element">
+                            <label for="mod_amenidades" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-calendar-check text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Reserva de Amenidades</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 9 -->
+                        <div>
+                            <input type="checkbox" id="mod_material" class="card-input-element">
+                            <label for="mod_material" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-truck text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Salida de Material/Equipo</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+
+                        <!-- Module 10 -->
+                        <div>
+                            <input type="checkbox" id="mod_herramientas" class="card-input-element">
+                            <label for="mod_herramientas" class="card-input-label flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
+                                        <i class="ph ph-wrench text-slate-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Préstamo de Herramientas</span>
+                                </div>
+                                <i class="ph-fill ph-check-circle text-lg text-slate-300 opacity-0 check-icon"></i>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer / Navigation -->
+            <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+                <button type="button" id="btn-prev" class="px-6 py-2.5 rounded-xl text-sm font-medium text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-800 transition-colors hidden">
+                    Anterior
+                </button>
+                <!-- This empty div pushes the Next button to the right when Previous is hidden -->
+                <div id="spacer" class="w-24"></div>
+
+                <button type="button" id="btn-next" class="px-6 py-2.5 rounded-xl text-sm font-medium text-white bg-slate-800 hover:bg-slate-900 transition-all duration-200 shadow-sm flex items-center gap-2">
+                    Siguiente <i class="ph-bold ph-arrow-right"></i>
+                </button>
+
+                <button type="button" id="btn-submit" class="px-8 py-2.5 rounded-xl text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2 hidden">
+                    <i class="ph-bold ph-calculator"></i> Generar Cotización
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- JavaScript for Multi-step logic -->
+    <script>
+        const steps = [
+            { id: 1, title: 'Datos del Residencial', desc: 'Información general para preparar tu entorno.' },
+            { id: 2, title: 'Infraestructura de Caseta', desc: 'Configuración de los accesos principales.' },
+            { id: 3, title: 'Equipamiento y Tags', desc: 'Selección de dispositivos de acceso.' },
+            { id: 4, title: 'Módulos del Sistema', desc: 'Personaliza las herramientas de tu software.' }
+        ];
+
+        let currentStepIndex = 0;
+
+        const elTitle = document.getElementById('step-title');
+        const elDesc = document.getElementById('step-desc');
+        const elStepDisplay = document.getElementById('current-step-display');
+        const elProgressBar = document.getElementById('progress-bar');
+
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnSubmit = document.getElementById('btn-submit');
+        const spacer = document.getElementById('spacer');
+
+        function updateUI() {
+            // Update Headers
+            const currentStep = steps[currentStepIndex];
+            elTitle.textContent = currentStep.title;
+            elDesc.textContent = currentStep.desc;
+            elStepDisplay.textContent = currentStep.id;
+
+            // Update Progress Bar
+            const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100;
+            elProgressBar.style.width = progressPercentage + '%';
+
+            // Show/Hide Steps
+            document.querySelectorAll('.step-container').forEach((el, index) => {
+                if (index === currentStepIndex) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+
+            // Update Buttons
+            if (currentStepIndex === 0) {
+                btnPrev.classList.add('hidden');
+                spacer.classList.remove('hidden');
+            } else {
+                btnPrev.classList.remove('hidden');
+                spacer.classList.add('hidden');
+            }
+
+            if (currentStepIndex === steps.length - 1) {
+                btnNext.classList.add('hidden');
+                btnSubmit.classList.remove('hidden');
+            } else {
+                btnNext.classList.remove('hidden');
+                btnSubmit.classList.add('hidden');
+            }
+        }
+
+        btnNext.addEventListener('click', () => {
+            if (currentStepIndex < steps.length - 1) {
+                currentStepIndex++;
+                updateUI();
+            }
+        });
+
+        btnPrev.addEventListener('click', () => {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
+                updateUI();
+            }
+        });
+
+        btnSubmit.addEventListener('click', () => {
+            // Simulated submit action
+            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Procesando...';
+            btnSubmit.disabled = true;
+            btnSubmit.classList.add('opacity-80');
+
+            setTimeout(() => {
+                alert('¡Cotización generada con éxito!');
+                btnSubmit.innerHTML = '<i class="ph-bold ph-calculator"></i> Generar Cotización';
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-80');
+            }, 1000);
+        });
+
+        // Initialize UI
+        updateUI();
+    </script>
+</body>
+</html>
