@@ -55,6 +55,8 @@
     'solicitudes_pendientes',
     'bitacora_operativa',
     'herramientas',
+    'reportes_operativos',
+    'rondines',
   ]);
 
   let currentViewScript = null;
@@ -83,6 +85,8 @@
     'solicitudes_pendientes',
     'bitacora_operativa',
     'herramientas',
+    'reportes_operativos',
+    'rondines',
     'perfil',
     'reglamento',
   ]);
@@ -123,6 +127,14 @@
 
   function applyVisualLabels(root = document) {
     window.OSGateLabels?.apply?.(root, currentDisplayMode());
+  }
+
+  function viewAssetName(view) {
+    const normalized = String(view || '').trim();
+    if (normalized === 'unidades' && currentDisplayMode() !== 'residencial') {
+      return 'areas_operativas';
+    }
+    return normalized;
   }
 
   function resolveServiceDisplayName(data = {}, ctx = {}) {
@@ -175,6 +187,8 @@
       solicitudes_pendientes: 'habilita_solicitudes_pendientes',
       bitacora_operativa: 'habilita_bitacora_operativa',
       herramientas: 'habilita_herramientas',
+      reportes_operativos: 'habilita_reportes_operativos',
+      rondines: 'habilita_rondines',
     };
 
     const flag = moduleFlagByView[view];
@@ -200,6 +214,7 @@
   }
 
   function loadViewScript(view, token) {
+    const assetView = viewAssetName(view);
     // Solo mete aquí lo que realmente tengas
     const scriptsMap = {
       perfil: BASE + 'js/perfil.js',
@@ -210,6 +225,7 @@
 
       // si luego los creas:
       unidades: BASE + 'js/unidades.js',
+      areas_operativas: BASE + 'js/areas_operativas.js',
       residentes: BASE + 'js/residentes.js',
       incidencias: BASE + 'js/incidencias.js',
       home: BASE + 'js/home.js',
@@ -219,6 +235,8 @@
       solicitudes_pendientes: BASE + 'js/solicitudes_pendientes.js',
       bitacora_operativa: BASE + 'js/bitacora_operativa.js',
       herramientas: BASE + 'js/herramientas.js',
+      reportes_operativos: BASE + 'js/reportes_operativos.js',
+      rondines: BASE + 'js/rondines.js',
     };
 
     if (currentViewScript) {
@@ -226,12 +244,12 @@
       currentViewScript = null;
     }
 
-    if (!scriptsMap[view]) return Promise.resolve(true);
+    if (!scriptsMap[assetView]) return Promise.resolve(true);
 
     const s = document.createElement('script');
-    s.src = `${scriptsMap[view]}?v=${Date.now()}`;
+    s.src = `${scriptsMap[assetView]}?v=${Date.now()}`;
     s.defer = true;
-    s.dataset.viewScript = view;
+    s.dataset.viewScript = assetView;
     return new Promise((resolve) => {
       s.onload = () => resolve(token === state.navToken);
       s.onerror = () => resolve(false);
@@ -492,7 +510,8 @@
     `;
 
     try {
-      const res = await fetch(`${VIEWS}${view}.html`, { cache: 'no-store' });
+      const assetView = viewAssetName(view);
+      const res = await fetch(`${VIEWS}${assetView}.html`, { cache: 'no-store' });
       if (token !== state.navToken) return;
       if (!res.ok) throw new Error('No se pudo cargar plantilla');
       const html = await res.text();
@@ -504,7 +523,7 @@
       wrap.innerHTML = `
         <div class="rounded-2xl bg-white p-4 shadow">
           <div class="text-sm font-semibold text-rose-600">No se pudo cargar la sección</div>
-          <div class="text-xs text-slate-600">Plantilla: ${escapeHtml(view)}.html</div>
+          <div class="text-xs text-slate-600">Plantilla: ${escapeHtml(viewAssetName(view))}.html</div>
         </div>
       `;
       state.pendingView = null;
@@ -520,7 +539,7 @@
       wrap.innerHTML = `
         <div class="rounded-2xl bg-white p-4 shadow">
           <div class="text-sm font-semibold text-rose-600">No se pudo cargar la sección</div>
-          <div class="text-xs text-slate-600">Script: ${escapeHtml(view)}.js</div>
+          <div class="text-xs text-slate-600">Script: ${escapeHtml(viewAssetName(view))}.js</div>
         </div>
       `;
       state.pendingView = null;

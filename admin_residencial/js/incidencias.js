@@ -66,6 +66,40 @@
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
   }
 
+  function currentMode() {
+    const metaMode = String(state.meta?.modo_operacion || '').trim();
+    const dashboardMode = String(window.AdminResidencialDashboard?.getOperationalMode?.() || '').trim();
+    const dashboardPreset = String(window.AdminResidencialDashboard?.getServiceProfile?.()?.preset_servicio || '').trim();
+    const mode = metaMode && metaMode !== 'residencial' ? metaMode : dashboardMode;
+    return mode && mode !== 'residencial' ? mode : dashboardPreset || mode || 'residencial';
+  }
+
+  function isOperationalMode() {
+    return String(currentMode() || 'residencial') !== 'residencial';
+  }
+
+  function label(term, fallback = '') {
+    return window.OSGateLabels?.label?.(term, currentMode()) || fallback || term;
+  }
+
+  function incidentLower() {
+    return String(label('incident', 'incidencia')).toLowerCase();
+  }
+
+  function applyStaticLabels() {
+    window.OSGateLabels?.apply?.(view, currentMode());
+    if (els.search) {
+      els.search.placeholder = isOperationalMode()
+        ? `Buscar por título, ${String(label('area', 'área')).toLowerCase()} o ${String(label('responsible', 'responsable')).toLowerCase()}...`
+        : 'Buscar por título, unidad o residente...';
+    }
+    if (els.btnAdd) {
+      els.btnAdd.textContent = isOperationalMode() ? '+ Reportar incidente' : '+ Reportar';
+    }
+    const chartTitle = els.chartCard?.querySelector('.mt-1.text-base');
+    if (chartTitle) chartTitle.textContent = `Estado de ${String(label('incidents', 'incidencias')).toLowerCase()}`;
+  }
+
   function showAlert(msg, type = 'info') {
     if (!els.alert) return;
     els.alert.className =
@@ -238,13 +272,14 @@
   }
 
   function openIncidenciaDetail(inc) {
+    const operational = isOperationalMode();
     const modal = document.createElement('div');
     modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] bg-black/60 p-3 md:p-4 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="flex min-h-full items-center justify-center">
         <div class="app-admin-modal-card w-full max-w-lg rounded-3xl bg-white shadow-2xl">
           <div class="app-admin-modal-header flex items-center justify-between border-b border-slate-100 px-5 py-4">
-            <div class="text-lg font-semibold text-slate-900">Detalle de incidencia</div>
+            <div class="text-lg font-semibold text-slate-900">Detalle de ${escapeHtml(incidentLower())}</div>
             <button type="button" class="js-inc-detail-close h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
           </div>
           <div class="app-admin-modal-body space-y-4 p-5">
@@ -259,10 +294,10 @@
             <div class="grid gap-3 sm:grid-cols-2">
               <div><div class="text-xs text-slate-500">Tipo</div><div class="text-sm text-slate-700">${escapeHtml(humanizeValue(inc.tipo))}</div></div>
               <div><div class="text-xs text-slate-500">Fecha</div><div class="text-sm text-slate-700">${escapeHtml(fmtDate(inc.created_at))}</div></div>
-              <div><div class="text-xs text-slate-500">Unidad</div><div class="text-sm text-slate-700">${escapeHtml(inc.unidad_clave || 'General')}</div></div>
+              <div><div class="text-xs text-slate-500">${escapeHtml(operational ? label('area', 'Área') : label('unit', 'Unidad'))}</div><div class="text-sm text-slate-700">${escapeHtml(inc.area_nombre || inc.unidad_clave || 'General')}</div></div>
               <div><div class="text-xs text-slate-500">Contexto</div><div class="text-sm text-slate-700">${escapeHtml(inc.unidad_clave || inc.area_nombre || 'General')}</div></div>
               <div><div class="text-xs text-slate-500">Relación</div><div class="text-sm text-slate-700">${escapeHtml(inc.residente_nombre || inc.persona_recurrente_nombre || inc.visitante_rapido_nombre || '—')}</div></div>
-              <div><div class="text-xs text-slate-500">Guardia</div><div class="text-sm text-slate-700">${escapeHtml(inc.guardia_nombre || '—')}</div></div>
+              <div><div class="text-xs text-slate-500">${escapeHtml(label('guard', 'Guardia'))}</div><div class="text-sm text-slate-700">${escapeHtml(inc.guardia_nombre || '—')}</div></div>
             </div>
             <div>
               <div class="text-xs text-slate-500">Descripción</div>
@@ -413,10 +448,36 @@
       state.guardias = g.guardias || [];
       state.meta = m.data || state.meta;
 
+      applyStaticLabels();
       render();
     } catch (e) {
       showAlert(e.message, 'error');
     }
+  }
+
+  function setTypeOptions() {
+    const select = els.formAdd?.querySelector('[name="tipo"]');
+    if (!select) return;
+    const options = isOperationalMode()
+      ? [
+          ['seguridad', 'Seguridad'],
+          ['robo', 'Robo'],
+          ['conflicto', 'Conflicto'],
+          ['salida_sin_permiso', 'Salida sin permiso'],
+          ['visitante_sin_ine', 'Visitante sin INE'],
+          ['material_no_coincide', 'Material no coincide'],
+          ['evento_general', 'Evento general'],
+          ['otro', 'Otro'],
+        ]
+      : [
+          ['seguridad', 'Seguridad'],
+          ['servicio', 'Servicio'],
+          ['vecino', 'Vecino'],
+          ['infraestructura', 'Infraestructura'],
+          ['otro', 'Otro'],
+        ];
+    select.innerHTML = options.map(([value, text]) => `<option value="${escapeHtml(value)}">${escapeHtml(text)}</option>`).join('');
+    select.value = isOperationalMode() ? 'evento_general' : 'seguridad';
   }
 
   function openAddModal() {
@@ -424,10 +485,13 @@
 
     clearFormError(els.addError);
     els.formAdd.reset();
+    setTypeOptions();
 
     const selU = els.formAdd.querySelector('[name="unidad_id"]');
     const operationalWrap = document.getElementById('incOperationalFields');
-    const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
+    const isOperational = isOperationalMode();
+    const addTitle = els.modalAdd.querySelector('.app-admin-modal-header h2');
+    if (addTitle) addTitle.textContent = label('report_incident', 'Reportar incidencia');
     const scopeInputs = els.formAdd.querySelectorAll('[name="incidencia_scope"]');
     scopeInputs.forEach((input) => {
       input.checked = input.value === 'unidad';
@@ -469,7 +533,7 @@
 
   function syncResidentialScopeUi() {
     if (!els.formAdd) return;
-    const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
+    const isOperational = isOperationalMode();
     if (isOperational) return;
     const isGeneral = currentIncidenciaScope() === 'general';
     els.unitField?.classList.toggle('hidden', isGeneral);
@@ -495,6 +559,10 @@
 
     clearFormError(els.editError);
     els.formEdit.reset();
+    const editTitle = els.modalEdit.querySelector('.app-admin-modal-header h2');
+    if (editTitle) editTitle.textContent = label('update_incident', 'Actualizar incidencia');
+    const guardLabel = els.formEdit.querySelector('label');
+    if (guardLabel) guardLabel.textContent = `Asignar ${String(label('guard', 'guardia')).toLowerCase()}`;
 
     const idInput = els.formEdit.querySelector('[name="id"]');
     if (idInput) idInput.value = inc.id;
@@ -524,8 +592,8 @@
 
   async function deleteIncidencia(id) {
     const ok = await showConfirmIncidencia({
-      title: 'Eliminar incidencia',
-      message: 'Esta acción eliminará la incidencia de forma permanente. ¿Deseas continuar?',
+      title: label('delete_incident', 'Eliminar incidencia'),
+      message: `Esta acción eliminará el ${incidentLower()} de forma permanente. ¿Deseas continuar?`,
       acceptText: 'Sí, eliminar',
       cancelText: 'Cancelar',
     });
@@ -534,7 +602,7 @@
 
     try {
       const resp = await api.incidencias.remove(id);
-      showAlert(resp.message || 'Incidencia eliminada.');
+      showAlert(resp.message || (isOperationalMode() ? 'Incidente eliminado.' : 'Incidencia eliminada.'));
       await loadAll();
     } catch (e) {
       showAlert(e.message, 'error');
@@ -542,7 +610,7 @@
   }
 
   function validateAddForm(fd) {
-    const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
+    const isOperational = isOperationalMode();
     const scope = String(fd.get('incidencia_scope') || 'unidad');
     const unidadId = Number(fd.get('unidad_id') || 0);
     const tipo = String(fd.get('tipo') || '').trim();
@@ -580,6 +648,7 @@
 
   function render() {
     els.list.innerHTML = '';
+    const operational = isOperationalMode();
 
     const filtradas = state.incidencias.filter((i) => {
       const byEstado =
@@ -592,7 +661,10 @@
             (i.titulo || '').toLowerCase().includes(q) ||
             (i.descripcion || '').toLowerCase().includes(q) ||
             (i.unidad_clave || '').toLowerCase().includes(q) ||
-            (i.residente_nombre || '').toLowerCase().includes(q)
+            (i.area_nombre || '').toLowerCase().includes(q) ||
+            (i.residente_nombre || '').toLowerCase().includes(q) ||
+            (i.persona_recurrente_nombre || '').toLowerCase().includes(q) ||
+            (i.visitante_rapido_nombre || '').toLowerCase().includes(q)
           );
 
       return byEstado && bySearch;
@@ -610,9 +682,9 @@
 
       header.innerHTML = `
         <div class="col-span-2">Título</div>
-        <div>Unidad</div>
-        <div class="col-span-2">Residente</div>
-        <div>Guardia</div>
+        <div>${escapeHtml(operational ? label('area', 'Área') : label('unit', 'Unidad'))}</div>
+        <div class="col-span-2">${escapeHtml(operational ? label('responsible', 'Responsable') : label('person', 'Residente'))}</div>
+        <div>${escapeHtml(label('guard', 'Guardia'))}</div>
         <div>Prioridad</div>
         <div>Estado</div>
         <div class="text-right">Acciones</div>
@@ -625,7 +697,7 @@
     if (!visibles.length) {
       els.list.innerHTML += `
         <div class="rounded-2xl border bg-slate-50 p-4 text-sm text-slate-600">
-          No hay incidencias para mostrar.
+          ${escapeHtml(label('no_incidents', 'No hay incidencias para mostrar.'))}
         </div>`;
       return;
     }
@@ -644,10 +716,10 @@
           <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Descripción</span><div class="whitespace-pre-wrap">${escapeHtml(i.descripcion || 'Sin descripción')}</div></div>
           <div><span class="text-xs text-slate-500">Tipo</span><div>${escapeHtml(humanizeValue(i.tipo))}</div></div>
           <div><span class="text-xs text-slate-500">Fecha</span><div>${escapeHtml(fmtDate(i.created_at))}</div></div>
-          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Unidad</span><div>${escapeHtml(i.unidad_clave || 'General')}</div></div>
+          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">${escapeHtml(operational ? label('area', 'Área') : label('unit', 'Unidad'))}</span><div>${escapeHtml(i.area_nombre || i.unidad_clave || 'General')}</div></div>
           <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Contexto</span><div>${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</div></div>
-          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Relación</span><div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div></div>
-          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">Guardia</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
+          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">${escapeHtml(operational ? label('responsible', 'Responsable') : 'Relación')}</span><div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div></div>
+          <div class="app-mobile-secondary"><span class="text-xs text-slate-500">${escapeHtml(label('guard', 'Guardia'))}</span><div>${escapeHtml(i.guardia_nombre || '—')}</div></div>
 
           <div class="flex gap-2">
             <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}</span>
@@ -670,16 +742,16 @@
           </div>
           <div>
             <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Contexto</div>
-            <div>${escapeHtml(i.unidad_clave || i.area_nombre || 'General')}</div>
+            <div>${escapeHtml(i.area_nombre || i.unidad_clave || 'General')}</div>
             <div class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">Tipo</div>
             <div class="text-xs text-slate-600">${escapeHtml(humanizeValue(i.tipo))}</div>
           </div>
           <div class="col-span-2">
-            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Relación</div>
+            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">${escapeHtml(operational ? label('responsible', 'Responsable') : 'Relación')}</div>
             <div>${escapeHtml(i.residente_nombre || i.persona_recurrente_nombre || i.visitante_rapido_nombre || '—')}</div>
           </div>
           <div>
-            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Guardia</div>
+            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">${escapeHtml(label('guard', 'Guardia'))}</div>
             <div>${escapeHtml(i.guardia_nombre || '—')}</div>
           </div>
           <div><span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(i.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(i.prioridad, '')}`.trim())}</span></div>
@@ -795,7 +867,7 @@
     }, async () => {
       try {
         const fd = new FormData(els.formAdd);
-        if (String(state.meta?.modo_operacion || 'residencial') === 'residencial') {
+        if (!isOperationalMode()) {
           if (String(fd.get('incidencia_scope') || 'unidad') === 'general') {
             fd.delete('unidad_id');
           }
@@ -812,10 +884,10 @@
 
         const resp = await api.incidencias.save(fd);
         closeAddModal();
-        showAlert(resp.message || 'Incidencia registrada.');
+        showAlert(resp.message || (isOperationalMode() ? 'Incidente registrado.' : 'Incidencia registrada.'));
         await loadAll();
       } catch (e2) {
-        showFormError(els.addError, e2.message || 'Error al registrar incidencia.');
+        showFormError(els.addError, e2.message || `Error al registrar ${incidentLower()}.`);
       }
     });
   });
@@ -836,14 +908,15 @@
 
         const resp = await api.incidencias.save(fd);
         closeEditModal();
-        showAlert(resp.message || 'Incidencia actualizada.');
+        showAlert(resp.message || (isOperationalMode() ? 'Incidente actualizado.' : 'Incidencia actualizada.'));
         await loadAll();
       } catch (e2) {
-        showFormError(els.editError, e2.message || 'Error al actualizar incidencia.');
+        showFormError(els.editError, e2.message || `Error al actualizar ${incidentLower()}.`);
       }
     });
   });
 
   ensureUiHelpers();
+  applyStaticLabels();
   loadAll();
 })();

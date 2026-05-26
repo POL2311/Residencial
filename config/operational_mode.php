@@ -71,6 +71,25 @@ if (!function_exists('operational_column_exists')) {
     }
 }
 
+if (!function_exists('operational_column_is_nullable')) {
+    function operational_column_is_nullable(PDO $pdo, string $table, string $column): bool
+    {
+        $stmt = $pdo->prepare("
+            SELECT IS_NULLABLE
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = :table_name
+              AND COLUMN_NAME = :column_name
+            LIMIT 1
+        ");
+        $stmt->execute([
+            'table_name' => $table,
+            'column_name' => $column,
+        ]);
+        return strtoupper((string)($stmt->fetchColumn() ?: '')) === 'YES';
+    }
+}
+
 if (!function_exists('operational_index_exists')) {
     function operational_index_exists(PDO $pdo, string $table, string $index): bool
     {
@@ -410,8 +429,11 @@ if (!function_exists('operational_schema_ensure')) {
                     residencial_id INT(11) NOT NULL,
                     herramienta_id INT(11) NOT NULL,
                     guardia_id INT(11) NOT NULL,
-                    unidad_id INT(11) NOT NULL,
+                    unidad_id INT(11) DEFAULT NULL,
                     residente_id INT(11) DEFAULT NULL,
+                    area_id INT(11) DEFAULT NULL,
+                    persona_recurrente_id INT(11) DEFAULT NULL,
+                    responsable_nombre VARCHAR(180) DEFAULT NULL,
                     estado VARCHAR(20) NOT NULL DEFAULT 'prestado',
                     notas TEXT DEFAULT NULL,
                     prestado_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -424,9 +446,29 @@ if (!function_exists('operational_schema_ensure')) {
                     KEY idx_prestamos_herramientas_guardia (guardia_id),
                     KEY idx_prestamos_herramientas_herramienta (herramienta_id),
                     KEY idx_prestamos_herramientas_unidad (unidad_id),
-                    KEY idx_prestamos_herramientas_residente (residente_id)
+                    KEY idx_prestamos_herramientas_residente (residente_id),
+                    KEY idx_prestamos_herramientas_area (area_id),
+                    KEY idx_prestamos_herramientas_persona (persona_recurrente_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
             ");
+        }
+        if (operational_column_exists($pdo, 'prestamos_herramientas', 'unidad_id') && !operational_column_is_nullable($pdo, 'prestamos_herramientas', 'unidad_id')) {
+            $pdo->exec("ALTER TABLE prestamos_herramientas MODIFY unidad_id INT(11) DEFAULT NULL");
+        }
+        if (!operational_column_exists($pdo, 'prestamos_herramientas', 'area_id')) {
+            $pdo->exec("ALTER TABLE prestamos_herramientas ADD COLUMN area_id INT(11) DEFAULT NULL AFTER residente_id");
+        }
+        if (!operational_column_exists($pdo, 'prestamos_herramientas', 'persona_recurrente_id')) {
+            $pdo->exec("ALTER TABLE prestamos_herramientas ADD COLUMN persona_recurrente_id INT(11) DEFAULT NULL AFTER area_id");
+        }
+        if (!operational_column_exists($pdo, 'prestamos_herramientas', 'responsable_nombre')) {
+            $pdo->exec("ALTER TABLE prestamos_herramientas ADD COLUMN responsable_nombre VARCHAR(180) DEFAULT NULL AFTER persona_recurrente_id");
+        }
+        if (!operational_index_exists($pdo, 'prestamos_herramientas', 'idx_prestamos_herramientas_area')) {
+            $pdo->exec("ALTER TABLE prestamos_herramientas ADD KEY idx_prestamos_herramientas_area (area_id)");
+        }
+        if (!operational_index_exists($pdo, 'prestamos_herramientas', 'idx_prestamos_herramientas_persona')) {
+            $pdo->exec("ALTER TABLE prestamos_herramientas ADD KEY idx_prestamos_herramientas_persona (persona_recurrente_id)");
         }
         if (!operational_foreign_key_exists($pdo, 'prestamos_herramientas', 'fk_prestamos_herramientas_residencial')) {
             $pdo->exec("
@@ -465,6 +507,22 @@ if (!function_exists('operational_schema_ensure')) {
                 ALTER TABLE prestamos_herramientas
                 ADD CONSTRAINT fk_prestamos_herramientas_residente
                 FOREIGN KEY (residente_id) REFERENCES users(id)
+                ON DELETE SET NULL
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'prestamos_herramientas', 'fk_prestamos_herramientas_area')) {
+            $pdo->exec("
+                ALTER TABLE prestamos_herramientas
+                ADD CONSTRAINT fk_prestamos_herramientas_area
+                FOREIGN KEY (area_id) REFERENCES areas_operativas(id)
+                ON DELETE SET NULL
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'prestamos_herramientas', 'fk_prestamos_herramientas_persona')) {
+            $pdo->exec("
+                ALTER TABLE prestamos_herramientas
+                ADD CONSTRAINT fk_prestamos_herramientas_persona
+                FOREIGN KEY (persona_recurrente_id) REFERENCES personas_recurrentes(id)
                 ON DELETE SET NULL
             ");
         }
@@ -637,6 +695,230 @@ if (!function_exists('operational_schema_ensure')) {
                 ALTER TABLE incidencias
                 ADD CONSTRAINT fk_incidencias_permiso_operativa
                 FOREIGN KEY (permiso_material_id) REFERENCES permisos_materiales(id)
+                ON DELETE SET NULL
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'rondines_rutas')) {
+            $pdo->exec("
+                CREATE TABLE rondines_rutas (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    residencial_id INT(11) NOT NULL,
+                    nombre VARCHAR(150) NOT NULL,
+                    descripcion TEXT DEFAULT NULL,
+                    activo TINYINT(1) NOT NULL DEFAULT 1,
+                    created_by INT(11) DEFAULT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_rondines_rutas_residencial (residencial_id),
+                    KEY idx_rondines_rutas_activo (activo),
+                    KEY idx_rondines_rutas_created_by (created_by)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_rutas', 'fk_rondines_rutas_residencial')) {
+            $pdo->exec("
+                ALTER TABLE rondines_rutas
+                ADD CONSTRAINT fk_rondines_rutas_residencial
+                FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_rutas', 'fk_rondines_rutas_created_by')) {
+            $pdo->exec("
+                ALTER TABLE rondines_rutas
+                ADD CONSTRAINT fk_rondines_rutas_created_by
+                FOREIGN KEY (created_by) REFERENCES users(id)
+                ON DELETE SET NULL
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'rondines_puntos')) {
+            $pdo->exec("
+                CREATE TABLE rondines_puntos (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    residencial_id INT(11) NOT NULL,
+                    area_id INT(11) DEFAULT NULL,
+                    nombre VARCHAR(150) NOT NULL,
+                    descripcion TEXT DEFAULT NULL,
+                    codigo_qr VARCHAR(90) NOT NULL,
+                    latitud DECIMAL(10,7) DEFAULT NULL,
+                    longitud DECIMAL(10,7) DEFAULT NULL,
+                    radio_metros INT(11) NOT NULL DEFAULT 50,
+                    requiere_foto TINYINT(1) NOT NULL DEFAULT 0,
+                    requiere_observacion TINYINT(1) NOT NULL DEFAULT 0,
+                    activo TINYINT(1) NOT NULL DEFAULT 1,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    UNIQUE KEY uq_rondines_puntos_codigo_qr (codigo_qr),
+                    KEY idx_rondines_puntos_residencial (residencial_id),
+                    KEY idx_rondines_puntos_area (area_id),
+                    KEY idx_rondines_puntos_activo (activo)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_puntos', 'fk_rondines_puntos_residencial')) {
+            $pdo->exec("
+                ALTER TABLE rondines_puntos
+                ADD CONSTRAINT fk_rondines_puntos_residencial
+                FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_puntos', 'fk_rondines_puntos_area')) {
+            $pdo->exec("
+                ALTER TABLE rondines_puntos
+                ADD CONSTRAINT fk_rondines_puntos_area
+                FOREIGN KEY (area_id) REFERENCES areas_operativas(id)
+                ON DELETE SET NULL
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'rondines_ruta_puntos')) {
+            $pdo->exec("
+                CREATE TABLE rondines_ruta_puntos (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    ruta_id INT(11) NOT NULL,
+                    punto_id INT(11) NOT NULL,
+                    orden INT(11) NOT NULL DEFAULT 1,
+                    PRIMARY KEY (id),
+                    UNIQUE KEY uq_rondines_ruta_puntos_ruta_punto (ruta_id, punto_id),
+                    KEY idx_rondines_ruta_puntos_ruta (ruta_id),
+                    KEY idx_rondines_ruta_puntos_punto (punto_id),
+                    KEY idx_rondines_ruta_puntos_orden (ruta_id, orden)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_ruta_puntos', 'fk_rondines_ruta_puntos_ruta')) {
+            $pdo->exec("
+                ALTER TABLE rondines_ruta_puntos
+                ADD CONSTRAINT fk_rondines_ruta_puntos_ruta
+                FOREIGN KEY (ruta_id) REFERENCES rondines_rutas(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_ruta_puntos', 'fk_rondines_ruta_puntos_punto')) {
+            $pdo->exec("
+                ALTER TABLE rondines_ruta_puntos
+                ADD CONSTRAINT fk_rondines_ruta_puntos_punto
+                FOREIGN KEY (punto_id) REFERENCES rondines_puntos(id)
+                ON DELETE CASCADE
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'rondines_ejecuciones')) {
+            $pdo->exec("
+                CREATE TABLE rondines_ejecuciones (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    residencial_id INT(11) NOT NULL,
+                    ruta_id INT(11) NOT NULL,
+                    guardia_id INT(11) DEFAULT NULL,
+                    estado VARCHAR(30) NOT NULL DEFAULT 'en_proceso',
+                    inicio_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    fin_at DATETIME DEFAULT NULL,
+                    latitud_inicio DECIMAL(10,7) DEFAULT NULL,
+                    longitud_inicio DECIMAL(10,7) DEFAULT NULL,
+                    precision_inicio_metros DECIMAL(10,2) DEFAULT NULL,
+                    latitud_fin DECIMAL(10,7) DEFAULT NULL,
+                    longitud_fin DECIMAL(10,7) DEFAULT NULL,
+                    precision_fin_metros DECIMAL(10,2) DEFAULT NULL,
+                    observaciones TEXT DEFAULT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_rondines_ejecuciones_residencial (residencial_id),
+                    KEY idx_rondines_ejecuciones_ruta (ruta_id),
+                    KEY idx_rondines_ejecuciones_guardia (guardia_id),
+                    KEY idx_rondines_ejecuciones_estado (estado),
+                    KEY idx_rondines_ejecuciones_inicio (inicio_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_ejecuciones', 'fk_rondines_ejecuciones_residencial')) {
+            $pdo->exec("
+                ALTER TABLE rondines_ejecuciones
+                ADD CONSTRAINT fk_rondines_ejecuciones_residencial
+                FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_ejecuciones', 'fk_rondines_ejecuciones_ruta')) {
+            $pdo->exec("
+                ALTER TABLE rondines_ejecuciones
+                ADD CONSTRAINT fk_rondines_ejecuciones_ruta
+                FOREIGN KEY (ruta_id) REFERENCES rondines_rutas(id)
+                ON DELETE RESTRICT
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_ejecuciones', 'fk_rondines_ejecuciones_guardia')) {
+            $pdo->exec("
+                ALTER TABLE rondines_ejecuciones
+                ADD CONSTRAINT fk_rondines_ejecuciones_guardia
+                FOREIGN KEY (guardia_id) REFERENCES users(id)
+                ON DELETE SET NULL
+            ");
+        }
+
+        if (!operational_table_exists($pdo, 'rondines_eventos')) {
+            $pdo->exec("
+                CREATE TABLE rondines_eventos (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    ejecucion_id INT(11) NOT NULL,
+                    residencial_id INT(11) NOT NULL,
+                    punto_id INT(11) NOT NULL,
+                    guardia_id INT(11) DEFAULT NULL,
+                    escaneado_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    estado VARCHAR(30) NOT NULL DEFAULT 'correcto',
+                    latitud DECIMAL(10,7) DEFAULT NULL,
+                    longitud DECIMAL(10,7) DEFAULT NULL,
+                    precision_metros DECIMAL(10,2) DEFAULT NULL,
+                    distancia_punto_metros DECIMAL(10,2) DEFAULT NULL,
+                    gps_valido TINYINT(1) NOT NULL DEFAULT 0,
+                    observacion TEXT DEFAULT NULL,
+                    evidencia_url VARCHAR(255) DEFAULT NULL,
+                    metadata_json LONGTEXT DEFAULT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    UNIQUE KEY uq_rondines_eventos_ejecucion_punto (ejecucion_id, punto_id),
+                    KEY idx_rondines_eventos_residencial (residencial_id),
+                    KEY idx_rondines_eventos_punto (punto_id),
+                    KEY idx_rondines_eventos_guardia (guardia_id),
+                    KEY idx_rondines_eventos_estado (estado),
+                    KEY idx_rondines_eventos_escaneado (escaneado_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_eventos', 'fk_rondines_eventos_ejecucion')) {
+            $pdo->exec("
+                ALTER TABLE rondines_eventos
+                ADD CONSTRAINT fk_rondines_eventos_ejecucion
+                FOREIGN KEY (ejecucion_id) REFERENCES rondines_ejecuciones(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_eventos', 'fk_rondines_eventos_residencial')) {
+            $pdo->exec("
+                ALTER TABLE rondines_eventos
+                ADD CONSTRAINT fk_rondines_eventos_residencial
+                FOREIGN KEY (residencial_id) REFERENCES residenciales(id)
+                ON DELETE CASCADE
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_eventos', 'fk_rondines_eventos_punto')) {
+            $pdo->exec("
+                ALTER TABLE rondines_eventos
+                ADD CONSTRAINT fk_rondines_eventos_punto
+                FOREIGN KEY (punto_id) REFERENCES rondines_puntos(id)
+                ON DELETE RESTRICT
+            ");
+        }
+        if (!operational_foreign_key_exists($pdo, 'rondines_eventos', 'fk_rondines_eventos_guardia')) {
+            $pdo->exec("
+                ALTER TABLE rondines_eventos
+                ADD CONSTRAINT fk_rondines_eventos_guardia
+                FOREIGN KEY (guardia_id) REFERENCES users(id)
                 ON DELETE SET NULL
             ");
         }

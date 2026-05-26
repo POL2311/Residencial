@@ -2,7 +2,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_operational_bootstrap.php';
-admin_module_required('personal_recurrente', 'Las áreas operativas no están habilitadas para este cliente.');
+
+$areasAllowed = service_profile_module_allowed_for_role_and_service($serviceProfile, 'admin_residencial', 'unidades')
+    || service_profile_module_allowed_for_role_and_service($serviceProfile, 'admin_residencial', 'personal_recurrente');
+if (!$areasAllowed) {
+    json_out(false, ['error' => 'Las áreas operativas no están habilitadas para este cliente.'], 403);
+}
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
@@ -29,6 +34,34 @@ try {
     }
 
     $action = clean_str($_POST['action'] ?? 'save');
+
+    if ($action === 'toggle') {
+        $id = (int)($_POST['id'] ?? 0);
+        $activo = isset($_POST['activo']) && (string)$_POST['activo'] === '1' ? 1 : 0;
+        if ($id <= 0) {
+            json_out(false, ['error' => 'Área inválida.']);
+        }
+
+        $stmt = $pdo->prepare("
+            UPDATE areas_operativas
+            SET activo = :activo,
+                updated_at = NOW()
+            WHERE id = :id
+              AND residencial_id = :rid
+            LIMIT 1
+        ");
+        $stmt->execute([
+            'activo' => $activo,
+            'id' => $id,
+            'rid' => $residencialId,
+        ]);
+
+        if ($stmt->rowCount() <= 0) {
+            json_out(false, ['error' => 'No encontramos el área seleccionada.']);
+        }
+
+        json_out(true, ['message' => $activo ? 'Área activada correctamente.' : 'Área desactivada correctamente.']);
+    }
 
     if ($action === 'delete') {
         $id = (int)($_POST['id'] ?? 0);

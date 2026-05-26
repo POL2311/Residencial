@@ -76,6 +76,24 @@
       .replace(/'/g, '&#039;');
   }
 
+  function currentMode() {
+    const dashboardMode = String(window.AdminResidencialDashboard?.getOperationalMode?.() || '').trim();
+    const dashboardPreset = String(window.AdminResidencialDashboard?.getServiceProfile?.()?.preset_servicio || '').trim();
+    return dashboardMode && dashboardMode !== 'residencial' ? dashboardMode : dashboardPreset || dashboardMode || 'residencial';
+  }
+
+  function label(term, fallback) {
+    return window.OSGateLabels?.label?.(term, currentMode()) || fallback || term;
+  }
+
+  function actionFor(view) {
+    const key = String(view || '').trim();
+    if (!key) return '';
+    const allowed = window.AdminResidencialDashboard?.getServiceProfile?.()?.allowed_views;
+    if (Array.isArray(allowed) && !allowed.includes(key)) return '';
+    return key;
+  }
+
   function showAlert(msg, isError = false) {
     if (!els.alert) return;
     els.alert.textContent = msg;
@@ -347,13 +365,17 @@
       amber: 'text-amber-700 bg-amber-50 border-amber-200',
       rose: 'text-rose-700 bg-rose-50 border-rose-200',
       sky: 'text-sky-700 bg-sky-50 border-sky-200',
+      indigo: 'text-indigo-700 bg-indigo-50 border-indigo-200',
     };
+    const tag = action ? 'button' : 'div';
+    const actionAttr = action ? `type="button" data-retailops-action="${escapeHtml(action)}"` : '';
+    const interactionClass = action ? 'transition hover:-translate-y-0.5 hover:shadow-md' : '';
     return `
-      <button type="button" ${action ? `data-retailops-action="${escapeHtml(action)}"` : ''}
-        class="min-h-[7.5rem] rounded-[1.5rem] border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneMap[tone] || toneMap.slate}">
+      <${tag} ${actionAttr}
+        class="min-h-[7.5rem] rounded-[1.5rem] border bg-white p-4 text-left shadow-sm ${interactionClass} ${toneMap[tone] || toneMap.slate}">
         <div class="text-xs font-medium uppercase tracking-[0.16em] opacity-70">${escapeHtml(label)}</div>
         <div class="mt-3 text-3xl font-semibold">${escapeHtml(value ?? 0)}</div>
-      </button>
+      </${tag}>
     `;
   }
 
@@ -369,14 +391,18 @@
     }
 
     const cards = [
-      ['Personas dentro ahora', data.personas_dentro, 'emerald', 'personal_recurrente'],
-      ['Ingresos del día', data.ingresos_dia, 'sky', 'bitacora_operativa'],
-      ['Salidas pendientes', data.salidas_pendientes, 'amber', 'bitacora_operativa'],
-      ['Incidentes abiertos', data.incidentes_abiertos, 'rose', 'incidencias'],
-      ['Materiales autorizados', data.materiales_autorizados, 'slate', 'materiales'],
-      ['Herramientas prestadas', data.herramientas_prestadas, 'amber', 'herramientas'],
-      ['Accesos rechazados', data.accesos_rechazados, 'rose', 'bitacora_operativa'],
-      ['Últimos eventos', (data.ultimos_eventos || []).length, 'sky', 'bitacora_operativa'],
+      [label('people_inside_now', 'Personas dentro ahora'), data.personas_dentro, 'emerald', actionFor('personal_recurrente')],
+      [label('daily_entries', 'Ingresos del día'), data.ingresos_dia, 'sky', actionFor('bitacora_operativa')],
+      [label('pending_exits', 'Salidas pendientes'), data.salidas_pendientes, 'amber', actionFor('bitacora_operativa')],
+      [label('passes_used_today', 'Pases temporales usados hoy'), data.pases_usados_hoy, 'indigo', actionFor('visitantes_rapidos')],
+      [label('active_authorized_people', 'Personal autorizado activo'), data.personal_autorizado_activo, 'emerald', actionFor('personal_recurrente')],
+      [label('open_incidents', 'Incidentes abiertos'), data.incidentes_abiertos, 'rose', actionFor('incidencias')],
+      [label('authorized_materials', 'Materiales autorizados'), data.materiales_autorizados, 'slate', actionFor('materiales')],
+      [label('loaned_tools', 'Herramientas prestadas'), data.herramientas_prestadas, 'amber', actionFor('herramientas')],
+      [label('pending_rounds', 'Rondines pendientes'), data.rondines_pendientes, 'amber', null],
+      [label('completed_rounds_today', 'Rondines completados hoy'), data.rondines_completados_hoy, 'emerald', null],
+      [label('rejected_accesses', 'Accesos rechazados'), data.accesos_rechazados, 'rose', actionFor('bitacora_operativa')],
+      [label('latest_events', 'Últimos eventos'), (data.ultimos_eventos || []).length, 'sky', actionFor('bitacora_operativa')],
     ];
 
     if (els.retailCards) {
@@ -388,7 +414,7 @@
       if (!events.length) {
         els.retailEvents.innerHTML = `
           <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-            Aún no hay eventos operativos registrados.
+            ${escapeHtml(label('no_operational_events', 'Aún no hay eventos operativos registrados.'))}
           </div>
         `;
       } else {

@@ -46,6 +46,7 @@
     materiales_autorizados: BASE + 'js/materiales_autorizados.js',
     bitacora_hoy: BASE + 'js/bitacora_hoy.js',
     herramientas: BASE + 'js/herramientas.js',
+    rondines: BASE + 'js/rondines.js',
   };
 
   const state = {
@@ -65,7 +66,7 @@
     isNavigating: false,
     moreSheetOpen: false,
   };
-  const PRIMARY_DOCK_VIEWS = new Set(['home', 'accesos', 'incidencias', 'autos']);
+  const PRIMARY_DOCK_VIEWS = new Set(['home', 'accesos', 'rondines', 'incidencias', 'autos']);
   const SECONDARY_DOCK_VIEWS = new Set(['paqueteria', 'personas_dentro', 'materiales_autorizados', 'bitacora_hoy', 'herramientas', 'perfil']);
 
   function escapeHtml(s) {

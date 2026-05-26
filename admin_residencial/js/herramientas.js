@@ -79,6 +79,16 @@
     return 'border-slate-200 bg-slate-100 text-slate-600';
   }
 
+  function currentMode() {
+    const dashboardMode = String(window.AdminResidencialDashboard?.getOperationalMode?.() || '').trim();
+    const dashboardPreset = String(window.AdminResidencialDashboard?.getServiceProfile?.()?.preset_servicio || '').trim();
+    return dashboardMode && dashboardMode !== 'residencial' ? dashboardMode : dashboardPreset || dashboardMode || 'residencial';
+  }
+
+  function label(term, fallback = '') {
+    return window.OSGateLabels?.label?.(term, currentMode()) || fallback || term;
+  }
+
   function resetForm() {
     els.form?.reset();
     if (els.id) els.id.value = '';
@@ -129,7 +139,11 @@
         </div>
       `;
     } else {
-      els.prestamos.innerHTML = state.prestamos.map((loan) => `
+      els.prestamos.innerHTML = state.prestamos.map((loan) => {
+        const contextLabel = loan.area_nombre ? label('area', 'Área') : label('unit', 'Unidad');
+        const contextValue = loan.area_nombre || loan.unidad_clave || '—';
+        const responsibleValue = loan.persona_recurrente_nombre || loan.responsable_nombre || loan.residente_nombre || '—';
+        return `
         <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
@@ -138,9 +152,9 @@
                 <span class="rounded-full border px-2.5 py-1 text-[11px] ${statusBadge(loan.estado)}">${escapeHtml(loan.estado || '—')}</span>
               </div>
               <div class="mt-2 grid gap-1 text-sm text-slate-500 sm:grid-cols-2">
-                <div>Área/unidad: <span class="font-medium text-slate-700">${escapeHtml(loan.unidad_clave || '—')}</span></div>
-                <div>Responsable: <span class="font-medium text-slate-700">${escapeHtml(loan.residente_nombre || '—')}</span></div>
-                <div>Operador: <span class="font-medium text-slate-700">${escapeHtml(loan.guardia_nombre || '—')}</span></div>
+                <div>${escapeHtml(contextLabel)}: <span class="font-medium text-slate-700">${escapeHtml(contextValue)}</span></div>
+                <div>${escapeHtml(label('responsible', 'Responsable'))}: <span class="font-medium text-slate-700">${escapeHtml(responsibleValue)}</span></div>
+                <div>${escapeHtml(label('guard', 'Operador'))}: <span class="font-medium text-slate-700">${escapeHtml(loan.guardia_nombre || '—')}</span></div>
                 <div>Prestado: <span class="font-medium text-slate-700">${escapeHtml(loan.prestado_at || '—')}</span></div>
               </div>
               ${loan.notas ? `<div class="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">${escapeHtml(loan.notas)}</div>` : ''}
@@ -152,7 +166,8 @@
             ` : ''}
           </div>
         </article>
-      `).join('');
+      `;
+      }).join('');
     }
 
     if (els.pageInfo) {

@@ -1,0 +1,101 @@
+<div id="guardRondinesView" class="space-y-4">
+  <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <div class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Operación móvil</div>
+        <h1 class="mt-1 text-2xl font-semibold text-slate-800" data-os-label="rounds">Rondines</h1>
+        <p class="mt-1 text-sm text-slate-500">Inicia recorridos, escanea puntos QR y registra GPS, evidencia y observaciones.</p>
+      </div>
+      <button id="btnRefreshRounds" type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+        Actualizar
+      </button>
+    </div>
+  </section>
+
+  <div id="roundAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <section id="roundActiveWrap" class="hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div id="roundActiveContent"></div>
+  </section>
+
+  <section id="roundRoutesWrap" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-800">Rutas disponibles</h2>
+        <p class="text-sm text-slate-500">Selecciona una ruta activa para iniciar el rondín.</p>
+      </div>
+    </div>
+    <div id="roundRoutesList" class="space-y-3 text-sm text-slate-500">Cargando…</div>
+  </section>
+
+  <div id="roundPointModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm">
+    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
+      <div class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-lg sm:rounded-3xl">
+        <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+          <div>
+            <div class="text-base font-semibold text-slate-800">Registrar punto</div>
+            <div id="roundPointModalHint" class="mt-1 text-xs text-slate-500">Escanea el QR del punto de revisión.</div>
+          </div>
+          <button id="btnCloseRoundPointModal" type="button" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+        </div>
+
+        <form id="roundPointForm" class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+          <div id="roundPointFormError" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
+
+          <div class="grid gap-3">
+            <div>
+              <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Código QR</label>
+              <div class="flex gap-2">
+                <input id="roundQrCode" name="codigo_qr" class="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="op:round_point:..." required />
+                <button id="btnOpenRoundCamera" type="button" class="rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white">Escanear</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Estado</label>
+              <select id="roundPointStatus" name="estado" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="correcto">Correcto</option>
+                <option value="anomalia">Anomalía</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Observación</label>
+              <textarea id="roundObservation" name="observacion" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Describe novedades, anomalías o detalles del punto"></textarea>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Evidencia</label>
+              <input id="roundEvidence" name="evidencia" type="file" accept="image/*" capture="environment" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" />
+              <p class="mt-1 text-[11px] text-slate-400">Adjunta foto si el punto lo requiere o si registras una anomalía.</p>
+            </div>
+
+            <div id="roundGpsStatus" class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+              GPS pendiente. Se solicitará ubicación al guardar.
+            </div>
+          </div>
+        </form>
+
+        <div class="border-t border-slate-100 bg-white px-5 py-4">
+          <button id="btnSubmitRoundPoint" type="button" class="w-full rounded-2xl bg-[#2E5D73] px-4 py-3 text-sm font-semibold text-white shadow disabled:cursor-not-allowed disabled:opacity-50">
+            Guardar punto
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="roundCameraModal" class="fixed inset-0 z-[60] hidden bg-black/70 p-0 backdrop-blur-sm md:p-4">
+    <div class="flex min-h-full items-end justify-center md:items-center">
+      <div class="w-full max-w-sm rounded-t-2xl bg-white p-4 shadow-2xl md:rounded-2xl">
+        <div class="text-sm font-semibold text-slate-800">Escanea punto de revisión</div>
+        <video id="roundVideo" class="mt-3 aspect-video w-full rounded-xl bg-slate-100" autoplay playsinline></video>
+        <div id="roundCameraHint" class="mt-2 text-xs text-slate-500">Esperando QR…</div>
+        <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button id="btnRetryRoundCamera" type="button" class="hidden rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white">Reintentar</button>
+          <button id="btnCloseRoundCamera" type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,171 @@
+<div id="adminRondinesView" class="space-y-5">
+  <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="app-admin-kicker" data-os-label="rounds">Rondines</div>
+    <div class="mt-2 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h1 class="app-admin-title">Rondines digitales</h1>
+        <p class="app-admin-subtitle">Configura rutas, puntos QR y revisa cumplimiento operativo con GPS, evidencia y bitácora.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button id="btnRondinNewPoint" type="button" class="app-admin-ghost rounded-full px-4 py-2 text-sm font-semibold">Nuevo punto</button>
+        <button id="btnRondinNewRoute" type="button" class="app-admin-primary rounded-full px-4 py-2 text-sm font-semibold">Nueva ruta</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="rondinesAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+    <div class="grid gap-2 sm:grid-cols-3">
+      <button type="button" data-rondines-tab="rutas" class="rondines-tab rounded-xl px-4 py-3 text-sm font-semibold text-slate-700">Rutas</button>
+      <button type="button" data-rondines-tab="puntos" class="rondines-tab rounded-xl px-4 py-3 text-sm font-semibold text-slate-700">Puntos de revisión</button>
+      <button type="button" data-rondines-tab="historial" class="rondines-tab rounded-xl px-4 py-3 text-sm font-semibold text-slate-700">Historial</button>
+    </div>
+  </section>
+
+  <section id="rondinesRutasPanel" class="space-y-4">
+    <div id="rondinesRutasList" class="grid gap-4 lg:grid-cols-2"></div>
+  </section>
+
+  <section id="rondinesPuntosPanel" class="hidden space-y-4">
+    <div id="rondinesPuntosList" class="grid gap-4 lg:grid-cols-2"></div>
+  </section>
+
+  <section id="rondinesHistorialPanel" class="hidden space-y-4">
+    <div id="rondinesHistorialList" class="space-y-3"></div>
+  </section>
+
+  <div id="rondinRouteModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="round_routes">Rutas de rondín</div>
+          <h2 id="rondinRouteModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nueva ruta</h2>
+        </div>
+        <button type="button" data-close-route-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <form id="rondinRouteForm" class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <input type="hidden" name="id" />
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</label>
+          <input name="nombre" required maxlength="150" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Descripción</label>
+          <textarea name="descripcion" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></textarea>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-600"><input name="activo" type="checkbox" value="1" checked /> Ruta activa</label>
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <button type="button" data-close-route-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar ruta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="rondinPointModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="review_points">Puntos de revisión</div>
+          <h2 id="rondinPointModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nuevo punto</h2>
+        </div>
+        <button type="button" data-close-point-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <form id="rondinPointForm" class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <input type="hidden" name="id" />
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</label>
+            <input name="nombre" required maxlength="150" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="area">Área</label>
+            <select name="area_id" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></select>
+          </div>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Descripción</label>
+          <textarea name="descripcion" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></textarea>
+        </div>
+        <div class="grid gap-3 md:grid-cols-4">
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Latitud</label>
+            <input name="latitud" inputmode="decimal" placeholder="19.4326000" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Longitud</label>
+            <input name="longitud" inputmode="decimal" placeholder="-99.1332000" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Radio metros</label>
+            <input name="radio_metros" type="number" min="5" max="5000" value="50" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
+          </div>
+          <div class="flex items-end">
+            <button id="btnUseCurrentGps" type="button" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600">Usar GPS actual</button>
+          </div>
+        </div>
+        <div class="grid gap-2 md:grid-cols-3">
+          <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600"><input name="requiere_foto" type="checkbox" value="1" /> Requiere foto</label>
+          <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600"><input name="requiere_observacion" type="checkbox" value="1" /> Requiere observación</label>
+          <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600"><input name="activo" type="checkbox" value="1" checked /> Punto activo</label>
+        </div>
+        <div id="rondinPointGpsHint" class="hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500"></div>
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <button type="button" data-close-point-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar punto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="rondinAssignModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Asignación</div>
+          <h2 id="rondinAssignTitle" class="mt-1 text-xl font-semibold text-slate-900">Puntos de ruta</h2>
+        </div>
+        <button type="button" data-close-assign-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <div class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <div id="rondinAssignList" class="space-y-2"></div>
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <button type="button" data-close-assign-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button id="btnSaveRoutePoints" type="button" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar puntos</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rondinQrModal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">QR de punto</div>
+          <h2 id="rondinQrTitle" class="mt-1 text-xl font-semibold text-slate-900">Punto</h2>
+        </div>
+        <button type="button" data-close-qr-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <div class="p-5 text-center">
+        <div class="mx-auto inline-flex rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
+          <img id="rondinQrImage" src="" alt="QR rondín" class="h-72 w-72 max-w-full rounded-2xl object-contain" />
+        </div>
+        <div id="rondinQrPayload" class="mt-4 break-all rounded-2xl bg-slate-50 px-4 py-3 text-left text-xs text-slate-500"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rondinDetailModal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div class="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle de rondín</div>
+          <h2 id="rondinDetailTitle" class="mt-1 text-xl font-semibold text-slate-900">Historial</h2>
+        </div>
+        <button type="button" data-close-detail-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
+      </div>
+      <div id="rondinDetailBody" class="max-h-[72vh] overflow-y-auto p-5"></div>
+    </div>
+  </div>
+</div>

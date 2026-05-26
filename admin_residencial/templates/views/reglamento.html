@@ -3,7 +3,7 @@
 
   <div>
     <div class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Documento oficial</div>
-    <h1 class="mt-1 text-2xl font-semibold text-slate-800">Reglamento</h1>
+    <h1 class="mt-1 text-2xl font-semibold text-slate-800" data-os-label="policy">Reglamento</h1>
   </div>
 
   <div class="flex flex-col lg:flex-row gap-6">
@@ -12,8 +12,8 @@
       <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="px-5 py-4 border-b bg-slate-50 flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-semibold text-slate-800">Editar reglamento</h2>
-            <p class="text-sm text-slate-500">Modifica el documento oficial del residencial.</p>
+            <h2 class="text-lg font-semibold text-slate-800" data-os-label="edit_policy">Editar reglamento</h2>
+            <p class="text-sm text-slate-500" data-os-label="policy_hint">Modifica el documento oficial del residencial.</p>
           </div>
 
           <button
@@ -35,6 +35,7 @@
               name="titulo"
               type="text"
               class="w-full rounded-xl border px-4 py-3 text-sm"
+              data-os-placeholder="policy_placeholder_title"
               placeholder="Ej. Reglamento General del Residencial"
               required />
           </div>
@@ -56,6 +57,7 @@
               name="contenido"
               rows="18"
               class="w-full rounded-xl border px-4 py-3 text-sm"
+              data-os-placeholder="policy_placeholder_content"
               placeholder="Escribe aquí el reglamento..."
               required></textarea>
             <p class="mt-1 text-xs text-slate-500">
@@ -66,7 +68,8 @@
           <div class="flex justify-end">
             <button
               type="submit"
-              class="bg-[#2E5D73] text-white text-sm font-semibold px-5 py-3 rounded-xl hover:opacity-95">
+              class="bg-[#2E5D73] text-white text-sm font-semibold px-5 py-3 rounded-xl hover:opacity-95"
+              data-os-label="save_policy">
               Guardar reglamento
             </button>
           </div>
@@ -79,7 +82,7 @@
       <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="px-5 py-4 border-b bg-slate-50">
           <h2 class="text-lg font-semibold text-slate-800">Vista previa</h2>
-          <p class="text-sm text-slate-500">Así se verá el reglamento actual del residencial.</p>
+          <p class="text-sm text-slate-500" data-os-label="policy_preview_hint">Así se verá el reglamento actual del residencial.</p>
         </div>
 
         <div class="p-6">
@@ -95,7 +98,7 @@
               </div>
 
               <div class="shrink-0">
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-[#2E5D73]/10 text-[#2E5D73] text-xs font-semibold">
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-[#2E5D73]/10 text-[#2E5D73] text-xs font-semibold" data-os-label="policy">
                   Reglamento
                 </span>
               </div>

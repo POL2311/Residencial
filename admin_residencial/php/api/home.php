@@ -61,6 +61,15 @@ function admin_home_retailops_dashboard(PDO $pdo, int $residencialId): array
         ", ['rid' => $residencialId])
         : 0;
 
+    $personalAutorizadoActivo = tableExists($pdo, 'personas_recurrentes')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM personas_recurrentes
+            WHERE residencial_id = :rid
+              AND activo = 1
+        ", ['rid' => $residencialId])
+        : 0;
+
     $ingresosDia = tableExists($pdo, 'bitacora_operativa')
         ? admin_home_count($pdo, "
             SELECT COUNT(*)
@@ -71,6 +80,27 @@ function admin_home_retailops_dashboard(PDO $pdo, int $residencialId): array
               AND resultado = 'permitido'
         ", ['rid' => $residencialId])
         : 0;
+
+    $pasesUsadosHoy = tableExists($pdo, 'bitacora_operativa')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(DISTINCT visitante_rapido_id)
+            FROM bitacora_operativa
+            WHERE residencial_id = :rid
+              AND visitante_rapido_id IS NOT NULL
+              AND DATE(fecha_hora) = CURDATE()
+              AND resultado = 'permitido'
+        ", ['rid' => $residencialId])
+        : 0;
+
+    if ($pasesUsadosHoy === 0 && tableExists($pdo, 'visitantes_rapidos')) {
+        $pasesUsadosHoy = admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM visitantes_rapidos
+            WHERE residencial_id = :rid
+              AND ultimo_evento_at IS NOT NULL
+              AND DATE(ultimo_evento_at) = CURDATE()
+        ", ['rid' => $residencialId]);
+    }
 
     $incidentesAbiertos = tableExists($pdo, 'incidencias')
         ? admin_home_count($pdo, "
@@ -125,6 +155,25 @@ function admin_home_retailops_dashboard(PDO $pdo, int $residencialId): array
         ])
         : 0;
 
+    $rondinesPendientes = tableExists($pdo, 'rondines_ejecuciones')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM rondines_ejecuciones
+            WHERE residencial_id = :rid
+              AND estado IN ('en_proceso', 'incompleto')
+        ", ['rid' => $residencialId])
+        : 0;
+
+    $rondinesCompletadosHoy = tableExists($pdo, 'rondines_ejecuciones')
+        ? admin_home_count($pdo, "
+            SELECT COUNT(*)
+            FROM rondines_ejecuciones
+            WHERE residencial_id = :rid
+              AND estado = 'completado'
+              AND DATE(COALESCE(fin_at, inicio_at, created_at)) = CURDATE()
+        ", ['rid' => $residencialId])
+        : 0;
+
     $eventos = [];
     if (tableExists($pdo, 'bitacora_operativa')) {
         try {
@@ -164,9 +213,13 @@ function admin_home_retailops_dashboard(PDO $pdo, int $residencialId): array
         'personas_dentro' => $personasDentroAhora,
         'ingresos_dia' => $ingresosDia,
         'salidas_pendientes' => $personasDentroAhora + $materialesEnProceso,
+        'pases_usados_hoy' => $pasesUsadosHoy,
+        'personal_autorizado_activo' => $personalAutorizadoActivo,
         'incidentes_abiertos' => $incidentesAbiertos,
         'materiales_autorizados' => $materialesAutorizados,
         'herramientas_prestadas' => $herramientasPrestadas,
+        'rondines_pendientes' => $rondinesPendientes,
+        'rondines_completados_hoy' => $rondinesCompletadosHoy,
         'accesos_rechazados' => $rechazosBitacora + $rechazosAccesos,
         'ultimos_eventos' => $eventos,
     ];
@@ -290,7 +343,7 @@ try {
 
     $presetServicio = (string)($serviceProfile['preset_servicio'] ?? 'residencial');
     $modoOperacion = (string)($operationalMode ?? 'residencial');
-    $retailopsDashboard = ($presetServicio === 'retailops' || $modoOperacion === 'retailops')
+    $retailopsDashboard = (operational_is_operational_mode($presetServicio) || operational_is_operational_mode($modoOperacion))
         ? admin_home_retailops_dashboard($pdo, $residencialId)
         : null;
 

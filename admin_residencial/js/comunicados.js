@@ -137,6 +137,20 @@
       : 'bg-slate-100 text-slate-700';
   }
 
+  function currentMode() {
+    const dashboardMode = String(window.AdminResidencialDashboard?.getOperationalMode?.() || '').trim();
+    const dashboardPreset = String(window.AdminResidencialDashboard?.getServiceProfile?.()?.preset_servicio || '').trim();
+    return dashboardMode && dashboardMode !== 'residencial' ? dashboardMode : dashboardPreset || dashboardMode || 'residencial';
+  }
+
+  function label(term, fallback = '') {
+    return window.OSGateLabels?.label?.(term, currentMode()) || fallback || term;
+  }
+
+  function bulletinLabelLower() {
+    return String(label('bulletin', 'comunicado')).toLowerCase();
+  }
+
   function homeBadge(c) {
     const today = new Date().toISOString().slice(0, 10);
     const estado = String(c?.estado || '');
@@ -162,7 +176,7 @@
     const exp = String(fd.get('fecha_expiracion') || '').trim();
 
     if (estado !== 'publicado') {
-      showAlert('Borrador: este comunicado no se mostrará en Home hasta publicarlo.');
+      showAlert(`Borrador: este ${bulletinLabelLower()} no se mostrará en Home hasta publicarlo.`);
       return;
     }
     if (pub && pub > today) {
@@ -332,7 +346,7 @@
     state.editingId = null;
     clearFormError();
     els.form?.reset();
-    if (els.modalTitle) els.modalTitle.textContent = 'Nuevo comunicado';
+    if (els.modalTitle) els.modalTitle.textContent = label('new_bulletin', '+ Nuevo comunicado').replace(/^\+\s*/, '');
     if (els.form?.imagen_url) els.form.imagen_url.value = '';
     if (els.imagePreview) {
       els.imagePreview.src = '';
@@ -351,7 +365,7 @@
     state.editingId = c.id;
     clearFormError();
     els.form?.reset();
-    if (els.modalTitle) els.modalTitle.textContent = 'Editar comunicado';
+    if (els.modalTitle) els.modalTitle.textContent = label('edit_bulletin', 'Editar comunicado');
 
     Object.keys(c).forEach((k) => {
       // Los inputs file no se pueden setear programáticamente; solo guardamos el URL actual.
@@ -505,7 +519,7 @@
     if (!state.filtered.length) {
       els.list.innerHTML = `
         <div class="rounded-2xl border bg-slate-50 p-5 text-sm text-slate-600">
-          No hay comunicados para mostrar con los filtros actuales.
+          ${escapeHtml(label('no_bulletins', 'No hay comunicados para mostrar con los filtros actuales.'))}
         </div>
       `;
       renderPagination(0);
@@ -573,7 +587,7 @@
       applyFilters();
       render();
     } catch (e) {
-      showAlert(e.message || 'Error al cargar comunicados.', true);
+      showAlert(e.message || `Error al cargar ${String(label('bulletins', 'comunicados')).toLowerCase()}.`, true);
     }
   }
 
@@ -630,8 +644,8 @@
 
     if (arch) {
       const ok = await showConfirm({
-        title: 'Archivar comunicado',
-        message: 'El comunicado dejará de mostrarse en el listado principal. ¿Deseas continuar?',
+        title: label('archive_bulletin', 'Archivar comunicado'),
+        message: `El ${bulletinLabelLower()} dejará de mostrarse en el listado principal. ¿Deseas continuar?`,
         acceptText: 'Sí, archivar',
         cancelText: 'Cancelar',
       });
@@ -640,10 +654,10 @@
 
       try {
         const resp = await api.comunicados.archive(arch.dataset.archive);
-        showAlert(resp.message || 'Comunicado archivado');
+        showAlert(resp.message || `${label('bulletin', 'Comunicado')} archivado`);
         await load();
       } catch (err) {
-        showAlert(err.message || 'Error al archivar comunicado', true);
+        showAlert(err.message || `Error al archivar ${bulletinLabelLower()}`, true);
       }
     }
   });
@@ -688,12 +702,13 @@
       closeModal();
       await load();
     } catch (err) {
-      showFormError(err.message || 'Error al guardar comunicado.');
+      showFormError(err.message || `Error al guardar ${bulletinLabelLower()}.`);
     } finally {
       setLoading(false);
     }
   });
 
   ensureUiHelpers();
+  window.OSGateLabels?.apply?.(els.view, currentMode());
   load();
 })();

@@ -1,0 +1,101 @@
+<div id="reportesOperativosView" class="space-y-5">
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-100 bg-slate-50/70 px-4 py-4 sm:px-5">
+      <div class="app-admin-kicker" data-os-label="report_logbook">Reporte de bitácora</div>
+      <div class="mt-2 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 class="app-admin-title" data-os-label="operational_audit">Auditoría operativa</h1>
+          <p class="app-admin-subtitle max-w-3xl">
+            Consulta y exporta eventos operativos de accesos, materiales, herramientas, incidentes y bitácora.
+          </p>
+        </div>
+        <button id="reportesExportCsv"
+                type="button"
+                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-[#2E5D73]/40 hover:text-[#2E5D73]">
+          <span data-os-label="export_csv">Exportar CSV</span>
+        </button>
+      </div>
+    </div>
+
+    <form id="reportesOperativosFilters" class="grid gap-3 p-4 sm:p-5 lg:grid-cols-12">
+      <div class="lg:col-span-2">
+        <label for="reportesDesde" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha inicio</label>
+        <input id="reportesDesde" type="date" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/10" />
+      </div>
+      <div class="lg:col-span-2">
+        <label for="reportesHasta" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha fin</label>
+        <input id="reportesHasta" type="date" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/10" />
+      </div>
+      <div class="lg:col-span-2">
+        <label for="reportesArea" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="area">Área</label>
+        <select id="reportesArea" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/10">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="lg:col-span-2">
+        <label for="reportesOperador" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="guard">Operador</label>
+        <select id="reportesOperador" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/10">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="lg:col-span-2">
+        <label for="reportesTipo" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo de evento</label>
+        <select id="reportesTipo" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/10">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="lg:col-span-2">
+        <label for="reportesSearch" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Búsqueda</label>
+        <input id="reportesSearch" type="search" placeholder="Texto libre" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/10" />
+      </div>
+
+      <div class="flex flex-col gap-2 sm:flex-row lg:col-span-12 lg:justify-end">
+        <button id="reportesClear"
+                type="button"
+                class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+          Limpiar
+        </button>
+        <button type="submit"
+                class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#244c5f]">
+          Aplicar filtros
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <div id="reportesAlert" class="hidden rounded-2xl px-4 py-3 text-sm"></div>
+
+  <section id="reportesSummary" class="grid gap-3 md:grid-cols-4"></section>
+
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="flex flex-col gap-2 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-base font-semibold text-slate-800">Eventos encontrados</h2>
+        <p id="reportesRangeHint" class="text-xs text-slate-500"></p>
+      </div>
+      <div id="reportesCount" class="text-xs font-semibold uppercase tracking-wide text-slate-400">0 registros</div>
+    </div>
+
+    <div class="hidden overflow-x-auto md:block">
+      <table class="min-w-full divide-y divide-slate-100 text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+          <tr>
+            <th class="px-4 py-3 font-semibold">Fecha/hora</th>
+            <th class="px-4 py-3 font-semibold">Tipo</th>
+            <th class="px-4 py-3 font-semibold" data-os-label="area">Área</th>
+            <th class="px-4 py-3 font-semibold">Persona / responsable</th>
+            <th class="px-4 py-3 font-semibold" data-os-label="guard">Operador</th>
+            <th class="px-4 py-3 font-semibold">Origen</th>
+            <th class="px-4 py-3 font-semibold">Resultado</th>
+          </tr>
+        </thead>
+        <tbody id="reportesTableBody" class="divide-y divide-slate-100"></tbody>
+      </table>
+    </div>
+
+    <div id="reportesCards" class="space-y-3 p-4 md:hidden"></div>
+    <div id="reportesEmpty" class="hidden p-6 text-sm text-slate-500">
+      No hay eventos operativos con los filtros seleccionados.
+    </div>
+  </section>
+</div>

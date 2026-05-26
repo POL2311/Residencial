@@ -141,6 +141,8 @@ try {
     $profile = $isSuperAdmin
         ? service_profile_get($pdo, $rid)
         : service_profile_require_role_enabled($pdo, $rid, 'guardia', 'El panel de guardia no está habilitado para este cliente.');
+    $operationalMode = operational_get_mode($pdo, $rid);
+    $isOperationalMode = operational_is_operational_mode($operationalMode);
 
     guardia_require_module_access($profile, $isSuperAdmin, 'herramientas', 'El módulo de herramientas no está habilitado para este cliente.');
 
@@ -158,6 +160,32 @@ try {
         ");
         $stmt->execute(['rid' => $rid]);
         out(true, ['data' => ['items' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []]]);
+    }
+
+    if ($method === 'GET' && $action === 'areas_operativas') {
+        $stmt = $pdo->prepare("
+            SELECT id, nombre, codigo, tipo
+            FROM areas_operativas
+            WHERE residencial_id = :rid
+              AND activo = 1
+            ORDER BY nombre ASC, id ASC
+            LIMIT 400
+        ");
+        $stmt->execute(['rid' => $rid]);
+        out(true, ['data' => ['items' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [], 'modo_operacion' => $operationalMode]]);
+    }
+
+    if ($method === 'GET' && $action === 'personal_autorizado') {
+        $stmt = $pdo->prepare("
+            SELECT id, nombre, empresa, puesto, area_id
+            FROM personas_recurrentes
+            WHERE residencial_id = :rid
+              AND activo = 1
+            ORDER BY nombre ASC, id ASC
+            LIMIT 400
+        ");
+        $stmt->execute(['rid' => $rid]);
+        out(true, ['data' => ['items' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [], 'modo_operacion' => $operationalMode]]);
     }
 
     if ($method === 'GET' && $action === 'unidades') {
@@ -225,14 +253,19 @@ try {
                 p.*,
                 h.nombre AS herramienta_nombre,
                 u.clave AS unidad_clave,
+                a.nombre AS area_nombre,
                 g.name AS guardia_nombre,
                 r.name AS residente_nombre,
-                r.email AS residente_email
+                r.email AS residente_email,
+                pr.nombre AS persona_recurrente_nombre,
+                pr.empresa AS persona_recurrente_empresa
             FROM prestamos_herramientas p
             JOIN catalogo_herramientas h ON h.id = p.herramienta_id
-            JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN areas_operativas a ON a.id = p.area_id
             LEFT JOIN users g ON g.id = p.guardia_id
             LEFT JOIN users r ON r.id = p.residente_id
+            LEFT JOIN personas_recurrentes pr ON pr.id = p.persona_recurrente_id
             WHERE " . implode(' AND ', $where) . "
             ORDER BY p.prestado_at DESC, p.id DESC
             LIMIT :limit OFFSET :offset
@@ -257,9 +290,15 @@ try {
                 'herramienta_nombre' => (string)($row['herramienta_nombre'] ?? ''),
                 'unidad_id' => (int)($row['unidad_id'] ?? 0),
                 'unidad_clave' => (string)($row['unidad_clave'] ?? ''),
+                'area_id' => (int)($row['area_id'] ?? 0),
+                'area_nombre' => (string)($row['area_nombre'] ?? ''),
                 'residente_id' => (int)($row['residente_id'] ?? 0),
                 'residente_nombre' => (string)($row['residente_nombre'] ?? ''),
                 'residente_email' => (string)($row['residente_email'] ?? ''),
+                'persona_recurrente_id' => (int)($row['persona_recurrente_id'] ?? 0),
+                'persona_recurrente_nombre' => (string)($row['persona_recurrente_nombre'] ?? ''),
+                'persona_recurrente_empresa' => (string)($row['persona_recurrente_empresa'] ?? ''),
+                'responsable_nombre' => (string)($row['responsable_nombre'] ?? ''),
                 'guardia_id' => (int)($row['guardia_id'] ?? 0),
                 'guardia_nombre' => (string)($row['guardia_nombre'] ?? ''),
                 'notas' => (string)($row['notas'] ?? ''),
@@ -286,10 +325,13 @@ try {
         $herramientaId = intv($_POST['herramienta_id'] ?? 0, 0);
         $unidadId = intv($_POST['unidad_id'] ?? 0, 0);
         $residenteId = intv($_POST['residente_id'] ?? 0, 0);
+        $areaId = intv($_POST['area_id'] ?? 0, 0);
+        $personaId = intv($_POST['persona_recurrente_id'] ?? 0, 0);
+        $responsableNombre = strv((string)($_POST['responsable_nombre'] ?? ''), 180);
         $notas = strv((string)($_POST['notas'] ?? ''), 1200);
 
-        if ($herramientaId <= 0 || $unidadId <= 0) {
-            out(false, ['error' => 'Debes seleccionar herramienta y unidad.'], 422);
+        if ($herramientaId <= 0) {
+            out(false, ['error' => 'Debes seleccionar herramienta.'], 422);
         }
 
         $stmtH = $pdo->prepare("
@@ -303,42 +345,97 @@ try {
             out(false, ['error' => 'Herramienta inválida o inactiva.'], 422);
         }
 
-        $stmtU = $pdo->prepare("
-            SELECT 1
-            FROM unidades
-            WHERE id = :id AND residencial_id = :rid
-            LIMIT 1
-        ");
-        $stmtU->execute(['id' => $unidadId, 'rid' => $rid]);
-        if (!(bool)$stmtU->fetchColumn()) {
-            out(false, ['error' => 'Unidad inválida para este servicio.'], 422);
-        }
-
-        if ($residenteId > 0) {
-            $stmtR = $pdo->prepare("
-                SELECT 1
-                FROM users u
-                JOIN usuarios_residenciales ur ON ur.user_id = u.id AND ur.residencial_id = :rid
-                JOIN tipos_usuario t ON t.id = u.tipo_usuario_id
-                WHERE u.id = :uid
-                  AND t.nombre = 'residente'
+        if ($isOperationalMode) {
+            if ($areaId <= 0) {
+                out(false, ['error' => 'Debes seleccionar un área.'], 422);
+            }
+            $stmtA = $pdo->prepare("
+                SELECT nombre
+                FROM areas_operativas
+                WHERE id = :id
+                  AND residencial_id = :rid
+                  AND activo = 1
                 LIMIT 1
             ");
-            $stmtR->execute(['rid' => $rid, 'uid' => $residenteId]);
-            if (!(bool)$stmtR->fetchColumn()) {
-                out(false, ['error' => 'Residente inválido para este servicio.'], 422);
+            $stmtA->execute(['id' => $areaId, 'rid' => $rid]);
+            $areaNombre = (string)($stmtA->fetchColumn() ?: '');
+            if ($areaNombre === '') {
+                out(false, ['error' => 'Área inválida para este servicio.'], 422);
             }
-        } else {
+
+            $personaNombre = '';
+            if ($personaId > 0) {
+                $stmtP = $pdo->prepare("
+                    SELECT nombre
+                    FROM personas_recurrentes
+                    WHERE id = :id
+                      AND residencial_id = :rid
+                      AND activo = 1
+                    LIMIT 1
+                ");
+                $stmtP->execute(['id' => $personaId, 'rid' => $rid]);
+                $personaNombre = (string)($stmtP->fetchColumn() ?: '');
+                if ($personaNombre === '') {
+                    out(false, ['error' => 'Personal autorizado inválido para este servicio.'], 422);
+                }
+            } else {
+                $personaId = null;
+            }
+
+            if ($personaId === null && $responsableNombre === '') {
+                out(false, ['error' => 'Captura un responsable o selecciona personal autorizado.'], 422);
+            }
+
+            $unidadId = null;
             $residenteId = null;
+        } else {
+            if ($unidadId <= 0) {
+                out(false, ['error' => 'Debes seleccionar herramienta y unidad.'], 422);
+            }
+
+            $stmtU = $pdo->prepare("
+                SELECT clave
+                FROM unidades
+                WHERE id = :id AND residencial_id = :rid
+                LIMIT 1
+            ");
+            $stmtU->execute(['id' => $unidadId, 'rid' => $rid]);
+            $unidadClave = (string)($stmtU->fetchColumn() ?: '');
+            if ($unidadClave === '') {
+                out(false, ['error' => 'Unidad inválida para este servicio.'], 422);
+            }
+
+            if ($residenteId > 0) {
+                $stmtR = $pdo->prepare("
+                    SELECT 1
+                    FROM users u
+                    JOIN usuarios_residenciales ur ON ur.user_id = u.id AND ur.residencial_id = :rid
+                    JOIN tipos_usuario t ON t.id = u.tipo_usuario_id
+                    WHERE u.id = :uid
+                      AND t.nombre = 'residente'
+                    LIMIT 1
+                ");
+                $stmtR->execute(['rid' => $rid, 'uid' => $residenteId]);
+                if (!(bool)$stmtR->fetchColumn()) {
+                    out(false, ['error' => 'Residente inválido para este servicio.'], 422);
+                }
+            } else {
+                $residenteId = null;
+            }
+            $areaId = null;
+            $personaId = null;
+            $responsableNombre = '';
         }
 
         $pdo->beginTransaction();
         $ins = $pdo->prepare("
             INSERT INTO prestamos_herramientas (
                 residencial_id, herramienta_id, guardia_id, unidad_id, residente_id,
+                area_id, persona_recurrente_id, responsable_nombre,
                 estado, notas, prestado_at, devuelto_at, created_at, updated_at
             ) VALUES (
                 :rid, :herramienta_id, :guardia_id, :unidad_id, :residente_id,
+                :area_id, :persona_recurrente_id, :responsable_nombre,
                 'prestado', :notas, NOW(), NULL, NOW(), NOW()
             )
         ");
@@ -348,6 +445,9 @@ try {
             'guardia_id' => $uid,
             'unidad_id' => $unidadId,
             'residente_id' => $residenteId,
+            'area_id' => $areaId,
+            'persona_recurrente_id' => $personaId,
+            'responsable_nombre' => $responsableNombre !== '' ? $responsableNombre : null,
             'notas' => $notas !== '' ? $notas : null,
         ]);
         $prestamoId = (int)$pdo->lastInsertId();
@@ -365,10 +465,16 @@ try {
         }
 
         $toolName = '';
-        $unitClave = '';
+        $contextName = '';
+        $responsableBitacora = '';
         try {
             $toolName = (string)($pdo->query("SELECT nombre FROM catalogo_herramientas WHERE id=" . (int)$herramientaId)->fetchColumn() ?: '');
-            $unitClave = (string)($pdo->query("SELECT clave FROM unidades WHERE id=" . (int)$unidadId)->fetchColumn() ?: '');
+            if ($isOperationalMode) {
+                $contextName = $areaNombre ?? '';
+                $responsableBitacora = $personaNombre ?: $responsableNombre;
+            } else {
+                $contextName = $unidadClave ?? '';
+            }
         } catch (_) {}
 
         operational_write_bitacora($pdo, [
@@ -378,12 +484,19 @@ try {
             'origen_id' => $prestamoId,
             'tipo_evento' => 'prestado',
             'resultado' => 'informativo',
-            'observaciones' => trim(sprintf('Se prestó %s a la unidad %s.', $toolName ?: 'herramienta', $unitClave ?: '—')),
+            'persona_recurrente_id' => $personaId,
+            'area_id' => $areaId,
+            'observaciones' => $isOperationalMode
+                ? trim(sprintf('Se prestó %s en área %s%s.', $toolName ?: 'herramienta', $contextName ?: '—', $responsableBitacora ? ' a ' . $responsableBitacora : ''))
+                : trim(sprintf('Se prestó %s a la unidad %s.', $toolName ?: 'herramienta', $contextName ?: '—')),
             'metadata_json' => [
                 'prestamo_id' => $prestamoId,
                 'herramienta_id' => $herramientaId,
                 'unidad_id' => $unidadId,
                 'residente_id' => $residenteId,
+                'area_id' => $areaId,
+                'persona_recurrente_id' => $personaId,
+                'responsable_nombre' => $responsableNombre !== '' ? $responsableNombre : null,
             ],
         ]);
 
@@ -405,10 +518,17 @@ try {
 
         $pdo->beginTransaction();
         $stmtP = $pdo->prepare("
-            SELECT p.*, h.nombre AS herramienta_nombre, u.clave AS unidad_clave
+            SELECT
+                p.*,
+                h.nombre AS herramienta_nombre,
+                u.clave AS unidad_clave,
+                a.nombre AS area_nombre,
+                pr.nombre AS persona_recurrente_nombre
             FROM prestamos_herramientas p
             JOIN catalogo_herramientas h ON h.id = p.herramienta_id
-            JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN areas_operativas a ON a.id = p.area_id
+            LEFT JOIN personas_recurrentes pr ON pr.id = p.persona_recurrente_id
             WHERE p.id = :id AND p.residencial_id = :rid
             LIMIT 1
             FOR UPDATE
@@ -439,8 +559,18 @@ try {
             'origen_id' => $prestamoId,
             'tipo_evento' => 'devuelto',
             'resultado' => 'informativo',
-            'observaciones' => trim(sprintf('Se devolvió %s (unidad %s).', (string)($row['herramienta_nombre'] ?? 'herramienta'), (string)($row['unidad_clave'] ?? '—'))),
-            'metadata_json' => ['prestamo_id' => $prestamoId],
+            'persona_recurrente_id' => $row['persona_recurrente_id'] !== null ? (int)$row['persona_recurrente_id'] : null,
+            'area_id' => $row['area_id'] !== null ? (int)$row['area_id'] : null,
+            'observaciones' => trim(sprintf(
+                'Se devolvió %s (%s %s).',
+                (string)($row['herramienta_nombre'] ?? 'herramienta'),
+                !empty($row['area_nombre']) ? 'área' : 'unidad',
+                (string)($row['area_nombre'] ?: ($row['unidad_clave'] ?? '—'))
+            )),
+            'metadata_json' => [
+                'prestamo_id' => $prestamoId,
+                'responsable_nombre' => $row['responsable_nombre'] ?? null,
+            ],
         ]);
 
         $pdo->commit();
@@ -457,4 +587,3 @@ try {
     }
     out(false, ['error' => 'No pudimos procesar el módulo de herramientas.'], 500);
 }
-

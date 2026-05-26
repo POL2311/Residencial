@@ -105,10 +105,28 @@
     },
   };
 
+  function currentMode() {
+    const dashboardMode = String(window.AdminResidencialDashboard?.getOperationalMode?.() || '').trim();
+    const dashboardPreset = String(window.AdminResidencialDashboard?.getServiceProfile?.()?.preset_servicio || '').trim();
+    return dashboardMode && dashboardMode !== 'residencial' ? dashboardMode : dashboardPreset || dashboardMode || 'residencial';
+  }
+
+  function label(term, fallback = '') {
+    return window.OSGateLabels?.label?.(term, currentMode()) || fallback || term;
+  }
+
+  function applyStaticLabels() {
+    window.OSGateLabels?.apply?.(els.view, currentMode());
+    els.view?.querySelectorAll('[data-os-placeholder]').forEach((field) => {
+      const term = field.getAttribute('data-os-placeholder') || '';
+      field.setAttribute('placeholder', label(term, field.getAttribute('placeholder') || ''));
+    });
+  }
+
   function renderPreview() {
     const titulo = els.titleInput?.value?.trim() || 'Sin título';
     const version = els.versionInput?.value?.trim() || 'Sin versión';
-    const contenido = els.contentInput?.value?.trim() || 'Aún no hay contenido del reglamento.';
+    const contenido = els.contentInput?.value?.trim() || label('policy_empty', 'Aún no hay contenido del reglamento.');
 
     if (els.previewTitle) {
       els.previewTitle.textContent = titulo;
@@ -145,7 +163,7 @@
     }
 
     if (contenido.length > 30000) {
-      throw new Error('El contenido del reglamento es demasiado largo.');
+      throw new Error(`El contenido de ${String(label('policy', 'reglamento')).toLowerCase()} es demasiado largo.`);
     }
   }
 
@@ -174,7 +192,7 @@
 
       renderPreview();
     } catch (err) {
-      showAlert(err.message || 'No se pudo cargar el reglamento.', true);
+      showAlert(err.message || `No se pudo cargar ${String(label('policy', 'reglamento')).toLowerCase()}.`, true);
     }
   }
 
@@ -199,12 +217,13 @@
 
         const json = await api.reglamento.save(fd);
         renderPreview();
-        showAlert(json.message || 'Reglamento guardado.');
+        showAlert(json.message || `${label('policy', 'Reglamento')} guardado.`);
       } catch (err) {
-        showFormError(err.message || 'Error al guardar reglamento.');
+        showFormError(err.message || `Error al guardar ${String(label('policy', 'reglamento')).toLowerCase()}.`);
       }
     });
   });
 
+  applyStaticLabels();
   loadReglamento();
 })();

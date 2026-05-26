@@ -146,7 +146,7 @@ try {
             $params['estado'] = $estado;
         }
         if ($q !== '') {
-            $where[] = '(h.nombre LIKE :q OR u.clave LIKE :q OR r.name LIKE :q OR r.email LIKE :q)';
+            $where[] = '(h.nombre LIKE :q OR u.clave LIKE :q OR a.nombre LIKE :q OR r.name LIKE :q OR r.email LIKE :q OR pr.nombre LIKE :q OR p.responsable_nombre LIKE :q)';
             $params['q'] = '%' . $q . '%';
         }
 
@@ -154,8 +154,10 @@ try {
             SELECT COUNT(*)
             FROM prestamos_herramientas p
             JOIN catalogo_herramientas h ON h.id = p.herramienta_id
-            JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN areas_operativas a ON a.id = p.area_id
             LEFT JOIN users r ON r.id = p.residente_id
+            LEFT JOIN personas_recurrentes pr ON pr.id = p.persona_recurrente_id
             WHERE " . implode(' AND ', $where) . "
         ");
         $countStmt->execute($params);
@@ -166,14 +168,19 @@ try {
                 p.*,
                 h.nombre AS herramienta_nombre,
                 u.clave AS unidad_clave,
+                a.nombre AS area_nombre,
                 g.name AS guardia_nombre,
                 r.name AS residente_nombre,
-                r.email AS residente_email
+                r.email AS residente_email,
+                pr.nombre AS persona_recurrente_nombre,
+                pr.empresa AS persona_recurrente_empresa
             FROM prestamos_herramientas p
             JOIN catalogo_herramientas h ON h.id = p.herramienta_id
-            JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN areas_operativas a ON a.id = p.area_id
             LEFT JOIN users g ON g.id = p.guardia_id
             LEFT JOIN users r ON r.id = p.residente_id
+            LEFT JOIN personas_recurrentes pr ON pr.id = p.persona_recurrente_id
             WHERE " . implode(' AND ', $where) . "
             ORDER BY p.prestado_at DESC, p.id DESC
             LIMIT :limit OFFSET :offset
@@ -218,9 +225,15 @@ try {
                 'herramienta_nombre' => (string)($row['herramienta_nombre'] ?? ''),
                 'unidad_id' => (int)($row['unidad_id'] ?? 0),
                 'unidad_clave' => (string)($row['unidad_clave'] ?? ''),
+                'area_id' => (int)($row['area_id'] ?? 0),
+                'area_nombre' => (string)($row['area_nombre'] ?? ''),
                 'residente_id' => (int)($row['residente_id'] ?? 0),
                 'residente_nombre' => (string)($row['residente_nombre'] ?? ''),
                 'residente_email' => (string)($row['residente_email'] ?? ''),
+                'persona_recurrente_id' => (int)($row['persona_recurrente_id'] ?? 0),
+                'persona_recurrente_nombre' => (string)($row['persona_recurrente_nombre'] ?? ''),
+                'persona_recurrente_empresa' => (string)($row['persona_recurrente_empresa'] ?? ''),
+                'responsable_nombre' => (string)($row['responsable_nombre'] ?? ''),
                 'guardia_id' => (int)($row['guardia_id'] ?? 0),
                 'guardia_nombre' => (string)($row['guardia_nombre'] ?? ''),
                 'notas' => (string)($row['notas'] ?? ''),
@@ -251,10 +264,17 @@ try {
 
         $pdo->beginTransaction();
         $stmtP = $pdo->prepare("
-            SELECT p.*, h.nombre AS herramienta_nombre, u.clave AS unidad_clave
+            SELECT
+                p.*,
+                h.nombre AS herramienta_nombre,
+                u.clave AS unidad_clave,
+                a.nombre AS area_nombre,
+                pr.nombre AS persona_recurrente_nombre
             FROM prestamos_herramientas p
             JOIN catalogo_herramientas h ON h.id = p.herramienta_id
-            JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN unidades u ON u.id = p.unidad_id
+            LEFT JOIN areas_operativas a ON a.id = p.area_id
+            LEFT JOIN personas_recurrentes pr ON pr.id = p.persona_recurrente_id
             WHERE p.id = :id AND p.residencial_id = :rid
             LIMIT 1
             FOR UPDATE
@@ -285,8 +305,18 @@ try {
             'origen_id' => $prestamoId,
             'tipo_evento' => 'devuelto',
             'resultado' => 'informativo',
-            'observaciones' => trim(sprintf('Se devolvió %s (unidad %s).', (string)($row['herramienta_nombre'] ?? 'herramienta'), (string)($row['unidad_clave'] ?? '—'))),
-            'metadata_json' => ['prestamo_id' => $prestamoId],
+            'persona_recurrente_id' => $row['persona_recurrente_id'] !== null ? (int)$row['persona_recurrente_id'] : null,
+            'area_id' => $row['area_id'] !== null ? (int)$row['area_id'] : null,
+            'observaciones' => trim(sprintf(
+                'Se devolvió %s (%s %s).',
+                (string)($row['herramienta_nombre'] ?? 'herramienta'),
+                !empty($row['area_nombre']) ? 'área' : 'unidad',
+                (string)($row['area_nombre'] ?: ($row['unidad_clave'] ?? '—'))
+            )),
+            'metadata_json' => [
+                'prestamo_id' => $prestamoId,
+                'responsable_nombre' => $row['responsable_nombre'] ?? null,
+            ],
         ]);
 
         $pdo->commit();
@@ -300,4 +330,3 @@ try {
     }
     app_json_exception($e, 'No pudimos procesar el módulo de herramientas.');
 }
-

@@ -25,6 +25,7 @@ $activeMenu = 'security';
 
 $toastV = @filemtime(__DIR__ . '/../../assets/js/app-toast.js') ?: time();
 $labelsV = @filemtime(__DIR__ . '/../../assets/js/osgate-labels.js') ?: time();
+$pwaV = @filemtime(__DIR__ . '/../js/pwa.js') ?: time();
 $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 ?>
 <!doctype html>
@@ -32,6 +33,12 @@ $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2E5D73" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="OS Gate Operador" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="../../assets/img/logo_asher.png" />
   <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -45,6 +52,7 @@ $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 
   <script src="../../assets/js/app-toast.js?v=<?= (int)$toastV ?>" defer></script>
   <script src="../../assets/js/osgate-labels.js?v=<?= (int)$labelsV ?>" defer></script>
+  <script src="../js/pwa.js?v=<?= (int)$pwaV ?>" defer></script>
   <script src="../js/dashboard.js?v=<?= (int)$dashV ?>" defer></script>
 </body>
 </html>
