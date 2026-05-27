@@ -360,9 +360,11 @@ try {
             $missingFlags
                 ? check_fail($stats, 'Faltan flags RetailOps: ' . implode(', ', $missingFlags) . '.')
                 : check_ok($stats, 'Flags RetailOps existen.');
-            $disabledFlags
-                ? check_fail($stats, 'Módulos RetailOps apagados: ' . implode(', ', $disabledFlags) . '.')
-                : check_ok($stats, 'Módulos RetailOps requeridos activos.');
+            if ($disabledFlags) {
+                check_fail($stats, 'Módulos RetailOps apagados: ' . implode(', ', $disabledFlags) . '.');
+            } elseif (!$missingFlags) {
+                check_ok($stats, 'Módulos RetailOps requeridos activos.');
+            }
         }
     }
 
@@ -544,24 +546,37 @@ try {
         }
 
         $validCompliance = ['autorizado', 'pendiente', 'bloqueado', 'documento_vencido', 'fuera_de_horario'];
-        $invalidProviders = preflight_valid_values($pdo, 'proveedores', 'estatus_cumplimiento', $rid, $validCompliance);
-        $invalidPersons = preflight_valid_values($pdo, 'personas_recurrentes', 'estatus_cumplimiento', $rid, $validCompliance);
-        $invalidProviders
-            ? check_fail($stats, 'Proveedores con estatus_cumplimiento inválido: ' . implode(', ', $invalidProviders) . '.')
-            : check_ok($stats, 'Semáforo de proveedores con valores válidos.');
-        $invalidPersons
-            ? check_fail($stats, 'Personas recurrentes con estatus_cumplimiento inválido: ' . implode(', ', $invalidPersons) . '.')
-            : check_ok($stats, 'Semáforo de personas recurrentes con valores válidos.');
+        if (preflight_table_exists($pdo, 'proveedores') && preflight_column_exists($pdo, 'proveedores', 'estatus_cumplimiento')) {
+            $invalidProviders = preflight_valid_values($pdo, 'proveedores', 'estatus_cumplimiento', $rid, $validCompliance);
+            $invalidProviders
+                ? check_fail($stats, 'Proveedores con estatus_cumplimiento inválido: ' . implode(', ', $invalidProviders) . '.')
+                : check_ok($stats, 'Semáforo de proveedores con valores válidos.');
+        }
+        if (preflight_table_exists($pdo, 'personas_recurrentes') && preflight_column_exists($pdo, 'personas_recurrentes', 'estatus_cumplimiento')) {
+            $invalidPersons = preflight_valid_values($pdo, 'personas_recurrentes', 'estatus_cumplimiento', $rid, $validCompliance);
+            $invalidPersons
+                ? check_fail($stats, 'Personas recurrentes con estatus_cumplimiento inválido: ' . implode(', ', $invalidPersons) . '.')
+                : check_ok($stats, 'Semáforo de personas recurrentes con valores válidos.');
+        }
     }
 
     if (preflight_table_exists($pdo, 'residenciales') && preflight_table_exists($pdo, 'residenciales_servicio_config')) {
+        $residentialFlags = ['habilita_rondines', 'habilita_proveedores', 'habilita_ordenes_servicio'];
+        $profileColumns = preflight_table_columns($pdo, 'residenciales_servicio_config');
+        $selectFlags = [];
+        foreach ($residentialFlags as $flag) {
+            if (array_key_exists($flag, $profileColumns)) {
+                $selectFlags[] = 'rsc.`' . $flag . '`';
+            }
+        }
+        $select = "r.id, r.nombre, r.modo_operacion";
+        if ($selectFlags) {
+            $select .= ",\n                       " . implode(",\n                       ", $selectFlags);
+        }
         $residential = preflight_fetch_one(
             $pdo,
             "
-                SELECT r.id, r.nombre, r.modo_operacion,
-                       rsc.habilita_rondines,
-                       rsc.habilita_proveedores,
-                       rsc.habilita_ordenes_servicio
+                SELECT {$select}
                 FROM residenciales r
                 JOIN residenciales_servicio_config rsc ON rsc.residencial_id = r.id
                 WHERE r.modo_operacion = 'residencial'
@@ -572,14 +587,17 @@ try {
             check_warn($stats, 'No hay residencial normal para validar separación.');
         } else {
             $badResidentialFlags = [];
-            foreach (['habilita_rondines', 'habilita_proveedores', 'habilita_ordenes_servicio'] as $flag) {
+            foreach ($residentialFlags as $flag) {
+                if (!array_key_exists($flag, $profileColumns)) {
+                    continue;
+                }
                 if ((int)($residential[$flag] ?? 0) !== 0) {
                     $badResidentialFlags[] = $flag;
                 }
             }
             $badResidentialFlags
                 ? check_fail($stats, 'Residencial normal con módulos RetailOps activos: ' . implode(', ', $badResidentialFlags) . '.')
-                : check_ok($stats, "Residencial separado OK: {$residential['nombre']}.");
+                : check_ok($stats, "Residencial separado OK para flags existentes: {$residential['nombre']}.");
         }
     }
 
