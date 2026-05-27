@@ -141,10 +141,10 @@ function preflight_load_config_pdo(string $root): PDO
     }
 
     require_once $root . '/config/config.php';
-    if (!isset($GLOBALS['pdo']) || !$GLOBALS['pdo'] instanceof PDO) {
+    if (!isset($pdo) || !$pdo instanceof PDO) {
         throw new RuntimeException('No se encontró $pdo desde config/config.php.');
     }
-    return $GLOBALS['pdo'];
+    return $pdo;
 }
 
 function preflight_ident(string $identifier): string
