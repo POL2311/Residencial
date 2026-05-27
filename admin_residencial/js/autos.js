@@ -67,7 +67,11 @@
   }
 
   function closeModal() {
-    els.modal?.classList.add('hidden');
+    if (window.OSGateModal?.close && els.modal) {
+      window.OSGateModal.close(els.modal);
+    } else {
+      els.modal?.classList.add('hidden');
+    }
     els.form?.reset();
   }
 
@@ -99,7 +103,11 @@
         <div class="mt-1"><span class="text-slate-500">Unidad:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.unidad_clave || 'Sin unidad')}</span></div>
       </div>
     `;
-    els.modal.classList.remove('hidden');
+    if (window.OSGateModal?.open) {
+      window.OSGateModal.open(els.modal);
+    } else {
+      els.modal.classList.remove('hidden');
+    }
   }
 
   function renderAutos() {

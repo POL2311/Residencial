@@ -31,9 +31,9 @@
 
     function formRow(label, inputHtml) {
       return `
-        <div class="rounded-xl bg-slate-50 px-3 py-2 border border-slate-200">
-          <div class="text-xs text-slate-500">${label}</div>
-          <div class="mt-1">${inputHtml}</div>
+        <div class="os-field">
+          <label class="text-xs text-slate-500">${label}</label>
+          ${inputHtml}
         </div>
       `;
     }
@@ -425,7 +425,7 @@
           ${formRow('Modelo', `<input name="modelo" class="w-full rounded-xl border px-3 py-2" />`)}
           ${formRow('Color', `<input name="color" class="w-full rounded-xl border px-3 py-2" />`)}
 
-          <div class="rounded-xl bg-slate-50 border px-3 py-2">
+          <div class="os-field-card">
             <div class="flex justify-between text-xs text-slate-500">
               <span>Unidad</span>
               <button type="button" id="addUnidad" class="text-[#4E7287]">+ Nueva</button>
@@ -433,7 +433,7 @@
             <select name="unidad_id" id="selUnidad" class="w-full border rounded-xl px-3 py-2 mt-1"></select>
           </div>
 
-          <div class="rounded-xl bg-slate-50 border px-3 py-2">
+          <div class="os-field-card">
             <div class="flex justify-between text-xs text-slate-500">
               <span>Propietario</span>
               <button type="button" id="addProp" class="text-[#4E7287]">+ Nuevo</button>

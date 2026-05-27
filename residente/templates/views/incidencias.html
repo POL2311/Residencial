@@ -16,16 +16,16 @@
     <div id="residentIncidenciasList" class="mt-4 space-y-3"></div>
   </div>
 
-  <div id="residentIncidenciasModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="min-h-full flex items-end md:items-center justify-center p-3 md:p-4">
-      <div class="flex max-h-[92vh] w-full md:max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+  <div id="residentIncidenciasModal" class="os-modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+    <div class="os-modal-shell min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
+      <div class="os-modal-panel os-modal-form os-modal-full-mobile bg-white shadow-2xl">
+        <div class="os-modal-header px-4 py-3 border-b border-slate-100 flex items-center justify-between">
           <div class="text-sm font-semibold text-slate-800">Nueva incidencia</div>
           <button id="btnCloseResidentIncModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
         </div>
         <form id="residentIncidenciasForm" class="flex min-h-0 flex-1 flex-col">
-          <div class="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-          <div>
+          <div class="os-modal-body min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+          <div class="os-field">
             <label class="block text-xs text-slate-600 mb-1">Tipo</label>
             <select name="tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
               <option value="seguridad">Seguridad</option>
@@ -34,11 +34,11 @@
               <option value="otros">Otros</option>
             </select>
           </div>
-          <div>
+          <div class="os-field">
             <label class="block text-xs text-slate-600 mb-1">Titulo</label>
             <input name="titulo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required>
           </div>
-          <div>
+          <div class="os-field">
             <label class="block text-xs text-slate-600 mb-1">Prioridad</label>
             <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
               <option value="baja">Baja</option>
@@ -46,12 +46,12 @@
               <option value="alta">Alta</option>
             </select>
           </div>
-          <div>
+          <div class="os-field">
             <label class="block text-xs text-slate-600 mb-1">Descripcion</label>
             <textarea name="descripcion" rows="4" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></textarea>
           </div>
           </div>
-          <div class="border-t border-slate-100 bg-white px-4 py-3 pt-1 flex justify-end gap-2">
+          <div class="os-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button id="btnCancelResidentIncModal" type="button" class="text-sm px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50">Cancelar</button>
             <button type="submit" class="text-sm px-4 py-2 rounded-xl bg-[#EF5A5A] text-white hover:opacity-95">Guardar</button>
           </div>

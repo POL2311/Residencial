@@ -29,7 +29,10 @@ body.os-modal-open [data-mobile-dock] {
 [id$="Modal"].fixed.inset-0,
 [id$="Modal"][class*="fixed"][class*="inset-0"] {
   box-sizing: border-box;
+  inset: 0;
   isolation: isolate;
+  overflow: hidden;
+  position: fixed;
   overscroll-behavior: contain;
 }
 
@@ -70,6 +73,19 @@ body.os-modal-open [data-mobile-dock] {
   width: min(920px, calc(100vw - 2rem));
 }
 
+.os-modal-panel:not(.os-modal-wide),
+.os-modal-form {
+  width: min(720px, calc(100vw - 2rem));
+}
+
+.os-modal-wide {
+  width: min(920px, calc(100vw - 2rem));
+}
+
+.os-modal-tall {
+  min-height: min(72dvh, 680px);
+}
+
 .os-modal-panel,
 .os-form-card {
   background: #fff;
@@ -80,8 +96,12 @@ body.os-modal-open [data-mobile-dock] {
 
 .os-modal-header,
 .app-admin-modal-header {
+  background: #fff;
   flex: 0 0 auto;
   min-width: 0;
+  position: sticky;
+  top: 0;
+  z-index: 3;
 }
 
 .os-modal-body,
@@ -159,8 +179,18 @@ body.os-modal-open [data-mobile-dock] {
 
 .os-form-row,
 .os-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.os-field-card {
+  background: rgb(248 250 252 / 0.76);
+  border: 1px solid rgba(226, 232, 240, 0.96);
+  border-radius: 1rem;
+  padding: 0.85rem;
 }
 
 .os-field label,
@@ -306,8 +336,19 @@ body.os-modal-open [data-mobile-dock] {
   [id$="Modal"].fixed.inset-0 > div > div,
   [id$="Modal"][class*="fixed"][class*="inset-0"] > div > div {
     border-radius: 1.5rem 1.5rem 0 0 !important;
-    max-height: 100dvh;
+    max-height: calc(100dvh - 0.5rem);
     width: 100%;
+  }
+
+  .os-modal-full-mobile,
+  [id*="modal" i][class*="fixed"][class*="inset-0"] .os-modal-full-mobile {
+    height: calc(100dvh - 0.5rem);
+    max-height: calc(100dvh - 0.5rem);
+    min-height: calc(100dvh - 0.5rem);
+  }
+
+  .os-modal-tall {
+    min-height: min(72dvh, 680px);
   }
 
   .os-modal-body,
