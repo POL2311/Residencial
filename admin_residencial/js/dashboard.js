@@ -364,20 +364,10 @@
   }
 
   function hasActiveModal() {
-    return Array.from(document.body.querySelectorAll('*')).some((el) => {
-      if (!(el instanceof HTMLElement) || isManagedOverlay(el)) return false;
-      if (el.classList.contains('hidden') || el.getAttribute('aria-hidden') === 'true') return false;
-      const style = window.getComputedStyle(el);
-      if (style.display === 'none' || style.visibility === 'hidden' || style.position !== 'fixed') return false;
-      const zIndex = Number.parseInt(style.zIndex || '0', 10);
-      if (!Number.isFinite(zIndex) || zIndex < 50) return false;
-      const rect = el.getBoundingClientRect();
-      return rect.width >= 80 && rect.height >= 80;
-    });
+    return document.body.classList.contains('os-modal-open');
   }
 
   function syncDockModalState() {
-    window.OSGateModal?.sync?.();
     if (state.accessBlocked) {
       hideFooterNavigation();
       return;
@@ -404,10 +394,8 @@
       window.requestAnimationFrame(syncDockModalState);
     });
     observer.observe(document.body, {
-      subtree: true,
-      childList: true,
       attributes: true,
-      attributeFilter: ['class', 'style', 'hidden', 'aria-hidden'],
+      attributeFilter: ['class'],
     });
     syncDockModalState();
   }
