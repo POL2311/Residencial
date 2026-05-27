@@ -60,33 +60,35 @@
     </div>
   </section>
 
-  <div id="proveedorModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="proveedorModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-close-provider-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--wide os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="proveedorModalTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="providers">Proveedores</div>
-          <h2 id="proveedorModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nuevo proveedor</h2>
+          <div class="os-modal-v2__eyebrow" data-os-label="providers">Proveedores</div>
+          <h2 id="proveedorModalTitle">Nuevo proveedor</h2>
         </div>
-        <button type="button" data-close-provider-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <form id="proveedorForm" class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <button type="button" data-close-provider-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <form id="proveedorForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-4">
         <input type="hidden" name="id" />
-        <div class="grid gap-3 md:grid-cols-2">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre comercial</label>
             <input name="nombre_comercial" required maxlength="160" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Razón social</label>
             <input name="razon_social" maxlength="180" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
         </div>
-        <div class="grid gap-3 md:grid-cols-2">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo de servicio</label>
             <input name="tipo_servicio" maxlength="120" placeholder="Mantenimiento, seguridad, limpieza..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="status">Estado</label>
             <select name="estatus" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
               <option value="activo">Activo</option>
@@ -95,86 +97,92 @@
             </select>
           </div>
         </div>
-        <div class="grid gap-3 md:grid-cols-3">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Contacto</label>
             <input name="contacto_nombre" maxlength="120" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Teléfono</label>
             <input name="contacto_telefono" maxlength="40" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Email</label>
             <input name="contacto_email" type="email" maxlength="160" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
         </div>
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Notas</label>
           <textarea name="notas" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></textarea>
         </div>
         <label class="flex items-center gap-2 text-sm text-slate-600"><input name="activo" type="checkbox" value="1" checked /> Proveedor activo</label>
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <button type="button" data-close-provider-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
-          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar proveedor</button>
         </div>
+        <footer class="os-modal-v2__footer">
+          <button type="button" data-close-provider-modal data-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar proveedor</button>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 
-  <div id="proveedorPersonModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="proveedorPersonModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-close-person-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact os-modal-v2__panel--form" role="dialog" aria-modal="true">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="associated_personnel">Personal asociado</div>
-          <h2 class="mt-1 text-xl font-semibold text-slate-900">Asociar personal</h2>
+          <div class="os-modal-v2__eyebrow" data-os-label="associated_personnel">Personal asociado</div>
+          <h2>Asociar personal</h2>
         </div>
-        <button type="button" data-close-person-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <form id="proveedorPersonForm" class="space-y-4 p-5">
+        <button type="button" data-close-person-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <form id="proveedorPersonForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-4">
         <input type="hidden" name="proveedor_id" />
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="authorized_person">Personal autorizado</label>
           <select name="persona_recurrente_id" required class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></select>
         </div>
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Rol / función</label>
           <input name="rol" maxlength="120" placeholder="Técnico, supervisor, contratista..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
         </div>
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <button type="button" data-close-person-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
-          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Asociar</button>
         </div>
+        <footer class="os-modal-v2__footer">
+          <button type="button" data-close-person-modal data-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Asociar</button>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 
-  <div id="proveedorDocModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="proveedorDocModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-close-doc-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="proveedorDocModalTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Documentos</div>
-          <h2 id="proveedorDocModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nuevo documento</h2>
+          <div class="os-modal-v2__eyebrow">Documentos</div>
+          <h2 id="proveedorDocModalTitle">Nuevo documento</h2>
         </div>
-        <button type="button" data-close-doc-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <form id="proveedorDocForm" class="space-y-4 p-5">
+        <button type="button" data-close-doc-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <form id="proveedorDocForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-4">
         <input type="hidden" name="id" />
         <input type="hidden" name="proveedor_id" />
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo de documento</label>
           <input name="tipo_documento" required maxlength="120" placeholder="Contrato, INE, seguro, constancia..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
         </div>
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">URL / ruta de archivo</label>
           <input name="archivo_url" maxlength="255" placeholder="assets/uploads/..." class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
         </div>
-        <div class="grid gap-3 md:grid-cols-2">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Vencimiento</label>
             <input name="fecha_vencimiento" type="date" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="status">Estado</label>
             <select name="estatus" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
               <option value="pendiente">Pendiente</option>
@@ -183,26 +191,29 @@
             </select>
           </div>
         </div>
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <button type="button" data-close-doc-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
-          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar documento</button>
         </div>
+        <footer class="os-modal-v2__footer">
+          <button type="button" data-close-doc-modal data-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar documento</button>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 
-  <div id="proveedorComplianceModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="proveedorComplianceModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-close-compliance-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="proveedorComplianceTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="compliance">Cumplimiento</div>
-          <h2 id="proveedorComplianceTitle" class="mt-1 text-xl font-semibold text-slate-900">Cambiar semáforo</h2>
+          <div class="os-modal-v2__eyebrow" data-os-label="compliance">Cumplimiento</div>
+          <h2 id="proveedorComplianceTitle">Cambiar semáforo</h2>
         </div>
-        <button type="button" data-close-compliance-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <form id="proveedorComplianceForm" class="space-y-4 p-5">
+        <button type="button" data-close-compliance-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <form id="proveedorComplianceForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-4">
         <input type="hidden" name="id" />
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="traffic_light">Semáforo</label>
           <select name="estatus_cumplimiento" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
             <option value="autorizado">Autorizado</option>
@@ -212,18 +223,19 @@
             <option value="fuera_de_horario">Fuera de horario</option>
           </select>
         </div>
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="block_reason">Motivo de bloqueo</label>
           <textarea name="motivo_bloqueo" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" placeholder="Documentación vencida, revisión pendiente, fuera de política..."></textarea>
         </div>
         <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Si un proveedor queda bloqueado, todo su personal asociado se considera bloqueado operativamente.
         </div>
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <button type="button" data-close-compliance-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
-          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar semáforo</button>
         </div>
+        <footer class="os-modal-v2__footer">
+          <button type="button" data-close-compliance-modal data-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar semáforo</button>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 </div>

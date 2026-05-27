@@ -6,9 +6,19 @@
   if (typeof window.OSGateModalDebug === 'undefined') window.OSGateModalDebug = false;
 
   const MODAL_SELECTOR = [
+    '.os-modal-v2',
     '.os-modal-overlay',
     '.app-admin-modal-overlay',
     '[role="dialog"]',
+    '[id*="modal" i][class*="fixed"][class*="inset-0"]',
+    '[id$="Modal"].fixed.inset-0',
+    '[id$="Modal"][class*="fixed"][class*="inset-0"]'
+  ].join(',');
+
+  const MODAL_ROOT_SELECTOR = [
+    '.os-modal-v2',
+    '.os-modal-overlay',
+    '.app-admin-modal-overlay',
     '[id*="modal" i][class*="fixed"][class*="inset-0"]',
     '[id$="Modal"].fixed.inset-0',
     '[id$="Modal"][class*="fixed"][class*="inset-0"]'
@@ -74,8 +84,12 @@
 
   function isElementVisible(element) {
     if (!element || !(element instanceof Element)) return false;
-    if (element.hidden || element.classList.contains('hidden')) return false;
-    if (element.getAttribute('aria-hidden') === 'true') return false;
+    let current = element;
+    while (current && current !== document.documentElement) {
+      if (current.hidden || current.classList.contains('hidden')) return false;
+      if (current.getAttribute('aria-hidden') === 'true') return false;
+      current = current.parentElement;
+    }
 
     const style = window.getComputedStyle(element);
     return style.display !== 'none' && style.visibility !== 'hidden';
@@ -180,6 +194,21 @@
     close(topModal);
   }
 
+  function closeFromTrigger(event) {
+    const trigger = event.target?.closest?.('[data-close-modal]');
+    if (!trigger) return;
+
+    const modal = trigger.closest(MODAL_ROOT_SELECTOR);
+    if (!modal) return;
+
+    event.preventDefault();
+    modal.dispatchEvent(new CustomEvent('osgate:modal-close-request', {
+      bubbles: true,
+      detail: { trigger }
+    }));
+    close(modal);
+  }
+
   function shouldSyncForAttribute(target) {
     if (!isElement(target)) return false;
     if (knownModals.has(target)) return true;
@@ -220,6 +249,7 @@
     });
 
     document.addEventListener('keydown', closeTopEscModal);
+    document.addEventListener('click', closeFromTrigger);
     sync();
   }
 

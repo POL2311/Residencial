@@ -1456,7 +1456,11 @@
       const totalPagado = state.pagos.reduce((sum, p) => sum + (Number(p.monto) || 0), 0);
 
       els.detailModalContent.innerHTML = renderDetailModal(r, totalPagado);
-      els.detailModal.classList.remove('hidden');
+      if (window.OSGateModal?.open) {
+        window.OSGateModal.open(els.detailModal);
+      } else {
+        els.detailModal.classList.remove('hidden');
+      }
       syncDashboardOverlayState();
 
       attachDetailEventListeners();
@@ -1476,7 +1480,11 @@
 
   function attachDetailEventListeners() {
     document.getElementById('btnCloseDetail')?.addEventListener('click', () => {
-      els.detailModal.classList.add('hidden');
+      if (window.OSGateModal?.close) {
+        window.OSGateModal.close(els.detailModal);
+      } else {
+        els.detailModal.classList.add('hidden');
+      }
       syncDashboardOverlayState();
     });
 
@@ -1654,6 +1662,10 @@
   els.btnAdd?.addEventListener('click', () => openModal('create'));
   els.btnCloseModal?.addEventListener('click', closeModal);
   els.btnCancelModal?.addEventListener('click', closeModal);
+  els.modal?.addEventListener('osgate:modal-close-request', closeModal);
+  els.detailModal?.addEventListener('osgate:modal-close-request', () => {
+    syncDashboardOverlayState();
+  });
   els.btnInlineAddUnidad?.addEventListener('click', openInlineUnidadPanel);
   els.btnCancelInlineUnidad?.addEventListener('click', () => closeInlineUnidadPanel());
 

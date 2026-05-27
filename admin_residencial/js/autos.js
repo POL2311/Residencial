@@ -80,25 +80,25 @@
     els.modalBody.innerHTML = `
       <input type="hidden" name="action" value="update">
       <input type="hidden" name="auto_id" value="${escapeHtml(auto.auto_id)}">
-      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <div>
-          <label class="mb-1 block text-xs text-slate-600">Placas *</label>
+      <div class="os-form-v2__grid">
+        <div class="os-field-v2">
+          <label>Placas *</label>
           <input name="placas" required maxlength="15" value="${escapeHtml(auto.placas || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
         </div>
-        <div>
-          <label class="mb-1 block text-xs text-slate-600">Tag ID</label>
+        <div class="os-field-v2">
+          <label>Tag ID</label>
           <input name="tag_id" maxlength="120" value="${escapeHtml(auto.tag_id || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
         </div>
-        <div>
-          <label class="mb-1 block text-xs text-slate-600">Modelo</label>
+        <div class="os-field-v2">
+          <label>Modelo</label>
           <input name="modelo" maxlength="80" value="${escapeHtml(auto.modelo || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
         </div>
-        <div>
-          <label class="mb-1 block text-xs text-slate-600">Color</label>
+        <div class="os-field-v2">
+          <label>Color</label>
           <input name="color" maxlength="40" value="${escapeHtml(auto.color || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
         </div>
       </div>
-      <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+      <div class="os-form-v2__section text-sm text-slate-600">
         <div><span class="text-slate-500">Residente:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.user_name || 'Sin residente')}</span></div>
         <div class="mt-1"><span class="text-slate-500">Unidad:</span> <span class="font-medium text-slate-800">${escapeHtml(auto.unidad_clave || 'Sin unidad')}</span></div>
       </div>
@@ -207,6 +207,7 @@
 
   els.btnCloseModal?.addEventListener('click', closeModal);
   els.btnCancelModal?.addEventListener('click', closeModal);
+  els.modal?.addEventListener('osgate:modal-close-request', closeModal);
   els.modal?.addEventListener('click', (e) => {
     if (e.target === els.modal) closeModal();
   });

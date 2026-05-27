@@ -214,9 +214,11 @@
     els.btnNew?.addEventListener('click', openFormModal);
     els.btnClose?.addEventListener('click', closeModal);
     els.btnCancel?.addEventListener('click', closeModal);
+    els.modal?.addEventListener('osgate:modal-close-request', closeModal);
     els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
     els.btnCloseCode?.addEventListener('click', closeCodeModal);
     els.btnDismissCode?.addEventListener('click', closeCodeModal);
+    els.codeModal?.addEventListener('osgate:modal-close-request', closeCodeModal);
     els.codeModal?.addEventListener('click', (e) => { if (e.target === els.codeModal) closeCodeModal(); });
     els.btnCopyCode?.addEventListener('click', async () => {
         try {

@@ -71,19 +71,23 @@
 
   <!-- MODAL -->
   <div id="comunicadoModal"
-       class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center z-50 hidden p-0 md:p-4">
-    <div class="app-admin-modal-card w-full max-w-lg bg-white rounded-t-2xl md:rounded-2xl shadow-xl">
+       class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--compact" role="dialog" aria-modal="true" aria-labelledby="comunicadoModalTitle">
 
-      <div class="app-admin-modal-header flex justify-between items-center border-b px-4 py-3 bg-slate-50">
-        <h2 id="comunicadoModalTitle" class="text-lg font-semibold" data-os-label="bulletin">Comunicado</h2>
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow" data-os-label="bulletin">Comunicado</div>
+          <h2 id="comunicadoModalTitle" data-os-label="bulletin">Comunicado</h2>
+        </div>
         <button id="btnCloseComModal"
-                class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">
-          ✕
+                class="os-modal-v2__close" data-close-modal aria-label="Cerrar">
+          ×
         </button>
-      </div>
+      </header>
 
-      <form id="comunicadoForm" class="flex min-h-0 flex-1 flex-col" enctype="multipart/form-data">
-        <div class="app-admin-modal-body px-4 py-4 space-y-3">
+      <form id="comunicadoForm" class="os-form-v2" enctype="multipart/form-data">
+        <div class="os-modal-v2__body space-y-3">
         <div id="comunicadoFormError"
              class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
@@ -146,9 +150,9 @@
         </select>
 
         </div>
-        <div class="app-admin-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <footer class="os-modal-v2__footer">
           <button type="button" id="btnCancelComModal"
-            class="text-sm px-4 py-2 rounded-lg border hover:bg-slate-50">
+            class="text-sm px-4 py-2 rounded-lg border hover:bg-slate-50" data-close-modal>
             Cancelar
           </button>
           <button
@@ -157,9 +161,9 @@
             data-os-label="save_bulletin">
             Guardar comunicado
           </button>
-        </div>
+        </footer>
       </form>
 
-    </div>
+    </section>
   </div>
 </div>

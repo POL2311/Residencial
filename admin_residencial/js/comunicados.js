@@ -358,7 +358,11 @@
       fechaPub.value = new Date().toISOString().slice(0, 10);
     }
 
-    els.modal?.classList.remove('hidden');
+    if (window.OSGateModal?.open && els.modal) {
+      window.OSGateModal.open(els.modal);
+    } else {
+      els.modal?.classList.remove('hidden');
+    }
   }
 
   function openEditModal(c) {
@@ -634,6 +638,7 @@
   els.btnAdd?.addEventListener('click', openCreateModal);
   els.btnClose?.addEventListener('click', closeModal);
   els.btnCancel?.addEventListener('click', closeModal);
+  els.modal?.addEventListener('osgate:modal-close-request', closeModal);
 
   els.modal?.addEventListener('click', (e) => {
     if (e.target === els.modal) closeModal();

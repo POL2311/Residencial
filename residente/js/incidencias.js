@@ -115,6 +115,7 @@
     });
     els.btnClose?.addEventListener('click', closeModal);
     els.btnCancel?.addEventListener('click', closeModal);
+    els.modal?.addEventListener('osgate:modal-close-request', closeModal);
     els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
     els.form?.addEventListener('submit', async (e) => {
         e.preventDefault();

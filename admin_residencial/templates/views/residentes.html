@@ -44,25 +44,26 @@
   <div id="residentesList" class="space-y-3 app-mobile-scroll-list"></div>
 
   <!-- MODAL CRUD RESIDENTE -->
-  <div id="modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
-      <div class="app-admin-modal-card w-full md:max-w-2xl bg-white md:rounded-2xl rounded-t-2xl shadow-2xl">
+  <div id="modal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+      <section class="os-modal-v2__panel os-modal-v2__panel--wide os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 
         <!-- Header -->
-        <div class="app-admin-modal-header px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <header class="os-modal-v2__header">
           <div>
-            <div id="modalTitle" class="text-base font-semibold text-slate-800">—</div>
+            <div class="os-modal-v2__eyebrow">Residentes</div>
+            <h2 id="modalTitle">—</h2>
             <p class="text-xs text-slate-500">Completa la información del residente</p>
           </div>
           <button id="btnCloseModal"
-            class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200">
-            ✕
+            class="os-modal-v2__close" data-close-modal aria-label="Cerrar">
+            ×
           </button>
-        </div>
+        </header>
 
         <!-- Form -->
-        <form id="modalForm" class="flex min-h-0 flex-1 flex-col">
-          <div class="app-admin-modal-body p-5 space-y-5">
+        <form id="modalForm" class="os-form-v2">
+          <div class="os-modal-v2__body space-y-5">
           <input type="hidden" name="action">
           <input type="hidden" name="residente_id">
 
@@ -220,11 +221,11 @@
 
           <!-- Actions -->
           </div>
-          <div class="app-admin-modal-footer border-t border-slate-100 bg-white px-5 py-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <footer class="os-modal-v2__footer">
             <button
               type="button"
               id="btnCancelModal"
-              class="text-sm px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100">
+              class="text-sm px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100" data-close-modal>
               Cancelar
             </button>
             <button
@@ -232,20 +233,18 @@
               class="text-sm px-5 py-2.5 rounded-xl bg-[#2E5D73] text-white hover:opacity-95">
               Guardar
             </button>
-          </div>
+          </footer>
         </form>
 
-      </div>
-    </div>
+      </section>
   </div>
 
   <!-- DETAIL MODAL -->
-  <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="min-h-full flex items-center justify-center p-4">
+  <div id="detailModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
       <div id="detailModalContent"
-        class="app-admin-modal-card app-admin-modal-body w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-4">
+        class="os-modal-v2__panel os-modal-v2__panel--wide os-modal-v2__body bg-white p-4">
       </div>
-    </div>
   </div>
 
 </div>

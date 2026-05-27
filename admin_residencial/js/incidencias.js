@@ -848,6 +848,8 @@
   els.btnCancelAdd?.addEventListener('click', closeAddModal);
   els.btnCloseEdit?.addEventListener('click', closeEditModal);
   els.btnCancelEdit?.addEventListener('click', closeEditModal);
+  els.modalAdd?.addEventListener('osgate:modal-close-request', closeAddModal);
+  els.modalEdit?.addEventListener('osgate:modal-close-request', closeEditModal);
 
   els.modalAdd?.addEventListener('click', (e) => {
     if (e.target === els.modalAdd) closeAddModal();

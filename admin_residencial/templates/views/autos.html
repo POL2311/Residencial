@@ -41,21 +41,23 @@
     <div id="residentAccessList" class="space-y-3"></div>
   </section>
 
-  <div id="adminAutoEditModal" class="os-modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="os-modal-shell flex min-h-full items-end justify-center p-0 md:items-center md:p-4">
-      <div class="os-modal-panel os-modal-form os-modal-full-mobile bg-white shadow-2xl">
-        <div class="os-modal-header app-admin-modal-header flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <div id="adminAutoEditModalTitle" class="text-sm font-semibold text-slate-800">Editar auto</div>
-          <button id="btnCloseAdminAutoModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+  <div id="adminAutoEditModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--full-mobile" role="dialog" aria-modal="true" aria-labelledby="adminAutoEditModalTitle">
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow">Control vehicular</div>
+          <h2 id="adminAutoEditModalTitle">Editar auto</h2>
         </div>
-        <form id="adminAutoEditForm" class="flex min-h-0 flex-1 flex-col">
-          <div id="adminAutoEditBody" class="os-modal-body app-admin-modal-body space-y-3 p-4"></div>
-          <div class="os-modal-footer app-admin-modal-footer flex flex-col-reverse gap-2 border-t border-slate-100 bg-white px-4 py-3 sm:flex-row sm:justify-end">
-            <button id="btnCancelAdminAutoModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
-            <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">Guardar</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <button id="btnCloseAdminAutoModal" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+      </header>
+      <form id="adminAutoEditForm" class="os-form-v2">
+        <div id="adminAutoEditBody" class="os-modal-v2__body space-y-3"></div>
+        <footer class="os-modal-v2__footer">
+          <button id="btnCancelAdminAutoModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" data-close-modal>Cancelar</button>
+          <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">Guardar</button>
+        </footer>
+      </form>
+    </section>
   </div>
 </div>

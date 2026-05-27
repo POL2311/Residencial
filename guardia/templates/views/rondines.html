@@ -28,18 +28,20 @@
     <div id="roundRoutesList" class="space-y-3 text-sm text-slate-500">Cargando…</div>
   </section>
 
-  <div id="roundPointModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm">
-    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
-      <div class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-lg sm:rounded-3xl">
-        <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+  <div id="roundPointModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--compact" role="dialog" aria-modal="true">
+        <header class="os-modal-v2__header">
           <div>
-            <div class="text-base font-semibold text-slate-800">Registrar punto</div>
+            <div class="os-modal-v2__eyebrow">Rondines</div>
+            <h2>Registrar punto</h2>
             <div id="roundPointModalHint" class="mt-1 text-xs text-slate-500">Escanea el QR del punto de revisión.</div>
           </div>
-          <button id="btnCloseRoundPointModal" type="button" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
-        </div>
+          <button id="btnCloseRoundPointModal" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+        </header>
 
-        <form id="roundPointForm" class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+        <form id="roundPointForm" class="os-form-v2">
+          <div class="os-modal-v2__body">
           <div id="roundPointFormError" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
 
           <div class="grid gap-3">
@@ -74,28 +76,35 @@
               GPS pendiente. Se solicitará ubicación al guardar.
             </div>
           </div>
+          </div>
         </form>
 
-        <div class="border-t border-slate-100 bg-white px-5 py-4">
+        <footer class="os-modal-v2__footer">
           <button id="btnSubmitRoundPoint" type="button" class="w-full rounded-2xl bg-[#2E5D73] px-4 py-3 text-sm font-semibold text-white shadow disabled:cursor-not-allowed disabled:opacity-50">
             Guardar punto
           </button>
-        </div>
-      </div>
-    </div>
+        </footer>
+    </section>
   </div>
 
-  <div id="roundCameraModal" class="fixed inset-0 z-[60] hidden bg-black/70 p-0 backdrop-blur-sm md:p-4">
-    <div class="flex min-h-full items-end justify-center md:items-center">
-      <div class="w-full max-w-sm rounded-t-2xl bg-white p-4 shadow-2xl md:rounded-2xl">
-        <div class="text-sm font-semibold text-slate-800">Escanea punto de revisión</div>
-        <video id="roundVideo" class="mt-3 aspect-video w-full rounded-xl bg-slate-100" autoplay playsinline></video>
-        <div id="roundCameraHint" class="mt-2 text-xs text-slate-500">Esperando QR…</div>
-        <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <button id="btnRetryRoundCamera" type="button" class="hidden rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white">Reintentar</button>
-          <button id="btnCloseRoundCamera" type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cerrar</button>
+  <div id="roundCameraModal" class="os-modal-v2 hidden z-[60]">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact" role="dialog" aria-modal="true">
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow">QR</div>
+          <h2>Escanea punto de revisión</h2>
         </div>
+        <button id="btnCloseRoundCamera" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+      </header>
+      <div class="os-modal-v2__body">
+        <video id="roundVideo" class="aspect-video w-full rounded-xl bg-slate-100" autoplay playsinline></video>
+        <div id="roundCameraHint" class="mt-2 text-xs text-slate-500">Esperando QR…</div>
       </div>
-    </div>
+      <footer class="os-modal-v2__footer">
+        <button id="btnRetryRoundCamera" type="button" class="hidden rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white">Reintentar</button>
+        <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" data-close-modal>Cerrar</button>
+      </footer>
+    </section>
   </div>
 </div>

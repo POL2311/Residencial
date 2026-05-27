@@ -29,6 +29,7 @@
       video: document.getElementById('video'),
       btnRetryCamera: document.getElementById('btnRetryCamera'),
       btnCloseCamera: document.getElementById('btnCloseCamera'),
+      btnCloseCameraFooter: document.getElementById('btnCloseCameraFooter'),
 
       residentSection: document.getElementById('residentDirectSection'),
       residentSearch: document.getElementById('residentDirectSearch'),
@@ -1040,7 +1041,10 @@
       els.btnOpenCamera?.addEventListener('click', openCamera);
       els.btnRetryCamera?.addEventListener('click', openCamera);
       els.btnCloseCamera?.addEventListener('click', closeCamera);
+      els.btnCloseCameraFooter?.addEventListener('click', closeCamera);
+      els.cameraModal?.addEventListener('osgate:modal-close-request', closeCamera);
       els.modalClose?.addEventListener('click', closeActionModal);
+      els.modal?.addEventListener('osgate:modal-close-request', closeActionModal);
       els.btnRefrescar?.addEventListener('click', loadHist);
       els.codigo?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {

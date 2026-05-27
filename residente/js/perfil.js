@@ -487,6 +487,7 @@
 
     els.btnCloseModal.addEventListener('click', closeModal);
     els.btnCancelModal.addEventListener('click', closeModal);
+    els.modal.addEventListener('osgate:modal-close-request', closeModal);
     els.modal.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
 
     els.modalForm.addEventListener('submit', async (e) => {

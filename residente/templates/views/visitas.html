@@ -17,81 +17,86 @@
     <div id="residentVisitasList" class="mt-4 space-y-3"></div>
   </div>
 
-  <div id="residentVisitasModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
-      <div class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-w-xl sm:rounded-2xl">
-        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-          <div id="residentVisitasModalTitle" class="text-sm font-semibold text-slate-800">Visita</div>
-          <button id="btnCloseResidentVisitasModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
+  <div id="residentVisitasModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--full-mobile" role="dialog" aria-modal="true" aria-labelledby="residentVisitasModalTitle">
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow">Visitas</div>
+          <h2 id="residentVisitasModalTitle">Visita</h2>
         </div>
-        <form id="residentVisitasForm" class="flex min-h-0 flex-1 flex-col">
-          <div class="flex-1 overflow-y-auto p-4 space-y-3">
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Tipo</label>
+        <button id="btnCloseResidentVisitasModal" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+      </header>
+      <form id="residentVisitasForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-3">
+          <div class="os-field-v2">
+            <label>Tipo</label>
             <select name="tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
               <option value="visita">Visita</option>
               <option value="servicio">Servicio</option>
               <option value="trabajador_recurrente">Trabajador recurrente</option>
             </select>
           </div>
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Nombre del visitante</label>
+          <div class="os-field-v2">
+            <label>Nombre del visitante</label>
             <input name="nombre_visitante" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-600 mb-1">Fecha desde</label>
+          <div class="os-form-v2__grid">
+            <div class="os-field-v2">
+              <label>Fecha desde</label>
               <input type="date" name="fecha_desde" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required>
             </div>
-            <div>
-              <label class="block text-xs text-slate-600 mb-1">Fecha hasta</label>
+            <div class="os-field-v2">
+              <label>Fecha hasta</label>
               <input type="date" name="fecha_hasta" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required>
             </div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-600 mb-1">Hora desde</label>
+          <div class="os-form-v2__grid">
+            <div class="os-field-v2">
+              <label>Hora desde</label>
               <input type="time" name="hora_desde" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
             </div>
-            <div>
-              <label class="block text-xs text-slate-600 mb-1">Hora hasta</label>
+            <div class="os-field-v2">
+              <label>Hora hasta</label>
               <input type="time" name="hora_hasta" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
             </div>
           </div>
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Motivo</label>
+          <div class="os-field-v2">
+            <label>Motivo</label>
             <input name="motivo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
           </div>
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Placa del vehiculo</label>
+          <div class="os-field-v2">
+            <label>Placa del vehiculo</label>
             <input name="placa_vehiculo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
           </div>
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Notas</label>
+          <div class="os-field-v2">
+            <label>Notas</label>
             <textarea name="notas" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></textarea>
           </div>
           <label class="flex items-center gap-2 text-sm text-slate-600">
             <input type="checkbox" name="uso_unico" value="1" checked>
             Uso unico
           </label>
-          </div>
-          <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button id="btnCancelResidentVisitasModal" type="button" class="text-sm px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50">Cancelar</button>
+        </div>
+        <footer class="os-modal-v2__footer">
+            <button id="btnCancelResidentVisitasModal" type="button" class="text-sm px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" data-close-modal>Cancelar</button>
             <button type="submit" class="text-sm px-4 py-2 rounded-xl bg-[#4E7287] text-white hover:opacity-95">Guardar</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </footer>
+      </form>
+    </section>
   </div>
 
-  <div id="residentVisitasCodeModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
-      <div class="w-full overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-w-md sm:rounded-2xl">
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <div class="text-sm font-semibold text-slate-800">Código de acceso</div>
-          <button id="btnCloseResidentVisitasCodeModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+  <div id="residentVisitasCodeModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact" role="dialog" aria-modal="true" aria-labelledby="residentVisitasCodeTitle">
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow">Acceso</div>
+          <h2 id="residentVisitasCodeTitle">Código de acceso</h2>
         </div>
-        <div class="space-y-4 px-4 py-5">
+        <button id="btnCloseResidentVisitasCodeModal" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+      </header>
+        <div class="os-modal-v2__body space-y-4">
           <p class="text-sm text-slate-500">Comparte este código con tu invitado para el acceso.</p>
           <div id="residentVisitasCodeValue"
             class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-5 text-center font-mono text-3xl font-bold tracking-[0.35em] text-slate-800">
@@ -110,9 +115,9 @@
               El guardia puede escanear este QR o capturar el código manualmente.
             </p>
           </div>
-          <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <div class="os-modal-v2__footer os-modal-v2__footer--inline">
             <button id="btnDismissResidentVisitasCodeModal" type="button"
-              class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+              class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" data-close-modal>
               Cerrar
             </button>
             <button id="btnDownloadResidentVisitasQr" type="button"
@@ -125,7 +130,6 @@
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </section>
   </div>
 </div>

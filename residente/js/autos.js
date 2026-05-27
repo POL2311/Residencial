@@ -52,20 +52,20 @@
         els.action.value = action;
         els.body.innerHTML = `
           ${auto.id ? `<input type="hidden" name="auto_id" value="${escapeHtml(auto.id)}">` : ''}
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Placas</label>
+          <div class="os-field-v2">
+            <label>Placas</label>
             <input name="placas" value="${escapeHtml(auto.placas || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required>
           </div>
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Modelo</label>
+          <div class="os-field-v2">
+            <label>Modelo</label>
             <input name="modelo" value="${escapeHtml(auto.modelo || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
           </div>
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Color</label>
+          <div class="os-field-v2">
+            <label>Color</label>
             <input name="color" value="${escapeHtml(auto.color || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
           </div>
-          <div>
-            <label class="block text-xs text-slate-600 mb-1">Tag ID</label>
+          <div class="os-field-v2">
+            <label>Tag ID</label>
             <input value="${escapeHtml(auto.tag_id || '')}" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500" disabled>
           </div>
         `;
@@ -133,6 +133,7 @@
     els.btnNew?.addEventListener('click', () => openModal('Agregar auto', 'create'));
     els.btnClose?.addEventListener('click', closeModal);
     els.btnCancel?.addEventListener('click', closeModal);
+    els.modal?.addEventListener('osgate:modal-close-request', closeModal);
     els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
     els.form?.addEventListener('submit', async (e) => {
         e.preventDefault();

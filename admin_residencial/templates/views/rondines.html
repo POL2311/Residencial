@@ -35,69 +35,74 @@
     <div id="rondinesHistorialList" class="space-y-3"></div>
   </section>
 
-  <div id="rondinRouteModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="rondinRouteModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-close-route-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--wide" role="dialog" aria-modal="true" aria-labelledby="rondinRouteModalTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="round_routes">Rutas de rondín</div>
-          <h2 id="rondinRouteModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nueva ruta</h2>
+          <div class="os-modal-v2__eyebrow" data-os-label="round_routes">Rutas de rondín</div>
+          <h2 id="rondinRouteModalTitle">Nueva ruta</h2>
         </div>
-        <button type="button" data-close-route-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <form id="rondinRouteForm" class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <button type="button" data-close-route-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <form id="rondinRouteForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-4">
         <input type="hidden" name="id" />
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</label>
           <input name="nombre" required maxlength="150" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
         </div>
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Descripción</label>
           <textarea name="descripcion" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></textarea>
         </div>
         <label class="flex items-center gap-2 text-sm text-slate-600"><input name="activo" type="checkbox" value="1" checked /> Ruta activa</label>
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <button type="button" data-close-route-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
-          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar ruta</button>
         </div>
+        <footer class="os-modal-v2__footer">
+          <button type="button" data-close-route-modal data-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar ruta</button>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 
-  <div id="rondinPointModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="rondinPointModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-close-point-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--wide os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="rondinPointModalTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="review_points">Puntos de revisión</div>
-          <h2 id="rondinPointModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nuevo punto</h2>
+          <div class="os-modal-v2__eyebrow" data-os-label="review_points">Puntos de revisión</div>
+          <h2 id="rondinPointModalTitle">Nuevo punto</h2>
         </div>
-        <button type="button" data-close-point-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <form id="rondinPointForm" class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <button type="button" data-close-point-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <form id="rondinPointForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-4">
         <input type="hidden" name="id" />
-        <div class="grid gap-3 md:grid-cols-2">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</label>
             <input name="nombre" required maxlength="150" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="area">Área</label>
             <select name="area_id" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></select>
           </div>
         </div>
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Descripción</label>
           <textarea name="descripcion" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></textarea>
         </div>
-        <div class="grid gap-3 md:grid-cols-4">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Latitud</label>
             <input name="latitud" inputmode="decimal" placeholder="19.4326000" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Longitud</label>
             <input name="longitud" inputmode="decimal" placeholder="-99.1332000" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Radio metros</label>
             <input name="radio_metros" type="number" min="5" max="5000" value="50" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
@@ -111,61 +116,65 @@
           <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600"><input name="activo" type="checkbox" value="1" checked /> Punto activo</label>
         </div>
         <div id="rondinPointGpsHint" class="hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500"></div>
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <button type="button" data-close-point-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+        </div>
+        <footer class="os-modal-v2__footer">
+          <button type="button" data-close-point-modal data-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
           <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar punto</button>
-        </div>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 
-  <div id="rondinAssignModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="rondinAssignModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-close-assign-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--wide os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="rondinAssignTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Asignación</div>
-          <h2 id="rondinAssignTitle" class="mt-1 text-xl font-semibold text-slate-900">Puntos de ruta</h2>
+          <div class="os-modal-v2__eyebrow">Asignación</div>
+          <h2 id="rondinAssignTitle">Puntos de ruta</h2>
         </div>
-        <button type="button" data-close-assign-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <div class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <button type="button" data-close-assign-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <div class="os-modal-v2__body space-y-4">
         <div id="rondinAssignList" class="space-y-2"></div>
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <button type="button" data-close-assign-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
-          <button id="btnSaveRoutePoints" type="button" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar puntos</button>
-        </div>
       </div>
-    </div>
+      <footer class="os-modal-v2__footer">
+          <button type="button" data-close-assign-modal data-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+          <button id="btnSaveRoutePoints" type="button" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar puntos</button>
+      </footer>
+    </section>
   </div>
 
-  <div id="rondinQrModal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="w-full max-w-md rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="rondinQrModal" class="os-modal-v2 hidden z-[90]">
+    <div class="os-modal-v2__backdrop" data-close-qr-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact" role="dialog" aria-modal="true" aria-labelledby="rondinQrTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">QR de punto</div>
-          <h2 id="rondinQrTitle" class="mt-1 text-xl font-semibold text-slate-900">Punto</h2>
+          <div class="os-modal-v2__eyebrow">QR de punto</div>
+          <h2 id="rondinQrTitle">Punto</h2>
         </div>
-        <button type="button" data-close-qr-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <div class="p-5 text-center">
+        <button type="button" data-close-qr-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <div class="os-modal-v2__body text-center">
         <div class="mx-auto inline-flex rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
           <img id="rondinQrImage" src="" alt="QR rondín" class="h-72 w-72 max-w-full rounded-2xl object-contain" />
         </div>
         <div id="rondinQrPayload" class="mt-4 break-all rounded-2xl bg-slate-50 px-4 py-3 text-left text-xs text-slate-500"></div>
       </div>
-    </div>
+    </section>
   </div>
 
-  <div id="rondinDetailModal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="rondinDetailModal" class="os-modal-v2 hidden z-[90]">
+    <div class="os-modal-v2__backdrop" data-close-detail-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--wide os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="rondinDetailTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle de rondín</div>
-          <h2 id="rondinDetailTitle" class="mt-1 text-xl font-semibold text-slate-900">Historial</h2>
+          <div class="os-modal-v2__eyebrow">Detalle de rondín</div>
+          <h2 id="rondinDetailTitle">Historial</h2>
         </div>
-        <button type="button" data-close-detail-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <div id="rondinDetailBody" class="max-h-[72vh] overflow-y-auto p-5"></div>
-    </div>
+        <button type="button" data-close-detail-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <div id="rondinDetailBody" class="os-modal-v2__body"></div>
+    </section>
   </div>
 </div>

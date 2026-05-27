@@ -3,6 +3,9 @@
   --os-modal-border: rgba(226, 232, 240, 0.92);
   --os-modal-shadow: 0 28px 70px rgba(15, 23, 42, 0.24), 0 10px 26px rgba(15, 23, 42, 0.12);
   --os-form-accent: #2e5d73;
+  --os-modal-v2-radius: 1.5rem;
+  --os-modal-v2-border: rgba(226, 232, 240, 0.94);
+  --os-modal-v2-shadow: 0 30px 72px rgba(15, 23, 42, 0.24), 0 10px 28px rgba(15, 23, 42, 0.12);
 }
 
 body.os-modal-open {
@@ -21,6 +24,231 @@ body.os-modal-open [data-mobile-dock] {
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
+}
+
+.os-modal-v2,
+.os-modal-v2 *,
+.os-form-v2,
+.os-form-v2 * {
+  box-sizing: border-box;
+}
+
+.os-modal-v2 {
+  align-items: center;
+  display: none;
+  inset: 0;
+  justify-content: center;
+  overflow: hidden;
+  padding: 1.5rem;
+  position: fixed;
+  z-index: 80;
+}
+
+.os-modal-v2:not(.hidden),
+.os-modal-v2.is-open {
+  display: flex !important;
+}
+
+.os-modal-v2 .hidden {
+  display: none !important;
+}
+
+.os-modal-v2__backdrop {
+  background: rgba(15, 23, 42, 0.64);
+  inset: 0;
+  position: absolute;
+}
+
+.os-modal-v2__panel {
+  background: #fff;
+  border: 1px solid var(--os-modal-v2-border);
+  border-radius: var(--os-modal-v2-radius);
+  box-shadow: var(--os-modal-v2-shadow);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 3rem);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  width: min(720px, calc(100vw - 2rem));
+  z-index: 1;
+}
+
+.os-modal-v2__panel--wide {
+  width: min(920px, calc(100vw - 2rem));
+}
+
+.os-modal-v2__panel--compact {
+  width: min(520px, calc(100vw - 2rem));
+}
+
+.os-modal-v2__panel--tall {
+  min-height: min(72dvh, 680px);
+}
+
+.os-modal-v2__header {
+  align-items: flex-start;
+  background: #fff;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.82);
+  display: flex;
+  flex: 0 0 auto;
+  gap: 1rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.os-modal-v2__header h2 {
+  color: rgb(15 23 42);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0.15rem 0 0;
+}
+
+.os-modal-v2__header p {
+  color: rgb(100 116 139);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  margin: 0.25rem 0 0;
+}
+
+.os-modal-v2__eyebrow {
+  color: rgb(148 163 184);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.os-modal-v2__close {
+  align-items: center;
+  background: rgb(241 245 249);
+  border: 0;
+  border-radius: 999px;
+  color: rgb(51 65 85);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  height: 2.5rem;
+  justify-content: center;
+  width: 2.5rem;
+}
+
+.os-modal-v2__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 1.25rem;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.os-modal-v2__footer {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1px solid rgba(226, 232, 240, 0.82);
+  bottom: 0;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.7rem;
+  justify-content: flex-end;
+  padding: 0.9rem 1.25rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  position: sticky;
+  z-index: 3;
+}
+
+.os-modal-v2__footer--inline {
+  margin: 1rem -1.25rem -1.25rem;
+}
+
+.os-form-v2 {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.os-form-v2__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  min-width: 0;
+}
+
+.os-form-v2__section {
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.25rem;
+  padding: 1rem;
+}
+
+.os-field-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.os-field-v2 label,
+.os-field-v2__label {
+  color: rgb(100 116 139);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.os-field-v2 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.os-field-v2 select,
+.os-field-v2 textarea,
+.os-form-v2 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.os-form-v2 select,
+.os-form-v2 textarea {
+  background: #fff;
+  border: 1px solid rgba(203, 213, 225, 0.96);
+  border-radius: 0.95rem;
+  color: rgb(15 23 42);
+  max-width: 100%;
+  min-height: 3rem;
+  min-width: 0;
+  padding: 0.75rem 0.95rem;
+  width: 100%;
+}
+
+.os-field-v2 textarea,
+.os-form-v2 textarea {
+  min-height: 7rem;
+}
+
+.os-form-v2__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.os-form-v2__detail-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  min-width: 0;
+}
+
+.os-form-v2__value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .os-modal-overlay,
@@ -307,6 +535,47 @@ body.os-modal-open [data-mobile-dock] {
 }
 
 @media (max-width: 767px) {
+  .os-modal-v2 {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .os-modal-v2__panel {
+    border-radius: 1.5rem 1.5rem 0 0;
+    max-height: calc(100dvh - 0.5rem);
+    width: 100%;
+  }
+
+  .os-modal-v2__panel--form,
+  .os-modal-v2__panel--full-mobile {
+    height: calc(100dvh - 0.5rem);
+    max-height: calc(100dvh - 0.5rem);
+    min-height: calc(100dvh - 0.5rem);
+  }
+
+  .os-modal-v2__header {
+    padding: 0.95rem 1rem;
+  }
+
+  .os-modal-v2__body {
+    padding: 1rem;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .os-modal-v2__footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+    padding: 0.85rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .os-modal-v2__footer > * {
+    width: 100%;
+  }
+
+  .os-modal-v2__footer--inline {
+    margin: 1rem -1rem -1rem;
+  }
+
   .os-modal-active[class*="backdrop-blur"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;

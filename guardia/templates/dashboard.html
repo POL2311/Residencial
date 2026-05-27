@@ -170,16 +170,18 @@
   </footer>
 </div>
 
-<div id="gModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-  <div class="min-h-full flex items-end md:items-center justify-center p-3 md:p-4">
-    <div class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
-      <div class="px-4 py-3 border-b flex items-center justify-between">
-        <div id="gModalTitle" class="text-sm font-semibold text-slate-800">—</div>
-        <button id="gModalClose" type="button" class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
+<div id="gModal" class="os-modal-v2 hidden z-50">
+  <div class="os-modal-v2__backdrop" data-close-modal></div>
+  <section class="os-modal-v2__panel os-modal-v2__panel--compact os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="gModalTitle">
+    <header class="os-modal-v2__header">
+      <div>
+        <div class="os-modal-v2__eyebrow">Operación</div>
+        <h2 id="gModalTitle">—</h2>
       </div>
-      <div class="min-h-0 flex-1 overflow-y-auto p-4">
-        <div id="gModalBody" class="space-y-2 text-sm text-slate-700"></div>
-      </div>
+      <button id="gModalClose" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+    </header>
+    <div class="os-modal-v2__body">
+      <div id="gModalBody" class="space-y-3 text-sm text-slate-700"></div>
     </div>
-  </div>
+  </section>
 </div>

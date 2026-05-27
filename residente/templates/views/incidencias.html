@@ -16,17 +16,20 @@
     <div id="residentIncidenciasList" class="mt-4 space-y-3"></div>
   </div>
 
-  <div id="residentIncidenciasModal" class="os-modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="os-modal-shell min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
-      <div class="os-modal-panel os-modal-form os-modal-full-mobile bg-white shadow-2xl">
-        <div class="os-modal-header px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-          <div class="text-sm font-semibold text-slate-800">Nueva incidencia</div>
-          <button id="btnCloseResidentIncModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
+  <div id="residentIncidenciasModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--full-mobile" role="dialog" aria-modal="true" aria-labelledby="residentIncidenciasModalTitle">
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow">Incidencias</div>
+          <h2 id="residentIncidenciasModalTitle">Nueva incidencia</h2>
         </div>
-        <form id="residentIncidenciasForm" class="flex min-h-0 flex-1 flex-col">
-          <div class="os-modal-body min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-          <div class="os-field">
-            <label class="block text-xs text-slate-600 mb-1">Tipo</label>
+        <button id="btnCloseResidentIncModal" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+      </header>
+      <form id="residentIncidenciasForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-3">
+          <div class="os-field-v2">
+            <label>Tipo</label>
             <select name="tipo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
               <option value="seguridad">Seguridad</option>
               <option value="ruido">Ruido</option>
@@ -34,29 +37,28 @@
               <option value="otros">Otros</option>
             </select>
           </div>
-          <div class="os-field">
-            <label class="block text-xs text-slate-600 mb-1">Titulo</label>
+          <div class="os-field-v2">
+            <label>Titulo</label>
             <input name="titulo" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required>
           </div>
-          <div class="os-field">
-            <label class="block text-xs text-slate-600 mb-1">Prioridad</label>
+          <div class="os-field-v2">
+            <label>Prioridad</label>
             <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
               <option value="baja">Baja</option>
               <option value="media" selected>Media</option>
               <option value="alta">Alta</option>
             </select>
           </div>
-          <div class="os-field">
-            <label class="block text-xs text-slate-600 mb-1">Descripcion</label>
+          <div class="os-field-v2">
+            <label>Descripcion</label>
             <textarea name="descripcion" rows="4" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required></textarea>
           </div>
-          </div>
-          <div class="os-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button id="btnCancelResidentIncModal" type="button" class="text-sm px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50">Cancelar</button>
-            <button type="submit" class="text-sm px-4 py-2 rounded-xl bg-[#EF5A5A] text-white hover:opacity-95">Guardar</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+        <footer class="os-modal-v2__footer">
+          <button id="btnCancelResidentIncModal" type="button" class="text-sm px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" data-close-modal>Cancelar</button>
+          <button type="submit" class="text-sm px-4 py-2 rounded-xl bg-[#EF5A5A] text-white hover:opacity-95">Guardar</button>
+        </footer>
+      </form>
+    </section>
   </div>
 </div>

@@ -333,12 +333,20 @@
         els.qrCode.value = '';
         els.qrCode.placeholder = point?.qr_payload || 'op:round_point:...';
       }
-      els.pointModal?.classList.remove('hidden');
+      if (window.OSGateModal?.open && els.pointModal) {
+        window.OSGateModal.open(els.pointModal);
+      } else {
+        els.pointModal?.classList.remove('hidden');
+      }
     }
 
     function closePointModal() {
       closeCamera();
-      els.pointModal?.classList.add('hidden');
+      if (window.OSGateModal?.close && els.pointModal) {
+        window.OSGateModal.close(els.pointModal);
+      } else {
+        els.pointModal?.classList.add('hidden');
+      }
       state.currentPoint = null;
     }
 
@@ -481,16 +489,28 @@
 
     function closeCamera() {
       stopCamera();
-      els.cameraModal?.classList.add('hidden');
+      if (window.OSGateModal?.close && els.cameraModal) {
+        window.OSGateModal.close(els.cameraModal);
+      } else {
+        els.cameraModal?.classList.add('hidden');
+      }
     }
 
     async function openCamera() {
       if (!isSecureCameraContext()) {
         setCameraState('error', 'La cámara requiere HTTPS o localhost.');
-        els.cameraModal?.classList.remove('hidden');
+        if (window.OSGateModal?.open && els.cameraModal) {
+          window.OSGateModal.open(els.cameraModal);
+        } else {
+          els.cameraModal?.classList.remove('hidden');
+        }
         return;
       }
-      els.cameraModal?.classList.remove('hidden');
+      if (window.OSGateModal?.open && els.cameraModal) {
+        window.OSGateModal.open(els.cameraModal);
+      } else {
+        els.cameraModal?.classList.remove('hidden');
+      }
       setCameraState('info', 'Abriendo cámara…');
       try {
         await prepareScannerEngine();
@@ -561,11 +581,13 @@
 
     els.refresh?.addEventListener('click', load);
     els.closePointModal?.addEventListener('click', closePointModal);
+    els.pointModal?.addEventListener('osgate:modal-close-request', closePointModal);
     els.pointModal?.addEventListener('click', (ev) => {
       if (ev.target === els.pointModal) closePointModal();
     });
     els.openCamera?.addEventListener('click', openCamera);
     els.closeCamera?.addEventListener('click', closeCamera);
+    els.cameraModal?.addEventListener('osgate:modal-close-request', closeCamera);
     els.retryCamera?.addEventListener('click', openCamera);
     els.submitPoint?.addEventListener('click', submitPoint);
 

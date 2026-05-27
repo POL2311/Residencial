@@ -29,28 +29,34 @@
   </div>
 
   <div id="cameraModal"
-    class="fixed inset-0 bg-black/70 hidden items-end md:items-center justify-center z-50 p-0 md:p-4">
-    <div class="bg-white rounded-t-2xl md:rounded-2xl p-4 w-full max-w-sm shadow-2xl">
-      <div class="text-sm font-semibold mb-2">Escanea el código QR</div>
-      <video id="video" class="w-full rounded-xl bg-slate-100 aspect-video" autoplay playsinline></video>
-      <div id="cameraHint" class="mt-2 text-xs text-slate-500">
-        Esperando código QR…
+    class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact" role="dialog" aria-modal="true">
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow">QR</div>
+          <h2>Escanea el código QR</h2>
+        </div>
+        <button id="btnCloseCamera" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+      </header>
+      <div class="os-modal-v2__body">
+        <video id="video" class="w-full rounded-xl bg-slate-100 aspect-video" autoplay playsinline></video>
+        <div id="cameraHint" class="mt-2 text-xs text-slate-500">
+          Esperando código QR…
+        </div>
+        <div id="cameraSupportNote" class="mt-2 text-[11px] text-slate-400">
+          Si no abre o no detecta el QR, puedes ingresar el código manualmente.
+        </div>
       </div>
-      <div id="cameraSupportNote" class="mt-2 text-[11px] text-slate-400">
-        Si no abre o no detecta el QR, puedes ingresar el código manualmente.
-      </div>
-      <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <button id="btnRetryCamera"
-          type="button"
-          class="hidden rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white hover:opacity-95">
+      <footer class="os-modal-v2__footer">
+        <button id="btnRetryCamera" type="button" class="hidden rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white hover:opacity-95">
           Reintentar cámara
         </button>
-        <button id="btnCloseCamera"
-          class="w-full rounded-xl border px-4 py-2 text-sm hover:bg-slate-50 sm:col-span-1">
+        <button id="btnCloseCameraFooter" type="button" class="w-full rounded-xl border px-4 py-2 text-sm hover:bg-slate-50 sm:col-span-1" data-close-modal>
           Cancelar
         </button>
-      </div>
-    </div>
+      </footer>
+    </section>
   </div>
 
   <div id="residentDirectSection" class="rounded-2xl bg-white shadow p-4 border border-slate-200">
@@ -86,19 +92,20 @@
     </div>
   </div>
 
-  <div id="accessActionModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm">
-    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
-      <div class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-xl sm:rounded-3xl">
-        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="accessActionModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--compact" role="dialog" aria-modal="true" aria-labelledby="accessActionTitle">
+        <header class="os-modal-v2__header">
           <div>
-            <div class="text-base font-semibold text-slate-800" id="accessActionTitle">Validación de acceso</div>
+            <div class="os-modal-v2__eyebrow">Accesos</div>
+            <h2 id="accessActionTitle">Validación de acceso</h2>
             <div id="accessActionStatus" class="mt-1 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">Esperando validación</div>
           </div>
           <button id="btnCloseAccessActionModal" type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
-        </div>
+            class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+        </header>
 
-        <div class="flex-1 overflow-y-auto px-5 py-4">
+        <div class="os-modal-v2__body">
           <div id="accessActionBody" class="space-y-3 text-sm text-slate-700">
             Ingresa un código para validar el acceso.
           </div>
@@ -132,7 +139,7 @@
           </div>
         </div>
 
-        <div id="accessActionButtons" class="hidden border-t border-slate-100 bg-white px-5 py-4">
+        <footer id="accessActionButtons" class="os-modal-v2__footer hidden">
           <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button id="btnConfirmarEntrada"
                     class="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow disabled:cursor-not-allowed disabled:opacity-50 hover:bg-emerald-700">
@@ -144,9 +151,8 @@
               Registrar salida
             </button>
           </div>
-        </div>
-      </div>
-    </div>
+        </footer>
+    </section>
   </div>
 
 </div>

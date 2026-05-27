@@ -83,27 +83,29 @@
     <div id="ordenesServicioEmpty" class="hidden p-6 text-sm text-slate-500">No hay órdenes de servicio con los filtros actuales.</div>
   </section>
 
-  <div id="ordenesServicioModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="ordenesServicioModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-os-close-modal data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--wide os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="ordenesServicioModalTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="service_orders">Órdenes de servicio</div>
-          <h2 id="ordenesServicioModalTitle" class="mt-1 text-xl font-semibold text-slate-900">Nueva orden</h2>
+          <div class="os-modal-v2__eyebrow" data-os-label="service_orders">Órdenes de servicio</div>
+          <h2 id="ordenesServicioModalTitle">Nueva orden</h2>
         </div>
-        <button type="button" data-os-close-modal class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <form id="ordenesServicioForm" class="max-h-[72vh] space-y-4 overflow-y-auto p-5">
+        <button type="button" data-os-close-modal data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <form id="ordenesServicioForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-4">
         <input type="hidden" name="id" />
-        <div class="grid gap-3 md:grid-cols-3">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo de servicio</label>
             <input name="tipo_servicio" required maxlength="120" placeholder="Mantenimiento refrigerador" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="scheduled_date">Fecha programada</label>
             <input name="fecha_programada" type="date" required class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Prioridad</label>
             <select name="prioridad" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
               <option value="baja">Baja</option>
@@ -113,30 +115,30 @@
             </select>
           </div>
         </div>
-        <div class="grid gap-3 md:grid-cols-3">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="provider">Proveedor</label>
             <select name="proveedor_id" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></select>
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="authorized_person">Persona autorizada</label>
             <select name="persona_recurrente_id" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></select>
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="area">Área</label>
             <select name="area_id" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></select>
           </div>
         </div>
-        <div class="grid gap-3 md:grid-cols-3">
-          <div>
+        <div class="os-form-v2__grid">
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Hora inicio</label>
             <input name="hora_inicio" type="time" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Hora fin</label>
             <input name="hora_fin" type="time" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]" />
           </div>
-          <div>
+          <div class="os-field-v2">
             <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500" data-os-label="status">Estado</label>
             <select name="estatus" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]">
               <option value="programada">Programada</option>
@@ -146,41 +148,44 @@
             <div data-os-status-readonly class="mt-2 hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700"></div>
           </div>
         </div>
-        <div>
+        <div class="os-field-v2">
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Descripción</label>
           <textarea name="descripcion" rows="4" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2E5D73]"></textarea>
         </div>
-        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-          <button type="button" data-os-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
+        </div>
+        <footer class="os-modal-v2__footer">
+          <button type="button" data-os-close-modal data-close-modal class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Cancelar</button>
           <button type="submit" class="app-admin-primary rounded-xl px-4 py-2 text-sm font-semibold">Guardar orden</button>
-        </div>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 
-  <div id="ordenesServicioDetailModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+  <div id="ordenesServicioDetailModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-os-close-detail data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--wide os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="ordenesServicioDetailTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="service_orders">Órdenes de servicio</div>
-          <h2 id="ordenesServicioDetailTitle" class="mt-1 text-xl font-semibold text-slate-900">Detalle</h2>
+          <div class="os-modal-v2__eyebrow" data-os-label="service_orders">Órdenes de servicio</div>
+          <h2 id="ordenesServicioDetailTitle">Detalle</h2>
         </div>
-        <button type="button" data-os-close-detail class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <div id="ordenesServicioDetailBody" class="max-h-[76vh] overflow-y-auto p-5"></div>
-    </div>
+        <button type="button" data-os-close-detail data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <div id="ordenesServicioDetailBody" class="os-modal-v2__body"></div>
+    </section>
   </div>
 
-  <div id="ordenesServicioQrModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-    <div class="w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
-      <div class="flex items-start justify-between gap-4">
+  <div id="ordenesServicioQrModal" class="os-modal-v2 hidden z-[80]">
+    <div class="os-modal-v2__backdrop" data-os-close-qr data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact" role="dialog" aria-modal="true" aria-labelledby="ordenesServicioQrTitle">
+      <header class="os-modal-v2__header">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400" data-os-label="service_qr">QR de servicio</div>
-          <h2 id="ordenesServicioQrTitle" class="mt-1 text-xl font-semibold text-slate-900">QR de servicio</h2>
+          <div class="os-modal-v2__eyebrow" data-os-label="service_qr">QR de servicio</div>
+          <h2 id="ordenesServicioQrTitle">QR de servicio</h2>
         </div>
-        <button type="button" data-os-close-qr class="h-10 w-10 rounded-full bg-slate-100 text-xl text-slate-600">×</button>
-      </div>
-      <div id="ordenesServicioQrBody" class="mt-5"></div>
-    </div>
+        <button type="button" data-os-close-qr data-close-modal class="os-modal-v2__close" aria-label="Cerrar">×</button>
+      </header>
+      <div id="ordenesServicioQrBody" class="os-modal-v2__body"></div>
+    </section>
   </div>
 </div>

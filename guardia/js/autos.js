@@ -31,8 +31,8 @@
 
     function formRow(label, inputHtml) {
       return `
-        <div class="os-field">
-          <label class="text-xs text-slate-500">${label}</label>
+        <div class="os-field-v2">
+          <label>${label}</label>
           ${inputHtml}
         </div>
       `;
@@ -329,7 +329,7 @@
 
     function openCreateUnidad(onDone) {
       openModal('Nueva unidad', `
-        <form id="frmUnidad" class="space-y-3">
+        <form id="frmUnidad" class="os-form-v2 gap-3">
           <div id="msgU" class="hidden rounded-xl px-3 py-2 text-sm"></div>
 
           ${formRow('Clave *', `<input name="clave" class="w-full rounded-xl border px-3 py-2" required />`)}
@@ -343,7 +343,7 @@
             </select>`
           )}
 
-          <div class="flex justify-end gap-2">
+          <div class="os-modal-v2__footer os-modal-v2__footer--inline">
             <button type="button" id="cancelU" class="border px-4 py-2 rounded-xl">Cancelar</button>
             <button type="submit" id="submitU" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Crear</button>
           </div>
@@ -373,7 +373,7 @@
 
     function openCreateProp(defaultUnidad, onDone) {
       openModal('Nuevo propietario', `
-        <form id="frmProp" class="space-y-3">
+        <form id="frmProp" class="os-form-v2 gap-3">
           <div id="msgP" class="hidden rounded-xl px-3 py-2 text-sm"></div>
 
           ${formRow('Nombre *', `<input name="name" class="w-full rounded-xl border px-3 py-2" required />`)}
@@ -381,7 +381,7 @@
           ${formRow('Teléfono', `<input name="telefono" class="w-full rounded-xl border px-3 py-2" />`)}
           <input type="hidden" name="unidad_id" value="${escapeHtml(defaultUnidad || '')}" />
 
-          <div class="flex justify-end gap-2">
+          <div class="os-modal-v2__footer os-modal-v2__footer--inline">
             <button type="button" id="cancelP" class="border px-4 py-2 rounded-xl">Cancelar</button>
             <button type="submit" id="submitP" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Crear</button>
           </div>
@@ -418,14 +418,14 @@
       const props = await getPropietarios();
 
       openModal('Nuevo auto', `
-        <form id="frmAuto" class="space-y-3">
+        <form id="frmAuto" class="os-form-v2 gap-3">
           <div id="msgA" class="hidden rounded-xl px-3 py-2 text-sm"></div>
 
           ${formRow('Placas *', `<input name="placas" class="w-full rounded-xl border px-3 py-2" required />`)}
           ${formRow('Modelo', `<input name="modelo" class="w-full rounded-xl border px-3 py-2" />`)}
           ${formRow('Color', `<input name="color" class="w-full rounded-xl border px-3 py-2" />`)}
 
-          <div class="os-field-card">
+          <div class="os-form-v2__section">
             <div class="flex justify-between text-xs text-slate-500">
               <span>Unidad</span>
               <button type="button" id="addUnidad" class="text-[#4E7287]">+ Nueva</button>
@@ -433,7 +433,7 @@
             <select name="unidad_id" id="selUnidad" class="w-full border rounded-xl px-3 py-2 mt-1"></select>
           </div>
 
-          <div class="os-field-card">
+          <div class="os-form-v2__section">
             <div class="flex justify-between text-xs text-slate-500">
               <span>Propietario</span>
               <button type="button" id="addProp" class="text-[#4E7287]">+ Nuevo</button>
@@ -443,7 +443,7 @@
 
           ${formRow('Notas', `<textarea name="notas" class="w-full rounded-xl border px-3 py-2"></textarea>`)}
 
-          <div class="flex justify-end gap-2">
+          <div class="os-modal-v2__footer os-modal-v2__footer--inline">
             <button type="button" id="cancelA" class="border px-4 py-2 rounded-xl">Cancelar</button>
             <button type="submit" id="submitA" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Guardar</button>
           </div>
@@ -499,7 +499,7 @@
       const props = await getPropietarios();
 
       openModal('Editar auto', `
-        <form id="frmEdit" class="space-y-3">
+        <form id="frmEdit" class="os-form-v2 gap-3">
           <div id="msgE" class="hidden rounded-xl px-3 py-2 text-sm"></div>
 
           <input type="hidden" name="auto_id" value="${escapeHtml(a.id)}" />
@@ -511,7 +511,7 @@
           ${formRow('Propietario', `<select name="propietario_user_id" id="selPEdit" class="w-full border px-3 py-2 rounded-xl"></select>`)}
           ${formRow('Notas', `<textarea name="notas" class="w-full border px-3 py-2 rounded-xl">${safeText(a.notas || '', '')}</textarea>`)}
 
-          <div class="flex justify-between items-center">
+          <div class="os-modal-v2__footer os-modal-v2__footer--inline !justify-between">
             <button type="button" id="delA" class="text-rose-700 hover:underline">
               Desactivar
             </button>

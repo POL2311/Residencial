@@ -50,15 +50,19 @@
   <div id="incidenciasList" class="space-y-3 app-mobile-scroll-list"></div>
 
   <!-- Modal Nueva -->
-  <div id="incidenciaModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-end md:items-center justify-center z-50 hidden p-3 md:p-4">
-    <div class="app-admin-modal-card w-full max-w-md bg-white rounded-2xl shadow-2xl">
-      <div class="app-admin-modal-header flex justify-between items-center border-b px-4 py-3 bg-slate-50">
-        <h2 class="text-base font-semibold">Reportar incidencia</h2>
-        <button id="btnCloseIncidenciaModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">✕</button>
-      </div>
+  <div id="incidenciaModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--compact" role="dialog" aria-modal="true">
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow">Incidencias</div>
+          <h2>Reportar incidencia</h2>
+        </div>
+        <button id="btnCloseIncidenciaModal" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+      </header>
 
-      <form id="incidenciaForm" class="flex min-h-0 flex-1 flex-col">
-        <div class="app-admin-modal-body px-4 py-4 space-y-3">
+      <form id="incidenciaForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-3">
         <div id="incidenciaAddError" class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
         <div id="incidenciaScopeWrap" class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
@@ -145,30 +149,34 @@
         </div>
 
         </div>
-        <div class="app-admin-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <footer class="os-modal-v2__footer">
           <button type="button" id="btnCancelIncidenciaAdd"
-            class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-50">
+            class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-50" data-close-modal>
             Cancelar
           </button>
           <button type="submit"
             class="bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-emerald-700">
             Registrar
           </button>
-        </div>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 
   <!-- Modal Editar -->
-  <div id="incidenciaEditModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm items-end md:items-center justify-center z-50 hidden p-3 md:p-4">
-    <div class="app-admin-modal-card w-full max-w-md bg-white rounded-2xl shadow-2xl">
-      <div class="app-admin-modal-header flex justify-between items-center border-b px-4 py-3 bg-slate-50">
-        <h2 class="text-base font-semibold">Actualizar incidencia</h2>
-        <button id="btnCloseEditIncModal" class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">✕</button>
-      </div>
+  <div id="incidenciaEditModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--form os-modal-v2__panel--compact" role="dialog" aria-modal="true">
+      <header class="os-modal-v2__header">
+        <div>
+          <div class="os-modal-v2__eyebrow">Incidencias</div>
+          <h2>Actualizar incidencia</h2>
+        </div>
+        <button id="btnCloseEditIncModal" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">×</button>
+      </header>
 
-      <form id="incidenciaEditForm" class="flex min-h-0 flex-1 flex-col">
-        <div class="app-admin-modal-body px-4 py-4 space-y-3">
+      <form id="incidenciaEditForm" class="os-form-v2">
+        <div class="os-modal-v2__body space-y-3">
         <div id="incidenciaEditError" class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
         <input type="hidden" name="id" />
@@ -199,17 +207,17 @@
         </div>
 
         </div>
-        <div class="app-admin-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <footer class="os-modal-v2__footer">
           <button type="button" id="btnCancelIncidenciaEdit"
-            class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-50">
+            class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-50" data-close-modal>
             Cancelar
           </button>
           <button type="submit"
             class="bg-[#2E5D73] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-95">
             Guardar cambios
           </button>
-        </div>
+        </footer>
       </form>
-    </div>
+    </section>
   </div>
 </div>
