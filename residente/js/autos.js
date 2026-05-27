@@ -69,11 +69,19 @@
             <input value="${escapeHtml(auto.tag_id || '')}" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500" disabled>
           </div>
         `;
-        els.modal.classList.remove('hidden');
+        if (window.OSGateModal?.open) {
+            window.OSGateModal.open(els.modal);
+        } else {
+            els.modal.classList.remove('hidden');
+        }
     }
 
     function closeModal() {
-        els.modal.classList.add('hidden');
+        if (window.OSGateModal?.close) {
+            window.OSGateModal.close(els.modal);
+        } else {
+            els.modal.classList.add('hidden');
+        }
         els.form.reset();
     }
 

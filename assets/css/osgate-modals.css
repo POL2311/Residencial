@@ -1,0 +1,347 @@
+:root {
+  --os-modal-radius: 1.5rem;
+  --os-modal-border: rgba(226, 232, 240, 0.92);
+  --os-modal-shadow: 0 28px 70px rgba(15, 23, 42, 0.24), 0 10px 26px rgba(15, 23, 42, 0.12);
+  --os-form-accent: #2e5d73;
+}
+
+body.os-modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+body.os-modal-open #shellHeader,
+body.os-modal-open #shellFooter,
+body.os-modal-open .mobile-dock-layer,
+body.os-modal-open .mobile-floating-dock,
+body.os-modal-open .mobile-footer,
+body.os-modal-open .bottom-nav,
+body.os-modal-open [data-app-footer],
+body.os-modal-open [data-mobile-dock] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+.os-modal-overlay,
+.app-admin-modal-overlay,
+[id*="modal" i][class*="fixed"][class*="inset-0"],
+[id$="Modal"].fixed.inset-0,
+[id$="Modal"][class*="fixed"][class*="inset-0"] {
+  box-sizing: border-box;
+  isolation: isolate;
+  overscroll-behavior: contain;
+}
+
+.os-modal-overlay:not(.hidden),
+.app-admin-modal-overlay:not(.hidden),
+[id*="modal" i][class*="fixed"][class*="inset-0"]:not(.hidden),
+[id$="Modal"].fixed.inset-0:not(.hidden),
+[id$="Modal"][class*="fixed"][class*="inset-0"]:not(.hidden) {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.os-modal-shell,
+.app-admin-modal-card,
+.app-admin-modal-overlay > div,
+[id*="modal" i][class*="fixed"][class*="inset-0"] > div,
+[id$="Modal"].fixed.inset-0 > div,
+[id$="Modal"][class*="fixed"][class*="inset-0"] > div {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 2rem);
+  min-height: 0;
+  min-width: 0;
+}
+
+.os-modal-panel,
+.app-admin-modal-card,
+[id*="modal" i][class*="fixed"][class*="inset-0"] > div > div,
+[id$="Modal"].fixed.inset-0 > div > div,
+[id$="Modal"][class*="fixed"][class*="inset-0"] > div > div {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 2rem);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  width: min(920px, calc(100vw - 2rem));
+}
+
+.os-modal-panel,
+.os-form-card {
+  background: #fff;
+  border: 1px solid var(--os-modal-border);
+  border-radius: var(--os-modal-radius);
+  box-shadow: var(--os-modal-shadow);
+}
+
+.os-modal-header,
+.app-admin-modal-header {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.os-modal-body,
+.app-admin-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.os-modal-footer,
+.app-admin-modal-footer,
+.os-actions-sticky {
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(226, 232, 240, 0.82);
+  bottom: 0;
+  flex: 0 0 auto;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  position: sticky;
+  z-index: 2;
+}
+
+.os-modal-close {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 2.5rem;
+  justify-content: center;
+  width: 2.5rem;
+}
+
+.os-form,
+.os-form-card,
+.os-field,
+.os-field *,
+.os-modal-panel *,
+.app-admin-modal-card *,
+[id*="modal" i][class*="fixed"][class*="inset-0"] *,
+[id$="Modal"].fixed.inset-0 *,
+[id$="Modal"][class*="fixed"][class*="inset-0"] * {
+  box-sizing: border-box;
+}
+
+.os-form-card {
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.os-form-grid,
+.os-grid-2,
+.os-grid-3,
+.os-mobile-stack {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.os-form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+}
+
+.os-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.os-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.os-full {
+  grid-column: 1 / -1;
+}
+
+.os-form-row,
+.os-field {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.os-field label,
+.os-modal-panel label,
+.app-admin-modal-card label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.os-field input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.os-field select,
+.os-field textarea,
+.os-form input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.os-form select,
+.os-form textarea,
+.os-modal-panel input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.os-modal-panel select,
+.os-modal-panel textarea,
+.app-admin-modal-card input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.app-admin-modal-card select,
+.app-admin-modal-card textarea,
+[id*="modal" i][class*="fixed"][class*="inset-0"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+[id*="modal" i][class*="fixed"][class*="inset-0"] select,
+[id*="modal" i][class*="fixed"][class*="inset-0"] textarea,
+[id$="Modal"].fixed.inset-0 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+[id$="Modal"].fixed.inset-0 select,
+[id$="Modal"].fixed.inset-0 textarea {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.os-field input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.os-field select,
+.os-field textarea {
+  border: 1px solid rgba(203, 213, 225, 0.95);
+  border-radius: 0.9rem;
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.os-field textarea {
+  min-height: 7rem;
+}
+
+.os-field-help,
+.os-field-error {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin-top: 0.35rem;
+  overflow-wrap: anywhere;
+}
+
+.os-field-help {
+  color: rgb(100 116 139);
+}
+
+.os-field-error {
+  color: rgb(190 18 60);
+}
+
+.os-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.os-detail-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  min-width: 0;
+}
+
+.os-detail-item,
+.os-detail-value,
+.os-breakable,
+[data-os-breakable] {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+[id*="detail" i],
+[id*="detalle" i],
+[id*="detail" i] *,
+[id*="detalle" i] * {
+  min-width: 0;
+}
+
+[id*="detail" i] .grid,
+[id*="detalle" i] .grid {
+  min-width: 0;
+}
+
+[id*="detail" i] .truncate,
+[id*="detalle" i] .truncate,
+[id*="detail" i] .font-semibold,
+[id*="detalle" i] .font-semibold,
+[id*="detail" i] [class*="text-slate"],
+[id*="detalle" i] [class*="text-slate"] {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+[id*="detail" i] .truncate,
+[id*="detalle" i] .truncate {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+@media (max-width: 767px) {
+  .os-modal-overlay:not(.hidden),
+  .app-admin-modal-overlay:not(.hidden),
+  [id*="modal" i][class*="fixed"][class*="inset-0"]:not(.hidden),
+  [id$="Modal"].fixed.inset-0:not(.hidden),
+  [id$="Modal"][class*="fixed"][class*="inset-0"]:not(.hidden) {
+    align-items: flex-end;
+    padding: 0 !important;
+  }
+
+  .os-modal-shell,
+  .app-admin-modal-overlay > div,
+  [id*="modal" i][class*="fixed"][class*="inset-0"] > div,
+  [id$="Modal"].fixed.inset-0 > div,
+  [id$="Modal"][class*="fixed"][class*="inset-0"] > div {
+    min-height: 0;
+    width: 100%;
+  }
+
+  .os-modal-panel,
+  .app-admin-modal-card,
+  [id*="modal" i][class*="fixed"][class*="inset-0"] > div > div,
+  [id$="Modal"].fixed.inset-0 > div > div,
+  [id$="Modal"][class*="fixed"][class*="inset-0"] > div > div {
+    border-radius: 1.5rem 1.5rem 0 0 !important;
+    max-height: 100dvh;
+    width: 100%;
+  }
+
+  .os-modal-body,
+  .app-admin-modal-body {
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .os-grid-2,
+  .os-grid-3,
+  .os-mobile-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .os-actions,
+  .os-modal-footer,
+  .app-admin-modal-footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .os-actions > *,
+  .os-modal-footer > *,
+  .app-admin-modal-footer > * {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .os-modal-overlay:not(.hidden),
+  .app-admin-modal-overlay:not(.hidden),
+  [id*="modal" i][class*="fixed"][class*="inset-0"]:not(.hidden),
+  [id$="Modal"].fixed.inset-0:not(.hidden),
+  [id$="Modal"][class*="fixed"][class*="inset-0"]:not(.hidden) {
+    padding: 1rem;
+  }
+}
+
+#cameraModal > div > div,
+#roundCameraModal > div,
+#roundCameraModal > div > div {
+  max-width: min(100vw, 32rem);
+}

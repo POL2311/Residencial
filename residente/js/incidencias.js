@@ -38,7 +38,11 @@
     }
 
     function closeModal() {
-        els.modal.classList.add('hidden');
+        if (window.OSGateModal?.close) {
+            window.OSGateModal.close(els.modal);
+        } else {
+            els.modal.classList.add('hidden');
+        }
         els.form.reset();
     }
 
@@ -102,7 +106,13 @@
         `).join('') : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Aun no has reportado incidencias.</div>`;
     }
 
-    els.btnNew?.addEventListener('click', () => els.modal.classList.remove('hidden'));
+    els.btnNew?.addEventListener('click', () => {
+        if (window.OSGateModal?.open) {
+            window.OSGateModal.open(els.modal);
+        } else {
+            els.modal.classList.remove('hidden');
+        }
+    });
     els.btnClose?.addEventListener('click', closeModal);
     els.btnCancel?.addEventListener('click', closeModal);
     els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });

@@ -145,6 +145,7 @@
   }
 
   function syncDockModalState() {
+    window.OSGateModal?.sync?.();
     const hasModal = hasActiveModal();
     els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
     if (hasModal) {
@@ -407,12 +408,20 @@
     showShellHeader();
     els.modalTitle.textContent = title || 'Detalle';
     els.modalBody.innerHTML = html || '';
-    els.modal.classList.remove('hidden');
+    if (window.OSGateModal?.open) {
+      window.OSGateModal.open(els.modal);
+    } else {
+      els.modal.classList.remove('hidden');
+    }
   }
 
   function closeModal() {
     if (!els.modal) return;
-    els.modal.classList.add('hidden');
+    if (window.OSGateModal?.close) {
+      window.OSGateModal.close(els.modal);
+    } else {
+      els.modal.classList.add('hidden');
+    }
   }
 
   function getWrap() {

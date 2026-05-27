@@ -1,0 +1,13 @@
+{
+  "appId": "com.osgate.operador",
+  "appName": "OS Gate Operador",
+  "webDir": "www",
+  "server": {
+    "url": "https://TU-DOMINIO/guardia/php/dashboard.php",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true
+  }
+}

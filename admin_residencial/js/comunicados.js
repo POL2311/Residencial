@@ -386,11 +386,19 @@
       }
     }
 
-    els.modal?.classList.remove('hidden');
+    if (window.OSGateModal?.open && els.modal) {
+      window.OSGateModal.open(els.modal);
+    } else {
+      els.modal?.classList.remove('hidden');
+    }
   }
 
   function closeModal() {
-    els.modal?.classList.add('hidden');
+    if (window.OSGateModal?.close && els.modal) {
+      window.OSGateModal.close(els.modal);
+    } else {
+      els.modal?.classList.add('hidden');
+    }
     clearFormError();
     state.editingId = null;
     els.form?.reset();

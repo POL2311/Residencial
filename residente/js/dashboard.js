@@ -101,6 +101,7 @@
     }
 
     function syncDockModalState() {
+        window.OSGateModal?.sync?.();
         const hasModal = hasActiveModal();
         els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
         if (hasModal) {

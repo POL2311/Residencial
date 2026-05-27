@@ -107,7 +107,11 @@
     }
 
     function closeModal() {
-        els.modal.classList.add('hidden');
+        if (window.OSGateModal?.close) {
+            window.OSGateModal.close(els.modal);
+        } else {
+            els.modal.classList.add('hidden');
+        }
         els.form.reset();
         document.body.style.overflow = '';
     }
@@ -127,13 +131,21 @@
             if (horaDesde) horaDesde.value = formatTimeInput(now);
             if (horaHasta) horaHasta.value = formatTimeInput(plusOneHour);
         }
-        els.modal.classList.remove('hidden');
+        if (window.OSGateModal?.open) {
+            window.OSGateModal.open(els.modal);
+        } else {
+            els.modal.classList.remove('hidden');
+        }
         document.body.style.overflow = 'hidden';
     }
 
     function closeCodeModal() {
         if (!els.codeModal) return;
-        els.codeModal.classList.add('hidden');
+        if (window.OSGateModal?.close) {
+            window.OSGateModal.close(els.codeModal);
+        } else {
+            els.codeModal.classList.add('hidden');
+        }
         currentCode = '';
         if (els.qrImage) {
             els.qrImage.removeAttribute('src');
@@ -147,7 +159,11 @@
     async function openCodeModal(code) {
         currentCode = String(code || '').trim();
         if (els.codeValue) els.codeValue.textContent = currentCode || '----';
-        els.codeModal?.classList.remove('hidden');
+        if (window.OSGateModal?.open && els.codeModal) {
+            window.OSGateModal.open(els.codeModal);
+        } else {
+            els.codeModal?.classList.remove('hidden');
+        }
         document.body.style.overflow = 'hidden';
         await renderQr(currentCode);
     }

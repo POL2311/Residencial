@@ -243,7 +243,11 @@ console.log('[UNIDADES] JS ACTIVO');
   ========================= */
   function openModal(unidad = null) {
     document.body.style.overflow = 'hidden';
-    els.modal.classList.remove('hidden');
+    if (window.OSGateModal?.open) {
+      window.OSGateModal.open(els.modal);
+    } else {
+      els.modal.classList.remove('hidden');
+    }
     els.modalForm.reset();
 
     if (unidad) {
@@ -260,7 +264,11 @@ console.log('[UNIDADES] JS ACTIVO');
   }
 
   function closeModal() {
-    els.modal.classList.add('hidden');
+    if (window.OSGateModal?.close) {
+      window.OSGateModal.close(els.modal);
+    } else {
+      els.modal.classList.add('hidden');
+    }
     document.body.style.overflow = '';
     state.editingId = null;
   }
@@ -302,11 +310,15 @@ console.log('[UNIDADES] JS ACTIVO');
       </div>
     `;
 
-    els.detailModal.classList.remove('hidden');
+    if (window.OSGateModal?.open) {
+      window.OSGateModal.open(els.detailModal);
+    } else {
+      els.detailModal.classList.remove('hidden');
+    }
     document.body.style.overflow = 'hidden';
 
     document.getElementById('closeDetail').onclick = () =>
-      (els.detailModal.classList.add('hidden'), document.body.style.overflow = '');
+      (window.OSGateModal?.close ? window.OSGateModal.close(els.detailModal) : els.detailModal.classList.add('hidden'), document.body.style.overflow = '');
   }
 
   /* =========================

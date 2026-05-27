@@ -83,7 +83,11 @@
         document.body.appendChild(modal);
 
         const close = () => {
-            modal.classList.add('hidden');
+            if (window.OSGateModal?.close) {
+                window.OSGateModal.close(modal);
+            } else {
+                modal.classList.add('hidden');
+            }
             document.body.style.overflow = '';
         };
 
@@ -106,7 +110,11 @@
             image.src = resolvePublicUrl(item.imagen_url);
             image.alt = item.titulo || 'Imagen adjunta';
         }
-        modal.classList.remove('hidden');
+        if (window.OSGateModal?.open) {
+            window.OSGateModal.open(modal);
+        } else {
+            modal.classList.remove('hidden');
+        }
         document.body.style.overflow = 'hidden';
     }
 

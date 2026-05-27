@@ -78,11 +78,19 @@
             ? 'text-sm px-4 py-2 rounded-xl bg-rose-600 text-white hover:opacity-95'
             : 'text-sm px-4 py-2 rounded-xl bg-[#2E5D73] text-white hover:opacity-95';
 
-        els.modal.classList.remove('hidden');
+        if (window.OSGateModal?.open) {
+            window.OSGateModal.open(els.modal);
+        } else {
+            els.modal.classList.remove('hidden');
+        }
     }
 
     function closeModal() {
-        els.modal.classList.add('hidden');
+        if (window.OSGateModal?.close) {
+            window.OSGateModal.close(els.modal);
+        } else {
+            els.modal.classList.add('hidden');
+        }
         els.modalBody.innerHTML = '';
         els.modalAction.value = '';
     }

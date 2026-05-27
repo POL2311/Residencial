@@ -18,6 +18,8 @@ if ($residencialId > 0) {
 $pageTitle = 'Portal del residente';
 
 $toastV = @filemtime(__DIR__ . '/../../assets/js/app-toast.js') ?: time();
+$modalCssV = @filemtime(__DIR__ . '/../../assets/css/osgate-modals.css') ?: time();
+$modalJsV = @filemtime(__DIR__ . '/../../assets/js/osgate-modal.js') ?: time();
 $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 ?>
 <!doctype html>
@@ -29,12 +31,14 @@ $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 
   <!-- Tailwind CDN (si ya lo cargas global, puedes quitarlo) -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../assets/css/osgate-modals.css?v=<?= (int)$modalCssV ?>" />
 </head>
 
 <body class="min-h-screen bg-[#F2F3F5] text-slate-900">
   <?php include __DIR__ . '/../templates/dashboard.html'; ?>
 
   <script src="../../assets/js/app-toast.js?v=<?= (int)$toastV ?>" defer></script>
+  <script src="../../assets/js/osgate-modal.js?v=<?= (int)$modalJsV ?>" defer></script>
   <script src="../js/dashboard.js?v=<?= (int)$dashV ?>" defer></script>
 </body>
 </html>

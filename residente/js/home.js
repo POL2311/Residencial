@@ -357,7 +357,11 @@
 
     function closeTipsModal() {
         if (!els.tipsModal) return;
-        els.tipsModal.classList.add('hidden');
+        if (window.OSGateModal?.close) {
+            window.OSGateModal.close(els.tipsModal);
+        } else {
+            els.tipsModal.classList.add('hidden');
+        }
         document.body.style.overflow = '';
         try {
             window.localStorage.setItem(tipsDismissKey(), '1');
@@ -375,7 +379,11 @@
             dismissed = false;
         }
         if (dismissed) return;
-        els.tipsModal.classList.remove('hidden');
+        if (window.OSGateModal?.open) {
+            window.OSGateModal.open(els.tipsModal);
+        } else {
+            els.tipsModal.classList.remove('hidden');
+        }
         document.body.style.overflow = 'hidden';
     }
 

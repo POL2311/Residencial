@@ -377,6 +377,7 @@
   }
 
   function syncDockModalState() {
+    window.OSGateModal?.sync?.();
     if (state.accessBlocked) {
       hideFooterNavigation();
       return;

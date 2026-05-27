@@ -345,12 +345,20 @@
 
     function openActionModal(title = 'Validación de acceso') {
       if (els.modalTitle) els.modalTitle.textContent = title;
-      els.modal?.classList.remove('hidden');
+      if (window.OSGateModal?.open && els.modal) {
+        window.OSGateModal.open(els.modal);
+      } else {
+        els.modal?.classList.remove('hidden');
+      }
       document.body.style.overflow = 'hidden';
     }
 
     function closeActionModal() {
-      els.modal?.classList.add('hidden');
+      if (window.OSGateModal?.close && els.modal) {
+        window.OSGateModal.close(els.modal);
+      } else {
+        els.modal?.classList.add('hidden');
+      }
       document.body.style.overflow = '';
       state.actionSource = null;
       state.current = null;
@@ -925,8 +933,12 @@
     async function openCamera() {
       if (!els.cameraModal || !els.video || !isAlive()) return;
       closeCamera();
-      els.cameraModal.classList.remove('hidden');
-      els.cameraModal.classList.add('flex');
+      if (window.OSGateModal?.open) {
+        window.OSGateModal.open(els.cameraModal);
+      } else {
+        els.cameraModal.classList.remove('hidden');
+        els.cameraModal.classList.add('flex');
+      }
       setCameraState('idle', 'Estamos solicitando permiso de cámara…');
       alertMsg('');
 
@@ -963,8 +975,12 @@
       } catch (e) {
         const mapped = mapCameraError(e);
         closeCamera();
-        els.cameraModal?.classList.remove('hidden');
-        els.cameraModal?.classList.add('flex');
+        if (window.OSGateModal?.open && els.cameraModal) {
+          window.OSGateModal.open(els.cameraModal);
+        } else {
+          els.cameraModal?.classList.remove('hidden');
+          els.cameraModal?.classList.add('flex');
+        }
         setCameraState('error', mapped.message, mapped.note);
         alertMsg(mapped.message);
       }
@@ -992,8 +1008,12 @@
     }
 
     function closeCamera() {
-      els.cameraModal?.classList.add('hidden');
-      els.cameraModal?.classList.remove('flex');
+      if (window.OSGateModal?.close && els.cameraModal) {
+        window.OSGateModal.close(els.cameraModal);
+      } else {
+        els.cameraModal?.classList.add('hidden');
+        els.cameraModal?.classList.remove('flex');
+      }
       if (state.rafId) cancelAnimationFrame(state.rafId);
       state.rafId = null;
       if (state.stream) state.stream.getTracks().forEach((track) => track.stop());

@@ -98,15 +98,23 @@
   }
 
   function openModal(modal) {
-    modal?.classList.remove('hidden');
-    modal?.classList.add('flex');
+    if (window.OSGateModal?.open && modal) {
+      window.OSGateModal.open(modal);
+    } else {
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    }
     document.body.style.overflow = 'hidden';
     syncOverlay();
   }
 
   function closeModal(modal) {
-    modal?.classList.add('hidden');
-    modal?.classList.remove('flex');
+    if (window.OSGateModal?.close && modal) {
+      window.OSGateModal.close(modal);
+    } else {
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+    }
     document.body.style.overflow = '';
     syncOverlay();
   }

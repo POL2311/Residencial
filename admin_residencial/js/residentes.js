@@ -1089,7 +1089,11 @@
   // =========================
   function openModal(mode, r = null) {
     document.body.style.overflow = 'hidden';
-    els.modal.classList.remove('hidden');
+    if (window.OSGateModal?.open) {
+      window.OSGateModal.open(els.modal);
+    } else {
+      els.modal.classList.remove('hidden');
+    }
     syncDashboardOverlayState();
     els.modalForm.reset();
     closeInlineUnidadPanel();
@@ -1128,7 +1132,11 @@
   }
 
   function closeModal() {
-    els.modal.classList.add('hidden');
+    if (window.OSGateModal?.close) {
+      window.OSGateModal.close(els.modal);
+    } else {
+      els.modal.classList.add('hidden');
+    }
     document.body.style.overflow = '';
     state.editingId = null;
     state.selectedUnidadId = '';

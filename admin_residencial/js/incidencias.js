@@ -393,12 +393,20 @@
       acceptBtn.textContent = acceptText;
       cancelBtn.textContent = cancelText;
 
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      if (window.OSGateModal?.open) {
+        window.OSGateModal.open(modal);
+      } else {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
 
       const cleanup = () => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (window.OSGateModal?.close) {
+          window.OSGateModal.close(modal);
+        } else {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
         acceptBtn.onclick = null;
         cancelBtn.onclick = null;
         modal.onclick = null;
@@ -523,7 +531,11 @@
       fillSelect('permiso_material_id', state.meta.permisos || [], 'tipo_movimiento', 'Sin permiso');
     }
 
-    els.modalAdd.classList.remove('hidden');
+    if (window.OSGateModal?.open) {
+      window.OSGateModal.open(els.modalAdd);
+    } else {
+      els.modalAdd.classList.remove('hidden');
+    }
   }
 
   function currentIncidenciaScope() {
@@ -550,7 +562,11 @@
   }
 
   function closeAddModal() {
-    els.modalAdd?.classList.add('hidden');
+    if (window.OSGateModal?.close && els.modalAdd) {
+      window.OSGateModal.close(els.modalAdd);
+    } else {
+      els.modalAdd?.classList.add('hidden');
+    }
     clearFormError(els.addError);
   }
 
@@ -582,11 +598,19 @@
     const selPri = els.formEdit.querySelector('[name="prioridad"]');
     if (selPri) selPri.value = inc.prioridad || 'media';
 
-    els.modalEdit.classList.remove('hidden');
+    if (window.OSGateModal?.open) {
+      window.OSGateModal.open(els.modalEdit);
+    } else {
+      els.modalEdit.classList.remove('hidden');
+    }
   }
 
   function closeEditModal() {
-    els.modalEdit?.classList.add('hidden');
+    if (window.OSGateModal?.close && els.modalEdit) {
+      window.OSGateModal.close(els.modalEdit);
+    } else {
+      els.modalEdit?.classList.add('hidden');
+    }
     clearFormError(els.editError);
   }
 

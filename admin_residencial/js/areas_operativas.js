@@ -149,15 +149,23 @@
     els.form.elements.tipo.value = item?.tipo || 'general';
     els.form.elements.descripcion.value = item?.descripcion || '';
     els.form.elements.activo.checked = Number(item?.activo ?? 1) === 1;
-    els.modal.classList.remove('hidden');
-    els.modal.classList.add('flex');
+    if (window.OSGateModal?.open) {
+      window.OSGateModal.open(els.modal);
+    } else {
+      els.modal.classList.remove('hidden');
+      els.modal.classList.add('flex');
+    }
     document.body.style.overflow = 'hidden';
     window.AdminResidencialDashboard?.syncOverlayState?.();
   }
 
   function closeModal() {
-    els.modal?.classList.add('hidden');
-    els.modal?.classList.remove('flex');
+    if (window.OSGateModal?.close && els.modal) {
+      window.OSGateModal.close(els.modal);
+    } else {
+      els.modal?.classList.add('hidden');
+      els.modal?.classList.remove('flex');
+    }
     document.body.style.overflow = '';
     state.editingId = null;
     window.AdminResidencialDashboard?.syncOverlayState?.();
