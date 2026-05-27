@@ -198,62 +198,107 @@
             <div id="step-2" class="step-container">
                 <div class="space-y-8">
 
+                    <!-- Tipo de acceso deseado -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-4">Tipo de acceso principal</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-4">
+                            Selecciona el acceso deseado
+                        </label>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
+                            <!-- Option 1 -->
                             <div>
-                                <input type="radio" name="tipo_acceso" id="acceso_motor" class="card-input-element" value="motor">
+                                <input 
+                                    type="radio" 
+                                    name="tipo_acceso" 
+                                    id="acceso_porton_automatizado" 
+                                    class="card-input-element" 
+                                    value="porton_automatizado"
+                                >
 
-                                <label for="acceso_motor" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
+                                <label for="acceso_porton_automatizado" class="card-input-label block w-full border border-slate-200 rounded-xl p-5 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
                                     <div class="absolute top-3 right-3 text-slate-300 group-hover:text-teal-600 transition-colors">
                                         <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
                                     </div>
 
-                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-teal-100/50 transition-colors">
-                                        <i class="ph ph-garage text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
+                                    <div class="w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-teal-100/50 transition-colors">
+                                        <i class="ph ph-garage text-3xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
                                     </div>
 
-                                    <span class="text-sm font-medium text-slate-800">Portón con motor</span>
+                                    <span class="text-base font-semibold text-slate-800">Portón automatizado</span>
+                                    <span class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                        Ideal para accesos con portón eléctrico.
+                                    </span>
                                 </label>
                             </div>
 
+                            <!-- Option 2 -->
                             <div>
-                                <input type="radio" name="tipo_acceso" id="acceso_sin_motor" class="card-input-element" value="sin_motor">
+                                <input 
+                                    type="radio" 
+                                    name="tipo_acceso" 
+                                    id="acceso_pluma_vehicular" 
+                                    class="card-input-element" 
+                                    value="pluma_vehicular"
+                                >
 
-                                <label for="acceso_sin_motor" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
+                                <label for="acceso_pluma_vehicular" class="card-input-label block w-full border border-slate-200 rounded-xl p-5 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
                                     <div class="absolute top-3 right-3 text-slate-300 group-hover:text-teal-600 transition-colors">
                                         <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
                                     </div>
 
-                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-teal-100/50 transition-colors">
-                                        <i class="ph ph-door text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
+                                    <div class="w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-teal-100/50 transition-colors">
+                                        <i class="ph ph-barrier text-3xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
                                     </div>
 
-                                    <span class="text-sm font-medium text-slate-800">Portón sin motor</span>
-                                </label>
-                            </div>
-
-                            <div>
-                                <input type="radio" name="tipo_acceso" id="acceso_plumas" class="card-input-element" value="plumas">
-
-                                <label for="acceso_plumas" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
-                                    <div class="absolute top-3 right-3 text-slate-300 group-hover:text-teal-600 transition-colors">
-                                        <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
-                                    </div>
-
-                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-teal-100/50 transition-colors">
-                                        <i class="ph ph-boom-tube text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
-                                    </div>
-
-                                    <span class="text-sm font-medium text-slate-800">Barreras / Plumas</span>
+                                    <span class="text-base font-semibold text-slate-800">Pluma vehicular</span>
+                                    <span class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                        Ideal para entradas con carril vehicular.
+                                    </span>
                                 </label>
                             </div>
 
                         </div>
                     </div>
 
+                    <!-- Extra semáforo -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-4">
+                            Extras para el acceso
+                        </label>
+
+                        <div>
+                            <input 
+                                type="checkbox" 
+                                id="extra_semaforo_contador" 
+                                name="extra_semaforo_contador" 
+                                value="si" 
+                                class="card-input-element"
+                            >
+
+                            <label for="extra_semaforo_contador" class="card-input-label flex items-start justify-between gap-4 p-4 border border-slate-200 rounded-xl hover:border-teal-600 hover:shadow-sm">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-11 h-11 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0">
+                                        <i class="ph ph-traffic-signal text-2xl text-slate-600"></i>
+                                    </div>
+
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-slate-800">
+                                            Incluir semáforo con contador
+                                        </h4>
+
+                                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                            Agrega señalización visual para mejorar el flujo de entrada y salida de vehículos.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <i class="ph-fill ph-check-circle text-xl text-slate-300 opacity-0 check-icon flex-shrink-0 mt-1"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Medidas -->
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Medidas aproximadas del acceso</label>
 
