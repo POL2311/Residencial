@@ -1,0 +1,99 @@
+:root {
+  --os-ui-surface: #ffffff;
+  --os-ui-page: #f2f3f5;
+  --os-ui-text: #0f172a;
+  --os-ui-muted: #64748b;
+  --os-ui-accent: #2e5d73;
+  --os-ui-border: rgba(226, 232, 240, 0.94);
+  --os-ui-radius-lg: 1.5rem;
+  --os-ui-radius-md: 1rem;
+  --os-modal-vh: 100dvh;
+  --os-modal-mobile-gap: 0.5rem;
+}
+
+@supports (height: 100svh) {
+  :root {
+    --os-modal-vh: 100svh;
+  }
+}
+
+.os-modal-v2__panel {
+  max-height: calc(var(--os-modal-vh, 100dvh) - 3rem);
+}
+
+.os-field-v2 {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.os-field-v2 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.os-field-v2 select,
+.os-field-v2 textarea {
+  background-color: #fff;
+}
+
+.os-modal-v2__panel--full-mobile .os-form-v2 {
+  flex: 1 1 auto;
+}
+
+.os-modal-v2__panel:not(.os-modal-v2__panel--full-mobile) .os-form-v2 {
+  flex: 0 1 auto;
+}
+
+@media (max-width: 767px) {
+  .os-modal-v2 {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .os-modal-v2__panel {
+    border-radius: 1.5rem 1.5rem 0 0;
+    max-height: min(88dvh, calc(var(--os-modal-vh, 100dvh) - var(--os-modal-mobile-gap)));
+    width: 100%;
+  }
+
+  .os-modal-v2__panel--form {
+    height: auto;
+    max-height: min(88dvh, calc(var(--os-modal-vh, 100dvh) - var(--os-modal-mobile-gap)));
+    min-height: 0;
+  }
+
+  .os-modal-v2__panel--compact.os-modal-v2__panel--form {
+    max-height: min(86dvh, calc(var(--os-modal-vh, 100dvh) - var(--os-modal-mobile-gap)));
+  }
+
+  .os-modal-v2__panel--tall {
+    max-height: calc(var(--os-modal-vh, 100dvh) - var(--os-modal-mobile-gap));
+    min-height: min(64dvh, 620px);
+  }
+
+  .os-modal-v2__panel--full-mobile {
+    height: calc(var(--os-modal-vh, 100dvh) - var(--os-modal-mobile-gap));
+    max-height: calc(var(--os-modal-vh, 100dvh) - var(--os-modal-mobile-gap));
+    min-height: calc(var(--os-modal-vh, 100dvh) - var(--os-modal-mobile-gap));
+  }
+
+  .os-modal-v2__panel--full-mobile .os-form-v2 {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .os-modal-v2__panel:not(.os-modal-v2__panel--full-mobile) .os-form-v2 {
+    flex: 0 1 auto;
+  }
+
+  .os-modal-v2__header {
+    padding-top: max(0.95rem, env(safe-area-inset-top, 0px));
+  }
+
+  .os-modal-v2__body {
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .os-modal-v2__footer {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+}

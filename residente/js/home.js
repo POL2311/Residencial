@@ -362,7 +362,6 @@
         } else {
             els.tipsModal.classList.add('hidden');
         }
-        document.body.style.overflow = '';
         try {
             window.localStorage.setItem(tipsDismissKey(), '1');
         } catch (_) {
@@ -384,7 +383,6 @@
         } else {
             els.tipsModal.classList.remove('hidden');
         }
-        document.body.style.overflow = 'hidden';
     }
 
     function bindActions() {
@@ -422,6 +420,7 @@
 
         els.btnCloseTipsModal?.addEventListener('click', closeTipsModal);
         els.btnDismissTipsModal?.addEventListener('click', closeTipsModal);
+        els.tipsModal?.addEventListener('osgate:modal-close-request', closeTipsModal);
         els.tipsModal?.addEventListener('click', (event) => {
             if (event.target === els.tipsModal) closeTipsModal();
         });

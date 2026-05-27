@@ -19,6 +19,7 @@ $pageTitle = 'Portal del residente';
 
 $toastV = @filemtime(__DIR__ . '/../../assets/js/app-toast.js') ?: time();
 $modalCssV = @filemtime(__DIR__ . '/../../assets/css/osgate-modals.css') ?: time();
+$sharedDesignCssV = @filemtime(__DIR__ . '/../../assets/design/shared-ui.css') ?: time();
 $modalJsV = @filemtime(__DIR__ . '/../../assets/js/osgate-modal.js') ?: time();
 $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
 ?>
@@ -32,6 +33,7 @@ $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
   <!-- Tailwind CDN (si ya lo cargas global, puedes quitarlo) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/osgate-modals.css?v=<?= (int)$modalCssV ?>" />
+  <link rel="stylesheet" href="../../assets/design/shared-ui.css?v=<?= (int)$sharedDesignCssV ?>" />
 </head>
 
 <body class="min-h-screen bg-[#F2F3F5] text-slate-900">

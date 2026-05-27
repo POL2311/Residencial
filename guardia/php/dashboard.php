@@ -26,6 +26,7 @@ $activeMenu = 'security';
 $toastV = @filemtime(__DIR__ . '/../../assets/js/app-toast.js') ?: time();
 $labelsV = @filemtime(__DIR__ . '/../../assets/js/osgate-labels.js') ?: time();
 $modalCssV = @filemtime(__DIR__ . '/../../assets/css/osgate-modals.css') ?: time();
+$sharedDesignCssV = @filemtime(__DIR__ . '/../../assets/design/shared-ui.css') ?: time();
 $modalJsV = @filemtime(__DIR__ . '/../../assets/js/osgate-modal.js') ?: time();
 $pwaV = @filemtime(__DIR__ . '/../js/pwa.js') ?: time();
 $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
@@ -44,6 +45,7 @@ $dashV = @filemtime(__DIR__ . '/../js/dashboard.js') ?: time();
   <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/osgate-modals.css?v=<?= (int)$modalCssV ?>" />
+  <link rel="stylesheet" href="../../assets/design/shared-ui.css?v=<?= (int)$sharedDesignCssV ?>" />
 </head>
 <body class="min-h-screen bg-[#F2F3F5] text-slate-900">
   <audio id="soundOk" src="/assets/sounds/ok.mp3" preload="auto"></audio>

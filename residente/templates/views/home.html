@@ -77,27 +77,25 @@
     </div>
   </section>
 
-  <div id="residentTipsModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm">
-    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
-      <div class="flex max-h-[88vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-lg sm:rounded-3xl">
-        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <div>
-            <div class="text-lg font-semibold text-slate-800">Consejos útiles</div>
-            <p class="mt-1 text-sm text-slate-500">Te los mostraremos solo una vez por día.</p>
-          </div>
-          <button id="btnCloseResidentTipsModal" type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">
-            ✕
-          </button>
+  <div id="residentTipsModal" class="os-modal-v2 hidden z-50">
+    <div class="os-modal-v2__backdrop" data-close-modal></div>
+    <section class="os-modal-v2__panel os-modal-v2__panel--compact os-modal-v2__panel--form" role="dialog" aria-modal="true" aria-labelledby="residentTipsModalTitle">
+      <header class="os-modal-v2__header">
+        <div>
+          <h2 id="residentTipsModalTitle">Consejos útiles</h2>
+          <p>Te los mostraremos solo una vez por día.</p>
         </div>
-        <div id="residentTipsModalBody" class="flex-1 space-y-3 overflow-y-auto px-5 py-4"></div>
-        <div class="border-t border-slate-100 bg-white px-5 py-4">
-          <button id="btnDismissResidentTipsModal" type="button"
-            class="w-full rounded-2xl bg-[#2E5D73] px-4 py-3 text-sm font-medium text-white hover:opacity-95">
-            Entendido
-          </button>
-        </div>
-      </div>
-    </div>
+        <button id="btnCloseResidentTipsModal" type="button" class="os-modal-v2__close" data-close-modal aria-label="Cerrar">
+          ×
+        </button>
+      </header>
+      <div id="residentTipsModalBody" class="os-modal-v2__body space-y-3"></div>
+      <footer class="os-modal-v2__footer">
+        <button id="btnDismissResidentTipsModal" type="button" data-close-modal
+          class="w-full rounded-2xl bg-[#2E5D73] px-4 py-3 text-sm font-medium text-white hover:opacity-95">
+          Entendido
+        </button>
+      </footer>
+    </section>
   </div>
 </div>

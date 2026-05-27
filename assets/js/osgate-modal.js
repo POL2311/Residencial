@@ -27,7 +27,21 @@
   const knownModals = new Set();
   const stats = { syncs: 0, candidates: 0, open: false };
   let scheduledFrame = 0;
+  let viewportFrame = 0;
   let modalOpenState = null;
+
+  function syncViewportHeight() {
+    viewportFrame = 0;
+    const height = Math.round(window.visualViewport?.height || window.innerHeight || 0);
+    if (height > 0) {
+      document.documentElement.style.setProperty('--os-modal-vh', `${height}px`);
+    }
+  }
+
+  function scheduleViewportHeight() {
+    if (viewportFrame) return;
+    viewportFrame = window.requestAnimationFrame(syncViewportHeight);
+  }
 
   function isElement(node) {
     return node && node.nodeType === 1;
@@ -239,6 +253,7 @@
 
   function boot() {
     registerTree(document);
+    syncViewportHeight();
 
     const observer = new MutationObserver(handleMutations);
     observer.observe(document.body, {
@@ -250,6 +265,10 @@
 
     document.addEventListener('keydown', closeTopEscModal);
     document.addEventListener('click', closeFromTrigger);
+    window.addEventListener('resize', scheduleViewportHeight, { passive: true });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', scheduleViewportHeight, { passive: true });
+    }
     sync();
   }
 
