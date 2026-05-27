@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Solicitudes - OS-Gate Admin</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        osgate: {
+                            blue: '#2E5D73',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+    <!-- Top Navigation Placeholder (Simulating Admin Dashboard) -->
+    <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-50">
+        <div class="flex items-center gap-2 text-slate-900">
+            <i class="ph-fill ph-hexagon text-2xl text-osgate-blue"></i>
+            <span class="text-lg font-bold tracking-tight">OS-Gate <span class="text-slate-400 font-normal">| Admin</span></span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors relative">
+                <i class="ph ph-bell text-xl"></i>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            </button>
+            <div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-sm font-semibold text-slate-600 border border-slate-300">
+                JD
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Section Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Solicitudes de Residenciales</h1>
+                <p class="text-sm text-slate-500 mt-1">Gestiona los prospectos y cotizaciones pendientes.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:text-teal-600 transition-colors shadow-sm">
+                    <i class="ph ph-export"></i> Exportar
+                </button>
+                <button class="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors shadow-sm hover:shadow-md">
+                    <i class="ph-bold ph-plus"></i> Nueva Solicitud
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters & Search Bar -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+            <!-- Fast Filters (Pills) -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 hide-scrollbar">
+                <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-white whitespace-nowrap transition-colors">
+                    Todos
+                </button>
+                <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors flex items-center gap-2">
+                    Nuevos/Pendientes
+                    <span class="inline-flex items-center justify-center bg-orange-100 text-orange-700 text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
+                </button>
+                <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">
+                    Cotizados
+                </button>
+                <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">
+                    Rechazados
+                </button>
+            </div>
+
+            <!-- Search -->
+            <div class="relative w-full lg:w-72">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="ph ph-magnifying-glass text-slate-400"></i>
+                </div>
+                <input type="text" placeholder="Buscar residencial..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-sm focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all shadow-sm bg-white">
+            </div>
+        </div>
+
+        <!-- Data Table Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200">
+                            <th class="py-3 px-6 text-xs uppercase font-semibold text-slate-500 whitespace-nowrap">ID / Fecha</th>
+                            <th class="py-3 px-6 text-xs uppercase font-semibold text-slate-500 whitespace-nowrap">Residencial & Tamaño</th>
+                            <th class="py-3 px-6 text-xs uppercase font-semibold text-slate-500 whitespace-nowrap">Infraestructura</th>
+                            <th class="py-3 px-6 text-xs uppercase font-semibold text-slate-500 whitespace-nowrap">Estatus</th>
+                            <th class="py-3 px-6 text-xs uppercase font-semibold text-slate-500 text-right whitespace-nowrap">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <!-- Row 1: Pendiente -->
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">#REQ-042</div>
+                                <div class="text-xs text-slate-500 mt-0.5">24 May, 2026</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
+                                        <i class="ph-fill ph-buildings"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Residencial Balmoral</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">120 Casas (95 Habitadas)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm text-slate-700">Portón con Motor</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Sticker UHF &bull; 240 Tags</div>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pendiente
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
+                                        <i class="ph ph-eye text-lg"></i>
+                                    </button>
+                                    <button class="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Generar Cotización">
+                                        <i class="ph ph-file-text text-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2: Cotizado -->
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">#REQ-041</div>
+                                <div class="text-xs text-slate-500 mt-0.5">22 May, 2026</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
+                                        <i class="ph-fill ph-house"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Privada San Ángel</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">45 Casas (40 Habitadas)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm text-slate-700">Barreras / Plumas</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Tarjeta PVC &bull; 90 Tags</div>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800 border border-teal-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Cotizado
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
+                                        <i class="ph ph-eye text-lg"></i>
+                                    </button>
+                                    <button class="p-1.5 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors" title="Ver Cotización">
+                                        <i class="ph-fill ph-file-pdf text-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3: Pendiente -->
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">#REQ-040</div>
+                                <div class="text-xs text-slate-500 mt-0.5">20 May, 2026</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
+                                        <i class="ph-fill ph-buildings"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Torre Vértice</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">80 Departamentos (75 Hab.)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm text-slate-700">Portón con Motor</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Sticker UHF &bull; 150 Tags</div>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pendiente
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
+                                        <i class="ph ph-eye text-lg"></i>
+                                    </button>
+                                    <button class="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Generar Cotización">
+                                        <i class="ph ph-file-text text-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 4: Cotizado -->
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">#REQ-039</div>
+                                <div class="text-xs text-slate-500 mt-0.5">18 May, 2026</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
+                                        <i class="ph-fill ph-house"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Coto Los Encinos</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">35 Casas (35 Habitadas)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm text-slate-700">Portón sin Motor</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Sticker UHF &bull; 70 Tags</div>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800 border border-teal-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Cotizado
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
+                                        <i class="ph ph-eye text-lg"></i>
+                                    </button>
+                                    <button class="p-1.5 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors" title="Ver Cotización">
+                                        <i class="ph-fill ph-file-pdf text-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Footer -->
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span class="text-sm text-slate-500">
+                    Mostrando <span class="font-medium text-slate-800">1</span> a <span class="font-medium text-slate-800">4</span> de <span class="font-medium text-slate-800">42</span> registros
+                </span>
+                
+                <div class="flex items-center gap-2">
+                    <button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors disabled:opacity-50" disabled>
+                        Anterior
+                    </button>
+                    <div class="hidden sm:flex items-center gap-1">
+                        <button class="w-8 h-8 rounded-lg bg-teal-600 text-white text-sm font-medium flex items-center justify-center">1</button>
+                        <button class="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-sm font-medium flex items-center justify-center transition-colors">2</button>
+                        <button class="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-sm font-medium flex items-center justify-center transition-colors">3</button>
+                        <span class="px-1 text-slate-400">...</span>
+                        <button class="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-sm font-medium flex items-center justify-center transition-colors">11</button>
+                    </div>
+                    <button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors">
+                        Siguiente
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+    </main>
+
+</body>
+</html>
