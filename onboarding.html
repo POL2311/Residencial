@@ -106,6 +106,23 @@
     <!-- Main Form Container -->
     <div class="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
         
+        <!-- Success State Container (Hidden by default) -->
+        <div id="success-container" class="hidden p-10 text-center flex flex-col items-center justify-center min-h-[400px]">
+            <div class="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mb-6 border border-teal-100">
+                <i class="ph-fill ph-check-circle text-4xl text-teal-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-3">¡Cotización Solicitada!</h2>
+            <p class="text-slate-600 max-w-md mx-auto leading-relaxed">
+                Hemos recopilado tus datos correctamente. Nuestro equipo de ventas analizará la información y te enviará una cotización detallada en los próximos minutos.
+            </p>
+            <div class="mt-8 p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-500 max-w-sm mx-auto">
+                <i class="ph-fill ph-envelope-simple text-slate-400 mr-2 text-lg align-middle"></i>
+                Revisa tu bandeja de entrada pronto.
+            </div>
+        </div>
+
+        <!-- Form Wrapper -->
+        <div id="form-wrapper">
         <!-- Progress Header -->
         <div class="px-8 py-6 border-b border-slate-100 bg-white">
             <div class="flex justify-between items-end mb-2">
@@ -486,6 +503,7 @@
             </div>
             
         </form>
+        </div>
     </div>
 
     <!-- JavaScript for Multi-step logic -->
@@ -564,6 +582,14 @@
         // Form Data Persistence with LocalStorage
         const form = document.getElementById('onboarding-form');
         const storageKey = 'osgate_onboarding_data';
+        const completedKey = 'osgate_onboarding_completed';
+
+        function showSuccessState() {
+            document.getElementById('form-wrapper').classList.add('hidden');
+            const successContainer = document.getElementById('success-container');
+            successContainer.classList.remove('hidden');
+            successContainer.classList.add('flex');
+        }
 
         function saveFormData() {
             const formData = new FormData(form);
@@ -644,9 +670,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('¡Cotización generada con éxito!');
                     localStorage.removeItem(storageKey); // Clear saved data on success
-                    window.location.reload(); // Or redirect to a success page
+                    localStorage.setItem(completedKey, 'true'); // Mark as completed
+                    showSuccessState();
                 } else {
                     alert('Error al generar la cotización: ' + (data.error || 'Error desconocido'));
                 }
@@ -663,8 +689,12 @@
         });
 
         // Initialize UI and load saved data
-        loadFormData();
-        updateUI();
+        if (localStorage.getItem(completedKey) === 'true') {
+            showSuccessState();
+        } else {
+            loadFormData();
+            updateUI();
+        }
     </script>
 </body>
 </html>
