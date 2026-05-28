@@ -166,7 +166,7 @@
                 <div class="space-y-8">
                     <!-- Tipo de acceso -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-4">Tipo de acceso principal</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-4">Tipo de acceso deseado</label>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <!-- Option 1 -->
                             <div>
@@ -181,20 +181,8 @@
                                     <span class="text-sm font-medium text-slate-800">Portón con motor</span>
                                 </label>
                             </div>
+
                             <!-- Option 2 -->
-                            <div>
-                                <input type="radio" name="tipo_acceso" id="acceso_sin_motor" class="card-input-element" value="sin_motor">
-                                <label for="acceso_sin_motor" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
-                                    <div class="absolute top-3 right-3 text-slate-300 group-hover:text-teal-600 transition-colors">
-                                        <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
-                                    </div>
-                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-teal-100/50 transition-colors">
-                                        <i class="ph ph-door text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
-                                    </div>
-                                    <span class="text-sm font-medium text-slate-800">Portón sin motor</span>
-                                </label>
-                            </div>
-                            <!-- Option 3 -->
                             <div>
                                 <input type="radio" name="tipo_acceso" id="acceso_plumas" class="card-input-element" value="plumas">
                                 <label for="acceso_plumas" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
@@ -205,6 +193,19 @@
                                         <i class="ph ph-boom-tube text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
                                     </div>
                                     <span class="text-sm font-medium text-slate-800">Barreras / Plumas</span>
+                                </label>
+                            </div>
+                            <!-- Option 3 -->
+                            <div>
+                                <input type="radio" name="tipo_acceso" id="contizacion_ambas" class="card-input-element" value="sin_motor">
+                                <label for="contizacion_ambas" class="card-input-label block w-full border border-slate-200 rounded-xl p-4 hover:border-teal-600 hover:shadow-md h-full flex flex-col items-center justify-center text-center relative group">
+                                    <div class="absolute top-3 right-3 text-slate-300 group-hover:text-teal-600 transition-colors">
+                                        <i class="ph-fill ph-check-circle text-xl opacity-0 check-icon"></i>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-teal-100/50 transition-colors">
+                                        <i class="ph ph-door text-2xl text-slate-600 group-hover:text-teal-600 transition-colors"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-800">Cotización de Ambas</span>
                                 </label>
                             </div>
                         </div>
