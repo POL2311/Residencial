@@ -7,15 +7,20 @@ header('Content-Type: application/json');
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-try {
-    // Include the main config to get DB connection logic if available,
-    // or set it up directly here based on standard project structure.
-    $dbHost = getenv('DB_HOST') ?: 'localhost';
-    $dbName = getenv('DB_NAME') ?: 'miinvit3_residencial_app';
-    $dbUser = getenv('DB_USER') ?: 'root';
-    $dbPass = getenv('DB_PASS') ?: '';
+// Include the main config to load .env variables and set up constants
+require_once __DIR__ . '/../../config/config.php';
 
-    $conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+try {
+    // Use the variables initialized in config/config.php that pull from the environment
+    global $DB_HOST, $DB_NAME, $DB_USER, $DB_PASS;
+
+    // In case the variables aren't globally available here due to scope, fetch from getenv/$_ENV
+    $host = getenv('DB_HOST') ?: (isset($_ENV['DB_HOST']) ? $_ENV['DB_HOST'] : (isset($DB_HOST) ? $DB_HOST : 'localhost'));
+    $name = getenv('DB_NAME') ?: (isset($_ENV['DB_NAME']) ? $_ENV['DB_NAME'] : (isset($DB_NAME) ? $DB_NAME : 'miinvit3_residencial_app'));
+    $user = getenv('DB_USER') ?: (isset($_ENV['DB_USER']) ? $_ENV['DB_USER'] : (isset($DB_USER) ? $DB_USER : 'root'));
+    $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : (isset($_ENV['DB_PASS']) ? $_ENV['DB_PASS'] : (isset($DB_PASS) ? $DB_PASS : ''));
+
+    $conn = new mysqli($host, $user, $pass, $name);
 
     if ($conn->connect_error) {
         throw new Exception('Database connection failed: ' . $conn->connect_error);
