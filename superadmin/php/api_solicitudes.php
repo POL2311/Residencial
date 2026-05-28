@@ -29,6 +29,32 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method === 'POST') {
+        // Check if it's an update action
+        $action = $_POST['action'] ?? '';
+        if ($action === 'update_status') {
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+            $new_estatus = $_POST['estatus'] ?? '';
+
+            if ($id <= 0 || empty($new_estatus)) {
+                throw new Exception('ID y nuevo estatus son requeridos.');
+            }
+
+            $stmt = $conn->prepare("UPDATE solicitudes_cotizacion SET estatus = ? WHERE id = ?");
+            if (!$stmt) {
+                throw new Exception('Prepare failed: ' . $conn->error);
+            }
+
+            $stmt->bind_param("si", $new_estatus, $id);
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true]);
+            } else {
+                throw new Exception('Execute failed: ' . $stmt->error);
+            }
+            $stmt->close();
+            $conn->close();
+            exit;
+        }
+
         // Insert new request
         $nombre_residencial = $_POST['nombre_residencial'] ?? '';
         $nombre_solicitante = $_POST['nombre_solicitante'] ?? '';
