@@ -471,7 +471,7 @@
         autos.slice(0, 6).forEach((a) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'inline-flex h-10 min-w-[2.5rem] items-center justify-center rounded-full border border-slate-200 bg-white/80 px-2 text-[#436C81] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20';
+            btn.className = 'inline-flex h-11 min-w-[2.75rem] items-center justify-center rounded-full border border-slate-200 bg-white/80 px-2 text-[#436C81] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5D73]/20';
             btn.title = a.placas || 'Auto';
             btn.innerHTML = `
               <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none">
@@ -489,23 +489,25 @@
         els.modalBody.innerHTML = `
           <div class="rounded-xl bg-slate-50 px-3 py-2">
             <div class="text-xs text-slate-500">Placas</div>
-            <div class="font-semibold text-slate-900">${escapeHtml(auto.placas || '—')}</div>
+            <div class="break-words font-semibold text-slate-900">${escapeHtml(auto.placas || '—')}</div>
           </div>
           <div class="rounded-xl bg-slate-50 px-3 py-2">
             <div class="text-xs text-slate-500">Modelo</div>
-            <div class="text-slate-900">${escapeHtml(auto.modelo || '—')}</div>
+            <div class="break-words text-slate-900">${escapeHtml(auto.modelo || '—')}</div>
           </div>
           <div class="rounded-xl bg-slate-50 px-3 py-2">
             <div class="text-xs text-slate-500">Color</div>
-            <div class="text-slate-900">${escapeHtml(auto.color || '—')}</div>
+            <div class="break-words text-slate-900">${escapeHtml(auto.color || '—')}</div>
           </div>
         `;
         showShellHeader();
         els.modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeCarModal() {
         els.modal?.classList.add('hidden');
+        document.body.style.overflow = '';
     }
 
     window.ResidenteDashboard = {

@@ -40,6 +40,7 @@
     function closeModal() {
         els.modal.classList.add('hidden');
         els.form.reset();
+        document.body.style.overflow = '';
     }
 
     function badge(estado) {
@@ -73,36 +74,39 @@
         const items = json.data?.items || [];
         els.list.innerHTML = items.length ? items.map((item) => `
           <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div class="flex items-start justify-between gap-3">
-              <div>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
                 <div class="text-xs uppercase tracking-wide text-slate-400">Título</div>
-                <div class="mt-1 text-sm font-semibold text-slate-800">${escapeHtml(item.titulo)}</div>
+                <div class="mt-1 break-words text-sm font-semibold text-slate-800">${escapeHtml(item.titulo)}</div>
               </div>
-              <div class="flex flex-wrap gap-2 justify-end">
-                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${priorityBadge(item.prioridad)}">Prioridad: ${escapeHtml(item.prioridad)}</span>
-                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${badge(item.estado)}">Estado: ${escapeHtml(item.estado)}</span>
+              <div class="flex max-w-full flex-wrap gap-2 sm:shrink-0 sm:justify-end">
+                <span class="inline-flex max-w-full rounded-full px-2.5 py-1 text-[11px] break-words ${priorityBadge(item.prioridad)}">Prioridad: ${escapeHtml(item.prioridad)}</span>
+                <span class="inline-flex max-w-full rounded-full px-2.5 py-1 text-[11px] break-words ${badge(item.estado)}">Estado: ${escapeHtml(item.estado)}</span>
               </div>
             </div>
             <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-600">
-              <div>
+              <div class="break-words">
                 <span class="text-slate-500">Tipo:</span>
                 <span class="font-medium text-slate-700">${escapeHtml(item.tipo || '—')}</span>
               </div>
-              <div>
+              <div class="break-words">
                 <span class="text-slate-500">Fecha:</span>
                 <span class="font-medium text-slate-700">${escapeHtml(item.created_at || '—')}</span>
               </div>
-              <div>
+              <div class="break-words">
                 <span class="text-slate-500">Descripción:</span>
                 <span class="whitespace-pre-wrap font-medium text-slate-700">${escapeHtml(item.descripcion || 'Sin descripción')}</span>
               </div>
-              ${item.guardia_nombre ? `<div><span class="text-slate-500">Atendida por:</span> <span class="font-medium text-slate-700">${escapeHtml(item.guardia_nombre)}</span></div>` : ''}
+              ${item.guardia_nombre ? `<div class="break-words"><span class="text-slate-500">Atendida por:</span> <span class="font-medium text-slate-700">${escapeHtml(item.guardia_nombre)}</span></div>` : ''}
             </div>
           </article>
         `).join('') : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Aun no has reportado incidencias.</div>`;
     }
 
-    els.btnNew?.addEventListener('click', () => els.modal.classList.remove('hidden'));
+    els.btnNew?.addEventListener('click', () => {
+        els.modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    });
     els.btnClose?.addEventListener('click', closeModal);
     els.btnCancel?.addEventListener('click', closeModal);
     els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });

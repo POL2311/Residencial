@@ -9,7 +9,7 @@
             class="w-full px-4 py-4 flex items-center justify-between gap-3 hover:bg-slate-50"
             data-acc-btn="cuenta"
             aria-expanded="false">
-      <div class="text-left">
+      <div class="min-w-0 text-left">
         <div class="text-base font-semibold text-slate-800">Mi cuenta</div>
         <div class="text-xs text-slate-500">Nombre, dirección y contacto.</div>
       </div>
@@ -33,7 +33,7 @@
                 data-open="update_name">
           <div class="text-left min-w-0">
             <div class="text-xs text-slate-500">Nombre</div>
-            <div id="v_name" class="text-sm font-semibold text-slate-800 truncate">—</div>
+            <div id="v_name" class="min-w-0 break-words text-sm font-semibold text-slate-800">—</div>
           </div>
           <div class="shrink-0 flex items-center gap-2">
             <span class="text-xs text-[#2E5D73] font-medium">Actualizar</span>
@@ -46,7 +46,7 @@
         <!-- Dirección (solo visual) -->
         <div class="px-4 py-4">
           <div class="text-xs text-slate-500">Dirección</div>
-          <div id="v_direccion" class="text-sm font-semibold text-slate-800 truncate">—</div>
+          <div id="v_direccion" class="min-w-0 break-words text-sm font-semibold text-slate-800">—</div>
           <div class="text-[11px] text-slate-400 mt-0.5">Solo lectura</div>
         </div>
 
@@ -56,7 +56,7 @@
                 data-open="update_phone">
           <div class="text-left min-w-0">
             <div class="text-xs text-slate-500">Teléfono</div>
-            <div id="v_telefono" class="text-sm font-semibold text-slate-800 truncate">—</div>
+            <div id="v_telefono" class="min-w-0 break-words text-sm font-semibold text-slate-800">—</div>
           </div>
           <div class="shrink-0 flex items-center gap-2">
             <span class="text-xs text-[#2E5D73] font-medium">Actualizar</span>
@@ -72,7 +72,7 @@
                 data-open="update_email">
           <div class="text-left min-w-0">
             <div class="text-xs text-slate-500">Correo electrónico</div>
-            <div id="v_email" class="text-sm font-semibold text-slate-800 break-words">—</div>
+            <div id="v_email" class="min-w-0 break-words text-sm font-semibold text-slate-800">—</div>
           </div>
           <div class="shrink-0 flex items-center gap-2">
             <span class="text-xs text-[#2E5D73] font-medium">Actualizar</span>
@@ -92,7 +92,7 @@
             class="w-full px-4 py-4 flex items-center justify-between gap-3 hover:bg-slate-50"
             data-acc-btn="seguridad"
             aria-expanded="false">
-      <div class="text-left">
+      <div class="min-w-0 text-left">
         <div class="text-base font-semibold text-slate-800">Seguridad</div>
         <div class="text-xs text-slate-500">Actualiza tu contraseña.</div>
       </div>
@@ -133,7 +133,7 @@
             class="w-full px-4 py-4 flex items-center justify-between gap-3 hover:bg-slate-50"
             data-acc-btn="contactos"
             aria-expanded="false">
-      <div class="text-left">
+      <div class="min-w-0 text-left">
         <div class="text-base font-semibold text-slate-800">Contactos de emergencia</div>
         <div class="text-xs text-slate-500">Agrega números para casos urgentes.</div>
       </div>
@@ -153,7 +153,7 @@
 
       <div class="flex items-center justify-start sm:justify-end">
           <button id="btnAddCE" type="button"
-                  class="text-xs px-3 py-1.5 rounded-full bg-[#2E5D73] text-white hover:opacity-95">
+                  class="min-h-11 rounded-full bg-[#2E5D73] px-4 py-2 text-xs text-white hover:opacity-95">
             Agregar
           </button>
         </div>
@@ -183,7 +183,7 @@
             class="w-full px-4 py-4 flex items-center justify-between gap-3 hover:bg-slate-50"
             data-acc-btn="autos"
             aria-expanded="false">
-      <div class="text-left">
+      <div class="min-w-0 text-left">
         <div class="text-base font-semibold text-slate-800">Automóviles</div>
         <div class="text-xs text-slate-500">Agrega, edita o elimina tus autos.</div>
       </div>
@@ -203,7 +203,7 @@
 
         <div class="flex items-center justify-end">
           <button id="btnAddAuto" type="button"
-                  class="text-xs px-3 py-1.5 rounded-full bg-[#2E5D73] text-white hover:opacity-95">
+                  class="min-h-11 rounded-full bg-[#2E5D73] px-4 py-2 text-xs text-white hover:opacity-95">
             Agregar
           </button>
         </div>
@@ -222,31 +222,33 @@
 
   <!-- MODAL (ÚNICO) -->
   <div id="modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="min-h-full flex items-end md:items-center justify-center p-0 md:p-4">
-      <div class="flex max-h-[92vh] w-full md:max-w-lg flex-col bg-white md:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-          <div id="modalTitle" class="text-sm font-semibold text-slate-800">—</div>
+    <div class="box-border flex h-full items-end justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 sm:items-center sm:p-4">
+      <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-lg">
+        <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+          <div class="min-w-0">
+            <div id="modalTitle" class="text-base font-semibold leading-tight text-slate-900">—</div>
+            <p class="mt-1 text-xs leading-5 text-slate-500">Actualiza solo lo necesario y guarda los cambios.</p>
+          </div>
           <button id="btnCloseModal" type="button"
-                  class="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
+                  aria-label="Cerrar formulario"
+                  class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200">✕</button>
         </div>
 
         <form id="modalForm" class="flex min-h-0 flex-1 flex-col">
           <input type="hidden" id="modalAction" name="action" value="">
-          <div id="modalBody" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+          <div id="modalBody" class="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3"></div>
 
-          <div class="border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             <button id="btnCancelModal" type="button"
-                    class="text-sm px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50">
+                    class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
               Cancelar
             </button>
             <button id="btnSaveModal" type="submit"
-                    class="text-sm px-4 py-2 rounded-xl bg-[#2E5D73] text-white hover:opacity-95">
+                    class="min-h-11 flex-1 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">
               Guardar
             </button>
           </div>
         </form>
-
-        <div class="h-2 md:hidden"></div>
       </div>
     </div>
   </div>

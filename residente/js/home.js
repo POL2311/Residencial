@@ -159,7 +159,8 @@
 
             const dot = document.createElement('button');
             dot.type = 'button';
-            dot.className = 'h-2.5 w-2.5 rounded-full ' + (i === 0 ? 'bg-slate-700' : 'bg-slate-300');
+            dot.className = 'flex h-11 w-11 items-center justify-center rounded-full';
+            dot.innerHTML = `<span class="h-2.5 w-2.5 rounded-full ${i === 0 ? 'bg-slate-700' : 'bg-slate-300'}"></span>`;
             dot.dataset.slide = String(i);
             dot.addEventListener('click', () => {
                 state.currentSlide = i;
@@ -178,7 +179,8 @@
 
         const dots = Array.from(els.comDots.querySelectorAll('[data-slide]'));
         dots.forEach((d, i) => {
-            d.className = 'h-2.5 w-2.5 rounded-full ' + (i === state.currentSlide ? 'bg-slate-700' : 'bg-slate-300');
+            d.className = 'flex h-11 w-11 items-center justify-center rounded-full';
+            d.innerHTML = `<span class="h-2.5 w-2.5 rounded-full ${i === state.currentSlide ? 'bg-slate-700' : 'bg-slate-300'}"></span>`;
         });
     }
 
@@ -298,8 +300,8 @@
         if (!els.tipsModalBody) return;
         els.tipsModalBody.innerHTML = state.tips.map((item) => `
             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.title || '')}</div>
-              <p class="mt-2 text-sm text-slate-600">${escapeHtml(item.text || '')}</p>
+              <div class="break-words text-sm font-semibold text-slate-800">${escapeHtml(item.title || '')}</div>
+              <p class="mt-2 break-words text-sm text-slate-600">${escapeHtml(item.text || '')}</p>
             </div>
         `).join('');
     }
@@ -318,7 +320,7 @@
         }
 
         els.services.innerHTML = state.services.map((item) => `
-            <article class="min-w-[290px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <article class="min-w-[82vw] max-w-[20rem] flex-none overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm sm:min-w-[290px]">
               <div class="h-28 ${item.imagen_url ? 'bg-slate-100' : 'bg-gradient-to-br from-[#DCE9EE] via-[#EEF4F6] to-[#B9CCD5]'}">
                 ${item.imagen_url ? `<img src="${escapeHtml(resolvePublicUrl(item.imagen_url))}" alt="${escapeHtml(item.nombre || 'Servicio')}" class="h-full w-full object-cover" loading="lazy" />` : ''}
               </div>
@@ -326,17 +328,17 @@
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <div class="text-xs uppercase tracking-wide text-slate-400">${escapeHtml(item.categoria || 'servicio')}</div>
-                    <div class="mt-2 text-lg font-semibold text-slate-800">${escapeHtml(item.nombre || 'Servicio')}</div>
+                    <div class="mt-2 break-words text-lg font-semibold text-slate-800">${escapeHtml(item.nombre || 'Servicio')}</div>
                   </div>
                   <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${item.origen === 'global' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
                     ${item.origen === 'global' ? 'Global' : 'Residencial'}
                   </span>
                 </div>
-                <p class="mt-3 text-sm leading-6 text-slate-600">${escapeHtml(item.descripcion || '')}</p>
+                <p class="mt-3 break-words text-sm leading-6 text-slate-600">${escapeHtml(item.descripcion || '')}</p>
                 <div class="mt-4 flex flex-wrap gap-2">
-                  ${item.telefono ? `<a href="tel:${escapeHtml(item.telefono)}" class="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 hover:bg-slate-50">Llamar</a>` : ''}
-                  ${item.whatsapp ? `<a href="https://wa.me/52${escapeHtml(String(item.whatsapp).replace(/\D+/g, ''))}" target="_blank" rel="noreferrer" class="rounded-full bg-[#2E5D73] px-3 py-2 text-xs text-white hover:opacity-95">WhatsApp</a>` : ''}
-                  ${item.link_url ? `<a href="${escapeHtml(item.link_url)}" target="_blank" rel="noreferrer" class="rounded-full bg-sky-50 px-3 py-2 text-xs text-sky-700 hover:bg-sky-100">Ver más</a>` : ''}
+                  ${item.telefono ? `<a href="tel:${escapeHtml(item.telefono)}" class="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs text-slate-700 hover:bg-slate-50">Llamar</a>` : ''}
+                  ${item.whatsapp ? `<a href="https://wa.me/52${escapeHtml(String(item.whatsapp).replace(/\D+/g, ''))}" target="_blank" rel="noreferrer" class="inline-flex min-h-11 items-center rounded-full bg-[#2E5D73] px-4 py-2 text-xs text-white hover:opacity-95">WhatsApp</a>` : ''}
+                  ${item.link_url ? `<a href="${escapeHtml(item.link_url)}" target="_blank" rel="noreferrer" class="inline-flex min-h-11 items-center rounded-full bg-sky-50 px-4 py-2 text-xs text-sky-700 hover:bg-sky-100">Ver más</a>` : ''}
                 </div>
               </div>
             </article>

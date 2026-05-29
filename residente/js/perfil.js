@@ -48,6 +48,10 @@
         contactos: [],
         autos: [],
     };
+    const FORM_CONTROL = 'min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15';
+    const SOFT_CARD = 'rounded-2xl border border-slate-200 bg-slate-50/80 p-3';
+    const PRIMARY_ACTION = 'min-h-11 flex-1 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95';
+    const DANGER_ACTION = 'min-h-11 flex-1 rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95';
 
     function showAlert(type, msg) {
         if (!els.alert) return;
@@ -74,17 +78,17 @@
         els.modalBody.innerHTML = bodyHtml;
         els.btnSaveModal.textContent = saveText;
 
-        els.btnSaveModal.className = danger
-            ? 'text-sm px-4 py-2 rounded-xl bg-rose-600 text-white hover:opacity-95'
-            : 'text-sm px-4 py-2 rounded-xl bg-[#2E5D73] text-white hover:opacity-95';
+        els.btnSaveModal.className = danger ? DANGER_ACTION : PRIMARY_ACTION;
 
         els.modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {
         els.modal.classList.add('hidden');
         els.modalBody.innerHTML = '';
         els.modalAction.value = '';
+        document.body.style.overflow = '';
     }
 
     function rotateIcon(key, expanded) {
@@ -179,21 +183,21 @@
 
         items.forEach(c => {
             const div = document.createElement('div');
-            div.className = 'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-3';
+            div.className = 'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between';
             div.innerHTML = `
         <div class="min-w-0">
-          <div class="text-sm font-semibold text-slate-800 truncate">${escapeHtml(c.nombre || 'Contacto')}</div>
-          <div class="text-xs text-slate-500">
+          <div class="break-words text-sm font-semibold text-slate-800">${escapeHtml(c.nombre || 'Contacto')}</div>
+          <div class="break-words text-xs text-slate-500">
             ${escapeHtml(c.telefono || '')}${c.relacion ? ' · ' + escapeHtml(c.relacion) : ''}
           </div>
         </div>
-        <div class="shrink-0 flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 sm:shrink-0">
           <button type="button"
-            class="text-xs px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+            class="min-h-11 text-xs px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
             data-ce-edit="${c.id}">Actualizar</button>
 
           <button type="button"
-            class="h-9 w-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center justify-center"
+            class="h-11 w-11 rounded-full bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center justify-center"
             title="Eliminar"
             data-ce-del="${c.id}">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -220,18 +224,23 @@
             <div>
               <label class="block text-xs text-slate-600 mb-1">Nombre</label>
               <input name="ce_nombre" value="${escapeHtml(c.nombre || '')}"
-                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+                class="${FORM_CONTROL}" required>
             </div>
             <div>
               <label class="block text-xs text-slate-600 mb-1">Teléfono</label>
               <input name="ce_telefono" value="${escapeHtml(c.telefono || '')}"
-                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+                class="${FORM_CONTROL}" required>
             </div>
-            <div>
-              <label class="block text-xs text-slate-600 mb-1">Relación (opcional)</label>
-              <input name="ce_relacion" value="${escapeHtml(c.relacion || '')}"
-                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
-            </div>
+            <details class="${SOFT_CARD}">
+              <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-700">
+                <span>Detalles opcionales</span><span class="text-slate-400">⌄</span>
+              </summary>
+              <div class="mt-3">
+                <label class="block text-xs text-slate-600 mb-1">Relación</label>
+                <input name="ce_relacion" value="${escapeHtml(c.relacion || '')}"
+                  class="${FORM_CONTROL}">
+              </div>
+            </details>
           `
                 );
             });
@@ -271,22 +280,22 @@
 
         items.forEach(a => {
             const div = document.createElement('div');
-            div.className = 'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-3';
+            div.className = 'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between';
             div.innerHTML = `
         <div class="min-w-0">
-          <div class="text-sm font-semibold text-slate-800 truncate">${escapeHtml(a.placas || '—')}</div>
-          <div class="text-xs text-slate-500">
+          <div class="break-words text-sm font-semibold text-slate-800">${escapeHtml(a.placas || '—')}</div>
+          <div class="break-words text-xs text-slate-500">
             ${escapeHtml(a.modelo || '—')} · ${escapeHtml(a.color || '—')}
           </div>
         </div>
 
-        <div class="shrink-0 flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 sm:shrink-0">
           <button type="button"
-            class="text-xs px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+            class="min-h-11 text-xs px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
             data-auto-edit="${a.id}">Actualizar</button>
 
           <button type="button"
-            class="h-9 w-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center justify-center"
+            class="h-11 w-11 rounded-full bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 flex items-center justify-center"
             title="Eliminar"
             data-auto-del="${a.id}">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -313,18 +322,25 @@
             <div>
               <label class="block text-xs text-slate-600 mb-1">Placas *</label>
               <input name="placas" value="${escapeHtml(a.placas || '')}"
-                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+                class="${FORM_CONTROL}" required>
             </div>
-            <div>
-              <label class="block text-xs text-slate-600 mb-1">Modelo</label>
-              <input name="modelo" value="${escapeHtml(a.modelo || '')}"
-                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-600 mb-1">Color</label>
-              <input name="color" value="${escapeHtml(a.color || '')}"
-                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
-            </div>
+            <details class="${SOFT_CARD}">
+              <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-700">
+                <span>Detalles opcionales</span><span class="text-slate-400">⌄</span>
+              </summary>
+              <div class="mt-3 space-y-3">
+                <div>
+                  <label class="block text-xs text-slate-600 mb-1">Modelo</label>
+                  <input name="modelo" value="${escapeHtml(a.modelo || '')}"
+                    class="${FORM_CONTROL}">
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-600 mb-1">Color</label>
+                  <input name="color" value="${escapeHtml(a.color || '')}"
+                    class="${FORM_CONTROL}">
+                </div>
+              </div>
+            </details>
           `
                 );
             });
@@ -380,7 +396,7 @@
           <div>
             <label class="block text-xs text-slate-600 mb-1">Nombre</label>
             <input name="name" value="${escapeHtml(state.perfil?.user?.name || '')}"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+              class="${FORM_CONTROL}" required>
           </div>
         `);
             }
@@ -390,12 +406,12 @@
           <div>
             <label class="block text-xs text-slate-600 mb-1">Teléfono</label>
             <input name="telefono" value="${escapeHtml(state.perfil?.user?.telefono || '')}"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+              class="${FORM_CONTROL}" required>
           </div>
           <div>
             <label class="block text-xs text-slate-600 mb-1">Contraseña actual</label>
             <input type="password" name="current_password"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+              class="${FORM_CONTROL}" required>
           </div>
         `);
             }
@@ -405,12 +421,12 @@
           <div>
             <label class="block text-xs text-slate-600 mb-1">Correo</label>
             <input type="email" name="email" value="${escapeHtml(state.perfil?.user?.email || '')}"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+              class="${FORM_CONTROL}" required>
           </div>
           <div>
             <label class="block text-xs text-slate-600 mb-1">Contraseña actual</label>
             <input type="password" name="current_password"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+              class="${FORM_CONTROL}" required>
           </div>
         `);
             }
@@ -420,17 +436,17 @@
           <div>
             <label class="block text-xs text-slate-600 mb-1">Contraseña actual</label>
             <input type="password" name="current_password"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+              class="${FORM_CONTROL}" required>
           </div>
           <div>
             <label class="block text-xs text-slate-600 mb-1">Nueva contraseña</label>
             <input type="password" name="new_password"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+              class="${FORM_CONTROL}" required>
           </div>
           <div>
             <label class="block text-xs text-slate-600 mb-1">Confirmar nueva contraseña</label>
             <input type="password" name="new_password_confirm"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+              class="${FORM_CONTROL}" required>
           </div>
         `);
             }
@@ -442,18 +458,23 @@
       <div>
         <label class="block text-xs text-slate-600 mb-1">Nombre</label>
         <input name="ce_nombre"
-          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+          class="${FORM_CONTROL}" required>
       </div>
       <div>
         <label class="block text-xs text-slate-600 mb-1">Teléfono</label>
         <input name="ce_telefono"
-          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+          class="${FORM_CONTROL}" required>
       </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Relación (opcional)</label>
-        <input name="ce_relacion"
-          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
-      </div>
+      <details class="${SOFT_CARD}">
+        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-700">
+          <span>Detalles opcionales</span><span class="text-slate-400">⌄</span>
+        </summary>
+        <div class="mt-3">
+          <label class="block text-xs text-slate-600 mb-1">Relación</label>
+          <input name="ce_relacion"
+            class="${FORM_CONTROL}">
+        </div>
+      </details>
     `);
     });
 
@@ -462,18 +483,25 @@
       <div>
         <label class="block text-xs text-slate-600 mb-1">Placas *</label>
         <input name="placas"
-          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800" required>
+          class="${FORM_CONTROL}" required>
       </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Modelo</label>
-        <input name="modelo"
-          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Color</label>
-        <input name="color"
-          class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
-      </div>
+      <details class="${SOFT_CARD}">
+        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-700">
+          <span>Detalles opcionales</span><span class="text-slate-400">⌄</span>
+        </summary>
+        <div class="mt-3 space-y-3">
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Modelo</label>
+            <input name="modelo"
+              class="${FORM_CONTROL}">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">Color</label>
+            <input name="color"
+              class="${FORM_CONTROL}">
+          </div>
+        </div>
+      </details>
     `);
     });
 

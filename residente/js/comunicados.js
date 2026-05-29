@@ -66,16 +66,19 @@
 
         modal = document.createElement('div');
         modal.id = 'residentComunicadoImageModal';
-        modal.className = 'hidden fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm';
+        modal.className = 'hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm';
         modal.innerHTML = `
-          <div class="min-h-full flex items-center justify-center">
-            <div class="w-full max-w-4xl rounded-3xl bg-white shadow-2xl overflow-hidden">
-              <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                <div id="residentComunicadoImageTitle" class="text-sm font-semibold text-slate-800">Imagen adjunta</div>
-                <button type="button" id="residentComunicadoImageClose" class="h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
+          <div class="box-border flex h-full items-end justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 sm:items-center sm:p-4">
+            <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-2xl">
+              <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+                <div class="min-w-0">
+                  <div id="residentComunicadoImageTitle" class="text-base font-semibold leading-tight text-slate-900">Imagen adjunta</div>
+                  <p class="mt-1 text-xs leading-5 text-slate-500">Vista previa del comunicado.</p>
+                </div>
+                <button type="button" id="residentComunicadoImageClose" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200" aria-label="Cerrar imagen">×</button>
               </div>
-              <div class="bg-slate-950/95">
-                <img id="residentComunicadoImagePreview" src="" alt="Imagen adjunta" class="h-[70vh] w-full object-contain" />
+              <div class="flex-1 overflow-y-auto overscroll-contain bg-slate-950/95 p-3">
+                <img id="residentComunicadoImagePreview" src="" alt="Imagen adjunta" class="mx-auto max-h-[min(62dvh,34rem)] w-full rounded-2xl object-contain" />
               </div>
             </div>
           </div>
@@ -126,15 +129,15 @@
           <article class="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
             <div class="flex flex-col gap-2 xl:grid xl:grid-cols-[1.3fr_0.75fr_0.8fr_1.6fr_auto] xl:items-center xl:gap-4">
               <div class="min-w-0">
-                <div class="truncate text-base font-semibold text-slate-800">${escapeHtml(item.titulo || 'Comunicado')}</div>
+                <div class="break-words text-base font-semibold text-slate-800">${escapeHtml(item.titulo || 'Comunicado')}</div>
               </div>
-              <div class="text-sm text-slate-500">${escapeHtml(item.tipo || 'general')}</div>
-              <div class="text-sm text-slate-500">${escapeHtml(item.fecha_publicacion || '—')}</div>
-              <div class="text-sm text-slate-600">${escapeHtml(extractText(item.mensaje, 110))}</div>
+              <div class="min-w-0 break-words text-sm text-slate-500">${escapeHtml(item.tipo || 'general')}</div>
+              <div class="min-w-0 break-words text-sm text-slate-500">${escapeHtml(item.fecha_publicacion || '—')}</div>
+              <div class="min-w-0 break-words text-sm text-slate-600">${escapeHtml(extractText(item.mensaje, 110))}</div>
               <div class="flex items-center gap-2 xl:justify-end">
                 <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${badge(item.prioridad)}">${escapeHtml(item.prioridad || 'baja')}</span>
                 ${item.imagen_url ? `
-                  <button type="button" class="js-open-comunicado-image rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" data-index="${index}">
+                  <button type="button" class="js-open-comunicado-image min-h-11 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50" data-index="${index}">
                     Ver imagen adjunta
                   </button>
                 ` : ''}

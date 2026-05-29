@@ -69,15 +69,18 @@
 
         modal = document.createElement('div');
         modal.id = 'residentServicioDetailModal';
-        modal.className = 'hidden fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm';
+        modal.className = 'hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm';
         modal.innerHTML = `
-          <div class="min-h-full flex items-center justify-center">
-            <div class="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
-              <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                <div id="residentServicioModalTitle" class="text-sm font-semibold text-slate-800">Detalle del servicio</div>
-                <button type="button" id="residentServicioModalClose" class="h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
+          <div class="box-border flex h-full items-end justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 sm:items-center sm:p-4">
+            <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-2xl">
+              <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+                <div class="min-w-0">
+                  <div id="residentServicioModalTitle" class="text-base font-semibold leading-tight text-slate-900">Detalle del servicio</div>
+                  <p class="mt-1 text-xs leading-5 text-slate-500">Información y formas de contacto disponibles.</p>
+                </div>
+                <button type="button" id="residentServicioModalClose" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200" aria-label="Cerrar detalle">×</button>
               </div>
-              <div id="residentServicioModalBody" class="flex-1 overflow-y-auto"></div>
+              <div id="residentServicioModalBody" class="flex-1 overflow-y-auto overscroll-contain px-4 py-3"></div>
             </div>
           </div>
         `;
@@ -106,25 +109,25 @@
             const imageUrl = resolvePublicUrl(item?.imagen_url || '');
             const waDigits = String(item?.whatsapp || '').replace(/\D+/g, '');
             body.innerHTML = `
-              <article class="overflow-hidden">
-                <div class="h-56 ${imageUrl ? 'bg-slate-100' : 'bg-gradient-to-br from-[#DCE9EE] via-[#EEF4F6] to-[#B9CCD5]'}">
+              <article class="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+                <div class="h-48 overflow-hidden rounded-t-2xl ${imageUrl ? 'bg-slate-100' : 'bg-gradient-to-br from-[#DCE9EE] via-[#EEF4F6] to-[#B9CCD5]'} sm:h-56">
                   ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(item?.nombre || 'Servicio')}" class="h-full w-full object-cover" loading="lazy" />` : ''}
                 </div>
-                <div class="space-y-4 p-5">
+                <div class="space-y-4 p-4 sm:p-5">
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${item?.origen === 'global' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
                       ${item?.origen === 'global' ? 'Global' : 'Residencial'}
                     </span>
                     ${item?.categoria ? `<span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600">${escapeHtml(item.categoria)}</span>` : ''}
                   </div>
-                  <div>
-                    <div class="text-2xl font-semibold text-slate-800">${escapeHtml(item?.nombre || 'Servicio')}</div>
-                    <p class="mt-3 text-sm leading-6 text-slate-600">${escapeHtml(item?.descripcion || 'Sin descripción disponible.')}</p>
+                  <div class="min-w-0">
+                    <div class="break-words text-2xl font-semibold text-slate-800">${escapeHtml(item?.nombre || 'Servicio')}</div>
+                    <p class="mt-3 break-words text-sm leading-6 text-slate-600">${escapeHtml(item?.descripcion || 'Sin descripción disponible.')}</p>
                   </div>
                   <div class="flex flex-wrap gap-2">
-                    ${item?.telefono ? `<a href="tel:${escapeHtml(item.telefono)}" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Llamar</a>` : ''}
-                    ${waDigits ? `<a href="https://wa.me/52${escapeHtml(waDigits)}" target="_blank" rel="noreferrer" class="rounded-full bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">WhatsApp</a>` : ''}
-                    ${item?.perfil_url ? `<a href="${escapeHtml(item.perfil_url)}" target="_blank" rel="noreferrer" class="rounded-full bg-sky-50 px-4 py-2 text-sm text-sky-700 hover:bg-sky-100">Perfil</a>` : ''}
+                    ${item?.telefono ? `<a href="tel:${escapeHtml(item.telefono)}" class="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Llamar</a>` : ''}
+                    ${waDigits ? `<a href="https://wa.me/52${escapeHtml(waDigits)}" target="_blank" rel="noreferrer" class="inline-flex min-h-11 items-center rounded-full bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">WhatsApp</a>` : ''}
+                    ${item?.perfil_url ? `<a href="${escapeHtml(item.perfil_url)}" target="_blank" rel="noreferrer" class="inline-flex min-h-11 items-center rounded-full bg-sky-50 px-4 py-2 text-sm text-sky-700 hover:bg-sky-100">Perfil</a>` : ''}
                   </div>
                 </div>
               </article>
@@ -146,7 +149,7 @@
               <article class="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                 <div class="flex flex-col gap-3 xl:grid xl:grid-cols-[1.1fr_0.8fr_1.5fr_auto] xl:items-center xl:gap-4">
                   <div class="min-w-0">
-                    <div class="truncate text-base font-semibold text-slate-800">${escapeHtml(item.nombre || 'Servicio')}</div>
+                    <div class="break-words text-base font-semibold text-slate-800">${escapeHtml(item.nombre || 'Servicio')}</div>
                     <div class="mt-1 text-xs uppercase tracking-wide text-slate-400">${escapeHtml(item.categoria || 'servicio')}</div>
                   </div>
                   <div class="flex flex-wrap gap-2 text-xs">
@@ -154,12 +157,12 @@
                       ${item.origen === 'global' ? 'Global' : 'Residencial'}
                     </span>
                   </div>
-                  <div class="text-sm text-slate-600">${escapeHtml(shortText(item.descripcion, 110))}</div>
+                  <div class="min-w-0 break-words text-sm text-slate-600">${escapeHtml(shortText(item.descripcion, 110))}</div>
                   <div class="flex flex-wrap items-center gap-2 xl:justify-end">
-                    ${item.telefono ? `<a href="tel:${escapeHtml(item.telefono)}" class="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 hover:bg-slate-50">Llamar</a>` : ''}
-                    ${waDigits ? `<a href="https://wa.me/52${escapeHtml(waDigits)}" target="_blank" rel="noreferrer" class="rounded-full bg-[#2E5D73] px-3 py-2 text-xs text-white hover:opacity-95">WhatsApp</a>` : ''}
-                    ${item.perfil_url ? `<a href="${escapeHtml(item.perfil_url)}" target="_blank" rel="noreferrer" class="rounded-full bg-sky-50 px-3 py-2 text-xs text-sky-700 hover:bg-sky-100">Perfil</a>` : ''}
-                    <button type="button" class="js-open-service-detail rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50" data-index="${index}">
+                    ${item.telefono ? `<a href="tel:${escapeHtml(item.telefono)}" class="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs text-slate-700 hover:bg-slate-50">Llamar</a>` : ''}
+                    ${waDigits ? `<a href="https://wa.me/52${escapeHtml(waDigits)}" target="_blank" rel="noreferrer" class="inline-flex min-h-11 items-center rounded-full bg-[#2E5D73] px-4 py-2 text-xs text-white hover:opacity-95">WhatsApp</a>` : ''}
+                    ${item.perfil_url ? `<a href="${escapeHtml(item.perfil_url)}" target="_blank" rel="noreferrer" class="inline-flex min-h-11 items-center rounded-full bg-sky-50 px-4 py-2 text-xs text-sky-700 hover:bg-sky-100">Perfil</a>` : ''}
+                    <button type="button" class="js-open-service-detail min-h-11 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50" data-index="${index}">
                       Ver más
                     </button>
                   </div>

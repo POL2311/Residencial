@@ -21,6 +21,11 @@
         form: document.getElementById('residentVisitasForm'),
         btnClose: document.getElementById('btnCloseResidentVisitasModal'),
         btnCancel: document.getElementById('btnCancelResidentVisitasModal'),
+        optionalToggle: document.getElementById('btnToggleResidentVisitasOptional'),
+        optionalPanel: document.getElementById('residentVisitasOptional'),
+        optionalIcon: document.getElementById('residentVisitasOptionalIcon'),
+        scheduleHint: document.getElementById('residentVisitasScheduleHint'),
+        durationButtons: root.querySelectorAll('[data-duration-preset]'),
         codeModal: document.getElementById('residentVisitasCodeModal'),
         codeValue: document.getElementById('residentVisitasCodeValue'),
         btnCloseCode: document.getElementById('btnCloseResidentVisitasCodeModal'),
@@ -33,6 +38,7 @@
 
     let items = [];
     let currentCode = '';
+    let isApplyingPreset = false;
 
     function pad2(value) {
         return String(value).padStart(2, '0');
@@ -44,6 +50,115 @@
 
     function formatTimeInput(date) {
         return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+    }
+
+    function parseDateInput(value) {
+        const parts = String(value || '').split('-').map(Number);
+        if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+        return new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
+    }
+
+    function parseTimeParts(value) {
+        const parts = String(value || '').split(':').map(Number);
+        if (parts.length < 2 || parts.some(Number.isNaN)) return null;
+        return { hours: parts[0], minutes: parts[1] };
+    }
+
+    function combineDateTime(dateValue, timeValue) {
+        const date = parseDateInput(dateValue) || new Date();
+        const time = parseTimeParts(timeValue);
+        if (time) date.setHours(time.hours, time.minutes, 0, 0);
+        return date;
+    }
+
+    function addMinutes(date, minutes) {
+        return new Date(date.getTime() + minutes * 60 * 1000);
+    }
+
+    function getScheduleFields() {
+        if (!els.form) return {};
+        return {
+            fechaDesde: els.form.querySelector('[name="fecha_desde"]'),
+            fechaHasta: els.form.querySelector('[name="fecha_hasta"]'),
+            horaDesde: els.form.querySelector('[name="hora_desde"]'),
+            horaHasta: els.form.querySelector('[name="hora_hasta"]'),
+        };
+    }
+
+    function setScheduleFields(start, end) {
+        const fields = getScheduleFields();
+        if (fields.fechaDesde) fields.fechaDesde.value = formatDateInput(start);
+        if (fields.fechaHasta) fields.fechaHasta.value = formatDateInput(end);
+        if (fields.horaDesde) fields.horaDesde.value = formatTimeInput(start);
+        if (fields.horaHasta) fields.horaHasta.value = formatTimeInput(end);
+    }
+
+    function setDurationActive(preset) {
+        els.durationButtons?.forEach((btn) => {
+            const isActive = btn.dataset.durationPreset === preset;
+            btn.setAttribute('aria-pressed', String(isActive));
+            btn.classList.toggle('border-[#4E7287]', isActive);
+            btn.classList.toggle('bg-[#4E7287]', isActive);
+            btn.classList.toggle('text-white', isActive);
+            btn.classList.toggle('border-slate-200', !isActive);
+            btn.classList.toggle('bg-white', !isActive);
+            btn.classList.toggle('text-slate-700', !isActive);
+        });
+    }
+
+    function setScheduleHint(text) {
+        if (els.scheduleHint) els.scheduleHint.textContent = text;
+    }
+
+    function applyDurationPreset(preset) {
+        const fields = getScheduleFields();
+        if (!fields.fechaDesde || !fields.fechaHasta || !fields.horaDesde || !fields.horaHasta) return;
+
+        isApplyingPreset = true;
+        const now = new Date();
+        const currentStart = combineDateTime(fields.fechaDesde.value || formatDateInput(now), fields.horaDesde.value || formatTimeInput(now));
+        let start = currentStart;
+        let end = addMinutes(start, 60);
+        let hint = 'Duración sugerida: 1 hora';
+
+        if (preset === '2h') {
+            end = addMinutes(start, 120);
+            hint = 'Duración sugerida: 2 horas';
+        } else if (preset === 'day') {
+            start = parseDateInput(fields.fechaDesde.value) || now;
+            start.setHours(0, 0, 0, 0);
+            end = new Date(start);
+            end.setHours(23, 59, 0, 0);
+            hint = 'Acceso disponible todo el día';
+        } else if (preset === 'tomorrow') {
+            start = new Date(now);
+            start.setDate(start.getDate() + 1);
+            start.setHours(9, 0, 0, 0);
+            end = addMinutes(start, 60);
+            hint = 'Programado para mañana';
+        }
+
+        setScheduleFields(start, end);
+        setDurationActive(preset);
+        setScheduleHint(hint);
+        isApplyingPreset = false;
+    }
+
+    function setOptionalDetails(open) {
+        if (!els.optionalToggle || !els.optionalPanel) return;
+        els.optionalPanel.classList.toggle('hidden', !open);
+        els.optionalToggle.setAttribute('aria-expanded', String(open));
+        if (els.optionalIcon) els.optionalIcon.textContent = open ? '⌃' : '⌄';
+    }
+
+    function markScheduleAsManual() {
+        if (isApplyingPreset) return;
+        const fields = getScheduleFields();
+        if (fields.fechaDesde && fields.fechaHasta && fields.fechaDesde.value && (!fields.fechaHasta.value || fields.fechaHasta.value < fields.fechaDesde.value)) {
+            fields.fechaHasta.value = fields.fechaDesde.value;
+        }
+        setDurationActive('');
+        setScheduleHint('Horario ajustado manualmente');
     }
 
     function escapeHtml(s) {
@@ -109,6 +224,7 @@
     function closeModal() {
         els.modal.classList.add('hidden');
         els.form.reset();
+        setOptionalDetails(false);
         document.body.style.overflow = '';
     }
 
@@ -118,14 +234,11 @@
             els.form.reset();
             const now = new Date();
             const plusOneHour = new Date(now.getTime() + 60 * 60 * 1000);
-            const fechaDesde = els.form.querySelector('[name="fecha_desde"]');
-            const fechaHasta = els.form.querySelector('[name="fecha_hasta"]');
-            const horaDesde = els.form.querySelector('[name="hora_desde"]');
-            const horaHasta = els.form.querySelector('[name="hora_hasta"]');
-            if (fechaDesde) fechaDesde.value = formatDateInput(now);
-            if (fechaHasta) fechaHasta.value = formatDateInput(plusOneHour);
-            if (horaDesde) horaDesde.value = formatTimeInput(now);
-            if (horaHasta) horaHasta.value = formatTimeInput(plusOneHour);
+            setScheduleFields(now, plusOneHour);
+            const defaultType = els.form.querySelector('[name="tipo"][value="visita"]');
+            if (defaultType) defaultType.checked = true;
+            setOptionalDetails(false);
+            applyDurationPreset('1h');
         }
         els.modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
@@ -155,22 +268,22 @@
     function render() {
         els.list.innerHTML = items.length ? items.map((item) => `
           <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.nombre_visitante || 'Visitante')}</div>
-                <div class="mt-1 text-xs text-slate-500">${escapeHtml(item.tipo || 'visita')} · ${escapeHtml(item.fecha_desde || '')} ${item.hora_desde ? '· ' + escapeHtml(item.hora_desde) : ''}</div>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <div class="break-words text-sm font-semibold text-slate-800">${escapeHtml(item.nombre_visitante || 'Visitante')}</div>
+                <div class="mt-1 break-words text-xs text-slate-500">${escapeHtml(item.tipo || 'visita')} · ${escapeHtml(item.fecha_desde || '')} ${item.hora_desde ? '· ' + escapeHtml(item.hora_desde) : ''}</div>
               </div>
-              <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] ${statusBadge(item.estado)}">${escapeHtml(item.estado || 'pendiente')}</span>
+              <span class="inline-flex max-w-full self-start rounded-full px-2.5 py-1 text-center text-[11px] break-words sm:shrink-0 ${statusBadge(item.estado)}">${escapeHtml(item.estado || 'pendiente')}</span>
             </div>
             <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-600">
-              <div><span class="text-slate-500">Codigo:</span> <span class="font-semibold text-slate-800">${escapeHtml(item.codigo_acceso || '')}</span></div>
-              <div><span class="text-slate-500">Uso unico:</span> <span class="font-semibold text-slate-800">${Number(item.uso_unico || 0) === 1 ? 'Si' : 'No'}</span></div>
-              <div><span class="text-slate-500">Motivo:</span> ${escapeHtml(item.motivo || '—')}</div>
-              <div><span class="text-slate-500">Placa:</span> ${escapeHtml(item.placa_vehiculo || '—')}</div>
+              <div class="break-words"><span class="text-slate-500">Codigo:</span> <span class="font-semibold text-slate-800">${escapeHtml(item.codigo_acceso || '')}</span></div>
+              <div class="break-words"><span class="text-slate-500">Uso unico:</span> <span class="font-semibold text-slate-800">${Number(item.uso_unico || 0) === 1 ? 'Si' : 'No'}</span></div>
+              <div class="break-words"><span class="text-slate-500">Motivo:</span> ${escapeHtml(item.motivo || '—')}</div>
+              <div class="break-words"><span class="text-slate-500">Placa:</span> ${escapeHtml(item.placa_vehiculo || '—')}</div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
-              <button type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700" data-code="${escapeHtml(item.codigo_acceso || '')}">Codigo + QR</button>
-              ${item.estado === 'pendiente' ? `<button type="button" class="rounded-full border border-rose-200 bg-white px-3 py-1.5 text-xs text-rose-700" data-cancel="${item.id}">Cancelar</button>` : ''}
+              <button type="button" class="min-h-11 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs text-slate-700" data-code="${escapeHtml(item.codigo_acceso || '')}">Codigo + QR</button>
+              ${item.estado === 'pendiente' ? `<button type="button" class="min-h-11 rounded-full border border-rose-200 bg-white px-4 py-2 text-xs text-rose-700" data-cancel="${item.id}">Cancelar</button>` : ''}
             </div>
           </article>
         `).join('') : `<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Aun no has registrado visitas.</div>`;
@@ -199,6 +312,15 @@
     els.btnClose?.addEventListener('click', closeModal);
     els.btnCancel?.addEventListener('click', closeModal);
     els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
+    els.optionalToggle?.addEventListener('click', () => {
+        setOptionalDetails(els.optionalToggle.getAttribute('aria-expanded') !== 'true');
+    });
+    els.durationButtons?.forEach((btn) => {
+        btn.addEventListener('click', () => applyDurationPreset(btn.dataset.durationPreset || '1h'));
+    });
+    els.form?.querySelectorAll('[name="fecha_desde"], [name="fecha_hasta"], [name="hora_desde"], [name="hora_hasta"]').forEach((input) => {
+        input.addEventListener('input', markScheduleAsManual);
+    });
     els.btnCloseCode?.addEventListener('click', closeCodeModal);
     els.btnDismissCode?.addEventListener('click', closeCodeModal);
     els.codeModal?.addEventListener('click', (e) => { if (e.target === els.codeModal) closeCodeModal(); });
