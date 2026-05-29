@@ -104,8 +104,8 @@
         <div class="space-y-3">
           <input id="m_name"
             value="${escapeHtml(state.perfil?.user?.name || '')}"
-            class="w-full rounded-xl border px-3 py-2 text-sm">
-          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
+            class="w-full rounded-xl border min-h-11 px-3 text-sm">
+          <button id="m_save" class="w-full min-h-11 rounded-xl bg-[#2E5D73] text-white px-4">
             Guardar
           </button>
           <div id="m_error" class="text-sm text-rose-600"></div>
@@ -133,12 +133,12 @@
           <input id="m_email"
             type="email"
             value="${escapeHtml(state.perfil?.user?.email || '')}"
-            class="w-full rounded-xl border px-3 py-2 text-sm">
+            class="w-full rounded-xl border min-h-11 px-3 text-sm">
           <input id="m_pwd"
             type="password"
             placeholder="Contraseña actual"
-            class="w-full rounded-xl border px-3 py-2 text-sm">
-          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
+            class="w-full rounded-xl border min-h-11 px-3 text-sm">
+          <button id="m_save" class="w-full min-h-11 rounded-xl bg-[#2E5D73] text-white px-4">
             Guardar
           </button>
           <div id="m_error" class="text-sm text-rose-600"></div>
@@ -169,13 +169,13 @@
         <div class="space-y-3">
           <input id="m_phone"
             value="${escapeHtml(state.perfil?.user?.telefono || '')}"
-            class="w-full rounded-xl border px-3 py-2 text-sm"
+            class="w-full rounded-xl border min-h-11 px-3 text-sm"
             placeholder="Teléfono">
           <input id="m_pwd"
             type="password"
             placeholder="Contraseña actual"
-            class="w-full rounded-xl border px-3 py-2 text-sm">
-          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
+            class="w-full rounded-xl border min-h-11 px-3 text-sm">
+          <button id="m_save" class="w-full min-h-11 rounded-xl bg-[#2E5D73] text-white px-4">
             Guardar
           </button>
           <div id="m_error" class="text-sm text-rose-600"></div>
@@ -204,10 +204,10 @@
     function openPasswordModal() {
       openModal('Cambiar contraseña', `
         <div class="space-y-3">
-          <input id="m_cur" type="password" placeholder="Contraseña actual" class="w-full rounded-xl border px-3 py-2 text-sm">
-          <input id="m_new" type="password" placeholder="Nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-sm">
-          <input id="m_new2" type="password" placeholder="Confirmar nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-sm">
-          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
+          <input id="m_cur" type="password" placeholder="Contraseña actual" class="w-full rounded-xl border min-h-11 px-3 text-sm">
+          <input id="m_new" type="password" placeholder="Nueva contraseña" class="w-full rounded-xl border min-h-11 px-3 text-sm">
+          <input id="m_new2" type="password" placeholder="Confirmar nueva contraseña" class="w-full rounded-xl border min-h-11 px-3 text-sm">
+          <button id="m_save" class="w-full min-h-11 rounded-xl bg-[#2E5D73] text-white px-4">
             Guardar
           </button>
           <div id="m_error" class="text-sm text-rose-600"></div>

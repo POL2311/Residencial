@@ -95,13 +95,13 @@
               </div>
               <div class="mt-1 text-sm text-slate-600">Unidad: <span class="font-medium">${escapeHtml(item.unidad_clave || '—')}</span></div>
               <div class="mt-1 text-sm text-slate-500">Residente: ${escapeHtml(item.residente_nombre || item.residente_email || '—')}</div>
-              ${item.notas ? `<div class="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">${escapeHtml(item.notas)}</div>` : ''}
+              ${item.notas ? `<div class="mt-3 rounded-xl bg-slate-50 min-h-11 px-3 text-sm text-slate-600">${escapeHtml(item.notas)}</div>` : ''}
               ${renderEvidencias(item.evidencias || [])}
               <div class="mt-3 text-xs text-slate-400">Prestado: ${escapeHtml(item.prestado_at || '—')}${item.devuelto_at ? ` · Devuelto: ${escapeHtml(item.devuelto_at)}` : ''}</div>
             </div>
             <div class="shrink-0">
               ${item.estado === 'prestado' ? `
-                <button data-action="devuelto" data-id="${escapeHtml(item.id)}" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+                <button data-action="devuelto" data-id="${escapeHtml(item.id)}" class="rounded-xl bg-[#2E5D73] min-h-11 px-4 text-sm font-semibold text-white hover:opacity-95">
                   Marcar devuelto
                 </button>
               ` : ''}
@@ -161,36 +161,36 @@
       if (typeof openModal !== 'function') return;
       openModal('Nuevo préstamo', `
         <form id="herrNewLoanForm" class="space-y-3">
-          <div id="herrNewLoanError" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
+          <div id="herrNewLoanError" class="hidden rounded-xl border border-rose-200 bg-rose-50 min-h-11 px-3 text-sm text-rose-700"></div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Herramienta</label>
-            <select id="herrToolSelect" name="herramienta_id" class="w-full rounded-xl border px-3 py-2 text-sm" required></select>
+            <select id="herrToolSelect" name="herramienta_id" class="w-full rounded-xl border min-h-11 px-3 text-sm" required></select>
           </div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Unidad</label>
-            <select id="herrUnitSelect" name="unidad_id" class="w-full rounded-xl border px-3 py-2 text-sm" required></select>
+            <select id="herrUnitSelect" name="unidad_id" class="w-full rounded-xl border min-h-11 px-3 text-sm" required></select>
           </div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Residente (opcional)</label>
-            <select id="herrResidentSelect" name="residente_id" class="w-full rounded-xl border px-3 py-2 text-sm">
+            <select id="herrResidentSelect" name="residente_id" class="w-full rounded-xl border min-h-11 px-3 text-sm">
               <option value="">—</option>
             </select>
           </div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Notas (opcional)</label>
-            <textarea name="notas" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm" placeholder="Detalle del préstamo…"></textarea>
+            <textarea name="notas" rows="3" class="w-full rounded-xl border min-h-11 px-3 text-sm" placeholder="Detalle del préstamo…"></textarea>
           </div>
           <div>
             <div class="text-xs text-slate-600">Evidencias (opcional, máximo 3)</div>
             <div class="mt-2 grid gap-2 sm:grid-cols-3">
-              <input type="file" name="evidencia_1" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
-              <input type="file" name="evidencia_2" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
-              <input type="file" name="evidencia_3" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
+              <input type="file" name="evidencia_1" accept="image/*" class="w-full rounded-xl border bg-white min-h-11 px-3 text-xs" />
+              <input type="file" name="evidencia_2" accept="image/*" class="w-full rounded-xl border bg-white min-h-11 px-3 text-xs" />
+              <input type="file" name="evidencia_3" accept="image/*" class="w-full rounded-xl border bg-white min-h-11 px-3 text-xs" />
             </div>
           </div>
           <div class="flex justify-end gap-2 pt-2">
-            <button type="button" id="herrNewLoanCancel" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
-            <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Guardar</button>
+            <button type="button" id="herrNewLoanCancel" class="rounded-xl border border-slate-200 bg-white min-h-11 px-4 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="rounded-xl bg-[#2E5D73] min-h-11 px-4 text-sm font-semibold text-white hover:opacity-95">Guardar</button>
           </div>
         </form>
       `);

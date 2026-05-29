@@ -31,7 +31,7 @@
 
     function formRow(label, inputHtml) {
       return `
-        <div class="rounded-xl bg-slate-50 px-3 py-2 border border-slate-200">
+        <div class="rounded-xl bg-slate-50 min-h-11 px-3 border border-slate-200">
           <div class="text-xs text-slate-500">${label}</div>
           <div class="mt-1">${inputHtml}</div>
         </div>
@@ -286,8 +286,8 @@
         <div class="space-y-4">
           <div class="text-sm text-slate-700">${escapeHtml(message)}</div>
           <div class="flex justify-end gap-2">
-            <button type="button" id="confirmCancel" class="border px-4 py-2 rounded-xl">${escapeHtml(cancelText)}</button>
-            <button type="button" id="confirmAccept" class="bg-rose-600 text-white px-4 py-2 rounded-xl">${escapeHtml(acceptText)}</button>
+            <button type="button" id="confirmCancel" class="border min-h-11 px-4 rounded-xl">${escapeHtml(cancelText)}</button>
+            <button type="button" id="confirmAccept" class="bg-rose-600 text-white min-h-11 px-4 rounded-xl">${escapeHtml(acceptText)}</button>
           </div>
         </div>
       `);
@@ -308,13 +308,13 @@
           <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
             <div class="font-semibold text-emerald-700">Propietario creado correctamente</div>
             <div class="text-sm text-slate-600 mt-1">Contraseña temporal:</div>
-            <div class="mt-2 break-all rounded-lg bg-white border px-3 py-2 font-mono text-sm text-slate-800">
+            <div class="mt-2 break-all rounded-lg bg-white border min-h-11 px-3 font-mono text-sm text-slate-800">
               ${escapeHtml(tempPassword || '—')}
             </div>
           </div>
 
           <div class="flex justify-end gap-2">
-            <button type="button" id="btnTempPwdOk" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">
+            <button type="button" id="btnTempPwdOk" class="bg-[#4E7287] text-white min-h-11 px-4 rounded-xl">
               Continuar
             </button>
           </div>
@@ -330,12 +330,12 @@
     function openCreateUnidad(onDone) {
       openModal('Nueva unidad', `
         <form id="frmUnidad" class="space-y-3">
-          <div id="msgU" class="hidden rounded-xl px-3 py-2 text-sm"></div>
+          <div id="msgU" class="hidden rounded-xl min-h-11 px-3 text-sm"></div>
 
-          ${formRow('Clave *', `<input name="clave" class="w-full rounded-xl border px-3 py-2" required />`)}
+          ${formRow('Clave *', `<input name="clave" class="w-full rounded-xl border min-h-11 px-3" required />`)}
 
           ${formRow('Tipo',
-            `<select name="tipo" class="w-full rounded-xl border px-3 py-2">
+            `<select name="tipo" class="w-full rounded-xl border min-h-11 px-3">
               <option value="casa">Casa</option>
               <option value="departamento">Departamento</option>
               <option value="local">Local</option>
@@ -344,8 +344,8 @@
           )}
 
           <div class="flex justify-end gap-2">
-            <button type="button" id="cancelU" class="border px-4 py-2 rounded-xl">Cancelar</button>
-            <button type="submit" id="submitU" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Crear</button>
+            <button type="button" id="cancelU" class="border min-h-11 px-4 rounded-xl">Cancelar</button>
+            <button type="submit" id="submitU" class="bg-[#4E7287] text-white min-h-11 px-4 rounded-xl">Crear</button>
           </div>
         </form>
       `);
@@ -374,16 +374,16 @@
     function openCreateProp(defaultUnidad, onDone) {
       openModal('Nuevo propietario', `
         <form id="frmProp" class="space-y-3">
-          <div id="msgP" class="hidden rounded-xl px-3 py-2 text-sm"></div>
+          <div id="msgP" class="hidden rounded-xl min-h-11 px-3 text-sm"></div>
 
-          ${formRow('Nombre *', `<input name="name" class="w-full rounded-xl border px-3 py-2" required />`)}
-          ${formRow('Email *', `<input name="email" type="email" class="w-full rounded-xl border px-3 py-2" required />`)}
-          ${formRow('Teléfono', `<input name="telefono" class="w-full rounded-xl border px-3 py-2" />`)}
+          ${formRow('Nombre *', `<input name="name" class="w-full rounded-xl border min-h-11 px-3" required />`)}
+          ${formRow('Email *', `<input name="email" type="email" class="w-full rounded-xl border min-h-11 px-3" required />`)}
+          ${formRow('Teléfono', `<input name="telefono" class="w-full rounded-xl border min-h-11 px-3" />`)}
           <input type="hidden" name="unidad_id" value="${escapeHtml(defaultUnidad || '')}" />
 
           <div class="flex justify-end gap-2">
-            <button type="button" id="cancelP" class="border px-4 py-2 rounded-xl">Cancelar</button>
-            <button type="submit" id="submitP" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Crear</button>
+            <button type="button" id="cancelP" class="border min-h-11 px-4 rounded-xl">Cancelar</button>
+            <button type="submit" id="submitP" class="bg-[#4E7287] text-white min-h-11 px-4 rounded-xl">Crear</button>
           </div>
         </form>
       `);
@@ -419,33 +419,33 @@
 
       openModal('Nuevo auto', `
         <form id="frmAuto" class="space-y-3">
-          <div id="msgA" class="hidden rounded-xl px-3 py-2 text-sm"></div>
+          <div id="msgA" class="hidden rounded-xl min-h-11 px-3 text-sm"></div>
 
-          ${formRow('Placas *', `<input name="placas" class="w-full rounded-xl border px-3 py-2" required />`)}
-          ${formRow('Modelo', `<input name="modelo" class="w-full rounded-xl border px-3 py-2" />`)}
-          ${formRow('Color', `<input name="color" class="w-full rounded-xl border px-3 py-2" />`)}
+          ${formRow('Placas *', `<input name="placas" class="w-full rounded-xl border min-h-11 px-3" required />`)}
+          ${formRow('Modelo', `<input name="modelo" class="w-full rounded-xl border min-h-11 px-3" />`)}
+          ${formRow('Color', `<input name="color" class="w-full rounded-xl border min-h-11 px-3" />`)}
 
-          <div class="rounded-xl bg-slate-50 border px-3 py-2">
+          <div class="rounded-xl bg-slate-50 border min-h-11 px-3">
             <div class="flex justify-between text-xs text-slate-500">
               <span>Unidad</span>
               <button type="button" id="addUnidad" class="text-[#4E7287]">+ Nueva</button>
             </div>
-            <select name="unidad_id" id="selUnidad" class="w-full border rounded-xl px-3 py-2 mt-1"></select>
+            <select name="unidad_id" id="selUnidad" class="w-full border rounded-xl min-h-11 px-3 mt-1"></select>
           </div>
 
-          <div class="rounded-xl bg-slate-50 border px-3 py-2">
+          <div class="rounded-xl bg-slate-50 border min-h-11 px-3">
             <div class="flex justify-between text-xs text-slate-500">
               <span>Propietario</span>
               <button type="button" id="addProp" class="text-[#4E7287]">+ Nuevo</button>
             </div>
-            <select name="propietario_user_id" id="selProp" class="w-full border rounded-xl px-3 py-2 mt-1"></select>
+            <select name="propietario_user_id" id="selProp" class="w-full border rounded-xl min-h-11 px-3 mt-1"></select>
           </div>
 
-          ${formRow('Notas', `<textarea name="notas" class="w-full rounded-xl border px-3 py-2"></textarea>`)}
+          ${formRow('Notas', `<textarea name="notas" class="w-full rounded-xl border min-h-11 px-3"></textarea>`)}
 
           <div class="flex justify-end gap-2">
-            <button type="button" id="cancelA" class="border px-4 py-2 rounded-xl">Cancelar</button>
-            <button type="submit" id="submitA" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Guardar</button>
+            <button type="button" id="cancelA" class="border min-h-11 px-4 rounded-xl">Cancelar</button>
+            <button type="submit" id="submitA" class="bg-[#4E7287] text-white min-h-11 px-4 rounded-xl">Guardar</button>
           </div>
         </form>
       `);
@@ -500,16 +500,16 @@
 
       openModal('Editar auto', `
         <form id="frmEdit" class="space-y-3">
-          <div id="msgE" class="hidden rounded-xl px-3 py-2 text-sm"></div>
+          <div id="msgE" class="hidden rounded-xl min-h-11 px-3 text-sm"></div>
 
           <input type="hidden" name="auto_id" value="${escapeHtml(a.id)}" />
 
-          ${formRow('Placas *', `<input name="placas" value="${safeText(a.placas, '')}" class="w-full border px-3 py-2 rounded-xl" required />`)}
-          ${formRow('Modelo', `<input name="modelo" value="${safeText(a.modelo, '')}" class="w-full border px-3 py-2 rounded-xl" />`)}
-          ${formRow('Color', `<input name="color" value="${safeText(a.color, '')}" class="w-full border px-3 py-2 rounded-xl" />`)}
-          ${formRow('Unidad', `<select name="unidad_id" id="selUEdit" class="w-full border px-3 py-2 rounded-xl"></select>`)}
-          ${formRow('Propietario', `<select name="propietario_user_id" id="selPEdit" class="w-full border px-3 py-2 rounded-xl"></select>`)}
-          ${formRow('Notas', `<textarea name="notas" class="w-full border px-3 py-2 rounded-xl">${safeText(a.notas || '', '')}</textarea>`)}
+          ${formRow('Placas *', `<input name="placas" value="${safeText(a.placas, '')}" class="w-full border min-h-11 px-3 rounded-xl" required />`)}
+          ${formRow('Modelo', `<input name="modelo" value="${safeText(a.modelo, '')}" class="w-full border min-h-11 px-3 rounded-xl" />`)}
+          ${formRow('Color', `<input name="color" value="${safeText(a.color, '')}" class="w-full border min-h-11 px-3 rounded-xl" />`)}
+          ${formRow('Unidad', `<select name="unidad_id" id="selUEdit" class="w-full border min-h-11 px-3 rounded-xl"></select>`)}
+          ${formRow('Propietario', `<select name="propietario_user_id" id="selPEdit" class="w-full border min-h-11 px-3 rounded-xl"></select>`)}
+          ${formRow('Notas', `<textarea name="notas" class="w-full border min-h-11 px-3 rounded-xl">${safeText(a.notas || '', '')}</textarea>`)}
 
           <div class="flex justify-between items-center">
             <button type="button" id="delA" class="text-rose-700 hover:underline">
@@ -517,8 +517,8 @@
             </button>
 
             <div class="flex gap-2">
-              <button type="button" id="cancelEdit" class="border px-4 py-2 rounded-xl">Cancelar</button>
-              <button type="submit" id="submitE" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Guardar</button>
+              <button type="button" id="cancelEdit" class="border min-h-11 px-4 rounded-xl">Cancelar</button>
+              <button type="submit" id="submitE" class="bg-[#4E7287] text-white min-h-11 px-4 rounded-xl">Guardar</button>
             </div>
           </div>
         </form>

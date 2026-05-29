@@ -190,7 +190,7 @@
                 <div class="shrink-0 flex flex-col gap-2">
                   <button
                     type="button"
-                    class="js-view-pkg rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs hover:bg-slate-50"
+                    class="js-view-pkg rounded-lg border border-slate-300 bg-white min-h-11 px-3 text-xs hover:bg-slate-50"
                     data-pkg='${escapeHtml(JSON.stringify(item))}'>
                     Ver detalle
                   </button>
@@ -200,7 +200,7 @@
                       ? `
                         <button
                           type="button"
-                          class="js-mark-pkg rounded-lg bg-emerald-600 text-white px-3 py-2 text-xs hover:bg-emerald-700"
+                          class="js-mark-pkg rounded-lg bg-emerald-600 text-white min-h-11 px-3 text-xs hover:bg-emerald-700"
                           data-id="${escapeHtml(String(item.id))}"
                           data-state="entregado">
                           Marcar entregado
@@ -208,7 +208,7 @@
 
                         <button
                           type="button"
-                          class="js-mark-pkg rounded-lg bg-rose-600 text-white px-3 py-2 text-xs hover:bg-rose-700"
+                          class="js-mark-pkg rounded-lg bg-rose-600 text-white min-h-11 px-3 text-xs hover:bg-rose-700"
                           data-id="${escapeHtml(String(item.id))}"
                           data-state="devuelto">
                           Marcar devuelto
@@ -217,7 +217,7 @@
                       : `
                         <button
                           type="button"
-                          class="js-mark-pkg rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs hover:bg-slate-50"
+                          class="js-mark-pkg rounded-lg border border-slate-300 bg-white min-h-11 px-3 text-xs hover:bg-slate-50"
                           data-id="${escapeHtml(String(item.id))}"
                           data-state="registrado">
                           Reabrir pendiente
@@ -327,7 +327,7 @@
           }
 
           <div class="flex justify-end">
-            <button type="button" id="pkgDetailClose" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm">
+            <button type="button" id="pkgDetailClose" class="rounded-xl bg-[#4E7287] text-white min-h-11 px-4 text-sm">
               Cerrar
             </button>
           </div>
@@ -364,7 +364,7 @@
               ${safeText(e.message, 'No se pudo actualizar el estado del paquete.')}
             </div>
             <div class="flex justify-end">
-              <button type="button" id="pkgErrClose" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm">
+              <button type="button" id="pkgErrClose" class="rounded-xl bg-[#4E7287] text-white min-h-11 px-4 text-sm">
                 Entendido
               </button>
             </div>
@@ -390,43 +390,43 @@
         <form id="frmNewPkg" class="space-y-3">
           <div>
             <label class="text-xs text-slate-500">Unidad *</label>
-            <select id="pkgUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <select id="pkgUnidad" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm">
               <option value="">Cargando unidades…</option>
             </select>
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Residente destinatario *</label>
-            <select id="pkgResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" disabled>
+            <select id="pkgResidente" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm" disabled>
               <option value="">Selecciona primero una unidad</option>
             </select>
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Empresa</label>
-            <input id="pkgEmpresa" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Amazon, DHL..." />
+            <input id="pkgEmpresa" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm" placeholder="Amazon, DHL..." />
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Descripción *</label>
-            <input id="pkgDesc" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+            <input id="pkgDesc" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm" />
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Rastreo</label>
-            <input id="pkgTrack" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+            <input id="pkgTrack" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm" />
           </div>
 
           <div>
             <label class="text-xs text-slate-500">Notas</label>
-            <textarea id="pkgNotas" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" rows="3"></textarea>
+            <textarea id="pkgNotas" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm" rows="3"></textarea>
           </div>
 
-          <div id="pkgErr" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
+          <div id="pkgErr" class="hidden rounded-xl border border-rose-200 bg-rose-50 min-h-11 px-3 text-xs text-rose-700"></div>
 
           <div class="flex items-center justify-end gap-2">
-            <button type="button" id="pkgCancel" class="rounded-xl border border-slate-200 px-4 py-2 text-sm">Cancelar</button>
-            <button type="submit" id="pkgSave" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm shadow">Guardar</button>
+            <button type="button" id="pkgCancel" class="rounded-xl border border-slate-200 min-h-11 px-4 text-sm">Cancelar</button>
+            <button type="submit" id="pkgSave" class="rounded-xl bg-[#4E7287] text-white min-h-11 px-4 text-sm shadow">Guardar</button>
           </div>
         </form>
       `);

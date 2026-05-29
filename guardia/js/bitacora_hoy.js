@@ -79,11 +79,11 @@
             <img id="guardBitacoraGalleryImage" src="" alt="Evidencia" class="h-[55vh] w-full object-contain" />
           </div>
           <div class="flex items-center justify-between gap-3">
-            <button type="button" id="guardBitacoraPrev" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+            <button type="button" id="guardBitacoraPrev" class="rounded-2xl border border-slate-200 bg-white min-h-11 px-4 text-sm text-slate-700 hover:bg-slate-50">
               Anterior
             </button>
             <div id="guardBitacoraCounter" class="text-sm text-slate-500"></div>
-            <button type="button" id="guardBitacoraNext" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+            <button type="button" id="guardBitacoraNext" class="rounded-2xl border border-slate-200 bg-white min-h-11 px-4 text-sm text-slate-700 hover:bg-slate-50">
               Siguiente
             </button>
           </div>
@@ -204,19 +204,19 @@
           <div id="bitacoraNewReportError" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Tipo</label>
-            <select id="bitacoraReportTipo" name="tipo_evento" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" required>
+            <select id="bitacoraReportTipo" name="tipo_evento" class="w-full rounded-2xl border border-slate-200 bg-white min-h-11 px-4.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" required>
               <option value="seguridad">Nota</option>
             </select>
           </div>
           <div>
             <label class="mb-1 block text-xs text-slate-600">Observaciones</label>
-            <textarea name="observaciones" rows="4" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Describe lo ocurrido…" required></textarea>
+            <textarea name="observaciones" rows="4" class="w-full rounded-2xl border border-slate-200 bg-white min-h-11 px-4 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Describe lo ocurrido…" required></textarea>
           </div>
           <div>
             <div class="text-xs text-slate-600">Evidencias (opcional, maximo 3)</div>
             <div class="mt-2 grid gap-2 sm:grid-cols-3">
               ${[1, 2, 3].map((index) => `
-                <label data-evidence-slot class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 transition hover:border-[#2E5D73]/40 hover:bg-slate-50">
+                <label data-evidence-slot class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white min-h-11 px-4 text-sm text-slate-700 transition hover:border-[#2E5D73]/40 hover:bg-slate-50">
                   <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">+</span>
                   <div class="min-w-0">
                     <div class="text-xs uppercase tracking-[0.16em] text-slate-400">Foto ${index}</div>
@@ -228,10 +228,10 @@
             </div>
           </div>
           <div class="flex justify-end gap-2 pt-2">
-            <button type="button" id="bitacoraNewReportCancel" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+            <button type="button" id="bitacoraNewReportCancel" class="rounded-xl border border-slate-200 bg-white min-h-11 px-4 text-sm text-slate-700 hover:bg-slate-50">
               Cancelar
             </button>
-            <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
+            <button type="submit" class="rounded-xl bg-[#2E5D73] min-h-11 px-4 text-sm font-semibold text-white hover:opacity-95">
               Guardar
             </button>
           </div>
