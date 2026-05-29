@@ -479,20 +479,22 @@
       const isOperational = String(state.meta?.modo_operacion || 'residencial') !== 'residencial';
       const typeOptions = isOperational
         ? `
-              <option value="seguridad" ${item?.tipo === 'seguridad' ? 'selected' : ''}>Seguridad</option>
-              <option value="robo" ${item?.tipo === 'robo' ? 'selected' : ''}>Intento de robo</option>
-              <option value="conflicto" ${item?.tipo === 'conflicto' ? 'selected' : ''}>Conflicto</option>
-              <option value="salida_sin_permiso" ${item?.tipo === 'salida_sin_permiso' ? 'selected' : ''}>Salida sin permiso</option>
-              <option value="visitante_sin_ine" ${item?.tipo === 'visitante_sin_ine' ? 'selected' : ''}>Visitante sin INE</option>
-              <option value="material_no_coincide" ${item?.tipo === 'material_no_coincide' ? 'selected' : ''}>Material no coincide</option>
-              <option value="evento_general" ${item?.tipo === 'evento_general' ? 'selected' : ''}>Evento general</option>
-              <option value="otro" ${item?.tipo === 'otro' ? 'selected' : ''}>Otro</option>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="cursor-pointer"><input type="radio" name="tipo" value="seguridad" class="peer sr-only" ${!item || item?.tipo === 'seguridad' ? 'checked' : ''}><span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-[#4E7287] peer-checked:bg-[#4E7287]/5 peer-checked:text-[#4E7287] peer-focus-visible:ring-2 peer-focus-visible:ring-[#4E7287]/20">Seguridad</span></label>
+              <label class="cursor-pointer"><input type="radio" name="tipo" value="robo" class="peer sr-only" ${item?.tipo === 'robo' ? 'checked' : ''}><span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-[#4E7287] peer-checked:bg-[#4E7287]/5 peer-checked:text-[#4E7287] peer-focus-visible:ring-2 peer-focus-visible:ring-[#4E7287]/20">Robo</span></label>
+              <label class="cursor-pointer"><input type="radio" name="tipo" value="conflicto" class="peer sr-only" ${item?.tipo === 'conflicto' ? 'checked' : ''}><span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-[#4E7287] peer-checked:bg-[#4E7287]/5 peer-checked:text-[#4E7287] peer-focus-visible:ring-2 peer-focus-visible:ring-[#4E7287]/20">Conflicto</span></label>
+              <label class="cursor-pointer"><input type="radio" name="tipo" value="otro" class="peer sr-only" ${item?.tipo === 'otro' || (item && !['seguridad','robo','conflicto'].includes(item.tipo)) ? 'checked' : ''}><span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-[#4E7287] peer-checked:bg-[#4E7287]/5 peer-checked:text-[#4E7287] peer-focus-visible:ring-2 peer-focus-visible:ring-[#4E7287]/20">Otros</span></label>
+            </div>
+            <input type="hidden" id="incTipo" value="${item?.tipo || 'seguridad'}" />
           `
         : `
-              <option value="seguridad" ${item?.tipo === 'seguridad' ? 'selected' : ''}>Seguridad</option>
-              <option value="ruido" ${item?.tipo === 'ruido' ? 'selected' : ''}>Ruido</option>
-              <option value="mantenimiento" ${item?.tipo === 'mantenimiento' ? 'selected' : ''}>Mantenimiento</option>
-              <option value="otros" ${item?.tipo === 'otros' ? 'selected' : ''}>Otros</option>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="cursor-pointer"><input type="radio" name="tipo" value="seguridad" class="peer sr-only" ${!item || item?.tipo === 'seguridad' ? 'checked' : ''}><span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-[#4E7287] peer-checked:bg-[#4E7287]/5 peer-checked:text-[#4E7287] peer-focus-visible:ring-2 peer-focus-visible:ring-[#4E7287]/20">Seguridad</span></label>
+              <label class="cursor-pointer"><input type="radio" name="tipo" value="ruido" class="peer sr-only" ${item?.tipo === 'ruido' ? 'checked' : ''}><span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-[#4E7287] peer-checked:bg-[#4E7287]/5 peer-checked:text-[#4E7287] peer-focus-visible:ring-2 peer-focus-visible:ring-[#4E7287]/20">Ruido</span></label>
+              <label class="cursor-pointer"><input type="radio" name="tipo" value="mantenimiento" class="peer sr-only" ${item?.tipo === 'mantenimiento' ? 'checked' : ''}><span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-[#4E7287] peer-checked:bg-[#4E7287]/5 peer-checked:text-[#4E7287] peer-focus-visible:ring-2 peer-focus-visible:ring-[#4E7287]/20">Mantenimiento</span></label>
+              <label class="cursor-pointer"><input type="radio" name="tipo" value="otros" class="peer sr-only" ${item?.tipo === 'otros' || (item && !['seguridad','ruido','mantenimiento'].includes(item.tipo)) ? 'checked' : ''}><span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-[#4E7287] peer-checked:bg-[#4E7287]/5 peer-checked:text-[#4E7287] peer-focus-visible:ring-2 peer-focus-visible:ring-[#4E7287]/20">Otros</span></label>
+            </div>
+            <input type="hidden" id="incTipo" value="${item?.tipo || 'seguridad'}" />
           `;
 
       openModal(title, `
@@ -501,41 +503,43 @@
           ${isEdit ? `<input type="hidden" id="incId" value="${escapeHtml(String(item.id || ''))}" />` : ''}
 
           ${isOperational ? `
-            <fieldset>
-              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Área</legend>
-              <select id="incArea" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
-            </fieldset>
+            <div>
+              <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Área</label></div>
+              <select id="incArea" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </div>
 
-            <fieldset>
-              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Origen</legend>
-              <select id="incOrigenTipo" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
+            <div>
+              <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Origen</label></div>
+              <select id="incOrigenTipo" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
+
                 <option value="">Evento general</option>
                 <option value="persona_recurrente" ${item?.origen_tipo === 'persona_recurrente' ? 'selected' : ''}>Persona recurrente</option>
                 <option value="visitante_rapido" ${item?.origen_tipo === 'visitante_rapido' ? 'selected' : ''}>Visitante rápido</option>
                 <option value="permiso_material" ${item?.origen_tipo === 'permiso_material' ? 'selected' : ''}>Permiso material</option>
                 <option value="area" ${item?.origen_tipo === 'area' ? 'selected' : ''}>Área</option>
+
               </select>
-            </fieldset>
+            </div>
 
-            <fieldset>
-              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Persona recurrente</legend>
-              <select id="incPersona" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
-            </fieldset>
+            <div id="wrapPersona" class="hidden">
+              <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Persona recurrente</label></div>
+              <select id="incPersona" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </div>
 
-            <fieldset>
-              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitante rápido</legend>
-              <select id="incVisitante" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
-            </fieldset>
+            <div id="wrapVisitante" class="hidden">
+              <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Visitante rápido</label></div>
+              <select id="incVisitante" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </div>
 
-            <fieldset>
-              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Permiso material</legend>
-              <select id="incPermiso" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
-            </fieldset>
+            <div id="wrapPermiso" class="hidden">
+              <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Permiso material</label></div>
+              <select id="incPermiso" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </div>
           ` : `
-            <fieldset>
-              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Unidad *</legend>
-              <select id="incUnidad" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
-            </fieldset>
+            <div>
+              <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Unidad *</label></div>
+              <select id="incUnidad" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </div>
 
             <fieldset>
               <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Residente *</legend>
@@ -546,11 +550,9 @@
           `}
 
           <fieldset>
-            <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Tipo</legend>
-            <select id="incTipo" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Tipo</legend>
               ${typeOptions}
-            </select>
-          </fieldset>
+            </fieldset>
 
           <fieldset>
             <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Prioridad</legend>
@@ -572,18 +574,20 @@
           </fieldset>
 
           ${isEdit ? `
-            <fieldset>
-              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Estado</legend>
-              <select id="incEstadoEdit" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
+            <div>
+              <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Estado</label></div>
+              <select id="incEstadoEdit" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
+
                 <option value="abierta" ${item?.estado === 'abierta' ? 'selected' : ''}>Abierta</option>
                 <option value="en_proceso" ${item?.estado === 'en_proceso' ? 'selected' : ''}>En proceso</option>
                 <option value="cerrada" ${item?.estado === 'cerrada' ? 'selected' : ''}>Cerrada</option>
+
               </select>
-            </fieldset>
+            </div>
           ` : ''}
 
           <div>
-            <label class="mb-1 block text-xs font-medium text-slate-600">Título *</label>
+            <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Título *</label></div>
             <input id="incTitulo" value="${safeText(item?.titulo || '', '')}" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" placeholder="Ej. Puerta atascada" />
           </div>
 
