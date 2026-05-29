@@ -188,10 +188,10 @@
             <div class="mt-1 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-700 whitespace-pre-wrap">${safeText(item.descripcion, 'Sin descripción')}</div>
           </div>
           <div class="flex flex-wrap justify-end gap-2">
-            <button type="button" id="guardIncDetailEdit" class="rounded-xl border border-slate-200 bg-white min-h-11 px-4 text-sm text-slate-700 hover:bg-slate-50">
+            <button type="button" id="guardIncDetailEdit" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
               Editar
             </button>
-            <button type="button" id="guardIncDetailDelete" class="rounded-xl bg-rose-600 min-h-11 px-4 text-sm text-white hover:bg-rose-700">
+            <button type="button" id="guardIncDetailDelete" class="rounded-xl bg-rose-600 px-4 py-2 text-sm text-white hover:bg-rose-700">
               Eliminar
             </button>
           </div>
@@ -273,14 +273,14 @@
                   <div class="app-mobile-actions flex gap-2">
                     <button
                       type="button"
-                      class="js-edit-inc rounded-lg border border-slate-300 bg-white min-h-11 px-3 text-xs hover:bg-slate-50"
+                      class="js-edit-inc rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs hover:bg-slate-50"
                       data-inc='${escapeHtml(JSON.stringify(i))}'>
                       Editar
                     </button>
 
                     <button
                       type="button"
-                      class="js-del-inc rounded-lg bg-rose-600 text-white min-h-11 px-3 text-xs hover:bg-rose-700"
+                      class="js-del-inc rounded-lg bg-rose-600 text-white px-3 py-2 text-xs hover:bg-rose-700"
                       data-id="${escapeHtml(String(i.id))}"
                       data-title="${safeText(i.titulo, '')}">
                       Eliminar
@@ -424,10 +424,10 @@
           </div>
 
           <div class="flex justify-end gap-2">
-            <button type="button" id="incDeleteCancel" class="rounded-xl border border-slate-200 min-h-11 px-4 text-sm">
+            <button type="button" id="incDeleteCancel" class="rounded-xl border border-slate-200 px-4 py-2 text-sm">
               Cancelar
             </button>
-            <button type="button" id="incDeleteAccept" class="rounded-xl bg-rose-600 text-white min-h-11 px-4 text-sm">
+            <button type="button" id="incDeleteAccept" class="rounded-xl bg-rose-600 text-white px-4 py-2 text-sm">
               Sí, eliminar
             </button>
           </div>
@@ -458,7 +458,7 @@
               ${safeText(e.message, 'No se pudo eliminar la incidencia.')}
             </div>
             <div class="flex justify-end mt-4">
-              <button type="button" id="incDeleteErrOk" class="rounded-xl bg-[#4E7287] text-white min-h-11 px-4 text-sm">
+              <button type="button" id="incDeleteErrOk" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm">
                 Entendido
               </button>
             </div>
@@ -496,101 +496,123 @@
           `;
 
       openModal(title, `
-        <form id="frmNewInc" class="space-y-3">
+        <form id="frmNewInc" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           ${isEdit ? `<input type="hidden" id="incId" value="${escapeHtml(String(item.id || ''))}" />` : ''}
 
           ${isOperational ? `
-            <div>
-              <label class="text-xs text-slate-500">Área</label>
-              <select id="incArea" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm"></select>
-            </div>
+            <fieldset>
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Área</legend>
+              <select id="incArea" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </fieldset>
 
-            <div>
-              <label class="text-xs text-slate-500">Origen</label>
-              <select id="incOrigenTipo" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm">
+            <fieldset>
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Origen</legend>
+              <select id="incOrigenTipo" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
                 <option value="">Evento general</option>
                 <option value="persona_recurrente" ${item?.origen_tipo === 'persona_recurrente' ? 'selected' : ''}>Persona recurrente</option>
                 <option value="visitante_rapido" ${item?.origen_tipo === 'visitante_rapido' ? 'selected' : ''}>Visitante rápido</option>
                 <option value="permiso_material" ${item?.origen_tipo === 'permiso_material' ? 'selected' : ''}>Permiso material</option>
                 <option value="area" ${item?.origen_tipo === 'area' ? 'selected' : ''}>Área</option>
               </select>
-            </div>
+            </fieldset>
 
-            <div>
-              <label class="text-xs text-slate-500">Persona recurrente</label>
-              <select id="incPersona" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm"></select>
-            </div>
+            <fieldset>
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Persona recurrente</legend>
+              <select id="incPersona" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </fieldset>
 
-            <div>
-              <label class="text-xs text-slate-500">Visitante rápido</label>
-              <select id="incVisitante" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm"></select>
-            </div>
+            <fieldset>
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Visitante rápido</legend>
+              <select id="incVisitante" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </fieldset>
 
-            <div>
-              <label class="text-xs text-slate-500">Permiso material</label>
-              <select id="incPermiso" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm"></select>
-            </div>
+            <fieldset>
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Permiso material</legend>
+              <select id="incPermiso" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </fieldset>
           ` : `
-            <div>
-              <label class="text-xs text-slate-500">Unidad *</label>
-              <select id="incUnidad" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm"></select>
-            </div>
+            <fieldset>
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Unidad *</legend>
+              <select id="incUnidad" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
+            </fieldset>
 
-            <div>
-              <label class="text-xs text-slate-500">Residente *</label>
-              <select id="incResidente" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm">
+            <fieldset>
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Residente *</legend>
+              <select id="incResidente" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
                 <option value="">Selecciona primero una unidad</option>
               </select>
-            </div>
+            </fieldset>
           `}
 
-          <div>
-            <label class="text-xs text-slate-500">Tipo</label>
-            <select id="incTipo" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm">
+          <fieldset>
+            <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Tipo</legend>
+            <select id="incTipo" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
               ${typeOptions}
             </select>
-          </div>
+          </fieldset>
 
-          <div>
-            <label class="text-xs text-slate-500">Prioridad</label>
-            <select id="incPrioridad" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm">
-              <option value="baja" ${item?.prioridad === 'baja' ? 'selected' : ''}>Baja</option>
-              <option value="media" ${!item || item?.prioridad === 'media' ? 'selected' : ''}>Media</option>
-              <option value="alta" ${item?.prioridad === 'alta' ? 'selected' : ''}>Alta</option>
-            </select>
-          </div>
+          <fieldset>
+            <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Prioridad</legend>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="cursor-pointer">
+                <input type="radio" name="prioridad" value="baja" class="peer sr-only" id="incPrioridadBaja" ${item?.prioridad === 'baja' ? 'checked' : ''}>
+                <span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-sky-200 peer-checked:bg-sky-50 peer-checked:text-sky-700 peer-focus-visible:ring-2 peer-focus-visible:ring-sky-200">Baja</span>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="prioridad" value="media" class="peer sr-only" id="incPrioridadMedia" ${!item || item?.prioridad === 'media' ? 'checked' : ''}>
+                <span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-amber-200 peer-checked:bg-amber-50 peer-checked:text-amber-700 peer-focus-visible:ring-2 peer-focus-visible:ring-amber-200">Media</span>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="prioridad" value="alta" class="peer sr-only" id="incPrioridadAlta" ${item?.prioridad === 'alta' ? 'checked' : ''}>
+                <span class="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 transition peer-checked:border-rose-200 peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-focus-visible:ring-2 peer-focus-visible:ring-rose-200">Alta</span>
+              </label>
+            </div>
+            <input type="hidden" id="incPrioridad" value="${item?.prioridad || 'media'}" />
+          </fieldset>
 
           ${isEdit ? `
-            <div>
-              <label class="text-xs text-slate-500">Estado</label>
-              <select id="incEstadoEdit" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm">
+            <fieldset>
+              <legend class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Estado</legend>
+              <select id="incEstadoEdit" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
                 <option value="abierta" ${item?.estado === 'abierta' ? 'selected' : ''}>Abierta</option>
                 <option value="en_proceso" ${item?.estado === 'en_proceso' ? 'selected' : ''}>En proceso</option>
                 <option value="cerrada" ${item?.estado === 'cerrada' ? 'selected' : ''}>Cerrada</option>
               </select>
-            </div>
+            </fieldset>
           ` : ''}
 
           <div>
-            <label class="text-xs text-slate-500">Título *</label>
-            <input id="incTitulo" value="${safeText(item?.titulo || '', '')}" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm" />
+            <label class="mb-1 block text-xs font-medium text-slate-600">Título *</label>
+            <input id="incTitulo" value="${safeText(item?.titulo || '', '')}" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" placeholder="Ej. Puerta atascada" />
           </div>
 
           <div>
-            <label class="text-xs text-slate-500">Descripción *</label>
-            <textarea id="incDesc" class="mt-1 w-full rounded-xl border border-slate-200 min-h-11 px-3 text-sm" rows="4">${safeText(item?.descripcion || '', '')}</textarea>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Descripción *</label>
+            <textarea id="incDesc" class="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" rows="4" placeholder="Describe lo ocurrido...">${safeText(item?.descripcion || '', '')}</textarea>
           </div>
 
-          <div id="incErr" class="hidden rounded-xl border border-rose-200 bg-rose-50 min-h-11 px-3 text-xs text-rose-700"></div>
+          <div id="incErr" class="hidden rounded-xl border border-rose-200 bg-rose-50 min-h-11 px-3 py-2 text-xs text-rose-700"></div>
 
-          <div class="flex items-center justify-end gap-2">
-            <button type="button" id="incCancel" class="rounded-xl border border-slate-200 min-h-11 px-4 text-sm">Cancelar</button>
-            <button type="submit" id="incSubmit" class="rounded-xl bg-[#4E7287] text-white min-h-11 px-4 text-sm shadow">${escapeHtml(submitText)}</button>
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="incCancel" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" id="incSubmit" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">${escapeHtml(submitText)}</button>
           </div>
         </form>
       `);
 
       const $ = (id) => document.getElementById(id);
+
+      const prioBaja = $('incPrioridadBaja');
+      const prioMedia = $('incPrioridadMedia');
+      const prioAlta = $('incPrioridadAlta');
+      const prioHidden = $('incPrioridad');
+      const updatePrio = (val) => { if (prioHidden) prioHidden.value = val; };
+      prioBaja?.addEventListener('change', () => updatePrio('baja'));
+      prioMedia?.addEventListener('change', () => updatePrio('media'));
+      prioAlta?.addEventListener('change', () => updatePrio('alta'));
+
       const unidadSel = $('incUnidad');
       const residenteSel = $('incResidente');
       const areaSel = $('incArea');

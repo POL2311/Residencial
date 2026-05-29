@@ -29,8 +29,8 @@
   </div>
 
   <div id="cameraModal"
-    class="fixed inset-0 bg-black/70 hidden box-border flex h-full items-end justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 sm:items-center sm:p-4 z-50">
-    <div class="bg-white rounded-[1.35rem] p-4 w-full max-w-sm shadow-2xl flex max-h-[min(86dvh,640px)] flex-col overflow-hidden">
+    class="fixed inset-0 bg-black/70 hidden items-end md:items-center justify-center z-50 p-0 md:p-4">
+    <div class="bg-white rounded-t-2xl md:rounded-2xl p-4 w-full max-w-sm shadow-2xl">
       <div class="text-sm font-semibold mb-2">Escanea el código QR</div>
       <video id="video" class="w-full rounded-xl bg-slate-100 aspect-video" autoplay playsinline></video>
       <div id="cameraHint" class="mt-2 text-xs text-slate-500">
@@ -42,11 +42,11 @@
       <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
         <button id="btnRetryCamera"
           type="button"
-          class="hidden min-h-11 rounded-xl bg-[#4E7287] px-4 text-sm text-white hover:opacity-95">
+          class="hidden rounded-xl bg-[#4E7287] px-4 py-2 text-sm text-white hover:opacity-95">
           Reintentar cámara
         </button>
         <button id="btnCloseCamera"
-          class="w-full min-h-11 rounded-xl border px-4 text-sm hover:bg-slate-50 sm:col-span-1">
+          class="w-full rounded-xl border px-4 py-2 text-sm hover:bg-slate-50 sm:col-span-1">
           Cancelar
         </button>
       </div>
@@ -87,15 +87,15 @@
   </div>
 
   <div id="accessActionModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm">
-    <div class="box-border flex h-full items-end justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 sm:items-center sm:p-4">
-      <div class="flex max-h-[min(86dvh,640px)] w-full flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-xl">
+    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
+      <div class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-xl sm:rounded-3xl">
         <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <div>
             <div class="text-base font-semibold text-slate-800" id="accessActionTitle">Validación de acceso</div>
             <div id="accessActionStatus" class="mt-1 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">Esperando validación</div>
           </div>
           <button id="btnCloseAccessActionModal" type="button"
-            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
         </div>
 
         <div class="flex-1 overflow-y-auto px-5 py-4">
@@ -109,7 +109,7 @@
               <input id="accessPin"
                 inputmode="numeric"
                 type="password"
-                class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-sm"
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 placeholder="Ingresa PIN para validar" />
             </div>
 
@@ -118,7 +118,7 @@
               <input id="accessEvidence"
                 type="file"
                 accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                class="min-h-11 w-full rounded-xl border border-slate-200 px-3 bg-white text-sm" />
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white" />
               <p class="mt-1 text-[11px] text-slate-400">Idealmente INE junto con placa o evidencia del material/equipo.</p>
             </div>
 
@@ -126,21 +126,21 @@
               <label class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Notas de caseta</label>
               <textarea id="accessNotes"
                 rows="3"
-                class="min-h-11 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 placeholder="Observaciones rápidas, novedades o aclaraciones"></textarea>
             </div>
           </div>
         </div>
 
-        <div id="accessActionButtons" class="hidden border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <div id="accessActionButtons" class="hidden border-t border-slate-100 bg-white px-5 py-4">
           <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button id="btnConfirmarEntrada"
-                    class="min-h-11 rounded-2xl bg-emerald-600 px-4 text-sm font-medium text-white shadow disabled:cursor-not-allowed disabled:opacity-50 hover:bg-emerald-700">
+                    class="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow disabled:cursor-not-allowed disabled:opacity-50 hover:bg-emerald-700">
               Registrar entrada
             </button>
 
             <button id="btnConfirmarSalida"
-                    class="min-h-11 rounded-2xl bg-[#2E5D73] px-4 text-sm font-medium text-white shadow disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-95">
+                    class="rounded-2xl bg-[#2E5D73] px-4 py-3 text-sm font-medium text-white shadow disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-95">
               Registrar salida
             </button>
           </div>
