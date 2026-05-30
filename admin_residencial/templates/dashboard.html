@@ -448,11 +448,15 @@
     body.os-modal-open {
       overflow: hidden !important;
     }
+    body.os-modal-open #dashboardBody {
+      overflow: hidden !important;
+    }
     body.os-modal-open #mobileDockLayer,
     body.os-modal-open .mobile-dock-layer,
     body.os-modal-open #shellFooter,
     body.os-modal-open footer,
     body.os-modal-open #shellHeader {
+      display: none !important;
       pointer-events: none !important;
       user-select: none !important;
       opacity: 0 !important;

@@ -18,7 +18,8 @@
     modalTitle: document.getElementById('comunicadoModalTitle'),
     form: document.getElementById('comunicadoForm'),
     btnClose: document.getElementById('btnCloseComModal'),
-    btnCancel: document.getElementById('btnCancelComModal'),
+    btnComStepPrev: document.getElementById('btnComStepPrev'),
+    btnComStepNext: document.getElementById('btnComStepNext'),
     formError: document.getElementById('comunicadoFormError'),
     imagePreview: document.getElementById('comunicadoImagePreview'),
 
@@ -329,6 +330,83 @@
     });
   }
 
+  let currentStep = 1;
+
+  function isStepValid(step) {
+    if (!els.form) return false;
+    if (step === 1) {
+      const titulo = String(els.form.titulo?.value || '').trim();
+      const mensaje = String(els.form.mensaje?.value || '').trim();
+      return titulo.length >= 3 && mensaje.length >= 3;
+    }
+    if (step === 2) {
+      const tipoChecked = els.form.querySelector('input[name="tipo"]:checked');
+      const prioridadChecked = els.form.querySelector('input[name="prioridad"]:checked');
+      return !!tipoChecked && !!prioridadChecked;
+    }
+    if (step === 3) {
+      const estadoChecked = els.form.querySelector('input[name="estado"]:checked');
+      return !!estadoChecked;
+    }
+    return true;
+  }
+
+  function updateStepButtonsState() {
+    if (!els.btnComStepNext) return;
+    const isValid = isStepValid(currentStep);
+    els.btnComStepNext.disabled = !isValid;
+    els.btnComStepNext.classList.toggle('opacity-50', !isValid);
+    els.btnComStepNext.classList.toggle('cursor-not-allowed', !isValid);
+  }
+
+  function setStep(step) {
+    currentStep = step;
+    
+    document.getElementById('comunicadoStep1')?.classList.toggle('hidden', step !== 1);
+    document.getElementById('comunicadoStep2')?.classList.toggle('hidden', step !== 2);
+    document.getElementById('comunicadoStep3')?.classList.toggle('hidden', step !== 3);
+    
+    const indicator = document.getElementById('comunicadoStepIndicator');
+    const title = document.getElementById('comunicadoStepTitle');
+    const progress = document.getElementById('comunicadoProgressBar');
+    
+    if (indicator) {
+      if (step === 1) {
+        indicator.textContent = 'Paso 1 de 3';
+        if (title) title.textContent = 'Contenido principal';
+        if (progress) progress.style.width = '33.3%';
+        if (els.btnComStepPrev) els.btnComStepPrev.textContent = 'Cancelar';
+        if (els.btnComStepNext) {
+          els.btnComStepNext.textContent = 'Siguiente';
+          els.btnComStepNext.type = 'button';
+        }
+      } else if (step === 2) {
+        indicator.textContent = 'Paso 2 de 3';
+        if (title) title.textContent = 'Opciones y Categoría';
+        if (progress) progress.style.width = '66.6%';
+        if (els.btnComStepPrev) els.btnComStepPrev.textContent = 'Atrás';
+        if (els.btnComStepNext) {
+          els.btnComStepNext.textContent = 'Siguiente';
+          els.btnComStepNext.type = 'button';
+        }
+      } else {
+        indicator.textContent = 'Paso 3 de 3';
+        if (title) title.textContent = 'Vigencia y Confirmación';
+        if (progress) progress.style.width = '100%';
+        if (els.btnComStepPrev) els.btnComStepPrev.textContent = 'Atrás';
+        if (els.btnComStepNext) {
+          els.btnComStepNext.textContent = 'Guardar';
+          els.btnComStepNext.type = 'submit';
+        }
+      }
+    }
+    
+    const modalBody = document.getElementById('comunicadoModalBody');
+    if (modalBody) modalBody.scrollTop = 0;
+    
+    updateStepButtonsState();
+  }
+
   function openCreateModal() {
     state.editingId = null;
     clearFormError();
@@ -345,6 +423,16 @@
       fechaPub.value = new Date().toISOString().slice(0, 10);
     }
 
+    // Preseleccionar valores razonables para el wizard
+    const radTipo = els.form?.querySelector('input[name="tipo"][value="general"]');
+    if (radTipo) radTipo.checked = true;
+    const radPrio = els.form?.querySelector('input[name="prioridad"][value="baja"]');
+    if (radPrio) radPrio.checked = true;
+    const radEst = els.form?.querySelector('input[name="estado"][value="publicado"]');
+    if (radEst) radEst.checked = true;
+
+    setStep(1);
+
     els.modal?.classList.remove('hidden');
   }
 
@@ -355,7 +443,6 @@
     if (els.modalTitle) els.modalTitle.textContent = 'Editar comunicado';
 
     Object.keys(c).forEach((k) => {
-      // Los inputs file no se pueden setear programáticamente; solo guardamos el URL actual.
       if (k === 'imagen') return;
       if (els.form && els.form[k]) {
         els.form[k].value = c[k] ?? '';
@@ -372,6 +459,8 @@
         els.imagePreview.classList.add('hidden');
       }
     }
+
+    setStep(1);
 
     els.modal?.classList.remove('hidden');
   }
@@ -612,7 +701,25 @@
 
   els.btnAdd?.addEventListener('click', openCreateModal);
   els.btnClose?.addEventListener('click', closeModal);
-  els.btnCancel?.addEventListener('click', closeModal);
+  els.btnComStepPrev?.addEventListener('click', () => {
+    if (currentStep === 1) {
+      closeModal();
+    } else {
+      setStep(currentStep - 1);
+    }
+  });
+
+  els.btnComStepNext?.addEventListener('click', (e) => {
+    if (currentStep < 3) {
+      e.preventDefault();
+      if (isStepValid(currentStep)) {
+        setStep(currentStep + 1);
+      }
+    }
+  });
+
+  els.form?.addEventListener('input', updateStepButtonsState);
+  els.form?.addEventListener('change', updateStepButtonsState);
 
   els.modal?.addEventListener('click', (e) => {
     if (e.target === els.modal) closeModal();
@@ -653,9 +760,9 @@
     e.preventDefault();
     clearFormError();
 
-    const submitBtn = els.form?.querySelector('button[type="submit"]');
+    const submitBtn = els.btnComStepNext;
     const originalSubmitHtml = submitBtn ? submitBtn.innerHTML : '';
-    const originalCancelDisabled = els.btnCancel ? els.btnCancel.disabled : false;
+    const originalCancelDisabled = els.btnComStepPrev ? els.btnComStepPrev.disabled : false;
     const originalCloseDisabled = els.btnClose ? els.btnClose.disabled : false;
 
     function setLoading(isLoading) {
@@ -674,7 +781,7 @@
           submitBtn.innerHTML = originalSubmitHtml || 'Guardar';
         }
       }
-      if (els.btnCancel) els.btnCancel.disabled = !!isLoading || originalCancelDisabled;
+      if (els.btnComStepPrev) els.btnComStepPrev.disabled = !!isLoading || originalCancelDisabled;
       if (els.btnClose) els.btnClose.disabled = !!isLoading || originalCloseDisabled;
     }
 
