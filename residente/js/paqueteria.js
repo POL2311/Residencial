@@ -344,6 +344,8 @@
 
     els.modalForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        e.preventDefault();
         hideAlert();
 
         const fd = new FormData(els.modalForm);

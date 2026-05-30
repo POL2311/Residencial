@@ -55,7 +55,7 @@
                   class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200">✕</button>
         </div>
 
-        <form id="paqModalForm" class="flex min-h-0 flex-1 flex-col">
+        <form id="paqModalForm" class="flex min-h-0 flex-1 flex-col" onsubmit="event.preventDefault();">
           <input type="hidden" id="paqModalAction" name="action" value="">
           <div id="paqModalBody" class="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3"></div>
 

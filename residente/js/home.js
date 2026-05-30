@@ -414,8 +414,8 @@
             els.services?.scrollBy({ left: 320, behavior: 'smooth' });
         });
 
-        els.btnCloseTipsModal?.addEventListener('click', closeTipsModal);
-        els.btnDismissTipsModal?.addEventListener('click', closeTipsModal);
+        els.btnCloseTipsModal?.addEventListener('click', (e) => { e.stopPropagation(); closeTipsModal(); });
+        els.btnDismissTipsModal?.addEventListener('click', (e) => { e.stopPropagation(); closeTipsModal(); });
         els.tipsModal?.addEventListener('click', (event) => {
             if (event.target === els.tipsModal) closeTipsModal();
         });
