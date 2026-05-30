@@ -71,7 +71,7 @@
   <!-- MODAL -->
   <div id="comunicadoModal" class="hidden fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm">
     <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
-      <div class="flex max-h-[min(86dvh,720px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-lg pointer-events-auto">
+      <div class="flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-h-[min(86dvh,720px)] sm:max-w-lg pointer-events-auto">
 
         <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
           <div class="min-w-0">
@@ -98,7 +98,7 @@
 
             <div>
               <label class="mb-1 block text-xs font-medium text-slate-600">Mensaje *</label>
-              <textarea name="mensaje" rows="4" required placeholder="Escribe el cuerpo del mensaje..."
+              <textarea name="mensaje" rows="3" required placeholder="Escribe el cuerpo del mensaje..."
                 class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"></textarea>
             </div>
 

@@ -745,7 +745,7 @@
 
   function renderDetailModal(r, totalPagado) {
     return `
-      <div class="flex flex-col bg-white rounded-[1.35rem] shadow-2xl w-full max-w-2xl overflow-hidden pointer-events-auto">
+      <div class="flex flex-col flex-1 min-h-0 overflow-hidden w-full">
         <!-- Header -->
         <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
           <div class="min-w-0">
@@ -1143,7 +1143,7 @@
 
     modal.innerHTML = `
       <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
-        <div class="flex max-h-[min(86dvh,600px)] w-full max-w-lg flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+        <div class="flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-h-[min(86dvh,600px)] pointer-events-auto">
           <!-- Header -->
           <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
             <div class="min-w-0">
@@ -1265,7 +1265,7 @@
 
     modal.innerHTML = `
       <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
-        <div class="flex max-h-[min(86dvh,600px)] w-full max-w-lg flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+        <div class="flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-h-[min(86dvh,600px)] pointer-events-auto">
           <!-- Header -->
           <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
             <div class="min-w-0">

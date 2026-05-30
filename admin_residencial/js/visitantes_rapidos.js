@@ -54,7 +54,7 @@
     modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9999] hidden bg-black/60 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
-        <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+        <div class="flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-h-[min(86dvh,640px)] pointer-events-auto">
           <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
             <div class="min-w-0">
               <div class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">QR visitante</div>
@@ -112,7 +112,7 @@
     modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] hidden bg-black/60 backdrop-blur-sm';
     modal.innerHTML = `
       <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
-        <div class="flex max-h-[min(86dvh,680px)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+        <div class="flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-h-[min(86dvh,680px)] pointer-events-auto">
           <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
             <div class="min-w-0">
               <div class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del acceso</div>

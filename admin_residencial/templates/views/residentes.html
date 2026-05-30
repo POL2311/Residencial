@@ -46,7 +46,7 @@
   <!-- MODAL CRUD RESIDENTE -->
   <div id="modal" class="hidden fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm">
     <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
-      <div class="flex max-h-[min(86dvh,750px)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+      <div class="flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-h-[min(86dvh,750px)] pointer-events-auto">
         <!-- Header -->
         <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
           <div class="min-w-0">
@@ -231,7 +231,7 @@
   <!-- DETAIL MODAL -->
   <div id="detailModal" class="hidden fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm">
     <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
-      <div id="detailModalContent" class="app-admin-modal-card w-full max-w-2xl bg-white rounded-[1.35rem] shadow-2xl pointer-events-auto overflow-hidden">
+      <div id="detailModalContent" class="flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-h-[min(86dvh,640px)] pointer-events-auto">
         <!-- Contenido dinámico inyectado por JS -->
       </div>
     </div>
