@@ -74,20 +74,13 @@
       let current = Math.max(0, Math.min(startIndex, urls.length - 1));
 
       openModal('Evidencias del reporte', `
-        <div class="space-y-4">
-          <div class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950/95">
-            <img id="guardBitacoraGalleryImage" src="" alt="Evidencia" class="h-[55vh] w-full object-contain" />
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-          <div class="flex items-center justify-between gap-3">
-            <button type="button" id="guardBitacoraPrev" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-              Anterior
-            </button>
-            <div id="guardBitacoraCounter" class="text-sm text-slate-500"></div>
-            <button type="button" id="guardBitacoraNext" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-              Siguiente
-            </button>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Cerrar</button>
           </div>
-          <div id="guardBitacoraThumbs" class="flex flex-wrap gap-2"></div>
         </div>
       `);
 
@@ -134,44 +127,13 @@
     function openReportDetail(item) {
       if (typeof openModal !== 'function' || !item) return;
       openModal('Detalle del movimiento', `
-        <div class="space-y-4">
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <div class="text-lg font-semibold text-slate-800">${escapeHtml(tipoLabel(item.tipo_evento))} · ${escapeHtml(item.tipo_origen || '')}</div>
-              <span class="rounded-full px-2.5 py-1 text-xs ${item.resultado === 'permitido' ? 'bg-emerald-100 text-emerald-700' : item.resultado === 'denegado' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'}">${escapeHtml(item.resultado || '')}</span>
-            </div>
-            <div class="text-sm text-slate-600">${escapeHtml(item.persona_nombre || item.nombre_visitante || item.permiso_tipo_movimiento || 'Evento general')}</div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div>
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Área</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.area_nombre || 'Sin área')}</div>
-            </div>
-            <div>
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Guardia</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.guardia_nombre || '—')}</div>
-            </div>
-            <div class="sm:col-span-2">
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Fecha</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.fecha_hora || '—')}</div>
-            </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Cerrar</button>
           </div>
-          ${item.observaciones ? `<div class="rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-700 whitespace-pre-wrap">${escapeHtml(item.observaciones)}</div>` : ''}
-          ${Array.isArray(item.evidencias) && item.evidencias.length ? `
-            <div class="space-y-2">
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Evidencias</div>
-              <div class="flex flex-wrap gap-2">
-                ${item.evidencias.slice(0, 6).map((url, index) => `
-                  <button
-                    type="button"
-                    class="js-detail-evidence block h-20 w-20 overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
-                    data-index="${index}">
-                    <img src="${escapeHtml(resolvePublicUrl(url))}" alt="Evidencia" class="h-full w-full object-cover" loading="lazy" />
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
         </div>
       `);
 
@@ -200,40 +162,13 @@
     function openNewReportModal() {
       if (typeof openModal !== 'function') return;
       openModal('Nuevo reporte operativo', `
-        <form id="bitacoraNewReportForm" class="space-y-4">
-          <div id="bitacoraNewReportError" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Tipo</label>
-            <select id="bitacoraReportTipo" name="tipo_evento" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" required>
-              <option value="seguridad">Nota</option>
-            </select>
+        <form id="bitacoraNewReportForm" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${cleanInner}
           </div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Observaciones</label>
-            <textarea name="observaciones" rows="4" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Describe lo ocurrido…" required></textarea>
-          </div>
-          <div>
-            <div class="text-xs text-slate-600">Evidencias (opcional, maximo 3)</div>
-            <div class="mt-2 grid gap-2 sm:grid-cols-3">
-              ${[1, 2, 3].map((index) => `
-                <label data-evidence-slot class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 transition hover:border-[#2E5D73]/40 hover:bg-slate-50">
-                  <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">+</span>
-                  <div class="min-w-0">
-                    <div class="text-xs uppercase tracking-[0.16em] text-slate-400">Foto ${index}</div>
-                    <div data-file-label class="truncate text-sm font-medium text-slate-700">Agregar foto</div>
-                  </div>
-                  <input type="file" name="evidencia_${index}" accept="image/*" class="hidden" />
-                </label>
-              `).join('')}
-            </div>
-          </div>
-          <div class="flex justify-end gap-2 pt-2">
-            <button type="button" id="bitacoraNewReportCancel" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-              Cancelar
-            </button>
-            <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">
-              Guardar
-            </button>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="bitacoraNewReportCancel" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
           </div>
         </form>
       `);

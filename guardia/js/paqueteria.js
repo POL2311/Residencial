@@ -277,59 +277,12 @@
 
     function openDetailModal(item) {
       openModal('Detalle del paquete', `
-        <div class="space-y-3 text-sm">
-          <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-            <div class="text-xs text-slate-500">Descripción</div>
-            <div class="mt-1 font-semibold text-slate-800">${safeText(item.descripcion)}</div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Unidad</div>
-              <div class="mt-1 text-slate-800">${safeText(item.unidad_clave)}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Estado</div>
-              <div class="mt-1 text-slate-800">${safeText(stateLabel(item.estado))}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Empresa</div>
-              <div class="mt-1 text-slate-800">${safeText(item.empresa, 'Sin empresa')}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Rastreo</div>
-              <div class="mt-1 text-slate-800 break-all">${safeText(item.codigo_rastreo, 'Sin rastreo')}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Residente</div>
-              <div class="mt-1 text-slate-800">${safeText(item.residente_nombre, 'No asignado')}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Guardia</div>
-              <div class="mt-1 text-slate-800">${safeText(item.guardia_nombre)}</div>
-            </div>
-          </div>
-
-          ${
-            item.notas
-              ? `
-                <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-                  <div class="text-xs text-slate-500">Notas</div>
-                  <div class="mt-1 text-slate-800 whitespace-pre-line">${safeText(item.notas, '')}</div>
-                </div>
-              `
-              : ''
-          }
-
-          <div class="flex justify-end">
-            <button type="button" id="pkgDetailClose" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm">
-              Cerrar
-            </button>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Cerrar</button>
           </div>
         </div>
       `);
@@ -359,12 +312,14 @@
         if (!isAlive() || token !== state.actionToken) return;
 
         openModal('Error', `
-          <div class="space-y-4">
-            <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              ${safeText(e.message, 'No se pudo actualizar el estado del paquete.')}
+          <div class="flex min-h-0 flex-1 flex-col">
+            <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+              <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                ${safeText(e.message, 'No se pudo actualizar el estado del paquete.')}
+              </div>
             </div>
-            <div class="flex justify-end">
-              <button type="button" id="pkgErrClose" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm">
+            <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <button type="button" id="pkgErrClose" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">
                 Entendido
               </button>
             </div>
@@ -387,46 +342,50 @@
 
     function openNewModal() {
       openModal('Nuevo paquete', `
-        <form id="frmNewPkg" class="space-y-3">
+        <form id="frmNewPkg" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+
           <div>
-            <label class="text-xs text-slate-500">Unidad *</label>
-            <select id="pkgUnidad" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Unidad *</label></div>
+            <select id="pkgUnidad" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
               <option value="">Cargando unidades…</option>
             </select>
           </div>
 
           <div>
-            <label class="text-xs text-slate-500">Residente destinatario *</label>
-            <select id="pkgResidente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" disabled>
+            <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Residente destinatario *</label></div>
+            <select id="pkgResidente" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" disabled>
               <option value="">Selecciona primero una unidad</option>
             </select>
           </div>
 
           <div>
-            <label class="text-xs text-slate-500">Empresa</label>
-            <input id="pkgEmpresa" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Amazon, DHL..." />
+            <div class="mb-1"><label class="text-xs font-medium text-slate-600">Empresa</label></div>
+            <input id="pkgEmpresa" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" placeholder="Amazon, DHL..." />
           </div>
 
           <div>
-            <label class="text-xs text-slate-500">Descripción *</label>
-            <input id="pkgDesc" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+            <div class="mb-1"><label class="text-xs font-medium text-slate-600">Descripción *</label></div>
+            <input id="pkgDesc" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" />
           </div>
 
           <div>
-            <label class="text-xs text-slate-500">Rastreo</label>
-            <input id="pkgTrack" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+            <div class="mb-1"><label class="text-xs font-medium text-slate-600">Rastreo</label></div>
+            <input id="pkgTrack" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" />
           </div>
 
           <div>
-            <label class="text-xs text-slate-500">Notas</label>
-            <textarea id="pkgNotas" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" rows="3"></textarea>
+            <div class="mb-1"><label class="text-xs font-medium text-slate-600">Notas</label></div>
+            <textarea id="pkgNotas" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" rows="3"></textarea>
           </div>
 
           <div id="pkgErr" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
 
-          <div class="flex items-center justify-end gap-2">
-            <button type="button" id="pkgCancel" class="rounded-xl border border-slate-200 px-4 py-2 text-sm">Cancelar</button>
-            <button type="submit" id="pkgSave" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm shadow">Guardar</button>
+
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="pkgCancel" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" id="pkgSave" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
           </div>
         </form>
       `);

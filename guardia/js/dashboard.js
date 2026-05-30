@@ -292,29 +292,20 @@
   }
 
   function renderNotificationsContent(items = []) {
+    let innerContent = '';
     if (!items.length) {
-      return `
-        <div class="space-y-3">
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+      innerContent = `
+          <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
             No hay alertas operativas por el momento.
-          </div>
-          <div class="flex justify-end">
-            <button type="button" id="guardRefreshLocalData" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">
-              Actualizar base local
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="space-y-3">
-        <div class="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-xs text-sky-800">
+          </div>`;
+    } else {
+      innerContent = `
+        <div class="rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-xs text-sky-800">
           Revisa estos cambios para mantener actualizada la base local de accesos del guardia.
         </div>
-        <div class="space-y-3 max-h-[58vh] overflow-y-auto pr-1">
+        <div class="space-y-3 mt-3">
           ${items.map((item) => `
-            <article class="rounded-2xl border ${item.status === 'permitido' ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'} px-4 py-4">
+            <article class="rounded-xl border ${item.status === 'permitido' ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'} px-4 py-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.resident_name || 'Residente')}</div>
@@ -329,13 +320,22 @@
             </article>
           `).join('')}
         </div>
-        <div class="flex justify-end">
-          <button type="button" id="guardRefreshLocalData" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">
-            Actualizar base local
-          </button>
+      `;
+    }
+
+    return `
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cerrar</button>
+            <button type="button" id="guardRefreshLocalData" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">
+              Actualizar local
+            </button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
   }
 
   function initShellHeader() {
@@ -796,7 +796,12 @@
   }
 
   async function openNotifications() {
-    openModal('Notificaciones operativas', `<div class="text-sm text-slate-500">Cargando alertas…</div>`);
+    openModal('Notificaciones operativas', `
+      <div class="flex min-h-0 flex-1 flex-col">
+        <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          <div class="text-sm text-slate-500">Cargando alertas…</div>
+        </div>
+      </div>`);
 
     try {
       const json = await fetchJSON(`${API}notificaciones.php`);
@@ -816,13 +821,18 @@
       }
     } catch (e) {
       if (els.modalBody) {
-        els.modalBody.innerHTML = `<div class="text-sm text-rose-600">No se pudieron cargar las alertas operativas.</div>`;
+        els.modalBody.innerHTML = `<div class="flex min-h-0 flex-1 flex-col"><div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]"><div class="text-sm text-rose-600">No se pudieron cargar las alertas operativas.</div></div></div>`;
       }
     }
   }
 
   async function openReglamento() {
-    openModal('Reglamento', `<div class="text-sm text-slate-500">Cargando reglamento…</div>`);
+    openModal('Reglamento', `
+      <div class="flex min-h-0 flex-1 flex-col">
+        <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          <div class="text-sm text-slate-500">Cargando reglamento…</div>
+        </div>
+      </div>`);
 
     try {
       const json = await fetchJSON(`${API}reglamento.php`);
@@ -830,11 +840,7 @@
 
       if (!r) {
         if (els.modalBody) {
-          els.modalBody.innerHTML = `
-            <div class="text-sm text-slate-600">
-              No hay reglamento público registrado para este residencial.
-            </div>
-          `;
+          els.modalBody.innerHTML = `<div class="flex min-h-0 flex-1 flex-col"><div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]"><div class="text-sm text-slate-600">No hay reglamento público registrado para este residencial.</div></div><div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"><button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Entendido</button></div></div>`;
         }
         return;
       }

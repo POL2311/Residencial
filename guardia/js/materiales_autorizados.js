@@ -41,30 +41,13 @@
     function openMaterialDetail(item) {
       if (typeof openModal !== 'function' || !item) return;
       openModal('Detalle del permiso', `
-        <div class="space-y-4">
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="text-lg font-semibold text-slate-800">${escapeHtml(item.tipo_movimiento === 'salida' ? 'Salida autorizada' : 'Entrada autorizada')}</div>
-            <span class="rounded-full px-2.5 py-1 text-xs ${item.estado === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'}">${escapeHtml(item.estado || '')}</span>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div>
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Responsable</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.responsable_nombre || 'Sin responsable')}</div>
-            </div>
-            <div>
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Área</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.area_nombre || 'Sin área')}</div>
-            </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Cerrar</button>
           </div>
-          <div class="space-y-2">
-            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Materiales</div>
-            ${(item.items || []).map((row) => `
-              <div class="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                ${escapeHtml(row.material_nombre || '')} · ${escapeHtml(row.cantidad_texto || '')}
-              </div>
-            `).join('')}
-          </div>
-          <div class="text-xs text-slate-500">Aprobado: ${escapeHtml(item.aprobado_at || '—')}</div>
         </div>
       `);
     }
@@ -258,76 +241,11 @@
 
       if (typeof openModal !== 'function') return;
       openModal('Nueva solicitud de materiales', `
-        <form id="guardMaterialRequestForm" class="space-y-4">
-          <div id="guardMaterialRequestError" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
-
-          <div class="grid gap-3 md:grid-cols-3">
-            <div>
-              <label class="mb-1 block text-xs font-medium text-slate-600">Tipo</label>
-              <select name="tipo_movimiento" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20">
-                <option value="entrada">Entrada</option>
-                <option value="salida">Salida</option>
-              </select>
-            </div>
-            <div>
-              <label class="mb-1 block text-xs font-medium text-slate-600">Responsable interno</label>
-              <select id="guardMaterialResponsable" name="responsable_user_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
-            </div>
-            <div>
-              <label class="mb-1 block text-xs font-medium text-slate-600">Área</label>
-              <select id="guardMaterialArea" name="area_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
-            </div>
+        ${newInner}
           </div>
-
-          <div>
-            <label class="mb-1 block text-xs font-medium text-slate-600">Notas</label>
-            <textarea name="notas" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Describe qué intentan ingresar o sacar."></textarea>
-          </div>
-
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div class="mb-3 flex items-center justify-between gap-3">
-              <div>
-                <div class="text-sm font-semibold text-slate-800">Items de la solicitud</div>
-                <p class="text-xs text-slate-500">Agrega materiales uno por uno y se irán acumulando abajo.</p>
-              </div>
-              <button type="button" id="btnGuardAddMaterialItem" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Agregar item
-              </button>
-            </div>
-
-            <div class="rounded-2xl border border-slate-200 bg-white p-4">
-              <div class="grid gap-3 md:grid-cols-[1.2fr_0.8fr]">
-                <div>
-                  <label class="mb-1 block text-xs font-medium text-slate-600">Material</label>
-                  <select id="guardMaterialItemMaterial" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20"></select>
-                </div>
-                <div>
-                  <label class="mb-1 block text-xs font-medium text-slate-600">Cantidad / detalle</label>
-                  <input id="guardMaterialItemCantidad" type="text" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Ej. 2 bultos, 1 compresor" />
-                </div>
-              </div>
-              <div id="guardMaterialManualWrap" class="mt-3 hidden grid gap-3 md:grid-cols-[1fr_auto]">
-                <div>
-                  <label class="mb-1 block text-xs font-medium text-slate-600">Nombre manual</label>
-                  <input id="guardMaterialManualName" type="text" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5D73]/20" placeholder="Escribe si no existe en catálogo" />
-                </div>
-                <label class="flex items-center gap-2 text-sm text-slate-700 md:pb-2">
-                  <input id="guardMaterialAddCatalog" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-[#2E5D73] focus:ring-[#2E5D73]/20" />
-                  Agregar al catálogo
-                </label>
-              </div>
-            </div>
-
-            <div id="guardMaterialItemsList" class="mt-3 space-y-2"></div>
-          </div>
-
-          <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button type="button" id="btnGuardMaterialCancel" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
-              Cancelar
-            </button>
-            <button type="submit" id="btnGuardMaterialSubmit" class="rounded-2xl bg-[#2E5D73] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-95">
-              Enviar solicitud
-            </button>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="btnGuardMaterialCancel" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" id="btnGuardMaterialSubmit" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Enviar solicitud</button>
           </div>
         </form>
       `);

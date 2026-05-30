@@ -31,9 +31,9 @@
 
     function formRow(label, inputHtml) {
       return `
-        <div class="rounded-xl bg-slate-50 px-3 py-2 border border-slate-200">
-          <div class="text-xs text-slate-500">${label}</div>
-          <div class="mt-1">${inputHtml}</div>
+        <div>
+          <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">${label}</label></div>
+          ${inputHtml}
         </div>
       `;
     }
@@ -84,16 +84,12 @@
       if (!el) return;
 
       if (!msg) {
-        el.className = 'hidden rounded-xl px-3 py-2 text-sm';
+        el.className = 'hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700';
         el.textContent = '';
         return;
       }
 
-      el.className =
-        'rounded-xl px-3 py-2 text-sm ' +
-        (isError
-          ? 'bg-rose-50 border border-rose-200 text-rose-700'
-          : 'bg-emerald-50 border border-emerald-200 text-emerald-700');
+      el.className = 'rounded-xl border px-3 py-2 text-xs ' + (isError ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700');
 
       el.textContent = msg;
     }
@@ -304,19 +300,12 @@
 
     function showTempPasswordModal(tempPassword, item, onDone) {
       openModal('Propietario creado', `
-        <div class="space-y-4">
-          <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <div class="font-semibold text-emerald-700">Propietario creado correctamente</div>
-            <div class="text-sm text-slate-600 mt-1">Contraseña temporal:</div>
-            <div class="mt-2 break-all rounded-lg bg-white border px-3 py-2 font-mono text-sm text-slate-800">
-              ${escapeHtml(tempPassword || '—')}
-            </div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-
-          <div class="flex justify-end gap-2">
-            <button type="button" id="btnTempPwdOk" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">
-              Continuar
-            </button>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="btnTempPwdOk" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Continuar</button>
           </div>
         </div>
       `);
@@ -329,13 +318,14 @@
 
     function openCreateUnidad(onDone) {
       openModal('Nueva unidad', `
-        <form id="frmUnidad" class="space-y-3">
+        <form id="frmUnidad" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div id="msgU" class="hidden rounded-xl px-3 py-2 text-sm"></div>
 
-          ${formRow('Clave *', `<input name="clave" class="w-full rounded-xl border px-3 py-2" required />`)}
+          ${formRow('Clave *', `<input name="clave" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" required />`)}
 
           ${formRow('Tipo',
-            `<select name="tipo" class="w-full rounded-xl border px-3 py-2">
+            `<select name="tipo" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">
               <option value="casa">Casa</option>
               <option value="departamento">Departamento</option>
               <option value="local">Local</option>
@@ -343,9 +333,10 @@
             </select>`
           )}
 
-          <div class="flex justify-end gap-2">
-            <button type="button" id="cancelU" class="border px-4 py-2 rounded-xl">Cancelar</button>
-            <button type="submit" id="submitU" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Crear</button>
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="cancelU" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" id="submitU" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Crear</button>
           </div>
         </form>
       `);
@@ -373,17 +364,19 @@
 
     function openCreateProp(defaultUnidad, onDone) {
       openModal('Nuevo propietario', `
-        <form id="frmProp" class="space-y-3">
+        <form id="frmProp" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div id="msgP" class="hidden rounded-xl px-3 py-2 text-sm"></div>
 
-          ${formRow('Nombre *', `<input name="name" class="w-full rounded-xl border px-3 py-2" required />`)}
-          ${formRow('Email *', `<input name="email" type="email" class="w-full rounded-xl border px-3 py-2" required />`)}
-          ${formRow('Teléfono', `<input name="telefono" class="w-full rounded-xl border px-3 py-2" />`)}
+          ${formRow('Nombre *', `<input name="name" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" required />`)}
+          ${formRow('Email *', `<input name="email" type="email" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" required />`)}
+          ${formRow('Teléfono', `<input name="telefono" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" />`)}
           <input type="hidden" name="unidad_id" value="${escapeHtml(defaultUnidad || '')}" />
 
-          <div class="flex justify-end gap-2">
-            <button type="button" id="cancelP" class="border px-4 py-2 rounded-xl">Cancelar</button>
-            <button type="submit" id="submitP" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Crear</button>
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="cancelP" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" id="submitP" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Crear</button>
           </div>
         </form>
       `);
@@ -418,34 +411,30 @@
       const props = await getPropietarios();
 
       openModal('Nuevo auto', `
-        <form id="frmAuto" class="space-y-3">
+        <form id="frmAuto" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div id="msgA" class="hidden rounded-xl px-3 py-2 text-sm"></div>
 
-          ${formRow('Placas *', `<input name="placas" class="w-full rounded-xl border px-3 py-2" required />`)}
-          ${formRow('Modelo', `<input name="modelo" class="w-full rounded-xl border px-3 py-2" />`)}
-          ${formRow('Color', `<input name="color" class="w-full rounded-xl border px-3 py-2" />`)}
+          ${formRow('Placas *', `<input name="placas" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" required />`)}
+          ${formRow('Modelo', `<input name="modelo" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" />`)}
+          ${formRow('Color', `<input name="color" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" />`)}
 
-          <div class="rounded-xl bg-slate-50 border px-3 py-2">
-            <div class="flex justify-between text-xs text-slate-500">
-              <span>Unidad</span>
-              <button type="button" id="addUnidad" class="text-[#4E7287]">+ Nueva</button>
-            </div>
-            <select name="unidad_id" id="selUnidad" class="w-full border rounded-xl px-3 py-2 mt-1"></select>
+          <div>
+            <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Unidad</label><button type="button" id="addUnidad" class="text-xs font-medium text-[#4E7287] hover:underline">+ Unidad</button></div>
+            <select name="unidad_id" id="selUnidad" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
           </div>
 
-          <div class="rounded-xl bg-slate-50 border px-3 py-2">
-            <div class="flex justify-between text-xs text-slate-500">
-              <span>Propietario</span>
-              <button type="button" id="addProp" class="text-[#4E7287]">+ Nuevo</button>
-            </div>
-            <select name="propietario_user_id" id="selProp" class="w-full border rounded-xl px-3 py-2 mt-1"></select>
+          <div>
+            <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Propietario</label><button type="button" id="addProp" class="text-xs font-medium text-[#4E7287] hover:underline">+ Propietario</button></div>
+            <select name="propietario_user_id" id="selProp" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>
           </div>
 
-          ${formRow('Notas', `<textarea name="notas" class="w-full rounded-xl border px-3 py-2"></textarea>`)}
+          ${formRow('Notas', `<textarea name="notas" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></textarea>`)}
 
-          <div class="flex justify-end gap-2">
-            <button type="button" id="cancelA" class="border px-4 py-2 rounded-xl">Cancelar</button>
-            <button type="submit" id="submitA" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Guardar</button>
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="cancelA" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" id="submitA" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
           </div>
         </form>
       `);
@@ -499,26 +488,27 @@
       const props = await getPropietarios();
 
       openModal('Editar auto', `
-        <form id="frmEdit" class="space-y-3">
+        <form id="frmEdit" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div id="msgE" class="hidden rounded-xl px-3 py-2 text-sm"></div>
 
           <input type="hidden" name="auto_id" value="${escapeHtml(a.id)}" />
 
-          ${formRow('Placas *', `<input name="placas" value="${safeText(a.placas, '')}" class="w-full border px-3 py-2 rounded-xl" required />`)}
-          ${formRow('Modelo', `<input name="modelo" value="${safeText(a.modelo, '')}" class="w-full border px-3 py-2 rounded-xl" />`)}
-          ${formRow('Color', `<input name="color" value="${safeText(a.color, '')}" class="w-full border px-3 py-2 rounded-xl" />`)}
-          ${formRow('Unidad', `<select name="unidad_id" id="selUEdit" class="w-full border px-3 py-2 rounded-xl"></select>`)}
-          ${formRow('Propietario', `<select name="propietario_user_id" id="selPEdit" class="w-full border px-3 py-2 rounded-xl"></select>`)}
-          ${formRow('Notas', `<textarea name="notas" class="w-full border px-3 py-2 rounded-xl">${safeText(a.notas || '', '')}</textarea>`)}
+          ${formRow('Placas *', `<input name="placas" value="${safeText(a.placas, '')}" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" required />`)}
+          ${formRow('Modelo', `<input name="modelo" value="${safeText(a.modelo, '')}" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" />`)}
+          ${formRow('Color', `<input name="color" value="${safeText(a.color, '')}" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15" />`)}
+          ${formRow('Unidad', `<select name="unidad_id" id="selUEdit" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>`)}
+          ${formRow('Propietario', `<select name="propietario_user_id" id="selPEdit" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15"></select>`)}
+          ${formRow('Notas', `<textarea name="notas" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">${safeText(a.notas || '', '')}</textarea>`)}
 
-          <div class="flex justify-between items-center">
-            <button type="button" id="delA" class="text-rose-700 hover:underline">
+          </div>
+          <div class="flex shrink-0 items-center justify-between gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="delA" class="min-h-11 shrink-0 rounded-xl px-3 text-sm font-medium text-rose-700 transition hover:bg-rose-50">
               Desactivar
             </button>
-
-            <div class="flex gap-2">
-              <button type="button" id="cancelEdit" class="border px-4 py-2 rounded-xl">Cancelar</button>
-              <button type="submit" id="submitE" class="bg-[#4E7287] text-white px-4 py-2 rounded-xl">Guardar</button>
+            <div class="flex items-center gap-2">
+              <button type="button" id="cancelEdit" class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+              <button type="submit" id="submitE" class="min-h-11 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
             </div>
           </div>
         </form>

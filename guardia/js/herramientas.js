@@ -160,37 +160,13 @@
     function openNewLoanModal() {
       if (typeof openModal !== 'function') return;
       openModal('Nuevo préstamo', `
-        <form id="herrNewLoanForm" class="space-y-3">
-          <div id="herrNewLoanError" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Herramienta</label>
-            <select id="herrToolSelect" name="herramienta_id" class="w-full rounded-xl border px-3 py-2 text-sm" required></select>
+        <form id="herrNewLoanForm" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${newInner}
           </div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Unidad</label>
-            <select id="herrUnitSelect" name="unidad_id" class="w-full rounded-xl border px-3 py-2 text-sm" required></select>
-          </div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Residente (opcional)</label>
-            <select id="herrResidentSelect" name="residente_id" class="w-full rounded-xl border px-3 py-2 text-sm">
-              <option value="">—</option>
-            </select>
-          </div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Notas (opcional)</label>
-            <textarea name="notas" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm" placeholder="Detalle del préstamo…"></textarea>
-          </div>
-          <div>
-            <div class="text-xs text-slate-600">Evidencias (opcional, máximo 3)</div>
-            <div class="mt-2 grid gap-2 sm:grid-cols-3">
-              <input type="file" name="evidencia_1" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
-              <input type="file" name="evidencia_2" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
-              <input type="file" name="evidencia_3" accept="image/*" class="w-full rounded-xl border bg-white px-3 py-2 text-xs" />
-            </div>
-          </div>
-          <div class="flex justify-end gap-2 pt-2">
-            <button type="button" id="herrNewLoanCancel" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
-            <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Guardar</button>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="herrNewLoanCancel" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
           </div>
         </form>
       `);

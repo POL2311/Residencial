@@ -10,29 +10,12 @@
     function openPersonDetail(item) {
       if (typeof openModal !== 'function' || !item) return;
       openModal('Detalle de personal dentro', `
-        <div class="space-y-4">
-          <div class="flex items-start gap-4">
-            <div class="h-20 w-20 overflow-hidden rounded-2xl bg-slate-100">
-              ${item.foto_url ? `<img src="${escapeHtml(item.foto_url)}" alt="${escapeHtml(item.nombre)}" class="h-full w-full object-cover" loading="lazy" />` : `<div class="flex h-full items-center justify-center text-xs text-slate-400">Sin foto</div>`}
-            </div>
-            <div class="min-w-0">
-              <div class="text-lg font-semibold text-slate-800">${escapeHtml(item.nombre || '')}</div>
-              <div class="mt-1 text-sm text-slate-600">${escapeHtml(item.empresa || 'Sin empresa')} · ${escapeHtml(item.puesto || 'Sin puesto')}</div>
-            </div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div>
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Área</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.area_nombre || 'Sin área')}</div>
-            </div>
-            <div>
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Teléfono</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.telefono || 'Sin teléfono')}</div>
-            </div>
-            <div class="sm:col-span-2">
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Última entrada</div>
-              <div class="text-sm text-sky-700">${escapeHtml(item.ultima_entrada_at || '—')}</div>
-            </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Cerrar</button>
           </div>
         </div>
       `);

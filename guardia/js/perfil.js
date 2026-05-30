@@ -101,14 +101,15 @@
 
     function openNameModal() {
       openModal('Actualizar nombre', `
-        <div class="space-y-3">
-          <input id="m_name"
-            value="${escapeHtml(state.perfil?.user?.name || '')}"
-            class="w-full rounded-xl border px-3 py-2 text-sm">
-          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
-            Guardar
-          </button>
-          <div id="m_error" class="text-sm text-rose-600"></div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            ${'<div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Nombre</label></div><input id="m_name" value="' + escapeHtml(state.perfil?.user?.name || '') + '" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">'}
+            <div id="m_error" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="button" id="m_save" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
+          </div>
         </div>
       `);
 
@@ -122,26 +123,22 @@
           showAlert('ok', 'Nombre actualizado.');
         } catch (e) {
           const errorEl = document.getElementById('m_error');
-          if (errorEl) errorEl.textContent = e.message || 'No se pudo actualizar el nombre.';
+          if (errorEl) { errorEl.textContent = e.message || 'No se pudo actualizar el nombre.'; errorEl.classList.remove('hidden'); }
         }
       });
     }
 
     function openEmailModal() {
       openModal('Actualizar correo', `
-        <div class="space-y-3">
-          <input id="m_email"
-            type="email"
-            value="${escapeHtml(state.perfil?.user?.email || '')}"
-            class="w-full rounded-xl border px-3 py-2 text-sm">
-          <input id="m_pwd"
-            type="password"
-            placeholder="Contraseña actual"
-            class="w-full rounded-xl border px-3 py-2 text-sm">
-          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
-            Guardar
-          </button>
-          <div id="m_error" class="text-sm text-rose-600"></div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            ${'<div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Nuevo correo</label></div><input id="m_email" type="email" value="' + escapeHtml(state.perfil?.user?.email || '') + '" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15 mb-3"><div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Contraseña actual</label></div><input id="m_pwd" type="password" placeholder="Requerida para confirmar" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">'}
+            <div id="m_error" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="button" id="m_save" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
+          </div>
         </div>
       `);
 
@@ -159,26 +156,22 @@
           showAlert('ok', 'Correo actualizado.');
         } catch (e) {
           const errorEl = document.getElementById('m_error');
-          if (errorEl) errorEl.textContent = e.message || 'No se pudo actualizar el correo.';
+          if (errorEl) { errorEl.textContent = e.message || 'No se pudo actualizar el correo.'; errorEl.classList.remove('hidden'); }
         }
       });
     }
 
     function openPhoneModal() {
       openModal('Actualizar teléfono', `
-        <div class="space-y-3">
-          <input id="m_phone"
-            value="${escapeHtml(state.perfil?.user?.telefono || '')}"
-            class="w-full rounded-xl border px-3 py-2 text-sm"
-            placeholder="Teléfono">
-          <input id="m_pwd"
-            type="password"
-            placeholder="Contraseña actual"
-            class="w-full rounded-xl border px-3 py-2 text-sm">
-          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
-            Guardar
-          </button>
-          <div id="m_error" class="text-sm text-rose-600"></div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            ${'<div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Nuevo teléfono</label></div><input id="m_phone" value="' + escapeHtml(state.perfil?.user?.telefono || '') + '" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15 mb-3" placeholder="10 dígitos"><div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Contraseña actual</label></div><input id="m_pwd" type="password" placeholder="Requerida para confirmar" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">'}
+            <div id="m_error" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="button" id="m_save" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
+          </div>
         </div>
       `);
 
@@ -196,21 +189,22 @@
           showAlert('ok', 'Teléfono actualizado.');
         } catch (e) {
           const errorEl = document.getElementById('m_error');
-          if (errorEl) errorEl.textContent = e.message || 'No se pudo actualizar el teléfono.';
+          if (errorEl) { errorEl.textContent = e.message || 'No se pudo actualizar el teléfono.'; errorEl.classList.remove('hidden'); }
         }
       });
     }
 
     function openPasswordModal() {
       openModal('Cambiar contraseña', `
-        <div class="space-y-3">
-          <input id="m_cur" type="password" placeholder="Contraseña actual" class="w-full rounded-xl border px-3 py-2 text-sm">
-          <input id="m_new" type="password" placeholder="Nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-sm">
-          <input id="m_new2" type="password" placeholder="Confirmar nueva contraseña" class="w-full rounded-xl border px-3 py-2 text-sm">
-          <button id="m_save" class="w-full rounded-xl bg-[#2E5D73] text-white py-2">
-            Guardar
-          </button>
-          <div id="m_error" class="text-sm text-rose-600"></div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            ${'<div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Contraseña actual</label></div><input id="m_cur" type="password" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15 mb-3"><div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Nueva contraseña</label></div><input id="m_new" type="password" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15 mb-3"><div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">Confirmar nueva contraseña</label></div><input id="m_new2" type="password" class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base text-slate-800 outline-none transition focus:border-[#4E7287] focus:ring-2 focus:ring-[#4E7287]/15">'}
+            <div id="m_error" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"></div>
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="button" id="m_save" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
+          </div>
         </div>
       `);
 
@@ -225,7 +219,7 @@
           showAlert('ok', 'Contraseña actualizada.');
         } catch (e) {
           const errorEl = document.getElementById('m_error');
-          if (errorEl) errorEl.textContent = e.message || 'No se pudo actualizar la contraseña.';
+          if (errorEl) { errorEl.textContent = e.message || 'No se pudo actualizar la contraseña.'; errorEl.classList.remove('hidden'); }
         }
       });
     }
