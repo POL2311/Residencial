@@ -31,112 +31,141 @@
     </div>
   </div>
 
-  <div id="catalogoModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 p-0 md:items-center md:p-4">
-    <div class="app-admin-modal-card w-full max-w-lg rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
-      <div class="app-admin-modal-header flex items-center justify-between border-b bg-slate-50 px-4 py-3">
-        <h2 id="catalogoModalTitle" class="text-base font-semibold">Nuevo material</h2>
-        <button id="btnCatalogoClose" type="button" class="h-9 w-9 rounded-full border bg-white hover:bg-slate-100">✕</button>
+  <div id="catalogoModal" class="hidden fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm">
+    <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+      <div class="flex max-h-[min(86dvh,640px)] w-full max-w-lg flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+        <!-- Header -->
+        <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+          <div class="min-w-0">
+            <h2 id="catalogoModalTitle" class="text-base font-semibold leading-tight text-slate-900">Nuevo material</h2>
+            <p class="mt-1 text-xs leading-5 text-slate-500">Agrega o edita la información del catálogo de materiales.</p>
+          </div>
+          <button id="btnCatalogoClose" type="button" aria-label="Cerrar formulario" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center font-bold">✕</button>
+        </div>
+        <!-- Form -->
+        <form id="catalogoForm" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3">
+            <input type="hidden" name="id" />
+            <div id="catalogoError" class="hidden rounded-xl bg-rose-100 px-4 py-3 text-sm text-rose-700"></div>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Nombre</label>
+              <input name="nombre" type="text" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" placeholder="Ej. Escalera de aluminio" required />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Categoría</label>
+              <input name="categoria" type="text" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" placeholder="Ej. Herramientas / Construcción" />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Descripción</label>
+              <textarea name="descripcion" rows="3" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" placeholder="Detalle adicional sobre el material o equipo..."></textarea>
+            </div>
+            <label class="flex items-center gap-3 text-sm font-medium text-slate-700 cursor-pointer select-none">
+              <input type="checkbox" name="activo" value="1" checked class="h-5 w-5 rounded-md border-slate-300 text-[#2E5D73] focus:ring-[#2E5D73]/20" />
+              <span>Material activo</span>
+            </label>
+          </div>
+          <!-- Footer -->
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button id="btnCatalogoCancel" type="button" class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="min-h-11 flex-1 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
+          </div>
+        </form>
       </div>
-      <form id="catalogoForm" class="flex min-h-0 flex-1 flex-col">
-        <div class="app-admin-modal-body space-y-3 p-4">
-          <input type="hidden" name="id" />
-          <div id="catalogoError" class="hidden rounded-xl bg-rose-100 px-4 py-3 text-sm text-rose-700"></div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Nombre</label>
-            <input name="nombre" type="text" class="w-full rounded-xl border px-3 py-2 text-sm" required />
-          </div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Categoría</label>
-            <input name="categoria" type="text" class="w-full rounded-xl border px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Descripción</label>
-            <textarea name="descripcion" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm"></textarea>
-          </div>
-          <label class="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" name="activo" value="1" checked />
-            Material activo
-          </label>
-        </div>
-        <div class="app-admin-modal-footer flex flex-col-reverse gap-2 border-t bg-white px-4 py-3 sm:flex-row sm:justify-end">
-          <button id="btnCatalogoCancel" type="button" class="rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">Cancelar</button>
-          <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Guardar</button>
-        </div>
-      </form>
     </div>
   </div>
 
-  <div id="permisoModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 p-0 md:items-center md:p-4">
-    <div class="app-admin-modal-card w-full max-w-3xl rounded-t-2xl bg-white shadow-2xl md:rounded-2xl">
-      <div class="app-admin-modal-header flex items-center justify-between border-b bg-slate-50 px-4 py-3">
-        <h2 id="permisoModalTitle" class="text-base font-semibold">Nuevo permiso</h2>
-        <button id="btnPermisoClose" type="button" class="h-9 w-9 rounded-full border bg-white hover:bg-slate-100">✕</button>
+  <div id="permisoModal" class="hidden fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm">
+    <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+      <div class="flex max-h-[min(90dvh,800px)] w-full max-w-3xl flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+        <!-- Header -->
+        <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+          <div class="min-w-0">
+            <h2 id="permisoModalTitle" class="text-base font-semibold leading-tight text-slate-900">Nuevo permiso</h2>
+            <p class="mt-1 text-xs leading-5 text-slate-500">Registra y autoriza la entrada o salida de materiales de la residencial.</p>
+          </div>
+          <button id="btnPermisoClose" type="button" aria-label="Cerrar formulario" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center font-bold">✕</button>
+        </div>
+        <!-- Form -->
+        <form id="permisoForm" class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3">
+            <input type="hidden" name="id" />
+            <div id="permisoError" class="hidden rounded-xl bg-rose-100 px-4 py-3 text-sm text-rose-700"></div>
+            
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Tipo de movimiento</label>
+                <div class="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 min-h-11 items-center">
+                  <label class="relative flex cursor-pointer items-center justify-center">
+                    <input type="radio" name="tipo_movimiento" value="entrada" class="peer sr-only" checked />
+                    <span class="w-full rounded-lg py-1.5 text-center text-sm font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-slate-800 peer-checked:shadow-sm">
+                      Entrada
+                    </span>
+                  </label>
+                  <label class="relative flex cursor-pointer items-center justify-center">
+                    <input type="radio" name="tipo_movimiento" value="salida" class="peer sr-only" />
+                    <span class="w-full rounded-lg py-1.5 text-center text-sm font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-slate-800 peer-checked:shadow-sm">
+                      Salida
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Responsable interno</label>
+                <select name="responsable_user_id" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"></select>
+              </div>
+              <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Área</label>
+                <select name="area_id" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"></select>
+              </div>
+            </div>
+            
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Notas</label>
+              <textarea name="notas" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" placeholder="Detalles de la autorización..."></textarea>
+            </div>
+            
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="text-sm font-semibold text-slate-700">Agregar materiales al permiso</div>
+                <button id="btnAddPermisoItem" type="button" class="min-h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm">+ Agregar item</button>
+              </div>
+
+              <div class="rounded-xl border border-slate-200 bg-white p-3 space-y-3 shadow-sm">
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-[1.2fr_1fr]">
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-600">Material</label>
+                    <select id="permisoItemMaterial" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white">
+                      <option value="">Selecciona un material</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-600">Cantidad / detalle</label>
+                    <input id="permisoItemCantidad" type="text" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" placeholder="Ej. 2 cajas / 1 compresor" />
+                  </div>
+                </div>
+
+                <div id="permisoItemManualWrap" class="mt-3 hidden grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] items-end">
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-600">Nombre manual</label>
+                    <input id="permisoItemNombreManual" type="text" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" placeholder="Escribe si no está en el catálogo" />
+                  </div>
+                  <label class="flex items-center gap-3 text-sm font-medium text-slate-700 cursor-pointer select-none min-h-11 pb-1 md:pb-2">
+                    <input id="permisoItemAgregarCatalogo" type="checkbox" class="h-5 w-5 rounded-md border-slate-300 text-[#2E5D73] focus:ring-[#2E5D73]/20" />
+                    <span>Agregar al catálogo</span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="permisoItemsList" class="space-y-2"></div>
+            </div>
+          </div>
+          <!-- Footer -->
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button id="btnPermisoCancel" type="button" class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit" class="min-h-11 flex-1 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
+          </div>
+        </form>
       </div>
-      <form id="permisoForm" class="flex min-h-0 flex-1 flex-col">
-        <div class="app-admin-modal-body space-y-3 px-4 py-4">
-          <input type="hidden" name="id" />
-          <div id="permisoError" class="hidden rounded-xl bg-rose-100 px-4 py-3 text-sm text-rose-700"></div>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <div>
-              <label class="mb-1 block text-xs text-slate-600">Tipo</label>
-              <select name="tipo_movimiento" class="w-full rounded-xl border px-3 py-2 text-sm">
-                <option value="entrada">Entrada</option>
-                <option value="salida">Salida</option>
-              </select>
-            </div>
-            <div>
-              <label class="mb-1 block text-xs text-slate-600">Responsable interno</label>
-              <select name="responsable_user_id" class="w-full rounded-xl border px-3 py-2 text-sm"></select>
-            </div>
-            <div>
-              <label class="mb-1 block text-xs text-slate-600">Área</label>
-              <select name="area_id" class="w-full rounded-xl border px-3 py-2 text-sm"></select>
-            </div>
-          </div>
-          <div>
-            <label class="mb-1 block text-xs text-slate-600">Notas</label>
-            <textarea name="notas" rows="3" class="w-full rounded-xl border px-3 py-2 text-sm"></textarea>
-          </div>
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div class="mb-3 flex items-center justify-between">
-              <div class="text-sm font-semibold text-slate-700">Items del permiso</div>
-              <button id="btnAddPermisoItem" type="button" class="rounded-xl border px-3 py-2 text-xs hover:bg-white">+ Agregar item</button>
-            </div>
-
-            <div class="rounded-2xl border border-slate-200 bg-white p-3">
-              <div class="grid grid-cols-1 gap-3 md:grid-cols-[1.2fr_1fr]">
-                <div>
-                  <label class="mb-1 block text-xs text-slate-600">Material</label>
-                  <select id="permisoItemMaterial" class="w-full rounded-xl border px-3 py-2 text-sm">
-                    <option value="">Selecciona un material</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="mb-1 block text-xs text-slate-600">Cantidad / detalle</label>
-                  <input id="permisoItemCantidad" type="text" class="w-full rounded-xl border px-3 py-2 text-sm" placeholder="Ej. 2 cajas / 1 compresor" />
-                </div>
-              </div>
-
-              <div id="permisoItemManualWrap" class="mt-3 hidden grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
-                <div>
-                  <label class="mb-1 block text-xs text-slate-600">Nombre manual</label>
-                  <input id="permisoItemNombreManual" type="text" class="w-full rounded-xl border px-3 py-2 text-sm" placeholder="Escribe si no está en el catálogo" />
-                </div>
-                <label class="flex items-center gap-2 text-sm text-slate-700 md:pb-2">
-                  <input id="permisoItemAgregarCatalogo" type="checkbox" />
-                  Agregar al catálogo
-                </label>
-              </div>
-            </div>
-
-            <div id="permisoItemsList" class="space-y-2"></div>
-          </div>
-        </div>
-        <div class="app-admin-modal-footer flex flex-col-reverse gap-2 border-t bg-white px-4 py-3 sm:flex-row sm:justify-end">
-          <button id="btnPermisoCancel" type="button" class="rounded-xl border px-4 py-2 text-sm hover:bg-slate-50">Cancelar</button>
-          <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white hover:opacity-95">Guardar</button>
-        </div>
-      </form>
     </div>
   </div>
 </div>

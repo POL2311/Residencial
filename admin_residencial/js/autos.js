@@ -78,20 +78,24 @@
       <input type="hidden" name="auto_id" value="${escapeHtml(auto.auto_id)}">
       <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>
-          <label class="mb-1 block text-xs text-slate-600">Placas *</label>
-          <input name="placas" required maxlength="15" value="${escapeHtml(auto.placas || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <label class="mb-1 block text-xs font-medium text-slate-600">Placas *</label>
+          <input name="placas" required maxlength="15" value="${escapeHtml(auto.placas || '')}" 
+            class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15">
         </div>
         <div>
-          <label class="mb-1 block text-xs text-slate-600">Tag ID</label>
-          <input name="tag_id" maxlength="120" value="${escapeHtml(auto.tag_id || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <label class="mb-1 block text-xs font-medium text-slate-600">Tag ID</label>
+          <input name="tag_id" maxlength="120" value="${escapeHtml(auto.tag_id || '')}" 
+            class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15">
         </div>
         <div>
-          <label class="mb-1 block text-xs text-slate-600">Modelo</label>
-          <input name="modelo" maxlength="80" value="${escapeHtml(auto.modelo || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <label class="mb-1 block text-xs font-medium text-slate-600">Modelo</label>
+          <input name="modelo" maxlength="80" value="${escapeHtml(auto.modelo || '')}" 
+            class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15">
         </div>
         <div>
-          <label class="mb-1 block text-xs text-slate-600">Color</label>
-          <input name="color" maxlength="40" value="${escapeHtml(auto.color || '')}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+          <label class="mb-1 block text-xs font-medium text-slate-600">Color</label>
+          <input name="color" maxlength="40" value="${escapeHtml(auto.color || '')}" 
+            class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15">
         </div>
       </div>
       <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">

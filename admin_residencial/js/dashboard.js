@@ -350,12 +350,24 @@
     }
     const hasModal = hasActiveModal();
     els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
+    document.body.classList.toggle('os-modal-open', hasModal);
+
     if (els.mobileDockLayer) {
       els.mobileDockLayer.style.display = hasModal ? 'none' : '';
       els.mobileDockLayer.setAttribute('aria-hidden', hasModal ? 'true' : 'false');
+      if (hasModal) {
+        els.mobileDockLayer.setAttribute('inert', '');
+      } else {
+        els.mobileDockLayer.removeAttribute('inert');
+      }
     }
     if (els.footer) {
       els.footer.style.pointerEvents = hasModal ? 'none' : '';
+      if (hasModal) {
+        els.footer.setAttribute('inert', '');
+      } else {
+        els.footer.removeAttribute('inert');
+      }
     }
     if (hasModal) {
       closeMoreSheet();

@@ -103,6 +103,25 @@
     function syncDockModalState() {
         const hasModal = hasActiveModal();
         els.mobileDockLayer?.classList.toggle('dock-hidden-by-modal', hasModal);
+        document.body.classList.toggle('os-modal-open', hasModal);
+
+        if (els.mobileDockLayer) {
+            if (hasModal) {
+                els.mobileDockLayer.setAttribute('inert', '');
+            } else {
+                els.mobileDockLayer.removeAttribute('inert');
+            }
+        }
+
+        const footer = document.getElementById('shellFooter');
+        if (footer) {
+            if (hasModal) {
+                footer.setAttribute('inert', '');
+            } else {
+                footer.removeAttribute('inert');
+            }
+        }
+
         if (hasModal) {
             closeMoreSheet();
         } else if (!state.moreSheetOpen) {

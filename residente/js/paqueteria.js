@@ -109,7 +109,7 @@
         const json = await res.json().catch(() => null);
         if (!res.ok) {
             if (res.status === 404) {
-                throw new Error('No se encontró el endpoint de paquetería. Verifica que XAMPP esté sirviendo esta copia del proyecto.');
+                throw new Error(json?.error || 'No se encontró el endpoint de paquetería. Verifica que XAMPP esté sirviendo esta copia del proyecto.');
             }
             if (res.status === 403 || res.status === 422) {
                 throw new Error(json?.error || 'Tu cuenta residente no tiene una unidad activa configurada.');
@@ -191,7 +191,9 @@
 
     function bindRowActions(row, item) {
         row.querySelectorAll('[data-act]').forEach((btn) => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const act = btn.getAttribute('data-act');
 
                 if (act === 'view') {
@@ -342,9 +344,20 @@
         });
     });
 
-    els.modalForm?.addEventListener('submit', async (e) => {
+    // Evitar cualquier submit nativo del formulario
+    els.modalForm?.addEventListener('submit', (e) => {
         e.preventDefault();
+        e.stopPropagation();
+    });
+
+    els.btnSaveModal?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         hideAlert();
+
+        if (els.modalForm && !els.modalForm.reportValidity()) {
+            return;
+        }
 
         const fd = new FormData(els.modalForm);
         const action = els.modalAction.value || '';

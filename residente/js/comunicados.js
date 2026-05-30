@@ -66,10 +66,10 @@
 
         modal = document.createElement('div');
         modal.id = 'residentComunicadoImageModal';
-        modal.className = 'hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm';
+        modal.className = 'hidden fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm';
         modal.innerHTML = `
-          <div class="box-border flex h-full items-end justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 sm:items-center sm:p-4">
-            <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-2xl">
+          <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+            <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-2xl pointer-events-auto">
               <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
                 <div class="min-w-0">
                   <div id="residentComunicadoImageTitle" class="text-base font-semibold leading-tight text-slate-900">Imagen adjunta</div>

@@ -40,10 +40,10 @@
 
     let current = Math.max(0, Math.min(startIndex, urls.length - 1));
     const modal = document.createElement('div');
-    modal.className = 'app-admin-modal-overlay fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm';
     modal.innerHTML = `
-      <div class="min-h-full flex items-center justify-center">
-        <div class="app-admin-modal-card w-full max-w-4xl rounded-3xl bg-white shadow-2xl">
+      <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+        <div class="app-admin-modal-card w-full max-w-4xl rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
           <div class="app-admin-modal-header flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <div class="text-sm font-semibold text-slate-800">Evidencias del movimiento</div>
             <button type="button" class="js-evidence-close h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>

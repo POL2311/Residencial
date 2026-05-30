@@ -745,21 +745,20 @@
 
   function renderDetailModal(r, totalPagado) {
     return `
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
-        <div class="flex justify-between items-center px-6 py-4 border-b bg-slate-50">
-          <div>
-            <h2 class="text-lg font-semibold text-slate-800">Detalle del residente</h2>
-            <p class="text-xs text-slate-500">Información general y actividad</p>
+      <div class="flex flex-col bg-white rounded-[1.35rem] shadow-2xl w-full max-w-2xl overflow-hidden pointer-events-auto">
+        <!-- Header -->
+        <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+          <div class="min-w-0">
+            <h2 class="text-base font-semibold leading-tight text-slate-900">Detalle del residente</h2>
+            <p class="mt-1 text-xs leading-5 text-slate-500">Información general, vehículos y pagos del residente.</p>
           </div>
-          <button id="btnCloseDetail"
-            class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">
-            ✕
-          </button>
+          <button id="btnCloseDetail" type="button" aria-label="Cerrar detalle" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center font-bold">✕</button>
         </div>
 
-        <div class="p-6 space-y-6">
-          <section class="rounded-2xl border bg-white p-5">
-            <h3 class="text-sm font-semibold text-slate-700 mb-4">👤 Información del residente</h3>
+        <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3">
+          <!-- User info -->
+          <section class="rounded-2xl border border-slate-200 bg-white p-4">
+            <h3 class="text-xs font-bold uppercase tracking-[0.1em] text-slate-400 mb-3">👤 Información del residente</h3>
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p class="text-xs text-slate-500">Nombre</p>
@@ -771,45 +770,47 @@
               </div>
               <div>
                 <p class="text-xs text-slate-500">Email</p>
-                <p class="font-medium text-slate-800">${escapeHtml(r.email || '—')}</p>
+                <p class="font-medium text-slate-800 break-all">${escapeHtml(r.email || '—')}</p>
               </div>
               <div>
                 <p class="text-xs text-slate-500">Teléfono</p>
                 <p class="font-medium text-slate-800">${escapeHtml(r.telefono || '—')}</p>
               </div>
             </div>
-            <div class="mt-4 flex flex-wrap items-start justify-between gap-3">
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
               ${accessBadge(r)}
               <button type="button"
                 data-ban-toggle="${escapeHtml(r.resid_unid_id)}"
                 data-ban-active="${r.acceso_baneado_manual ? '1' : '0'}"
-                class="inline-flex items-center justify-center rounded-full ${r.acceso_baneado_manual ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'} px-4 py-2 text-xs font-medium">
+                class="inline-flex min-h-9 px-3 items-center justify-center rounded-xl text-xs font-semibold shadow-sm transition hover:opacity-95 ${r.acceso_baneado_manual ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'}">
                 ${r.acceso_baneado_manual ? 'Quitar baneo' : 'Banear acceso'}
               </button>
             </div>
           </section>
 
-          <section class="rounded-2xl border bg-white p-5 space-y-4">
+          <!-- Pagos -->
+          <section class="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="text-sm font-semibold text-slate-700">💳 Pagos</h3>
+              <h3 class="text-xs font-bold uppercase tracking-[0.1em] text-slate-400">💳 Pagos</h3>
               <button id="btnAddPago"
-                class="px-4 py-2 rounded-xl text-xs bg-blue-500 text-white hover:bg-blue-600">
+                class="min-h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm">
                 + Agregar pago
               </button>
             </div>
 
-            <div class="text-sm">
-              <strong>Total pagado:</strong> ${formatMoney(totalPagado)}
+            <div class="text-sm text-slate-700">
+              <strong>Total pagado:</strong> <span class="font-semibold text-slate-900">${formatMoney(totalPagado)}</span>
             </div>
 
             ${renderPagos()}
           </section>
 
-          <section class="rounded-2xl border bg-white p-5 space-y-4">
+          <!-- Autos -->
+          <section class="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="text-sm font-semibold text-slate-700">🚗 Autos</h3>
+              <h3 class="text-xs font-bold uppercase tracking-[0.1em] text-slate-400">🚗 Autos</h3>
               <button id="btnAddAuto"
-                class="px-4 py-2 rounded-xl text-xs bg-slate-800 text-white hover:bg-slate-900">
+                class="min-h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm">
                 + Agregar auto
               </button>
             </div>
@@ -1138,66 +1139,69 @@
 
   function openAddPagoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'app-admin-modal-overlay fixed inset-0 bg-black/40 flex items-end md:items-center justify-center z-50 p-3 md:p-4';
+    modal.className = 'fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm';
 
     modal.innerHTML = `
-      <div class="app-admin-modal-card app-admin-modal-body bg-white rounded-t-3xl md:rounded-3xl w-full max-w-xl p-6 md:p-8 shadow-2xl relative">
-        <button id="closeAddPago"
-          class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100">
-          ✕
-        </button>
-
-        <h2 class="text-lg font-semibold">Agregar pago</h2>
-        <p class="text-sm text-slate-500 mb-6">
-          ${escapeHtml(residente.nombre || '—')} · Unidad ${escapeHtml(residente.unidad_clave || '—')}
-        </p>
-
-        <form id="addPagoForm" class="space-y-5">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label class="text-xs text-slate-500">Monto *</label>
-              <input name="monto" type="number" step="0.01" required
-                class="w-full mt-1 rounded-xl border px-4 py-2"
-                placeholder="Ej. 850.00">
+      <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+        <div class="flex max-h-[min(86dvh,600px)] w-full max-w-lg flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+          <!-- Header -->
+          <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+            <div class="min-w-0">
+              <h2 class="text-base font-semibold leading-tight text-slate-900">Agregar pago</h2>
+              <p class="mt-1 text-xs leading-5 text-slate-500">${escapeHtml(residente.nombre || '—')} · Unidad ${escapeHtml(residente.unidad_clave || '—')}</p>
             </div>
-            <div>
-              <label class="text-xs text-slate-500">Fecha *</label>
-              <input name="fecha" type="date" required
-                class="w-full mt-1 rounded-xl border px-4 py-2">
-            </div>
+            <button id="closeAddPago" type="button" aria-label="Cerrar formulario" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center font-bold">✕</button>
           </div>
+          <!-- Form -->
+          <form id="addPagoForm" class="flex min-h-0 flex-1 flex-col">
+            <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Monto *</label>
+                  <input name="monto" type="number" step="0.01" required
+                    class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
+                    placeholder="Ej. 850.00">
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Fecha *</label>
+                  <input name="fecha" type="date" required
+                    class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white">
+                </div>
+              </div>
 
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label class="text-xs text-slate-500">Método</label>
-              <select name="metodo" class="w-full mt-1 rounded-xl border px-4 py-2">
-                <option value="efectivo">Efectivo</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="tarjeta">Tarjeta</option>
-              </select>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Método</label>
+                  <select name="metodo" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white">
+                    <option value="efectivo">Efectivo</option>
+                    <option value="transferencia">Transferencia</option>
+                    <option value="tarjeta">Tarjeta</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Concepto</label>
+                  <input name="concepto"
+                    class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
+                    placeholder="Ej. Mantenimiento enero"
+                    maxlength="120">
+                </div>
+              </div>
+
+              <input type="hidden" name="user_id" value="${escapeHtml(residente.user_id)}">
+              <input type="hidden" name="action" value="create">
             </div>
-            <div>
-              <label class="text-xs text-slate-500">Concepto</label>
-              <input name="concepto"
-                class="w-full mt-1 rounded-xl border px-4 py-2"
-                placeholder="Ej. Mantenimiento enero"
-                maxlength="120">
+            <!-- Footer -->
+            <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <button type="button" id="cancelAddPago"
+                class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                Cancelar
+              </button>
+              <button class="min-h-11 flex-1 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">
+                Registrar pago
+              </button>
             </div>
-          </div>
-
-          <input type="hidden" name="user_id" value="${escapeHtml(residente.user_id)}">
-          <input type="hidden" name="action" value="create">
-
-          <div class="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end">
-            <button type="button" id="cancelAddPago"
-              class="px-5 py-2 rounded-xl border hover:bg-slate-100">
-              Cancelar
-            </button>
-            <button class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
-              Registrar pago
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     `;
 
@@ -1257,80 +1261,83 @@
 
   function openAddAutoModal(residente) {
     const modal = document.createElement('div');
-    modal.className = 'app-admin-modal-overlay fixed inset-0 bg-black/40 flex items-end md:items-center justify-center z-50 p-3 md:p-4';
+    modal.className = 'fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm';
 
     modal.innerHTML = `
-      <div class="app-admin-modal-card app-admin-modal-body bg-white rounded-t-3xl md:rounded-3xl w-full max-w-xl p-6 md:p-8 shadow-2xl relative">
-        <button id="closeAddAuto"
-          class="absolute top-4 right-4 h-9 w-9 rounded-full border hover:bg-slate-100 flex items-center justify-center">
-          ✕
-        </button>
-
-        <h2 class="text-lg font-semibold text-slate-800">Agregar auto</h2>
-        <p class="text-sm text-slate-500 mb-6">
-          ${escapeHtml(residente.nombre || '—')} · Unidad ${escapeHtml(residente.unidad_clave || '—')}
-        </p>
-
-        <form id="addAutoForm" class="space-y-5">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label class="text-xs text-slate-500">Placas *</label>
-              <input name="placas" required
-                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                placeholder="Ej. ABC-123"
-                maxlength="15">
+      <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+        <div class="flex max-h-[min(86dvh,600px)] w-full max-w-lg flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+          <!-- Header -->
+          <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+            <div class="min-w-0">
+              <h2 class="text-base font-semibold leading-tight text-slate-900">Agregar auto</h2>
+              <p class="mt-1 text-xs leading-5 text-slate-500">${escapeHtml(residente.nombre || '—')} · Unidad ${escapeHtml(residente.unidad_clave || '—')}</p>
             </div>
-
-            <div>
-              <label class="text-xs text-slate-500">Modelo</label>
-              <input name="modelo"
-                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                placeholder="Ej. Versa 2020"
-                maxlength="80">
-            </div>
+            <button id="closeAddAuto" type="button" aria-label="Cerrar formulario" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center font-bold">✕</button>
           </div>
+          <!-- Form -->
+          <form id="addAutoForm" class="flex min-h-0 flex-1 flex-col">
+            <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Placas *</label>
+                  <input name="placas" required
+                    class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
+                    placeholder="Ej. ABC-123"
+                    maxlength="15">
+                </div>
 
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label class="text-xs text-slate-500">Color</label>
-              <input name="color"
-                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                placeholder="Ej. Blanco"
-                maxlength="40">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Modelo</label>
+                  <input name="modelo"
+                    class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
+                    placeholder="Ej. Versa 2020"
+                    maxlength="80">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Color</label>
+                  <input name="color"
+                    class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
+                    placeholder="Ej. Blanco"
+                    maxlength="40">
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Tag ID</label>
+                  <input name="tag_id"
+                    class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
+                    placeholder="Ej. TAG-001"
+                    maxlength="120">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-slate-600">Casa asignada</label>
+                  <input disabled
+                    class="min-h-11 w-full rounded-xl border bg-slate-100 px-3 text-base text-slate-800 outline-none"
+                    value="${escapeHtml(residente.unidad_clave || '—')}">
+                </div>
+              </div>
+
+              <input type="hidden" name="user_id" value="${escapeHtml(residente.user_id)}">
+              <input type="hidden" name="unidad_id" value="${escapeHtml(residente.unidad_id)}">
+              <input type="hidden" name="action" value="create">
             </div>
-
-            <div>
-              <label class="text-xs text-slate-500">Tag ID</label>
-              <input name="tag_id"
-                class="w-full mt-1 rounded-xl border px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                placeholder="Ej. TAG-001"
-                maxlength="120">
+            <!-- Footer -->
+            <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <button type="button" id="cancelAddAuto"
+                class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                Cancelar
+              </button>
+              <button class="min-h-11 flex-1 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">
+                Registrar auto
+              </button>
             </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="text-xs text-slate-500">Casa asignada</label>
-              <input disabled
-                class="w-full mt-1 rounded-xl border bg-slate-100 px-4 py-2"
-                value="${escapeHtml(residente.unidad_clave || '—')}">
-            </div>
-          </div>
-
-          <input type="hidden" name="user_id" value="${escapeHtml(residente.user_id)}">
-          <input type="hidden" name="unidad_id" value="${escapeHtml(residente.unidad_id)}">
-          <input type="hidden" name="action" value="create">
-
-          <div class="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end">
-            <button type="button" id="cancelAddAuto"
-              class="px-5 py-2 rounded-xl border hover:bg-slate-100">
-              Cancelar
-            </button>
-            <button class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
-              Crear auto
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     `;
 

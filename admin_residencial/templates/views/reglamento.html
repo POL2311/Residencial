@@ -12,14 +12,14 @@
       <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="px-5 py-4 border-b bg-slate-50 flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-semibold text-slate-800">Editar reglamento</h2>
-            <p class="text-sm text-slate-500">Modifica el documento oficial del residencial.</p>
+            <h2 class="text-base font-semibold text-slate-900">Editar reglamento</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Modifica el documento oficial del residencial.</p>
           </div>
 
           <button
             id="btnTogglePreview"
             type="button"
-            class="text-sm px-4 py-2 rounded-xl border hover:bg-slate-100">
+            class="min-h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition shadow-sm">
             Ocultar vista previa
           </button>
         </div>
@@ -29,33 +29,33 @@
                class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Título</label>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Título</label>
             <input
               id="reglamentoTitulo"
               name="titulo"
               type="text"
-              class="w-full rounded-xl border px-4 py-3 text-sm"
+              class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
               placeholder="Ej. Reglamento General del Residencial"
               required />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Versión</label>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Versión</label>
             <input
               id="reglamentoVersion"
               name="version_label"
               type="text"
-              class="w-full rounded-xl border px-4 py-3 text-sm"
+              class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
               placeholder="Ej. v1.0 / Abril 2026" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Contenido</label>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Contenido</label>
             <textarea
               id="reglamentoContenido"
               name="contenido"
               rows="18"
-              class="w-full rounded-xl border px-4 py-3 text-sm"
+              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
               placeholder="Escribe aquí el reglamento..."
               required></textarea>
             <p class="mt-1 text-xs text-slate-500">
@@ -63,10 +63,10 @@
             </p>
           </div>
 
-          <div class="flex justify-end">
+          <div class="flex justify-end pt-2">
             <button
               type="submit"
-              class="bg-[#2E5D73] text-white text-sm font-semibold px-5 py-3 rounded-xl hover:opacity-95">
+              class="min-h-11 rounded-xl bg-[#2E5D73] text-white px-5 text-sm font-semibold shadow-sm transition hover:opacity-95">
               Guardar reglamento
             </button>
           </div>

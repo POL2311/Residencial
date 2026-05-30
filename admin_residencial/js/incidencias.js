@@ -239,38 +239,37 @@
 
   function openIncidenciaDetail(inc) {
     const modal = document.createElement('div');
-    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] bg-black/60 p-3 md:p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm';
     modal.innerHTML = `
-      <div class="flex min-h-full items-center justify-center">
-        <div class="app-admin-modal-card w-full max-w-lg rounded-3xl bg-white shadow-2xl">
-          <div class="app-admin-modal-header flex items-center justify-between border-b border-slate-100 px-5 py-4">
-            <div class="text-lg font-semibold text-slate-900">Detalle de incidencia</div>
-            <button type="button" class="js-inc-detail-close h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-xl text-slate-500 hover:bg-slate-100">×</button>
-          </div>
-          <div class="app-admin-modal-body space-y-4 p-5">
-            <div>
-              <div class="text-xs text-slate-500">Título</div>
-              <div class="text-xl font-semibold text-slate-900">${escapeHtml(inc.titulo || '—')}</div>
+      <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+        <div class="flex max-h-[min(86dvh,680px)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+          <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+            <div class="min-w-0">
+              <div class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle de incidencia</div>
+              <h3 class="mt-1 text-base font-semibold leading-tight text-slate-900">${escapeHtml(inc.titulo || '—')}</h3>
             </div>
+            <button type="button" class="js-inc-detail-close h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center">×</button>
+          </div>
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4 text-sm">
             <div class="flex flex-wrap gap-2">
               <span class="px-3 py-1 text-xs rounded-full ${badgePrioridad(inc.prioridad)}">${escapeHtml(`Prioridad: ${humanizeValue(inc.prioridad, '')}`.trim())}</span>
               <span class="px-3 py-1 text-xs rounded-full ${badgeEstado(inc.estado)}">${escapeHtml(`Estado: ${humanizeValue(inc.estado, '')}`.trim())}</span>
             </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tipo</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(humanizeValue(inc.tipo))}</div></div>
+              <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Fecha</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(fmtDate(inc.created_at))}</div></div>
+              <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Unidad</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(inc.unidad_clave || 'General')}</div></div>
+              <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Contexto</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(inc.unidad_clave || inc.area_nombre || 'General')}</div></div>
+              <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Relación</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(inc.residente_nombre || inc.persona_recurrente_nombre || inc.visitante_rapido_nombre || '—')}</div></div>
+              <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Guardia</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(inc.guardia_nombre || '—')}</div></div>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Descripción</div>
+              <div class="mt-2 text-base text-slate-800 whitespace-pre-wrap leading-relaxed">${escapeHtml(inc.descripcion || 'Sin descripción')}</div>
+            </div>
             <div class="grid gap-3 sm:grid-cols-2">
-              <div><div class="text-xs text-slate-500">Tipo</div><div class="text-sm text-slate-700">${escapeHtml(humanizeValue(inc.tipo))}</div></div>
-              <div><div class="text-xs text-slate-500">Fecha</div><div class="text-sm text-slate-700">${escapeHtml(fmtDate(inc.created_at))}</div></div>
-              <div><div class="text-xs text-slate-500">Unidad</div><div class="text-sm text-slate-700">${escapeHtml(inc.unidad_clave || 'General')}</div></div>
-              <div><div class="text-xs text-slate-500">Contexto</div><div class="text-sm text-slate-700">${escapeHtml(inc.unidad_clave || inc.area_nombre || 'General')}</div></div>
-              <div><div class="text-xs text-slate-500">Relación</div><div class="text-sm text-slate-700">${escapeHtml(inc.residente_nombre || inc.persona_recurrente_nombre || inc.visitante_rapido_nombre || '—')}</div></div>
-              <div><div class="text-xs text-slate-500">Guardia</div><div class="text-sm text-slate-700">${escapeHtml(inc.guardia_nombre || '—')}</div></div>
-            </div>
-            <div>
-              <div class="text-xs text-slate-500">Descripción</div>
-              <div class="mt-1 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-700 whitespace-pre-wrap">${escapeHtml(inc.descripcion || 'Sin descripción')}</div>
-            </div>
-            <div class="flex flex-wrap justify-end gap-2">
-              <button type="button" class="js-inc-detail-edit rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700 hover:bg-slate-200">Editar</button>
-              <button type="button" class="js-inc-detail-delete rounded-full bg-rose-100 px-4 py-2 text-sm text-rose-700 hover:bg-rose-200">Eliminar</button>
+              <button type="button" class="js-inc-detail-edit min-h-11 rounded-xl bg-slate-100 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-200">Editar</button>
+              <button type="button" class="js-inc-detail-delete min-h-11 rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">Eliminar</button>
             </div>
           </div>
         </div>
@@ -302,32 +301,33 @@
     layer.id = 'incidenciasUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmIncidencia"
-           class="app-admin-modal-overlay hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
-        <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
-          <div class="app-admin-modal-body p-6">
-            <div class="flex items-start gap-4">
-              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
-                !
-              </div>
-              <div class="flex-1">
-                <h3 id="friendlyConfirmIncidenciaTitle" class="text-xl font-semibold text-slate-900">
-                  Confirmar acción
-                </h3>
-                <p id="friendlyConfirmIncidenciaMessage" class="mt-2 text-sm leading-6 text-slate-600">
-                  ¿Deseas continuar?
-                </p>
+           class="app-admin-modal-overlay hidden fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm">
+        <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+          <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+            <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-6">
+              <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
+                  !
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 id="friendlyConfirmIncidenciaTitle" class="text-base font-semibold leading-tight text-slate-900">
+                    Confirmar acción
+                  </h3>
+                  <p id="friendlyConfirmIncidenciaMessage" class="mt-2 text-sm leading-relaxed text-slate-600">
+                    ¿Deseas continuar?
+                  </p>
+                </div>
               </div>
             </div>
-
-            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <button id="friendlyConfirmIncidenciaCancel"
                       type="button"
-                      class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+                      class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                 Cancelar
               </button>
               <button id="friendlyConfirmIncidenciaAccept"
                       type="button"
-                      class="rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+                      class="min-h-11 flex-1 rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">
                 Eliminar
               </button>
             </div>
@@ -459,6 +459,9 @@
       fillSelect('permiso_material_id', state.meta.permisos || [], 'tipo_movimiento', 'Sin permiso');
     }
 
+    if (els.formAdd.tipo) els.formAdd.tipo.value = 'seguridad';
+    if (els.formAdd.prioridad) els.formAdd.prioridad.value = 'media';
+
     els.modalAdd.classList.remove('hidden');
   }
 
@@ -508,11 +511,8 @@
       selG.value = inc.guardia_id || '';
     }
 
-    const selEstado = els.formEdit.querySelector('[name="estado"]');
-    if (selEstado) selEstado.value = inc.estado || 'abierta';
-
-    const selPri = els.formEdit.querySelector('[name="prioridad"]');
-    if (selPri) selPri.value = inc.prioridad || 'media';
+    if (els.formEdit.estado) els.formEdit.estado.value = inc.estado || 'abierta';
+    if (els.formEdit.prioridad) els.formEdit.prioridad.value = inc.prioridad || 'media';
 
     els.modalEdit.classList.remove('hidden');
   }

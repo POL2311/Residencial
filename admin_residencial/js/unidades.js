@@ -286,18 +286,31 @@ console.log('[UNIDADES] JS ACTIVO');
   ========================= */
   function openDetail(unidad) {
     els.detailContent.innerHTML = `
-      <div class="bg-white rounded-2xl p-4 sm:p-6 space-y-4">
-        <div class="flex justify-between items-center gap-3">
-          <h2 class="text-lg font-semibold">Detalle de unidad</h2>
-          <button id="closeDetail"
-            class="h-9 w-9 rounded-full border hover:bg-slate-100">✕</button>
+      <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+        <div class="min-w-0">
+          <h2 class="text-base font-semibold leading-tight text-slate-900">Detalle de unidad</h2>
+          <p class="mt-1 text-xs leading-5 text-slate-500">Información detallada y titular de la unidad residencial.</p>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <div><strong>Clave:</strong> ${unidad.clave}</div>
-          <div><strong>Tipo:</strong> ${unidad.tipo}</div>
-          <div><strong>Torre:</strong> ${unidad.torre || '—'}</div>
-          <div><strong>Titular:</strong> ${unidad.titular || 'Sin titular'}</div>
+        <button id="closeDetail" type="button" aria-label="Cerrar detalle" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center">✕</button>
+      </div>
+      <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <span class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Clave</span>
+            <span class="mt-1 block text-base font-medium text-slate-800">${unidad.clave}</span>
+          </div>
+          <div>
+            <span class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Tipo</span>
+            <span class="mt-1 block text-base font-medium text-slate-800 capitalize">${unidad.tipo}</span>
+          </div>
+          <div>
+            <span class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Torre / Edificio</span>
+            <span class="mt-1 block text-base font-medium text-slate-800">${unidad.torre || '—'}</span>
+          </div>
+          <div>
+            <span class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Titular</span>
+            <span class="mt-1 block text-base font-medium text-slate-800">${unidad.titular || 'Sin titular'}</span>
+          </div>
         </div>
       </div>
     `;

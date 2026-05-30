@@ -232,32 +232,33 @@
     layer.id = 'comunicadosUiLayer';
     layer.innerHTML = `
       <div id="friendlyConfirmComunicado"
-           class="app-admin-modal-overlay hidden fixed inset-0 z-[9999] items-center justify-center bg-black/50 p-4">
-        <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
-          <div class="app-admin-modal-body p-6">
-            <div class="flex items-start gap-4">
-              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
-                !
-              </div>
-              <div class="flex-1">
-                <h3 id="friendlyConfirmComunicadoTitle" class="text-xl font-semibold text-slate-900">
-                  Confirmar acción
-                </h3>
-                <p id="friendlyConfirmComunicadoMessage" class="mt-2 text-sm leading-6 text-slate-600">
-                  ¿Deseas continuar?
-                </p>
+           class="app-admin-modal-overlay hidden fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm">
+        <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+          <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+            <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-6">
+              <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-xl font-bold">
+                  !
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 id="friendlyConfirmComunicadoTitle" class="text-base font-semibold leading-tight text-slate-900">
+                    Confirmar acción
+                  </h3>
+                  <p id="friendlyConfirmComunicadoMessage" class="mt-2 text-sm leading-relaxed text-slate-600">
+                    ¿Deseas continuar?
+                  </p>
+                </div>
               </div>
             </div>
-
-            <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <button id="friendlyConfirmComunicadoCancel"
                       type="button"
-                      class="rounded-full bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+                      class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                 Cancelar
               </button>
               <button id="friendlyConfirmComunicadoAccept"
                       type="button"
-                      class="rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+                      class="min-h-11 flex-1 rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">
                 Archivar
               </button>
             </div>

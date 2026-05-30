@@ -41,18 +41,24 @@
     <div id="residentAccessList" class="space-y-3"></div>
   </section>
 
-  <div id="adminAutoEditModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-    <div class="flex min-h-full items-end justify-center p-0 md:items-center md:p-4">
-      <div class="app-admin-modal-card w-full rounded-t-2xl bg-white shadow-2xl md:max-w-lg md:rounded-2xl">
-        <div class="app-admin-modal-header flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <div id="adminAutoEditModalTitle" class="text-sm font-semibold text-slate-800">Editar auto</div>
-          <button id="btnCloseAdminAutoModal" type="button" class="h-9 w-9 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">✕</button>
+  <div id="adminAutoEditModal" class="hidden fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm">
+    <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+      <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-lg pointer-events-auto">
+        <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+          <div class="min-w-0">
+            <h2 id="adminAutoEditModalTitle" class="text-base font-semibold leading-tight text-slate-900">Editar auto</h2>
+            <p class="mt-1 text-xs leading-5 text-slate-500">Actualiza las placas y detalles del vehículo.</p>
+          </div>
+          <button id="btnCloseAdminAutoModal" type="button" aria-label="Cerrar formulario"
+            class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200">✕</button>
         </div>
         <form id="adminAutoEditForm" class="flex min-h-0 flex-1 flex-col">
-          <div id="adminAutoEditBody" class="app-admin-modal-body space-y-3 p-4"></div>
-          <div class="app-admin-modal-footer flex flex-col-reverse gap-2 border-t border-slate-100 bg-white px-4 py-3 sm:flex-row sm:justify-end">
-            <button id="btnCancelAdminAutoModal" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
-            <button type="submit" class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm text-white hover:opacity-95">Guardar</button>
+          <div id="adminAutoEditBody" class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3"></div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button id="btnCancelAdminAutoModal" type="button"
+              class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="submit"
+              class="min-h-11 flex-1 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Guardar</button>
           </div>
         </form>
       </div>

@@ -76,21 +76,23 @@
 
     modal = document.createElement('div');
     modal.id = 'personalQrModal';
-    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9999] hidden bg-black/60 backdrop-blur-sm';
     modal.innerHTML = `
-      <div class="app-admin-modal-card w-full max-w-md rounded-3xl bg-white shadow-2xl">
-        <div class="app-admin-modal-header flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
-          <div>
-            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">QR personal</div>
-            <h3 id="personalQrTitle" class="mt-1 text-xl font-semibold text-slate-900">Personal recurrente</h3>
+      <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+        <div class="flex max-h-[min(86dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+          <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+            <div class="min-w-0">
+              <div class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">QR personal</div>
+              <h3 id="personalQrTitle" class="mt-1 text-base font-semibold leading-tight text-slate-900">Personal recurrente</h3>
+            </div>
+            <button type="button" id="personalQrClose" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center">×</button>
           </div>
-          <button type="button" id="personalQrClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
-        </div>
-        <div class="app-admin-modal-body px-5 py-6 text-center">
-          <div class="mx-auto inline-flex rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
-            <img id="personalQrImage" src="" alt="QR personal" class="h-72 w-72 max-w-full rounded-2xl object-contain" />
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-6 text-center">
+            <div class="mx-auto inline-flex rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
+              <img id="personalQrImage" src="" alt="QR personal" class="h-64 w-64 max-w-full rounded-2xl object-contain" />
+            </div>
+            <div id="personalQrPayload" class="mt-4 break-all rounded-2xl bg-slate-50 px-4 py-3 text-left text-xs text-slate-500"></div>
           </div>
-          <div id="personalQrPayload" class="mt-4 break-all rounded-2xl bg-slate-50 px-4 py-3 text-left text-xs text-slate-500"></div>
         </div>
       </div>
     `;
@@ -132,25 +134,25 @@
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
     syncDashboardOverlayState();
-  }
-
-  function ensureDetailsModal() {
+  }  function ensureDetailsModal() {
     let modal = document.getElementById('personalDetailsModal');
     if (modal) return modal;
 
     modal = document.createElement('div');
     modal.id = 'personalDetailsModal';
-    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm';
+    modal.className = 'app-admin-modal-overlay fixed inset-0 z-[9998] hidden bg-black/60 backdrop-blur-sm';
     modal.innerHTML = `
-      <div class="app-admin-modal-card w-full max-w-2xl rounded-3xl bg-white shadow-2xl">
-        <div class="app-admin-modal-header flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
-          <div>
-            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del personal</div>
-            <h3 id="personalDetailsTitle" class="mt-1 text-xl font-semibold text-slate-900">Personal recurrente</h3>
+      <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+        <div class="flex max-h-[min(86dvh,680px)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl pointer-events-auto">
+          <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+            <div class="min-w-0">
+              <div class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Detalle del personal</div>
+              <h3 id="personalDetailsTitle" class="mt-1 text-base font-semibold leading-tight text-slate-900">Personal recurrente</h3>
+            </div>
+            <button type="button" id="personalDetailsClose" class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center">×</button>
           </div>
-          <button type="button" id="personalDetailsClose" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button>
+          <div id="personalDetailsBody" class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4"></div>
         </div>
-        <div id="personalDetailsBody" class="app-admin-modal-body px-5 py-5"></div>
       </div>
     `;
     document.body.appendChild(modal);
@@ -188,31 +190,31 @@
     modal.querySelector('#personalDetailsBody').innerHTML = `
       <div class="space-y-4 text-sm text-slate-700">
         <div class="grid gap-4 sm:grid-cols-2">
-          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Empresa</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.empresa || 'Sin empresa')}</div></div>
-          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Puesto</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.puesto || 'Sin puesto')}</div></div>
-          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Área</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.area_nombre || 'Sin área')}</div></div>
-          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Teléfono</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.telefono || 'Sin teléfono')}</div></div>
-          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Estado</div><div class="mt-1 font-semibold text-slate-900">${item.activo ? 'Activo' : 'Inactivo'}</div></div>
-          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Presencia</div><div class="mt-1 font-semibold text-slate-900">${item.esta_dentro ? 'Dentro' : 'Fuera'}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Empresa</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(item.empresa || 'Sin empresa')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Puesto</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(item.puesto || 'Sin puesto')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Área</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(item.area_nombre || 'Sin área')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Teléfono</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(item.telefono || 'Sin teléfono')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Estado</div><div class="mt-1 text-base font-semibold text-slate-800">${item.activo ? 'Activo' : 'Inactivo'}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Presencia</div><div class="mt-1 text-base font-semibold text-slate-800">${item.esta_dentro ? 'Dentro' : 'Fuera'}</div></div>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
-          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Última entrada</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.ultima_entrada_at || '—')}</div></div>
-          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs uppercase tracking-wide text-slate-400">Última salida</div><div class="mt-1 font-semibold text-slate-900">${escapeHtml(item.ultima_salida_at || '—')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Última entrada</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(item.ultima_entrada_at || '—')}</div></div>
+          <div class="rounded-2xl bg-slate-50 p-4"><div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Última salida</div><div class="mt-1 text-base font-semibold text-slate-800">${escapeHtml(item.ultima_salida_at || '—')}</div></div>
         </div>
         <div class="rounded-2xl bg-slate-50 p-4">
-          <div class="text-xs uppercase tracking-wide text-slate-400">Notas</div>
-          <div class="mt-2 whitespace-pre-wrap text-slate-800">${escapeHtml(item.notas || 'Sin notas')}</div>
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Notas</div>
+          <div class="mt-2 whitespace-pre-wrap text-base text-slate-800">${escapeHtml(item.notas || 'Sin notas')}</div>
         </div>
         <div class="rounded-2xl bg-slate-50 p-4">
-          <div class="text-xs uppercase tracking-wide text-slate-400">QR personal</div>
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">QR personal</div>
           <div class="mt-2 break-all text-xs text-slate-500">${escapeHtml(item.qr_payload || 'Sin QR generado')}</div>
         </div>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <button type="button" data-detail-edit="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Editar</button>
-          <button type="button" data-detail-qr="${item.id}" class="rounded-xl bg-[#2E5D73] px-4 py-3 font-semibold text-white hover:opacity-95">Ver QR</button>
-          <button type="button" data-detail-reset="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Resetear PIN</button>
-          <button type="button" data-detail-regenerate="${item.id}" class="rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50">Regenerar QR</button>
-          <button type="button" data-detail-delete="${item.id}" class="rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white hover:bg-rose-700 sm:col-span-2 lg:col-span-1">Eliminar</button>
+          <button type="button" data-detail-edit="${item.id}" class="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Editar</button>
+          <button type="button" data-detail-qr="${item.id}" class="min-h-11 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Ver QR</button>
+          <button type="button" data-detail-reset="${item.id}" class="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Resetear PIN</button>
+          <button type="button" data-detail-regenerate="${item.id}" class="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Regenerar QR</button>
+          <button type="button" data-detail-delete="${item.id}" class="min-h-11 rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 sm:col-span-2 lg:col-span-1">Eliminar</button>
         </div>
       </div>
     `;

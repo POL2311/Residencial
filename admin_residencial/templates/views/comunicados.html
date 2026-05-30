@@ -5,37 +5,37 @@
 
   <!-- HEADER -->
   <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
-    <div>
-      <div class="app-admin-kicker">Comunicación interna</div>
-      <h1 class="app-admin-title">Comunicados</h1>
-      <p class="app-admin-subtitle">
-        Administra avisos, borradores y publicaciones activas del residencial.
-      </p>
-    </div>
-    <div class="mt-4 flex justify-end">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <div class="app-admin-kicker">Comunicación interna</div>
+        <h1 class="app-admin-title">Comunicados</h1>
+        <p class="app-admin-subtitle">
+          Administra avisos, borradores y publicaciones activas del residencial.
+        </p>
+      </div>
       <button id="btnAddComunicado"
-        class="app-admin-primary rounded-full px-5 py-2.5 text-sm font-semibold">
+        class="rounded-xl bg-[#2E5D73] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-95">
         + Nuevo comunicado
       </button>
     </div>
   </div>
 
   <!-- FILTROS -->
-  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm">
+  <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
       <div>
-        <label class="block text-xs text-slate-500 mb-1">Buscar</label>
+        <label class="mb-1 block text-xs font-medium text-slate-600">Buscar</label>
         <input
           id="comunicadoSearch"
           type="text"
           placeholder="Título, mensaje, tipo..."
-          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+          class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"
         />
       </div>
 
       <div>
-        <label class="block text-xs text-slate-500 mb-1">Estado</label>
-        <select id="comunicadoFilterEstado" class="w-full rounded-xl border px-3 py-3 text-sm">
+        <label class="mb-1 block text-xs font-medium text-slate-600">Estado</label>
+        <select id="comunicadoFilterEstado" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white">
           <option value="todos">Todos</option>
           <option value="publicado">Publicados</option>
           <option value="borrador">Borradores</option>
@@ -43,8 +43,8 @@
       </div>
 
       <div>
-        <label class="block text-xs text-slate-500 mb-1">Prioridad</label>
-        <select id="comunicadoFilterPrioridad" class="w-full rounded-xl border px-3 py-3 text-sm">
+        <label class="mb-1 block text-xs font-medium text-slate-600">Prioridad</label>
+        <select id="comunicadoFilterPrioridad" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white">
           <option value="todas">Todas</option>
           <option value="alta">Alta</option>
           <option value="media">Media</option>
@@ -55,7 +55,7 @@
       <div class="flex items-end">
         <button id="btnResetComunicadosFilters"
           type="button"
-          class="w-full rounded-xl border px-4 py-3 text-sm hover:bg-slate-50">
+          class="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
           Limpiar filtros
         </button>
       </div>
@@ -69,94 +69,137 @@
   <div id="comunicadosPagination" class="flex flex-wrap justify-end gap-2"></div>
 
   <!-- MODAL -->
-  <div id="comunicadoModal"
-       class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center z-50 hidden p-0 md:p-4">
-    <div class="app-admin-modal-card w-full max-w-lg bg-white rounded-t-2xl md:rounded-2xl shadow-xl">
+  <div id="comunicadoModal" class="hidden fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm">
+    <div class="flex min-h-dvh w-full items-center justify-center p-4 pointer-events-none">
+      <div class="flex max-h-[min(86dvh,720px)] w-full max-w-md flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-2xl sm:max-w-lg pointer-events-auto">
 
-      <div class="app-admin-modal-header flex justify-between items-center border-b px-4 py-3 bg-slate-50">
-        <h2 id="comunicadoModalTitle" class="text-lg font-semibold">Comunicado</h2>
-        <button id="btnCloseComModal"
-                class="h-9 w-9 rounded-full bg-white border hover:bg-slate-100 flex items-center justify-center">
-          ✕
-        </button>
-      </div>
-
-      <form id="comunicadoForm" class="flex min-h-0 flex-1 flex-col" enctype="multipart/form-data">
-        <div class="app-admin-modal-body px-4 py-4 space-y-3">
-        <div id="comunicadoFormError"
-             class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
-
-        <input type="hidden" name="id" />
-        <input type="hidden" name="imagen_url" />
-
-        <div>
-          <label class="block text-sm font-medium mb-1">Título</label>
-          <input name="titulo" required
-            class="w-full border rounded-lg px-3 py-2" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-1">Mensaje</label>
-          <textarea name="mensaje" rows="5" required
-            class="w-full border rounded-lg px-3 py-2"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-1">Fotografía (opcional)</label>
-          <input
-            type="file"
-            name="imagen"
-            accept="image/jpeg,image/png,image/webp"
-            class="w-full rounded-lg border bg-white px-3 py-2 text-sm" />
-          <div class="mt-2 flex items-center gap-3">
-            <img id="comunicadoImagePreview" alt=""
-                 class="hidden h-14 w-14 rounded-xl border border-slate-200 object-cover" />
-            <div class="text-xs text-slate-500">
-              Si subes una nueva imagen al editar, reemplazará la actual.
-            </div>
+        <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+          <div class="min-w-0">
+            <h2 id="comunicadoModalTitle" class="text-base font-semibold leading-tight text-slate-900">Comunicado</h2>
+            <p class="mt-1 text-xs leading-5 text-slate-500">Crea o edita comunicados y avisos para los residentes.</p>
           </div>
+          <button id="btnCloseComModal" type="button" aria-label="Cerrar formulario"
+            class="h-11 w-11 shrink-0 rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200 flex items-center justify-center">✕</button>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <select name="tipo" class="border rounded-lg px-2 py-2">
-            <option value="general">General</option>
-            <option value="mantenimiento">Mantenimiento</option>
-            <option value="seguridad">Seguridad</option>
-            <option value="pagos">Pagos</option>
-          </select>
+        <form id="comunicadoForm" class="flex min-h-0 flex-1 flex-col" enctype="multipart/form-data">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4">
+            <div id="comunicadoFormError"
+                 class="hidden rounded-xl bg-rose-100 text-rose-700 px-4 py-3 text-sm"></div>
 
-          <select name="prioridad" class="border rounded-lg px-2 py-2">
-            <option value="baja">Baja</option>
-            <option value="media">Media</option>
-            <option value="alta">Alta</option>
-          </select>
-        </div>
+            <input type="hidden" name="id" />
+            <input type="hidden" name="imagen_url" />
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input type="date" name="fecha_publicacion"
-                 class="border rounded-lg px-2 py-2" />
-          <input type="date" name="fecha_expiracion"
-                 class="border rounded-lg px-2 py-2" />
-        </div>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Título *</label>
+              <input name="titulo" required placeholder="Ej. Mantenimiento de elevadores"
+                class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" />
+            </div>
 
-        <select name="estado" class="border rounded-lg px-2 py-2">
-          <option value="publicado">Publicado</option>
-          <option value="borrador">Borrador</option>
-        </select>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Mensaje *</label>
+              <textarea name="mensaje" rows="4" required placeholder="Escribe el cuerpo del mensaje..."
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white"></textarea>
+            </div>
 
-        </div>
-        <div class="app-admin-modal-footer border-t border-slate-100 bg-white px-4 py-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button type="button" id="btnCancelComModal"
-            class="text-sm px-4 py-2 rounded-lg border hover:bg-slate-50">
-            Cancelar
-          </button>
-          <button
-            class="rounded-xl bg-[#2E5D73] px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-95">
-            Guardar comunicado
-          </button>
-        </div>
-      </form>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Fotografía (opcional)</label>
+              <div class="relative flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-2 pl-3">
+                <span class="text-sm text-slate-500 truncate" id="comunicadoFileNamePlaceholder">Ningún archivo seleccionado</span>
+                <input type="file" name="imagen" accept="image/jpeg,image/png,image/webp" class="absolute inset-0 cursor-pointer opacity-0" onchange="document.getElementById('comunicadoFileNamePlaceholder').innerText = this.files[0] ? this.files[0].name : 'Ningún archivo seleccionado'" />
+                <span class="inline-flex min-h-9 items-center justify-center rounded-lg bg-slate-100 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-200 pointer-events-none">Elegir archivo</span>
+              </div>
+              <div class="mt-2 flex items-center gap-3">
+                <img id="comunicadoImagePreview" alt=""
+                     class="hidden h-14 w-14 rounded-xl border border-slate-200 object-cover" />
+                <div class="text-[11px] text-slate-500">
+                  Si subes una nueva imagen al editar, reemplazará la actual.
+                </div>
+              </div>
+            </div>
 
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Tipo *</label>
+              <div class="grid grid-cols-4 gap-1.5 rounded-xl bg-slate-100 p-1">
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="tipo" value="general" required class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-[10px] font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">General</span>
+                </label>
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="tipo" value="mantenimiento" class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-[10px] font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">Mant.</span>
+                </label>
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="tipo" value="seguridad" class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-[10px] font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">Seguridad</span>
+                </label>
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="tipo" value="pagos" class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-[10px] font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">Pagos</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Prioridad *</label>
+              <div class="grid grid-cols-3 gap-1.5 rounded-xl bg-slate-100 p-1">
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="prioridad" value="baja" required class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-xs font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">Baja</span>
+                </label>
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="prioridad" value="media" class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-xs font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">Media</span>
+                </label>
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="prioridad" value="alta" class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-xs font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">Alta</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Fecha publicación</label>
+                <input type="date" name="fecha_publicacion"
+                       class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" />
+              </div>
+              <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Fecha expiración</label>
+                <input type="date" name="fecha_expiracion"
+                       class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" />
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-600">Estado *</label>
+              <div class="grid grid-cols-2 gap-1.5 rounded-xl bg-slate-100 p-1">
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="estado" value="publicado" required class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-xs font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">Publicado</span>
+                </label>
+                <label class="relative block cursor-pointer">
+                  <input type="radio" name="estado" value="borrador" class="peer sr-only">
+                  <span class="flex min-h-9 items-center justify-center rounded-lg text-xs font-medium text-slate-600 transition peer-checked:bg-white peer-checked:text-[#2E5D73] peer-checked:shadow-sm">Borrador</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="btnCancelComModal"
+              class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+              Cancelar
+            </button>
+            <button type="submit"
+              class="min-h-11 flex-1 rounded-xl bg-[#2E5D73] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">
+              Guardar
+            </button>
+          </div>
+        </form>
+
+      </div>
     </div>
   </div>
+</div>>
 </div>

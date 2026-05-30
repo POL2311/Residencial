@@ -23,14 +23,14 @@
     </button>
 
     <div data-acc-body="residencial" class="hidden border-t">
-      <div class="p-4 space-y-2">
+      <div class="p-4 space-y-3">
         <div>
-          <div class="text-xs text-slate-500">Nombre</div>
-          <div id="v_res_nombre" class="text-sm font-semibold">—</div>
+          <div class="text-xs font-medium text-slate-500">Nombre</div>
+          <div id="v_res_nombre" class="text-sm font-semibold text-slate-800 mt-0.5">—</div>
         </div>
         <div>
-          <div class="text-xs text-slate-500">Ubicación</div>
-          <div id="v_res_ubicacion" class="text-sm font-semibold">—</div>
+          <div class="text-xs font-medium text-slate-500">Ubicación</div>
+          <div id="v_res_ubicacion" class="text-sm font-semibold text-slate-800 mt-0.5">—</div>
         </div>
       </div>
     </div>
@@ -52,29 +52,29 @@
     </button>
 
     <div data-acc-body="usuario" class="hidden border-t">
-      <form id="perfilUserForm" class="p-4 space-y-3">
+      <form id="perfilUserForm" class="p-4 space-y-4">
         <div>
-          <label for="perfilUserName" class="text-xs text-slate-500">Nombre</label>
-          <input id="perfilUserName" name="name" type="text" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required>
+          <label for="perfilUserName" class="mb-1 block text-xs font-medium text-slate-600">Nombre</label>
+          <input id="perfilUserName" name="name" type="text" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" required>
         </div>
         <div>
-          <label for="perfilUserEmail" class="text-xs text-slate-500">Email</label>
-          <input id="perfilUserEmail" name="email" type="email" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required>
+          <label for="perfilUserEmail" class="mb-1 block text-xs font-medium text-slate-600">Email</label>
+          <input id="perfilUserEmail" name="email" type="email" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" required>
         </div>
         <div>
-          <label for="perfilUserTelefono" class="text-xs text-slate-500">Teléfono</label>
-          <input id="perfilUserTelefono" name="telefono" type="text" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" maxlength="20">
+          <label for="perfilUserTelefono" class="mb-1 block text-xs font-medium text-slate-600">Teléfono</label>
+          <input id="perfilUserTelefono" name="telefono" type="text" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" maxlength="20">
         </div>
         <div>
-          <label for="perfilUserPassword" class="text-xs text-slate-500">Nueva contraseña (opcional)</label>
-          <input id="perfilUserPassword" name="password" type="password" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" minlength="8" autocomplete="new-password">
+          <label for="perfilUserPassword" class="mb-1 block text-xs font-medium text-slate-600">Nueva contraseña (opcional)</label>
+          <input id="perfilUserPassword" name="password" type="password" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" minlength="8" autocomplete="new-password">
         </div>
         <div>
-          <label for="perfilUserPasswordConfirm" class="text-xs text-slate-500">Confirmar contraseña</label>
-          <input id="perfilUserPasswordConfirm" name="password_confirm" type="password" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" minlength="8" autocomplete="new-password">
+          <label for="perfilUserPasswordConfirm" class="mb-1 block text-xs font-medium text-slate-600">Confirmar contraseña</label>
+          <input id="perfilUserPasswordConfirm" name="password_confirm" type="password" class="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2E5D73] focus:ring-2 focus:ring-[#2E5D73]/15 bg-white" minlength="8" autocomplete="new-password">
         </div>
         <div class="pt-1">
-          <button id="perfilUserSaveBtn" type="submit" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          <button id="perfilUserSaveBtn" type="submit" class="min-h-11 rounded-xl bg-[#2E5D73] text-white px-5 text-sm font-semibold shadow-sm transition hover:opacity-95">
             Guardar cambios
           </button>
         </div>

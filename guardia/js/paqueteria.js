@@ -232,7 +232,9 @@
       `;
 
       els.list.querySelectorAll('.js-view-pkg').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           try {
             openDetailModal(JSON.parse(btn.dataset.pkg));
           } catch (_) {}
@@ -240,7 +242,9 @@
       });
 
       els.list.querySelectorAll('.js-mark-pkg').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           updateStatus(btn.dataset.id, btn.dataset.state);
         });
       });
@@ -426,7 +430,7 @@
 
           <div class="flex items-center justify-end gap-2">
             <button type="button" id="pkgCancel" class="rounded-xl border border-slate-200 px-4 py-2 text-sm">Cancelar</button>
-            <button type="submit" id="pkgSave" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm shadow">Guardar</button>
+            <button type="button" id="pkgSave" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm shadow">Guardar</button>
           </div>
         </form>
       `);
@@ -508,9 +512,21 @@
         }
       });
 
-      $('frmNewPkg')?.addEventListener('submit', async (ev) => {
+      $('frmNewPkg')?.addEventListener('submit', (ev) => {
         ev.preventDefault();
+        ev.stopPropagation();
+      });
+
+      $('pkgSave')?.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
         setErr('');
+
+        const form = $('frmNewPkg');
+        if (form && !form.reportValidity()) {
+          return;
+        }
+
         setSaving(true);
 
         const unidadId = unidadSel?.value || '';
@@ -559,6 +575,7 @@
 
     function onSubmitFilters(ev) {
       ev.preventDefault();
+      ev.stopPropagation();
       applyFilters();
       renderList();
     }
@@ -592,6 +609,7 @@
       els.search?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
+          e.stopPropagation();
           applyFilters();
           renderList();
         }
