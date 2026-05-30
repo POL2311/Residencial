@@ -32,7 +32,7 @@
     function formRow(label, inputHtml) {
       return `
         <div>
-          <label class="mb-1 block text-xs font-medium text-slate-600">${label}</label>
+          <div class="mb-1 flex items-center justify-between"><label class="text-xs font-medium text-slate-600">${label}</label></div>
           ${inputHtml}
         </div>
       `;

@@ -74,20 +74,13 @@
       let current = Math.max(0, Math.min(startIndex, urls.length - 1));
 
       openModal('Evidencias del reporte', `
-        <div class="space-y-4">
-          <div class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950/95">
-            <img id="guardBitacoraGalleryImage" src="" alt="Evidencia" class="h-[55vh] w-full object-contain" />
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-          <div class="flex items-center justify-between gap-3">
-            <button type="button" id="guardBitacoraPrev" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-              Anterior
-            </button>
-            <div id="guardBitacoraCounter" class="text-sm text-slate-500"></div>
-            <button type="button" id="guardBitacoraNext" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-              Siguiente
-            </button>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Cerrar</button>
           </div>
-          <div id="guardBitacoraThumbs" class="flex flex-wrap gap-2"></div>
         </div>
       `);
 

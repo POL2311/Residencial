@@ -41,30 +41,13 @@
     function openMaterialDetail(item) {
       if (typeof openModal !== 'function' || !item) return;
       openModal('Detalle del permiso', `
-        <div class="space-y-4">
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="text-lg font-semibold text-slate-800">${escapeHtml(item.tipo_movimiento === 'salida' ? 'Salida autorizada' : 'Entrada autorizada')}</div>
-            <span class="rounded-full px-2.5 py-1 text-xs ${item.estado === 'aprobado' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'}">${escapeHtml(item.estado || '')}</span>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div>
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Responsable</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.responsable_nombre || 'Sin responsable')}</div>
-            </div>
-            <div>
-              <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Área</div>
-              <div class="text-sm text-slate-700">${escapeHtml(item.area_nombre || 'Sin área')}</div>
-            </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Cerrar</button>
           </div>
-          <div class="space-y-2">
-            <div class="text-[11px] uppercase tracking-[0.12em] text-slate-400">Materiales</div>
-            ${(item.items || []).map((row) => `
-              <div class="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                ${escapeHtml(row.material_nombre || '')} · ${escapeHtml(row.cantidad_texto || '')}
-              </div>
-            `).join('')}
-          </div>
-          <div class="text-xs text-slate-500">Aprobado: ${escapeHtml(item.aprobado_at || '—')}</div>
         </div>
       `);
     }

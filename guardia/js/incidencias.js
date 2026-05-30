@@ -417,19 +417,19 @@
 
     function openDeleteConfirm(id, title) {
       openModal('Eliminar incidencia', `
-        <div class="space-y-4">
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+
           <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
             ¿Seguro que deseas eliminar la incidencia
             <b>${safeText(title, 'sin título')}</b>?
           </div>
 
-          <div class="flex justify-end gap-2">
-            <button type="button" id="incDeleteCancel" class="rounded-xl border border-slate-200 px-4 py-2 text-sm">
-              Cancelar
-            </button>
-            <button type="button" id="incDeleteAccept" class="rounded-xl bg-rose-600 text-white px-4 py-2 text-sm">
-              Sí, eliminar
-            </button>
+
+          </div>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" id="incDeleteCancel" class="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancelar</button>
+            <button type="button" id="incDeleteAccept" class="min-h-11 flex-1 rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Sí, eliminar</button>
           </div>
         </div>
       `);
@@ -454,13 +454,17 @@
           await load();
         } catch (e) {
           openModal('Error', `
-            <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              ${safeText(e.message, 'No se pudo eliminar la incidencia.')}
-            </div>
-            <div class="flex justify-end mt-4">
-              <button type="button" id="incDeleteErrOk" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm">
-                Entendido
-              </button>
+            <div class="flex min-h-0 flex-1 flex-col">
+              <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  ${safeText(e.message, 'No se pudo eliminar la incidencia.')}
+                </div>
+              </div>
+              <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                <button type="button" id="incDeleteErrOk" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">
+                  Entendido
+                </button>
+              </div>
             </div>
           `);
 

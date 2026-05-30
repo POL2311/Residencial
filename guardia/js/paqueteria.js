@@ -277,59 +277,12 @@
 
     function openDetailModal(item) {
       openModal('Detalle del paquete', `
-        <div class="space-y-3 text-sm">
-          <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-            <div class="text-xs text-slate-500">Descripción</div>
-            <div class="mt-1 font-semibold text-slate-800">${safeText(item.descripcion)}</div>
+        <div class="flex min-h-0 flex-1 flex-col">
+          <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          ${innerContent}
           </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Unidad</div>
-              <div class="mt-1 text-slate-800">${safeText(item.unidad_clave)}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Estado</div>
-              <div class="mt-1 text-slate-800">${safeText(stateLabel(item.estado))}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Empresa</div>
-              <div class="mt-1 text-slate-800">${safeText(item.empresa, 'Sin empresa')}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Rastreo</div>
-              <div class="mt-1 text-slate-800 break-all">${safeText(item.codigo_rastreo, 'Sin rastreo')}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Residente</div>
-              <div class="mt-1 text-slate-800">${safeText(item.residente_nombre, 'No asignado')}</div>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-              <div class="text-xs text-slate-500">Guardia</div>
-              <div class="mt-1 text-slate-800">${safeText(item.guardia_nombre)}</div>
-            </div>
-          </div>
-
-          ${
-            item.notas
-              ? `
-                <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-                  <div class="text-xs text-slate-500">Notas</div>
-                  <div class="mt-1 text-slate-800 whitespace-pre-line">${safeText(item.notas, '')}</div>
-                </div>
-              `
-              : ''
-          }
-
-          <div class="flex justify-end">
-            <button type="button" id="pkgDetailClose" class="rounded-xl bg-[#4E7287] text-white px-4 py-2 text-sm">
-              Cerrar
-            </button>
+          <div class="flex shrink-0 items-center gap-2 border-t border-slate-100 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <button type="button" onclick="closeModal()" class="min-h-11 flex-1 rounded-xl bg-[#4E7287] px-4 text-sm font-semibold text-white shadow-sm transition hover:opacity-95">Cerrar</button>
           </div>
         </div>
       `);
