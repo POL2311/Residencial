@@ -2,13 +2,13 @@
 require_once __DIR__ . '/app_security.php';
 
 #$DB_HOST = 'localhost';
-#$DB_NAME = 'residencial_app4'; 
-#$DB_USER = 'root';     
-#$DB_PASS = '';       
+#$DB_NAME = 'residencial_app4';
+#$DB_USER = 'root';
+#$DB_PASS = '';
 
 $DB_HOST = 'localhost';
 $DB_NAME = 'miinvit3_residencial_app';
-$DB_USER = 'miinvit3_adminmafious';     
+$DB_USER = 'miinvit3_adminmafious';
 $DB_PASS = 'Madafaka985*mg';
 try {
     $pdo = new PDO(
