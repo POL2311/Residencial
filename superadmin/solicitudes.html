@@ -6,99 +6,6 @@
     <title>Solicitudes - OS-Gate Admin</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Modal de Detalles -->
-    <div id="viewModal" class="hidden fixed inset-0 w-screen h-[100dvh] bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
-        <div class="bg-white rounded-[2rem] w-full max-w-2xl max-h-[90dvh] overflow-hidden shadow-2xl flex flex-col">
-            <!-- Header -->
-            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h3 class="text-xl font-semibold text-slate-800">Detalles de Solicitud</h3>
-                <button onclick="closeViewModal()" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
-                    <i class="ph ph-x text-lg"></i>
-                </button>
-            </div>
-            <!-- Body -->
-            <div class="p-6 overflow-y-auto" id="viewModalContent">
-                <!-- Injected via JS -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Template Cotizacion Oculto para PDF -->
-    <div id="invoiceTemplate" style="display:none; padding: 40px; background: white; color: #1e293b; font-family: sans-serif; width: 800px; max-width: 800px; margin: 0 auto;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0f172a; padding-bottom: 20px; margin-bottom: 30px;">
-            <div>
-                <h1 style="margin: 0; color: #0f172a; font-size: 32px; font-weight: 800;">OS-Gate</h1>
-                <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">Access Operating System</p>
-            </div>
-            <div style="text-align: right;">
-                <h2 style="margin: 0; color: #0f172a; font-size: 24px;">Cotización</h2>
-                <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">Fecha: <span id="invDate"></span></p>
-                <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">ID Req: <span id="invReqId"></span></p>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 40px;">
-            <h3 style="margin: 0 0 10px 0; color: #334155; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Preparado para:</h3>
-            <p style="margin: 5px 0; font-weight: 600; font-size: 18px;" id="invResidencial"></p>
-            <p style="margin: 5px 0; color: #475569;">Atn: <span id="invSolicitante"></span></p>
-            <p style="margin: 5px 0; color: #475569;">Total de viviendas a operar: <span id="invTotalCasas"></span></p>
-        </div>
-
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
-            <thead>
-                <tr style="background-color: #f8fafc;">
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #cbd5e1; color: #334155;">Descripción / Concepto</th>
-                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #cbd5e1; color: #334155;">Cantidad</th>
-                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #cbd5e1; color: #334155;">Precio Unitario</th>
-                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #cbd5e1; color: #334155;">Importe</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">
-                        <strong>Suscripción Mensual SaaS - OS-Gate</strong><br>
-                        <span style="font-size: 12px; color: #64748b;">Licencia de software, control de accesos y app residente.</span>
-                    </td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #1e293b;" id="invQtyCasas"></td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #1e293b;">$300.00 MXN</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; color: #1e293b;" id="invImporte"></td>
-                </tr>
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">
-                        <strong>Instalación y Setup Inicial</strong><br>
-                        <span style="font-size: 12px; color: #64748b;">Configuración de sistema en base a infraestructura: <span id="invInfra"></span></span>
-                    </td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #1e293b;">1</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #1e293b;">Variable</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; color: #1e293b;">TBD</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 40px;">
-            <div style="width: 300px;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-                    <span style="color: #64748b;">Subtotal (SaaS Mensual):</span>
-                    <strong style="color: #1e293b;" id="invSubtotal"></strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 2px solid #0f172a; font-size: 18px;">
-                    <span style="color: #0f172a; font-weight: 600;">Total Estimado Mensual:</span>
-                    <strong style="color: #0d9488;" id="invTotal"></strong>
-                </div>
-            </div>
-        </div>
-
-        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px;">
-            <h4 style="margin: 0 0 10px 0; color: #334155; font-size: 14px;">Términos y Condiciones (SaaS)</h4>
-            <p style="margin: 0; color: #64748b; font-size: 12px; line-height: 1.5;">
-                1. Esta cotización es un estimado base calculado por el número de viviendas totales y los costos de licenciamiento de software mensual.<br>
-                2. El equipo de hardware y su instalación no están incluidos en el costo mensual recurrente y serán cotizados por separado si así se requiere.<br>
-                3. Precios sujetos a cambio sin previo aviso. Vigencia de 30 días.
-            </p>
-        </div>
-    </div>
-
     <script>
         tailwind.config = {
             theme: {
@@ -121,9 +28,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <!-- html2pdf.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         /* Custom scrollbar for a cleaner look */
@@ -132,14 +36,14 @@
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9; 
+            background: #f1f5f9;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
+            background: #cbd5e1;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
+            background: #94a3b8;
         }
     </style>
 </head>
@@ -164,14 +68,14 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         <!-- Section Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
                 <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Solicitudes de Residenciales</h1>
                 <p class="text-sm text-slate-500 mt-1">Gestiona los prospectos y cotizaciones pendientes.</p>
             </div>
-            
+
             <div class="flex items-center gap-3">
                 <button class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:text-teal-600 transition-colors shadow-sm">
                     <i class="ph ph-export"></i> Exportar
@@ -185,18 +89,18 @@
         <!-- Filters & Search Bar -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <!-- Fast Filters (Pills) -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 hide-scrollbar" id="filter-tabs">
-                <button data-filter="Todos" class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-white whitespace-nowrap transition-colors">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 hide-scrollbar">
+                <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-white whitespace-nowrap transition-colors">
                     Todos
                 </button>
-                <button data-filter="Pendiente" class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors flex items-center gap-2">
+                <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors flex items-center gap-2">
                     Nuevos/Pendientes
-                    <span id="badge-pendientes" class="inline-flex items-center justify-center bg-orange-100 text-orange-700 text-xs font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    <span class="inline-flex items-center justify-center bg-orange-100 text-orange-700 text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
                 </button>
-                <button data-filter="Cotizado" class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">
+                <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">
                     Cotizados
                 </button>
-                <button data-filter="Rechazado" class="filter-tab px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">
+                <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">
                     Rechazados
                 </button>
             </div>
@@ -206,7 +110,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="ph ph-magnifying-glass text-slate-400"></i>
                 </div>
-                <input type="text" id="search-input" placeholder="Buscar residencial, solicitante o ID..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-sm focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all shadow-sm bg-white">
+                <input type="text" placeholder="Buscar residencial..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-sm focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-none transition-all shadow-sm bg-white">
             </div>
         </div>
 
@@ -223,11 +127,156 @@
                             <th class="py-3 px-6 text-xs uppercase font-semibold text-slate-500 text-right whitespace-nowrap">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="solicitudes-table-body" class="divide-y divide-slate-100">
-                        <tr>
-                            <td colspan="5" class="py-8 text-center text-slate-500">
-                                <i class="ph ph-spinner animate-spin text-2xl mb-2"></i>
-                                <p class="text-sm">Cargando solicitudes...</p>
+                    <tbody class="divide-y divide-slate-100">
+                        <!-- Row 1: Pendiente -->
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">#REQ-042</div>
+                                <div class="text-xs text-slate-500 mt-0.5">24 May, 2026</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
+                                        <i class="ph-fill ph-buildings"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Residencial Balmoral</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">120 Casas (95 Habitadas)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm text-slate-700">Portón con Motor</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Sticker UHF &bull; 240 Tags</div>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pendiente
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
+                                        <i class="ph ph-eye text-lg"></i>
+                                    </button>
+                                    <button class="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Generar Cotización">
+                                        <i class="ph ph-file-text text-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2: Cotizado -->
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">#REQ-041</div>
+                                <div class="text-xs text-slate-500 mt-0.5">22 May, 2026</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
+                                        <i class="ph-fill ph-house"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Privada San Ángel</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">45 Casas (40 Habitadas)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm text-slate-700">Barreras / Plumas</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Tarjeta PVC &bull; 90 Tags</div>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800 border border-teal-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Cotizado
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
+                                        <i class="ph ph-eye text-lg"></i>
+                                    </button>
+                                    <button class="p-1.5 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors" title="Ver Cotización">
+                                        <i class="ph-fill ph-file-pdf text-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3: Pendiente -->
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">#REQ-040</div>
+                                <div class="text-xs text-slate-500 mt-0.5">20 May, 2026</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
+                                        <i class="ph-fill ph-buildings"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Torre Vértice</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">80 Departamentos (75 Hab.)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm text-slate-700">Portón con Motor</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Sticker UHF &bull; 150 Tags</div>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pendiente
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
+                                        <i class="ph ph-eye text-lg"></i>
+                                    </button>
+                                    <button class="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Generar Cotización">
+                                        <i class="ph ph-file-text text-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 4: Cotizado -->
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <div class="text-sm font-medium text-slate-900">#REQ-039</div>
+                                <div class="text-xs text-slate-500 mt-0.5">18 May, 2026</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
+                                        <i class="ph-fill ph-house"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Coto Los Encinos</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">35 Casas (35 Habitadas)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm text-slate-700">Portón sin Motor</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Sticker UHF &bull; 70 Tags</div>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800 border border-teal-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Cotizado
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
+                                        <i class="ph ph-eye text-lg"></i>
+                                    </button>
+                                    <button class="p-1.5 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors" title="Ver Cotización">
+                                        <i class="ph-fill ph-file-pdf text-lg"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -236,398 +285,29 @@
 
             <!-- Pagination Footer -->
             <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-                <span id="table-info" class="text-sm text-slate-500">
-                    Mostrando <span class="font-medium text-slate-800">0</span> a <span class="font-medium text-slate-800">0</span> de <span class="font-medium text-slate-800">0</span> registros
+                <span class="text-sm text-slate-500">
+                    Mostrando <span class="font-medium text-slate-800">1</span> a <span class="font-medium text-slate-800">4</span> de <span class="font-medium text-slate-800">42</span> registros
                 </span>
-                
+
                 <div class="flex items-center gap-2">
                     <button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors disabled:opacity-50" disabled>
                         Anterior
                     </button>
                     <div class="hidden sm:flex items-center gap-1">
                         <button class="w-8 h-8 rounded-lg bg-teal-600 text-white text-sm font-medium flex items-center justify-center">1</button>
+                        <button class="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-sm font-medium flex items-center justify-center transition-colors">2</button>
+                        <button class="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-sm font-medium flex items-center justify-center transition-colors">3</button>
+                        <span class="px-1 text-slate-400">...</span>
+                        <button class="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-sm font-medium flex items-center justify-center transition-colors">11</button>
                     </div>
-                    <button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors disabled:opacity-50" disabled>
+                    <button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors">
                         Siguiente
                     </button>
                 </div>
             </div>
         </div>
-        
+
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchSolicitudes();
-        });
-
-        function fetchSolicitudes() {
-            fetch('php/api_solicitudes.php', {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    allRequests = data.data;
-                    handleSearchAndFilter();
-                } else {
-                    showError('Error al cargar datos: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                showError('Error de conexión al servidor.');
-            });
-        }
-
-        function handleSearchAndFilter() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-
-            filteredRequests = allRequests.filter(req => {
-                // Apply Search
-                const matchesSearch =
-                    (req.nombre_residencial && req.nombre_residencial.toLowerCase().includes(query)) ||
-                    (req.nombre_solicitante && req.nombre_solicitante.toLowerCase().includes(query)) ||
-                    (String(req.id).includes(query));
-
-                // Apply Filter
-                const matchesFilter = currentStatusFilter === 'Todos' || req.estatus === currentStatusFilter;
-
-                return matchesSearch && matchesFilter;
-            });
-
-            currentPage = 1;
-            renderTable();
-        }
-
-        function updatePendientesBadge() {
-            const pendientesCount = allRequests.filter(req => req.estatus === 'Pendiente').length;
-            const badge = document.getElementById('badge-pendientes');
-            badge.textContent = pendientesCount;
-            if (pendientesCount > 0) {
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('solicitudes-table-body');
-            const tableInfo = document.getElementById('table-info');
-            tbody.innerHTML = '';
-
-            updatePendientesBadge();
-
-            if (filteredRequests.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="py-8 text-center text-slate-500">
-                            <i class="ph ph-folder-open text-3xl mb-2 text-slate-300"></i>
-                            <p class="text-sm">No se encontraron solicitudes.</p>
-                        </td>
-                    </tr>
-                `;
-                tableInfo.innerHTML = `Mostrando <span class="font-medium text-slate-800">0</span> a <span class="font-medium text-slate-800">0</span> de <span class="font-medium text-slate-800">0</span> registros`;
-                renderPagination(0);
-                return;
-            }
-
-            // Pagination logic
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-            const pageData = filteredRequests.slice(startIndex, endIndex);
-
-            tableInfo.innerHTML = `Mostrando <span class="font-medium text-slate-800">${startIndex + 1}</span> a <span class="font-medium text-slate-800">${Math.min(endIndex, filteredRequests.length)}</span> de <span class="font-medium text-slate-800">${filteredRequests.length}</span> registros`;
-
-            pageData.forEach(solicitud => {
-                const date = new Date(solicitud.fecha_creacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-                const idFormat = `#REQ-${String(solicitud.id).padStart(3, '0')}`;
-
-                const tipoAccesoFormat = solicitud.tipo_acceso === 'motor' ? 'Portón con Motor' :
-                                         (solicitud.tipo_acceso === 'plumas' ? 'Barreras / Plumas' :
-                                         (solicitud.tipo_acceso === 'sin_motor' ? 'Portón sin Motor / Ambas' : 'N/D'));
-
-                const tipoTagFormat = solicitud.tipo_tag === 'sticker' ? 'Sticker UHF' :
-                                      (solicitud.tipo_tag === 'tarjeta' ? 'Tarjeta PVC' : 'N/D');
-
-                const statusColor = solicitud.estatus === 'Pendiente' ? 'bg-amber-100 text-amber-800 border-amber-200' :
-                                    (solicitud.estatus === 'Cotizado' ? 'bg-teal-100 text-teal-800 border-teal-200' :
-                                    (solicitud.estatus === 'Rechazado' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-slate-100 text-slate-800 border-slate-200'));
-
-                const statusDot = solicitud.estatus === 'Pendiente' ? 'bg-amber-500' :
-                                  (solicitud.estatus === 'Cotizado' ? 'bg-teal-500' :
-                                  (solicitud.estatus === 'Rechazado' ? 'bg-red-500' : 'bg-slate-500'));
-
-                const rowHtml = `
-                    <tr class="hover:bg-slate-50 transition-colors group">
-                        <td class="py-4 px-6 whitespace-nowrap">
-                            <div class="text-sm font-medium text-slate-900">${idFormat}</div>
-                            <div class="text-xs text-slate-500 mt-0.5">${date}</div>
-                        </td>
-                        <td class="py-4 px-6">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 flex-shrink-0">
-                                    <i class="ph-fill ph-buildings"></i>
-                                </div>
-                                <div>
-                                    <div class="text-sm font-semibold text-slate-800">${escapeHtml(solicitud.nombre_residencial)}</div>
-                                    <div class="text-xs text-slate-500 mt-0.5">${solicitud.total_casas || '?'} Casas (${solicitud.casas_habitadas || '?'} Habitadas)</div>
-                                    <div class="text-xs text-slate-400 mt-0.5">Solicita: ${escapeHtml(solicitud.nombre_solicitante)}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-4 px-6">
-                            <div class="text-sm text-slate-700">${tipoAccesoFormat}</div>
-                            <div class="text-xs text-slate-500 mt-0.5">${tipoTagFormat} &bull; ${solicitud.numero_tags || '?'} Tags c/u</div>
-                        </td>
-                        <td class="py-4 px-6 whitespace-nowrap">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusColor} border">
-                                <span class="w-1.5 h-1.5 rounded-full ${statusDot}"></span> ${escapeHtml(solicitud.estatus)}
-                            </span>
-                        </td>
-                        <td class="py-4 px-6 text-right whitespace-nowrap">
-                            <div class="flex items-center justify-end gap-2">
-                                <button onclick="openViewModal(${solicitud.id})" class="p-1.5 text-slate-400 hover:text-osgate-blue hover:bg-blue-50 rounded-lg transition-colors" title="Ver Detalles">
-                                    <i class="ph ph-eye text-lg"></i>
-                                </button>
-                                ${solicitud.estatus === 'Pendiente' ? `
-                                <button onclick="handleCotizar(${solicitud.id})" class="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Generar Cotización">
-                                    <i class="ph ph-file-text text-lg" id="icon-cotizar-${solicitud.id}"></i>
-                                </button>
-                                ` : `
-                                <button onclick="handleCotizar(${solicitud.id})" class="p-1.5 text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors" title="Ver Cotización / Re-generar">
-                                    <i class="ph-fill ph-file-pdf text-lg"></i>
-                                </button>
-                                `}
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                tbody.insertAdjacentHTML('beforeend', rowHtml);
-            });
-
-            renderPagination(filteredRequests.length);
-        }
-
-        function renderPagination(totalItems) {
-            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-            const btnPrev = document.getElementById('btn-prev-page');
-            const btnNext = document.getElementById('btn-next-page');
-            const numbersContainer = document.getElementById('pagination-numbers');
-
-            btnPrev.disabled = currentPage === 1 || totalPages === 0;
-            btnNext.disabled = currentPage === totalPages || totalPages === 0;
-
-            numbersContainer.innerHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                const isActive = i === currentPage;
-                const classNames = isActive
-                    ? 'w-8 h-8 rounded-lg bg-teal-600 text-white text-sm font-medium flex items-center justify-center'
-                    : 'w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-sm font-medium flex items-center justify-center transition-colors cursor-pointer';
-
-                const btn = document.createElement('button');
-                btn.className = classNames;
-                btn.textContent = i;
-                if (!isActive) {
-                    btn.onclick = () => {
-                        currentPage = i;
-                        renderTable();
-                    };
-                }
-                numbersContainer.appendChild(btn);
-            }
-        }
-
-        function openViewModal(id) {
-            const req = allRequests.find(r => r.id === id);
-            if (!req) return;
-
-            const modal = document.getElementById('viewModal');
-            const content = document.getElementById('viewModalContent');
-
-            const date = new Date(req.fecha_creacion).toLocaleString('es-ES');
-            let modulesHtml = '<p class="text-sm text-slate-500 italic">Ningún módulo extra</p>';
-            if (req.modulos_seleccionados && Array.isArray(req.modulos_seleccionados) && req.modulos_seleccionados.length > 0) {
-                modulesHtml = '<ul class="list-disc pl-5 text-sm text-slate-700 space-y-1">';
-                req.modulos_seleccionados.forEach(mod => {
-                    const formattedMod = mod.replace('mod_', '').replace('_', ' ');
-                    modulesHtml += `<li class="capitalize">${formattedMod}</li>`;
-                });
-                modulesHtml += '</ul>';
-            }
-
-            content.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Información General</p>
-                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-                            <div><span class="text-sm text-slate-500 block">Residencial</span><strong class="text-slate-800">${escapeHtml(req.nombre_residencial)}</strong></div>
-                            <div><span class="text-sm text-slate-500 block">Solicitante</span><strong class="text-slate-800">${escapeHtml(req.nombre_solicitante)}</strong></div>
-                            <div><span class="text-sm text-slate-500 block">Fecha Registro</span><strong class="text-slate-800">${date}</strong></div>
-                            <div><span class="text-sm text-slate-500 block">Instalación deseada</span><strong class="text-slate-800">${escapeHtml(req.fecha_instalacion)}</strong></div>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Volumen y Autos</p>
-                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-                            <div><span class="text-sm text-slate-500 block">Total Casas</span><strong class="text-slate-800">${req.total_casas || 'N/D'}</strong></div>
-                            <div><span class="text-sm text-slate-500 block">Casas Habitadas</span><strong class="text-slate-800">${req.casas_habitadas || 'N/D'}</strong></div>
-                            <div><span class="text-sm text-slate-500 block">Promedio Autos / Res</span><strong class="text-slate-800">${escapeHtml(req.promedio_autos || 'N/D')}</strong></div>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Infraestructura</p>
-                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-                            <div><span class="text-sm text-slate-500 block">Tipo Acceso</span><strong class="text-slate-800">${escapeHtml(req.tipo_acceso || 'N/D')}</strong></div>
-                            <div><span class="text-sm text-slate-500 block">Dimensiones (An x Al)</span><strong class="text-slate-800">${req.ancho_acceso || '-'} m x ${req.alto_acceso || '-'} m</strong></div>
-                            <div><span class="text-sm text-slate-500 block">Tipo Tag preferido</span><strong class="text-slate-800">${escapeHtml(req.tipo_tag || 'N/D')}</strong></div>
-                            <div><span class="text-sm text-slate-500 block">Tags por Residente</span><strong class="text-slate-800">${req.numero_tags || 'N/D'}</strong></div>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Módulos Seleccionados</p>
-                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 min-h-[120px]">
-                            ${modulesHtml}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeViewModal() {
-            document.getElementById('viewModal').classList.add('hidden');
-        }
-
-        function exportCSV() {
-            if (filteredRequests.length === 0) {
-                alert('No hay datos para exportar.');
-                return;
-            }
-
-            const headers = ['ID', 'Residencial', 'Solicitante', 'Estatus', 'Fecha Creacion', 'Casas', 'Habitadas', 'Acceso', 'Tags', 'Modulos'];
-
-            const csvRows = filteredRequests.map(req => {
-                const mods = Array.isArray(req.modulos_seleccionados) ? req.modulos_seleccionados.join(';') : '';
-                return [
-                    req.id,
-                    `"${(req.nombre_residencial || '').replace(/"/g, '""')}"`,
-                    `"${(req.nombre_solicitante || '').replace(/"/g, '""')}"`,
-                    req.estatus,
-                    req.fecha_creacion,
-                    req.total_casas || 0,
-                    req.casas_habitadas || 0,
-                    req.tipo_acceso || '',
-                    req.numero_tags || 0,
-                    `"${mods}"`
-                ].join(',');
-            });
-
-            const csvContent = [headers.join(','), ...csvRows].join('\n');
-            const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            const dateStr = new Date().toISOString().split('T')[0];
-            a.setAttribute('href', url);
-            a.setAttribute('download', `solicitudes_osgate_${dateStr}.csv`);
-            a.style.visibility = 'hidden';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        function handleCotizar(id) {
-            const req = allRequests.find(r => r.id === id);
-            if (!req) return;
-
-            // UI Feedback during generation
-            const icon = document.getElementById(`icon-cotizar-${id}`);
-            if(icon) {
-                icon.className = 'ph-bold ph-spinner animate-spin text-lg';
-            }
-
-            // 1. Prepare PDF Template Data
-            const dateStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
-            document.getElementById('pdf-date').textContent = dateStr;
-            document.getElementById('pdf-folio').textContent = `REQ-${String(req.id).padStart(3, '0')}`;
-            document.getElementById('pdf-residencial').textContent = req.nombre_residencial || 'Residencial';
-            document.getElementById('pdf-solicitante').textContent = req.nombre_solicitante || 'A quien corresponda';
-
-            const casas = parseInt(req.total_casas) || 0;
-            const costoMensual = casas * 300;
-            const formatMoney = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(costoMensual);
-
-            document.getElementById('pdf-casas-desc').textContent = `Para ${casas} casas/unidades registradas.`;
-            document.getElementById('pdf-total').textContent = formatMoney + ' MXN';
-
-            const element = document.getElementById('pdfTemplateContainer');
-            element.classList.remove('hidden');
-
-            const opt = {
-                margin:       0,
-                filename:     `Cotizacion_OSGate_${(req.nombre_residencial||'').replace(/[^a-z0-9]/gi, '_')}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            // 2. Generate PDF
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.add('hidden');
-
-                // 3. Update Status in DB
-                const formData = new FormData();
-                formData.append('action', 'update_status');
-                formData.append('id', req.id);
-                formData.append('estatus', 'Cotizado');
-
-                return fetch('php/api_solicitudes.php', {
-                    method: 'POST',
-                    body: formData
-                });
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Update Local State
-                    req.estatus = 'Cotizado';
-                    handleSearchAndFilter(); // Re-render table and badges (will auto-hide if in "Pendientes" tab)
-                } else {
-                    alert('PDF generado, pero hubo un error al actualizar estatus en la BD.');
-                    if(icon) icon.className = 'ph ph-file-text text-lg'; // reset icon
-                }
-            })
-            .catch(err => {
-                console.error('Error generating PDF or updating status:', err);
-                alert('Ocurrió un error en el proceso.');
-                element.classList.add('hidden');
-                if(icon) icon.className = 'ph ph-file-text text-lg';
-            });
-        }
-
-        function showError(message) {
-            const tbody = document.getElementById('solicitudes-table-body');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="py-8 text-center text-red-500">
-                        <i class="ph ph-warning-circle text-2xl mb-2"></i>
-                        <p class="text-sm">${escapeHtml(message)}</p>
-                    </td>
-                </tr>
-            `;
-        }
-
-        function escapeHtml(unsafe) {
-            if (!unsafe) return '';
-            return unsafe
-                 .replace(/&/g, "&amp;")
-                 .replace(/</g, "&lt;")
-                 .replace(/>/g, "&gt;")
-                 .replace(/"/g, "&quot;")
-                 .replace(/'/g, "&#039;");
-        }
-    </script>
 </body>
 </html>
